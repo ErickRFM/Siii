@@ -12,7 +12,7 @@ type Ctx = { params: Promise<{ institutionId: string; membershipId: string }> };
 const uuid = z.string().uuid();
 const schema = z.object({
   status: z.enum(['active', 'suspended']),
-  reason: z.string().trim().min(5).max(400),
+  reason: z.enum(['institutional_change', 'policy_enforcement', 'security_review', 'record_correction', 'access_restored']),
 });
 
 export async function PATCH(req: NextRequest, ctx: Ctx) {
@@ -67,7 +67,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
         actorUserId: actor.identity.id,
         institutionId,
         action: 'membership.status.change',
-        target: `membership:${membershipId}:status:${membership[0].status}->${parsed.data.status}`,
+        target: `membership:${membershipId}:status:${membership[0].status}->${parsed.data.status}:reason:${parsed.data.reason}`,
       });
     }
     return rows;
