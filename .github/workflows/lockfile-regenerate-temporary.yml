@@ -1,0 +1,35 @@
+# Temporary: intentionally removed from the PR once the lockfile is committed.
+name: One-time npm lockfile regeneration
+on:
+  push:
+    branches: [fix/vercel-zod-peer-install]
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: ${{ !contains(github.event.head_commit.message, '[lock-generated]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/vercel-zod-peer-install
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve and regenerate npm package lock
+        run: npm install --package-lock-only --no-audit --no-fund
+      - name: Commit regenerated lockfile
+        run: |
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo 'No lockfile changes needed'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(lock): regenerate npm lockfile with npm 10 [lock-generated]'
+          git push origin HEAD:fix/vercel-zod-peer-install
