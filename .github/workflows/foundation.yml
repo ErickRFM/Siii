@@ -1,0 +1,35 @@
+name: Foundation build and dependency integrity
+
+on:
+  push:
+    branches:
+      - feat/sis-foundation
+      - fix/vercel-zod-peer-install
+  pull_request:
+    branches:
+      - feat/sis-foundation
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Install, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify reproducible dependency install
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
