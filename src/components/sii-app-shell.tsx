@@ -16,7 +16,7 @@ export default function SiiAppShell({
   return (
     <div className="sii-app">
       {menuOpen && <button type="button" className="sii-scrim" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} />}
-      <aside className={menuOpen ? 'sii-sidebar sii-sidebar--open' : 'sii-sidebar'} aria-label="Menú del sistema">
+      <aside id="sii-sidebar-mobile" className={menuOpen ? 'sii-sidebar sii-sidebar--open' : 'sii-sidebar'} aria-label="Menú del sistema">
         <div className="sii-sidebar-brand"><SiiBrand light /></div>
         <div className="sii-sidebar-heading">PLATAFORMA</div>
         <nav className="sii-nav" aria-label="Navegación institucional">
