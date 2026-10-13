@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import { assertSameOrigin } from '@/shared/auth/guards';
-import { canGrantRole } from '@/shared/auth/roles';
+import { canGrantRole, canManageMembership } from '@/shared/auth/roles';
 
 function mutation(headers: Record<string, string> = {}): NextRequest {
   return new NextRequest('https://sii.example/api/v1/auth/login', {
@@ -66,5 +66,29 @@ describe('institutional role grants', () => {
   it('disallows teachers and students from granting any roles', () => {
     expect(canGrantRole(['teacher'], 'student')).toBe(false);
     expect(canGrantRole(['student'], 'teacher')).toBe(false);
+  });
+});
+
+describe('privileged membership changes', () => {
+  it('blocks administrative peers from managing one another', () => {
+    expect(canManageMembership(['admin'], ['admin'])).toBe(false);
+  });
+
+  it('blocks every ordinary API actor from modifying super administrators', () => {
+    expect(canManageMembership(['super_admin'], ['super_admin'])).toBe(false);
+    expect(canManageMembership(['admin'], ['super_admin'])).toBe(false);
+  });
+
+  it('permits a super administrator to manage an administrator', () => {
+    expect(canManageMembership(['super_admin'], ['admin'])).toBe(true);
+  });
+
+  it('permits institution admins to manage limited roles only', () => {
+    expect(canManageMembership(['admin'], ['student', 'teacher'])).toBe(true);
+  });
+
+  it('denies non-administrative actors', () => {
+    expect(canManageMembership(['teacher'], ['student'])).toBe(false);
+    expect(canManageMembership(['student'], [])).toBe(false);
   });
 });
