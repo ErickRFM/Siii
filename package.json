@@ -12,15 +12,20 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "db:generate": "drizzle-kit generate:pg",
+    "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx db/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "worker:dev": "tsx worker/index.ts",
-    "docs:openapi": "tsx scripts/generate-openapi.ts"
+    "docs:openapi": "tsx scripts/generate-openapi.ts",
+    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
+    "argon2": "^0.45.1",
+    "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.44.5",
+    "jose": "^6.2.12",
+    "nanoid": "^6.0.2",
     "next": "^15.5.4",
     "pg": "^8.16.3",
     "pino": "^9.11.0",
