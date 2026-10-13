@@ -1,28 +1,115 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getIdentity,getInstitutionAccess } from '@/shared/auth/session';
-import { hasPermission,ROLE_LABELS } from '@/shared/auth/roles';
+import type { Route } from 'next';
+import { redirect } from 'next/navigation';
+import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
+import { ROLE_LABELS, hasPermission } from '@/shared/auth/roles';
+import SiiAppShell from '@/components/sii-app-shell';
 import PasswordChange from './password-change';
-export const dynamic='force-dynamic';
-const modules=[
- {title:'Control escolar',description:'Expedientes, estudiantes, docentes e inscripciones.',kind:'F3 · Preparación'},
- {title:'Planeación académica',description:'Ofertas, aulas, secciones y conflictos de horarios.',kind:'F4 · Preparación'},
- {title:'Calificaciones',description:'Evaluaciones, actas y publicación oficial.',kind:'F6 · Preparación'},
- {title:'Integraciones',description:'Contratos, sincronización y estado de Compañero.',kind:'F5 · Preparación'},
+
+export const dynamic = 'force-dynamic';
+
+const modules = [
+  { symbol: '▣', title: 'Control escolar', description: 'Expedientes, matrículas y procesos de inscripción.', stage: 'F3' },
+  { symbol: '▦', title: 'Planeación académica', description: 'Carreras, grupos, aulas y horarios institucionales.', stage: 'F4' },
+  { symbol: '▤', title: 'Evaluación y actas', description: 'Calificaciones y publicación de resultados oficiales.', stage: 'F6' },
+  { symbol: '⇄', title: 'Integraciones', description: 'Sincronización académica segura con Compañero.', stage: 'F10' },
 ];
-export default async function Dashboard(){
- const user=await getIdentity();if(!user)redirect('/login');
- const institutions=await getInstitutionAccess(user.id);
- return <div className="dashboard-shell">
-  <aside className="sidebar"><Link href="/dashboard" className="wordmark">Siii<span>.</span></Link><div className="side-caption">CENTRO INSTITUCIONAL</div><nav aria-label="Navegación principal"><Link className="side-item active" href="/dashboard">◫ <span>Resumen general</span></Link><span className="side-item disabled">◎ <span>Operaciones académicas</span></span><span className="side-item disabled">▤ <span>Calificaciones</span></span><span className="side-item disabled">⇄ <span>Integraciones</span></span></nav><div className="sidebar-foot">Sistema Universitario<br/>Versión inicial · F2</div></aside>
-  <div className="dashboard-main"><header className="topbar"><span>Plataforma / Resumen</span><div className="header-actions"><span className="user-pill">{user.firstName} {user.lastName}</span><form action="/api/v1/auth/logout" method="post"><button className="text-button" type="submit">Cerrar sesión</button></form></div></header>
-  <main className="dashboard-content"><p className="eyebrow">CENTRO DE OPERACIONES</p><div className="heading-row"><div><h1>Bienvenido, {user.firstName}</h1><p className="muted">Consulta tu contexto institucional y los módulos del sistema.</p></div><span className="status-tag"><span className="status-dot"/> Sesión autenticada</span></div>
-  {user.mustChangePassword&&<div className="notice" role="alert"><strong>Cambio de contraseña requerido.</strong> Las operaciones administrativas permanecen restringidas hasta completar el flujo de actualización de contraseña.<PasswordChange/></div>}
-  <section aria-labelledby="inst-title" className="panel"><div className="panel-header"><div><h2 id="inst-title">Tus instituciones</h2><p className="muted">Accesos concedidos y perfiles vigentes en cada institución.</p></div><span className="count-chip">{institutions.length} disponibles</span></div>
-  {institutions.length? <div className="institution-list">{institutions.map(i=><div className="institution-row" key={i.institutionId}><div className="institution-badge">{i.institutionCode.slice(0,2).toUpperCase()}</div><div className="institution-details"><strong>{i.institutionName}</strong><small>{i.institutionCode} · {i.roles.map(role=>ROLE_LABELS[role]).join(', ')}</small></div><div className="institution-state">{hasPermission(i.roles,'users.manage')?'Administración habilitada':'Acceso vigente'}</div></div>)}</div>:<div className="empty-state"><strong>No hay instituciones asignadas</strong><p>Solicita a tu administrador que agregue una membresía y los permisos correspondientes.</p></div>}
-  </section>
-  <section aria-labelledby="modules-title"><div className="panel-header plain"><div><h2 id="modules-title">Áreas de trabajo</h2><p className="muted">Se habilitarán al implementar sus operaciones reales y sus políticas de seguridad.</p></div></div><div className="module-grid">{modules.map((m,i)=><article key={m.title} className="module-card"><div className="module-icon">{['◉','▦','▤','⇄'][i]}</div><h3>{m.title}</h3><p>{m.description}</p><span className="module-stage">{m.kind}</span></article>)}</div></section>
-  <footer className="footer-note">Siii mantiene sus registros institucionales separados de Compañero de Escuela.</footer>
-  </main></div>
- </div>
+
+export default async function Dashboard() {
+  const user = await getIdentity();
+  if (!user) redirect('/login');
+  const institutions = await getInstitutionAccess(user.id);
+  const roleNames = [...new Set(institutions.flatMap(item => item.roles))].map(role => ROLE_LABELS[role]);
+
+  return (
+    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="overview">
+      <div className="sii-page-eyebrow">CENTRO DE OPERACIONES <span className="sii-page-eyebrow-line"/></div>
+      <div className="sii-page-heading">
+        <div>
+          <h1>Bienvenido, {user.firstName}<span className="sii-welcome-period">.</span></h1>
+          <p>Este es tu espacio institucional. Consulta tus accesos y las áreas disponibles.</p>
+        </div>
+        <span className="sii-badge sii-badge--live"><span className="sii-online-dot"/> Cuenta activa</span>
+      </div>
+
+      {user.mustChangePassword && (
+        <section className="sii-security-notice" role="alert" aria-label="Actualización obligatoria de contraseña">
+          <div className="sii-notice-header"><span aria-hidden="true">⚠</span><div><strong>Actualiza tu contraseña para continuar</strong><p>Por seguridad, las operaciones administrativas están restringidas hasta completar este cambio.</p></div></div>
+          <PasswordChange/>
+        </section>
+      )}
+
+      <section className="sii-summary-grid" aria-label="Resumen de tu acceso">
+        <article className="sii-metric">
+          <span className="sii-metric-icon sii-metric-icon--rose" aria-hidden="true">▥</span>
+          <span className="sii-metric-label">Instituciones asignadas</span>
+          <span className="sii-metric-value">{institutions.length}</span>
+          <span className="sii-metric-caption">Membresías con acceso vigente</span>
+        </article>
+        <article className="sii-metric">
+          <span className="sii-metric-icon sii-metric-icon--amber" aria-hidden="true">♙</span>
+          <span className="sii-metric-label">Perfiles autorizados</span>
+          <span className="sii-metric-value">{roleNames.length}</span>
+          <span className="sii-metric-caption">Roles distintos entre tus instituciones</span>
+        </article>
+        <article className="sii-metric">
+          <span className="sii-metric-icon sii-metric-icon--blue" aria-hidden="true">◇</span>
+          <span className="sii-metric-label">Seguridad de cuenta</span>
+          <span className="sii-metric-value sii-metric-value--text">{user.mustChangePassword ? 'Acción requerida' : 'Al día'}</span>
+          <Link href="/dashboard/security" className="sii-metric-link">Gestionar seguridad <span aria-hidden="true">↗</span></Link>
+        </article>
+      </section>
+
+      <div className="sii-content-grid">
+        <section className="sii-panel sii-institutions-panel">
+          <div className="sii-panel-top">
+            <div><span className="sii-section-kicker">TU RED UNIVERSITARIA</span><h2>Mis instituciones</h2><p>Accesos concedidos y permisos vigentes.</p></div>
+            <span className="sii-small-count">{institutions.length} {institutions.length === 1 ? 'institución' : 'instituciones'}</span>
+          </div>
+          {institutions.length ? (
+            <div className="sii-institution-list">
+              {institutions.map(inst => (
+                <Link key={inst.institutionId} className="sii-institution-item"
+                  href={`/dashboard/institutions/${inst.institutionId}` as Route}>
+                  <span className="sii-institution-monogram">{inst.institutionCode.slice(0,2).toUpperCase()}</span>
+                  <span className="sii-institution-info"><strong>{inst.institutionName}</strong><small>{inst.institutionCode} · {inst.roles.map(role => ROLE_LABELS[role]).join(', ')}</small></span>
+                  <span className="sii-institution-tag">{hasPermission(inst.roles, 'users.manage') ? 'Administración' : 'Acceso vigente'}</span>
+                  <span className="sii-institution-arrow" aria-hidden="true">→</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="sii-empty"><span aria-hidden="true">▥</span><strong>No tienes instituciones asignadas</strong><p>Un administrador debe concederte una membresía para poder acceder a los recursos académicos.</p></div>
+          )}
+        </section>
+
+        <aside className="sii-panel sii-access-panel">
+          <span className="sii-section-kicker">CENTRO PERSONAL</span>
+          <h2>Tu cuenta está en control.</h2>
+          <p>La plataforma utiliza permisos específicos de cada institución para proteger la información académica.</p>
+          <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Sesión institucional</strong><small>Acceso verificado por el servidor</small></div></div>
+          <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Permisos por institución</strong><small>Vigentes según tus membresías</small></div></div>
+          <Link href="/dashboard/security" className="sii-outline-button">Ir a seguridad <span aria-hidden="true">→</span></Link>
+        </aside>
+      </div>
+
+      <section className="sii-modules-section">
+        <div className="sii-panel-top sii-panel-top--outside">
+          <div><span className="sii-section-kicker">ECOSISTEMA SII</span><h2>Próximos espacios de trabajo</h2><p>Se habilitarán cuando su lógica y permisos estén verificados.</p></div>
+          <span className="sii-badge sii-badge--muted">Desarrollo por fases</span>
+        </div>
+        <div className="sii-module-grid">
+          {modules.map(module => (
+            <article className="sii-module-card" key={module.title}>
+              <span className="sii-module-glyph" aria-hidden="true">{module.symbol}</span>
+              <h3>{module.title}</h3>
+              <p>{module.description}</p>
+              <div className="sii-module-bottom"><span>En preparación · {module.stage}</span><span aria-hidden="true">↗</span></div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <footer className="sii-footer">SII · Sistema Institucional Integral <span>Administración académica segura · Experiencia móvil en Compañero</span></footer>
+    </SiiAppShell>
+  );
 }
