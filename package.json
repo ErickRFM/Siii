@@ -19,7 +19,6 @@
     "docs:openapi": "tsx scripts/generate-openapi.ts"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.0",
     "@neondatabase/serverless": "^1.0.1",
     "drizzle-orm": "^0.44.5",
     "next": "^15.5.4",
