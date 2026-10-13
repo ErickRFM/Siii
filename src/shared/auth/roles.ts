@@ -13,10 +13,26 @@ const matrix: Record<Role, readonly Permission[]> = {
 export function hasPermission(roles: readonly Role[], permission: Permission): boolean {
   return roles.some(role => matrix[role]?.includes(permission));
 }
-// Administrative role grants MUST be deliberately scoped and never self-assigned.
+// Super-administrator assignment is a privileged provisioning operation, not an ordinary role grant.
+// Institutional admins may not mint new institutional admins: only super-admins can grant admin.
+// The route additionally prevents self-grants and verifies institution membership.
 export function canGrantRole(actorRoles: readonly Role[], targetRole: Role): boolean {
-  return targetRole !== 'super_admin' && (actorRoles.includes('admin') || actorRoles.includes('super_admin'));
+  if (targetRole === 'super_admin') return false;
+  if (targetRole === 'admin') return actorRoles.includes('super_admin');
+  return actorRoles.includes('admin') || actorRoles.includes('super_admin');
 }
+
+/**
+ * Granting or revoking lower-privilege access to other memberships must never
+ * allow an institutional admin to administer a super administrator or peer admin.
+ * The HTTP layer separately enforces identity, institution scope and no self-edit.
+ */
+export function canManageMembership(actorRoles: readonly Role[], targetRoles: readonly Role[]): boolean {
+  if (targetRoles.includes('super_admin')) return false;
+  if (targetRoles.includes('admin')) return actorRoles.includes('super_admin');
+  return actorRoles.includes('admin') || actorRoles.includes('super_admin');
+}
+
 export const ROLE_LABELS: Record<Role, string> = {
   student:'Estudiante',workshop_participant:'Participante',teacher_pending:'Docente pendiente',teacher:'Docente',
   tutor:'Tutor académico',coordinator:'Coordinación',admin:'Administración',super_admin:'Superadministración',
