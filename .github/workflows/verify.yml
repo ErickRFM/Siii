@@ -29,6 +29,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - run: git diff -- package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test
