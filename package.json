@@ -17,7 +17,8 @@
     "db:studio": "drizzle-kit studio",
     "worker:dev": "tsx worker/index.ts",
     "docs:openapi": "tsx scripts/generate-openapi.ts",
-    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts"
+    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
+    "db:preflight": "tsx scripts/db-preflight.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
