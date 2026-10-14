@@ -43,4 +43,12 @@ ALTER TABLE "curriculum_versions" ADD CONSTRAINT "curriculum_program_tenant_fk"
   FOREIGN KEY ("program_id","institution_id") REFERENCES "academic_programs"("id","institution_id") ON DELETE RESTRICT;--> statement-breakpoint
 -- Existing Supabase roles have default grants in public. Keep all institutional
 -- records private; the Next.js backend authenticates via PostgreSQL directly.
-REVOKE ALL PRIVILEGES ON TABLE "academic_programs","academic_courses","curriculum_versions" FROM anon, authenticated;
+DO $
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    REVOKE ALL PRIVILEGES ON TABLE "academic_programs","academic_courses","curriculum_versions" FROM anon;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    REVOKE ALL PRIVILEGES ON TABLE "academic_programs","academic_courses","curriculum_versions" FROM authenticated;
+  END IF;
+END $;
