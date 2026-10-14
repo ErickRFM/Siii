@@ -5,12 +5,12 @@ import { useState, type ReactNode } from 'react';
 import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 
-type Active = 'overview' | 'security' | 'institution';
+type Active = 'overview' | 'security' | 'institution' | 'academic';
 
 export default function SiiAppShell({
-  firstName, fullName, active, children,
+  firstName, fullName, active, institutionId, children,
 }: {
-  firstName: string; fullName: string; active: Active; children: ReactNode;
+  firstName: string; fullName: string; active: Active; institutionId?: string; children: ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -32,9 +32,14 @@ export default function SiiAppShell({
           </Link>
         </nav>
         <div className="sii-sidebar-heading sii-sidebar-heading--secondary">GESTIÓN ACADÉMICA</div>
-        <div className="sii-nav" aria-label="Módulos en desarrollo">
+        <div className="sii-nav" aria-label="Gestión académica">
+          {institutionId ? <Link href={`/dashboard/institutions/${institutionId}/academic`}
+            className={active === 'academic' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}
+            aria-current={active === 'academic' ? 'page' : undefined}
+            onClick={() => setMenuOpen(false)}>
+              <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
+          </Link> : <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico <span className="sii-nav-soon">Selecciona institución</span></span>}
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▣</span> Control escolar <span className="sii-nav-soon">Pronto</span></span>
-          <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Planeación <span className="sii-nav-soon">Pronto</span></span>
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▤</span> Calificaciones <span className="sii-nav-soon">Pronto</span></span>
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">⇄</span> Integraciones <span className="sii-nav-soon">Pronto</span></span>
         </div>
@@ -49,7 +54,7 @@ export default function SiiAppShell({
         <header className="sii-topbar">
           <div className="sii-topbar-start">
             <button className="sii-menu-button" onClick={() => setMenuOpen(x => !x)} type="button" aria-expanded={menuOpen} aria-controls="sii-sidebar-mobile" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'}>☰</button>
-            <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : 'Institución'}</span>
+            <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : 'Institución'}</span>
           </div>
           <div className="sii-topbar-actions">
             <span className="sii-connection-label"><span className="sii-online-dot" /> Sesión autenticada</span>
