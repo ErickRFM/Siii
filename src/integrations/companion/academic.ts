@@ -1,5 +1,5 @@
 import 'server-only';
-import { and,eq,isNull } from 'drizzle-orm';
+import { and,eq,isNull,sql } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
 import { institutionalStudents,academicPrograms,sectionEnrollments,academicSections,academicCourses,academicTerms,
  institutionalTeachers,sectionTeachers,schedulePatterns,classrooms,campuses } from '../../../db/schema';
@@ -66,4 +66,40 @@ export async function externalAcademicLoad(institutionId:string,externalId:strin
   });
  }
  return {data:{student,enrollments,schedule},status:200} as const;
+}
+
+export async function externalTeachers(institutionId:string){
+ const rows=await db.select().from(institutionalTeachers)
+  .where(and(eq(institutionalTeachers.institutionId,institutionId),eq(institutionalTeachers.status,'active'))).limit(201);
+ if(rows.length>200)return {error:'DIRECTORY_LIMIT_EXCEEDED',status:409} as const;
+ return {data:rows.map(x=>({
+  externalId:x.employeeNumber,fullName:[x.firstName,x.lastName].join(' '),
+  institutionalEmail:x.institutionalEmail??null,departmentCode:null,
+ })),status:200} as const;
+}
+export async function externalCourses(institutionId:string){
+ const offered=await db.select({sectionId:academicSections.id,sectionCode:academicSections.code,
+  courseCode:academicCourses.code,courseName:academicCourses.name,credits:academicCourses.credits,term:academicTerms.code})
+ .from(academicSections)
+ .innerJoin(academicCourses,eq(academicSections.courseId,academicCourses.id))
+ .innerJoin(academicTerms,eq(academicSections.termId,academicTerms.id))
+ .where(and(eq(academicSections.institutionId,institutionId),sql`${academicSections.status}<>'archived'`)).limit(201);
+ if(offered.length>200)return {error:'CATALOG_LIMIT_EXCEEDED',status:409} as const;
+ const data=[];
+ for(const section of offered){
+  const [teacher]=await db.select().from(sectionTeachers)
+   .innerJoin(institutionalTeachers,eq(sectionTeachers.teacherId,institutionalTeachers.id))
+   .where(and(eq(sectionTeachers.sectionId,section.sectionId),eq(sectionTeachers.institutionId,institutionId),
+     isNull(sectionTeachers.revokedAt),eq(institutionalTeachers.status,'active'))).limit(1);
+  if(!teacher)return {error:'MISSING_TEACHER_ASSIGNMENT',status:409} as const;
+  const person=teacher.institutional_teachers;
+  data.push({
+   externalId:section.sectionId,
+   subject:{externalCode:section.courseCode,name:section.courseName,credits:section.credits},
+   teacher:{externalId:person.employeeNumber,fullName:[person.firstName,person.lastName].join(' '),
+    institutionalEmail:person.institutionalEmail??null,departmentCode:null},
+   term:section.term,groupName:section.sectionCode,
+  });
+ }
+ return {data,status:200} as const;
 }
