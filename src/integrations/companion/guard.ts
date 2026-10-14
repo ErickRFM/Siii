@@ -14,7 +14,7 @@ export function authorizeCompanion(req:NextRequest):{institutionId:string}|NextR
   return error('INTEGRATION_NOT_CONFIGURED',503);
  }
  const auth=req.headers.get('authorization')??'';
- if(!/^Bearer [A-Za-z0-9._~+/-]{32,512}$/.test(auth))return error('UNAUTHENTICATED',401);
+ if(!/^Bearer [A-Za-z0-9_-]{32,512}$/.test(auth))return error('UNAUTHENTICATED',401);
  const actual=createHash('sha256').update(auth.slice(7)).digest();
  const expected=Buffer.from(sha,'hex');
  if(expected.length!==actual.length||!timingSafeEqual(actual,expected))return error('UNAUTHENTICATED',401);
