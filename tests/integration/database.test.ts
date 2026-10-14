@@ -50,6 +50,22 @@ describe('Postgres foundation',()=>{
     throw new Error('fixture rollback');
   })).rejects.toThrow('fixture rollback');
  });
+ it('rejects repeated program codes within the same institution', async () => {
+   const suffix=randomUUID().slice(0,12);
+   await expect(db.transaction(async tx => {
+     const [unit]=await tx.insert(institutions).values({name:'Duplicate Validation',code:`qa-duplicate-${suffix}`}).returning();
+     const program={institutionId:unit.id,code:'SYS101',name:'Programa A',level:'ingenieria',modality:'presencial'};
+     await tx.insert(academicPrograms).values(program);
+     await tx.insert(academicPrograms).values({...program,name:'Programa B'});
+   })).rejects.toThrow();
+ });
+ it('rejects credits outside their database range', async () => {
+   const suffix=randomUUID().slice(0,12);
+   await expect(db.transaction(async tx => {
+     const [unit]=await tx.insert(institutions).values({name:'Credit Validation',code:`qa-credits-${suffix}`}).returning();
+     await tx.insert(academicCourses).values({institutionId:unit.id,code:'BAD101',name:'Bad credit fixture',credits:31});
+   })).rejects.toThrow();
+ });
  it('rejects plans referencing a program in a different institution', async () => {
    const suffix=randomUUID().slice(0,12);
    await expect(db.transaction(async tx => {
