@@ -107,6 +107,8 @@ export async function POST(req:NextRequest,ctx:Ctx){
    await tx.insert(securityAuditLog).values({institutionId,actorUserId:access.identity.id,action:'grade.acta.publish',target:'publication:'+publication.id});
    return {data:publication,status:201} as const;
   });
-  return 'error' in result?jsonError(result.error,result.status):NextResponse.json({data:result.data},{status:result.status,headers:noCache});
+  if('error' in result && typeof result.error==='string')return jsonError(result.error,result.status);
+   if(!('data' in result))return jsonError('INVALID_GRADE_STATE',409);
+   return NextResponse.json({data:result.data},{status:result.status,headers:noCache});
  }catch(e){return fail(e)}
 }
