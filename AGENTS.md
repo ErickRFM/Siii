@@ -16,7 +16,7 @@ SIS universitario multitenant, backend institucional en Next.js/TypeScript + Dri
 - No hacer merge sin CI verde y revisión; no cambiar F2 en paralelo desde dos ramas sin reconciliación.
 
 ## Estado de implementación
-F1 y parte de F2 + shell UX (login, resumen de instituciones). Ver README. La mayoría de operaciones académicas F3-F8 todavía están pendientes.
+F1/F2 con login y shell institucional. F3 empieza con 5 catálogos reales (programas, materias, planes, periodos y campus), pendiente de validación/productivización. Expedientes, grupos, horarios, calificaciones, pagos y resto de dominios aún pendientes. Ver README y docs/implementation/F3_ACADEMIC_CATALOG.md.
 
 ## Comandos
 `npm ci`, `npm run db:migrate` (desarrollo), `npm run bootstrap:admin`, `npm run dev`, `npm run typecheck`, `npm run test`, `npm run test:integration`, `npm run build`.
