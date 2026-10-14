@@ -29,6 +29,13 @@
       "when": 1791999037864,
       "breakpoints": true,
       "version": "7"
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792000681637,
+      "tag": "0004_p0_1_inherited_privileges",
+      "breakpoints": true
     }
   ]
 }

@@ -25,3 +25,9 @@ Argon2id en runtime de destino/representativo aprobado: pendiente.
 Lector de pantalla escuchado por una persona: pendiente por flujo.
 Mantener docs/BLOCKERS.md y PR19 abiertos hasta cerrar sus puertas obligatorias.
 
+
+## Revisión posterior y ampliación aditiva 0004
+La revisión de fff49f88 verificó las tres correcciones iniciales y pidió cambios por RPC heredados, roles secundarios SET-only y defaults anteriores ALL de siii_app. Las regresiones sintéticas confirmaron EXECUTE heredado y TRUNCATE futuro antes de 0004; SET-only obtuvo 200 antes del ajuste del guard y 503 después.
+
+0004 reconcilia ACL de tablas/columnas/secuencias/RPC públicos de los grupos alcanzables por los roles Data API, revoca defaults globales/scoped excesivos y comprueba permisos efectivos al terminar. Rechaza pertenencia de APIroles a propietarios, roles privilegiados, siii_app o siii_migrator; no cambia membresías ni esquemas gestionados. Las tablas futuras del runtime necesitan grants explícitos revisados y políticas RLS. El guard también inspecciona DDL/DML/RPC de roles alcanzables mediante SET ROLE.
+Archivo runtime-effective-privileges: 6/6; p0-1-privacy: 4/4, incluyendo idempotencia 0004. Revisión independiente posterior de estas ampliaciones y CI final aún pendientes.

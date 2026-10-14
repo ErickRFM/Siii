@@ -1,9 +1,9 @@
 name: Verify SIS
 on:
   push:
-    branches: [main, 'feat/**', 'fix/**', 'codex/**']
+    branches: [main, 'feat/**', 'fix/**', 'chore/p0-1-release-gates', 'codex/**']
   pull_request:
-    branches: [main, feat/sis-foundation]
+    branches: [main, 'feat/**', 'chore/p0-1-release-gates', 'codex/**']
 permissions:
   contents: read
 concurrency:
