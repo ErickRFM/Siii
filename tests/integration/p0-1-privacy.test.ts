@@ -71,6 +71,9 @@ it('reconciles inherited API RPC/defaults and excessive app defaults additively'
   await client.query('CREATE TABLE public.synthetic_before(id integer)');
   expect((await client.query("SELECT has_table_privilege('siii_app','public.synthetic_before','TRUNCATE') AS allowed")).rows[0].allowed).toBe(true);
   await client.query(readFileSync('db/migrations/0004_p0_1_inherited_privileges.sql','utf8'));
+  await client.query(readFileSync('db/migrations/0005_p0_1_runtime_upgrade.sql','utf8'));
+  expect((await client.query("SELECT has_table_privilege('siii_app','public.synthetic_before','DELETE,TRUNCATE,TRIGGER,REFERENCES,MAINTAIN') AS allowed")).rows[0].allowed).toBe(false);
+  expect((await client.query("SELECT relrowsecurity AS enabled FROM pg_class WHERE oid='public.synthetic_before'::regclass")).rows[0].enabled).toBe(true);
   await client.query('CREATE TABLE public.synthetic_after(id integer)');
   await client.query('CREATE SEQUENCE public.synthetic_after_seq');
   await client.query("CREATE FUNCTION public.synthetic_after_rpc() RETURNS integer LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$ SELECT 2 $$");

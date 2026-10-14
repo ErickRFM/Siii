@@ -36,6 +36,13 @@
       "when": 1792000681637,
       "tag": "0004_p0_1_inherited_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792001102854,
+      "tag": "0005_p0_1_runtime_upgrade",
+      "breakpoints": true
     }
   ]
 }
