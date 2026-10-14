@@ -37,3 +37,9 @@ Primera revisión independiente encontró revalidación insuficiente de writeAcc
 ## Alcance pendiente
 
 MFA obligatorio por perfiles privilegiados, prevención de revocación mientras existan grants privilegiados y step-up institucional se integrarán con IAM, todavía no certificados. Tampoco se certifican gestión de usuarios, scopes, invitaciones, hosting real, staging cloud ni lector de pantalla humano. PR dependiente y P0 siguen sujetos a sus puertas de release; esta entrega no cierra P1 ni autoriza despliegue.
+
+## CI y segunda revisión de la base MFA
+
+Commit MFA final 3f75897ca83cb3f7f6e9b68c58d3660e0df03498 publicado en https://github.com/ErickRFM/Siii/pull/21, base chore/p0-1-release-gates (PR20). CI Verify SIS verde en https://github.com/ErickRFM/Siii/actions/runs/38621960099 y run38621950013: instalación/lockfile, lint, tipos, 122 unitarias, 112 integración, 12 Chromium, build y audit completo. Vercel Preview verde. No hubo merge ni despliegue productivo.
+
+Segunda revisión independiente de fuente favorable sobre ese SHA, sin nuevos hallazgos materiales. Confirma revalidación de authVersion/assurance bajo locks y worker usuario primero para cascadas. Verificó que fuente MFA coincide con0296add6 y hash0006 conservado; no ejecutó SQL/tests ni certificó infraestructura o IAM. Las limitaciones de alcance anteriores siguen vigentes.

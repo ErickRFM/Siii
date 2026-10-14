@@ -14,6 +14,7 @@ import { createSession, digestToken, generateToken, revokeUserSessions } from '.
 import { lockMfaFactor, factorIsActive } from './mfa-session';
 import { hasFreshStepUp, MFA_STEP_UP_MS, sessionIsCurrent } from './mfa-session-policy';
 import { createMfaSecret, sealMfaSecret, openMfaSecret, verifyTotp, createRecoveryCodes, digestRecoveryCode } from './mfa-primitives';
+import {hasPrivilegedMembership} from './institution-policy';
 
 export const MFA_CHALLENGE_COOKIE = process.env.NODE_ENV === 'production' ? '__Host-siii_mfa_challenge' : 'siii_mfa_challenge';
 const CHALLENGE_MS = 5 * 60000, ENROLLMENT_MS = 15 * 60000, BLOCK_MS = 15 * 60000;
@@ -145,7 +146,8 @@ export const mfaStatus = withMfaErrors(async req => {
     const { user, factor, session, now } = identity;
     const [pending] = await tx.select({ id: mfaEnrollments.id }).from(mfaEnrollments).where(and(eq(mfaEnrollments.userId, user.id), eq(mfaEnrollments.authVersion, user.authVersion), isNull(mfaEnrollments.consumedAt), gt(mfaEnrollments.expiresAt, now))).limit(1);
     const [remaining] = await tx.select({ total: count() }).from(mfaRecoveryCodes).where(and(eq(mfaRecoveryCodes.userId, user.id), isNull(mfaRecoveryCodes.consumedAt)));
-    return ok({ data: { configured: factorIsActive(factor), pending: !!pending, recoveryCodesRemaining: factorIsActive(factor) ? remaining.total : 0, stepUpExpiresAt: hasFreshStepUp(session, now) ? new Date(session.stepUpAt!.getTime() + MFA_STEP_UP_MS).toISOString() : null } });
+    const requiredByRole=await hasPrivilegedMembership(tx,user.id,now);
+    return ok({ data: { configured: factorIsActive(factor), requiredByRole, pending: !!pending, recoveryCodesRemaining: factorIsActive(factor) ? remaining.total : 0, stepUpExpiresAt: hasFreshStepUp(session, now) ? new Date(session.stepUpAt!.getTime() + MFA_STEP_UP_MS).toISOString() : null } });
   });
 });
 
@@ -273,6 +275,7 @@ async function manageFactor(req: NextRequest, operation: 'regenerate' | 'revoke'
     if (user.mustChangePassword) return jsonError('PASSWORD_CHANGE_REQUIRED', 403);
     if (!hasFreshStepUp(session, now)) return jsonError('STEP_UP_REQUIRED', 403);
     if (!factorIsActive(factor)) return jsonError('MFA_NOT_CONFIGURED', 409);
+    if(operation==='revoke'&&await hasPrivilegedMembership(tx,user.id,now))return jsonError('MFA_REQUIRED_BY_ROLE',403);
     openMfaSecret(factor!.secretEncrypted ?? '', user.id);
     if (operation === 'regenerate') {
       const codes = await replaceRecoveryCodes(tx, factor!, now);

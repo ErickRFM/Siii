@@ -13,7 +13,7 @@ test.beforeAll(async()=>{
  await sql.connect();
  const hash=await argon2.hash(password,{type:argon2.argon2id,memoryCost:65536,timeCost:3,parallelism:1});
  institutionId=(await sql.query("INSERT INTO institutions(name,code) VALUES('QA P0 local — datos sintéticos',$1) RETURNING id",['UI'+suffix])).rows[0].id;
- for(const [name,role]of [[username,'admin'],[student,'student']]){
+ for(const [name,role]of [[username,'coordinator'],[student,'student']]){
   const person=(await sql.query("INSERT INTO people(first_name,last_name) VALUES('QA','Local') RETURNING id")).rows[0].id;
   const user=(await sql.query('INSERT INTO platform_users(person_id,username,password_hash) VALUES($1,$2,$3) RETURNING id',[person,name,hash])).rows[0].id;
   const member=(await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id',[institutionId,user])).rows[0].id;

@@ -1,14 +1,17 @@
 import 'server-only';
 import {cookies} from 'next/headers';
-import {and,eq,isNull} from 'drizzle-orm';
+import {and,eq} from 'drizzle-orm';
 import {db,assertApplicationRole} from '@/infrastructure/database';
-import {authSessions,platformUsers,people,institutionMemberships,institutions,roleAssignments} from '../../../db/schema';
-import type {Role,Permission} from './roles';
-import {hasPermission} from './roles';
+import {authSessions,platformUsers,people} from '../../../db/schema';
+import type {Permission} from './roles';
 import {SESSION_COOKIE} from './session-policy';
 import {digestToken} from './session-write';
 import {lockMfaFactor} from './mfa-session';
 import {sessionIsCurrent} from './mfa-session-policy';
+import {factorIsActive} from './mfa-session';
+import {institutionAccess,legacyAllows} from './institution-policy';
+import {privilegedAssuranceAllows} from './privileged-policy';
+import {can,type Capability,type Resource} from './capabilities';
 export {SESSION_COOKIE,SESSION_DAYS} from './session-policy';
 export {digestToken,generateToken} from './session-write';
 export async function getIdentity(){
@@ -27,24 +30,23 @@ export async function getIdentity(){
   const now=new Date();
   if(!session||!sessionIsCurrent(identity,session,factor,now))return null;
   await tx.update(authSessions).set({lastSeenAt:now}).where(eq(authSessions.id,session.id));
-  return {...identity,sessionId:session.id};
+  return {...identity,sessionId:session.id,mfaConfigured:factorIsActive(factor),mfaVerified:factorIsActive(factor)&&!!session.mfaVerifiedAt,stepUpAt:session.stepUpAt};
  });
 }
-export async function getInstitutionAccess(userId:string){
- const rows=await db.select({institutionId:institutions.id,institutionName:institutions.name,institutionCode:institutions.code,membershipId:institutionMemberships.id,role:roleAssignments.role})
-  .from(institutionMemberships).innerJoin(institutions,eq(institutionMemberships.institutionId,institutions.id)).innerJoin(roleAssignments,eq(roleAssignments.membershipId,institutionMemberships.id))
-  .where(and(eq(institutionMemberships.userId,userId),eq(institutionMemberships.status,'active'),eq(institutions.status,'active'),isNull(roleAssignments.revokedAt)));
- const grouped=new Map<string,{institutionId:string;institutionName:string;institutionCode:string;membershipId:string;roles:Role[]}>();
- for(const row of rows){
-  let entry=grouped.get(row.institutionId);
-  if(!entry){entry={institutionId:row.institutionId,institutionName:row.institutionName,institutionCode:row.institutionCode,membershipId:row.membershipId,roles:[]};grouped.set(row.institutionId,entry);}
-  entry.roles.push(row.role);
- }
- return [...grouped.values()].sort((a,b)=>a.institutionId.localeCompare(b.institutionId));
-}
-export async function authorizeInstitution(institutionId:string,permission:Permission){
+export const getInstitutionAccess=institutionAccess;
+export async function institutionContext(institutionId:string){
  const identity=await getIdentity();if(!identity||identity.mustChangePassword)return null;
  const access=(await getInstitutionAccess(identity.id)).find(item=>item.institutionId===institutionId);
- if(!access||!hasPermission(access.roles,permission))return null;
- return {identity,access};
+ if(!access)return null;
+ return {identity,access,subject:{id:identity.id,active:identity.isActive,mustChangePassword:identity.mustChangePassword,grants:access.grants}};
+}
+export async function authorizeCapability(institutionId:string,capability:Capability,resource:Resource={institutionId,status:'active'},critical=false){
+ const context=await institutionContext(institutionId);if(!context)return null;
+ const now=new Date();
+ return resource.institutionId===institutionId&&can(context.subject,capability,resource,now)&&privilegedAssuranceAllows(context.access.grants,context.identity,now,critical)?context:null;
+}
+export async function authorizeInstitution(institutionId:string,permission:Permission){
+ const context=await institutionContext(institutionId);if(!context)return null;
+ const now=new Date(),critical=permission==='roles.assign'||permission==='users.manage';
+ return legacyAllows(context.subject,permission,institutionId,now)&&privilegedAssuranceAllows(context.access.grants,context.identity,now,critical)?context:null;
 }

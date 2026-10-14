@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-type MfaStatus = { configured: boolean; pending: boolean; recoveryCodesRemaining: number; stepUpExpiresAt: string | null };
+type MfaStatus = { configured: boolean; pending: boolean; recoveryCodesRemaining: number; stepUpExpiresAt: string | null; requiredByRole:boolean };
 type Enrollment = { enrollmentId: string; secret: string; uri: string; expiresAt: string };
 class MfaRequestError extends Error {
   constructor(readonly code: string) { super(code); }
@@ -33,6 +33,7 @@ function errorMessage(error: unknown): string {
     case 'PASSWORD_CHANGE_REQUIRED': return 'Actualiza primero tu contraseña en esta misma pantalla para gestionar el autenticador.';
     case 'MFA_KEY_UNAVAILABLE': return 'La configuración de seguridad no está disponible. Contacta a la administración de tu institución.';
     case 'MFA_ALREADY_CONFIGURED': return 'Tu cuenta ya tiene un autenticador activo. Actualiza el estado de seguridad.';
+    case 'MFA_REQUIRED_BY_ROLE': return 'No puedes desactivar el autenticador mientras mantengas perfiles privilegiados vigentes.';
     default: return 'No se pudo completar la operación de seguridad. Vuelve a intentar o contacta a soporte.';
   }
 }
@@ -187,7 +188,7 @@ export default function MfaSecurity() {
         </form>
       </div>}
       <h3>Confirma tu identidad</h3>
-      <p id="mfa-step-up-help">Esta confirmación dura cinco minutos y permite renovar códigos o desactivar el autenticador. Un código ya utilizado requiere esperar al siguiente.</p>
+      <p id="mfa-step-up-help">Esta confirmación dura cinco minutos y permite renovar códigos{status.requiredByRole?'':' o desactivar el autenticador'}. Un código ya utilizado requiere esperar al siguiente.</p>
       <form className="password-form" onSubmit={stepUp} aria-describedby="mfa-step-up-help">
         <label htmlFor="mfa-step-up-password">Contraseña actual para confirmar</label>
         <input id="mfa-step-up-password" name="currentPassword" type="password" autoComplete="current-password" required maxLength={512} disabled={!ready} aria-invalid={invalidField === 'mfa-step-up-password'} aria-describedby={error ? 'mfa-error' : undefined}/>
@@ -200,9 +201,10 @@ export default function MfaSecurity() {
       </form>
       {fresh && <p role="status">Confirmación vigente hasta {new Date(status.stepUpExpiresAt!).toLocaleTimeString('es-MX')}.</p>}
       {status.configured && <div>
-        <p>Renovar códigos invalida todos los anteriores. Desactivar el autenticador cierra las sesiones de los otros dispositivos.</p>
+        <p>Renovar códigos invalida todos los anteriores.{!status.requiredByRole&&' Desactivar el autenticador cierra las sesiones de los otros dispositivos.'}</p>
+        {status.requiredByRole&&<p id="mfa-required-by-role" className="sii-info-banner">No puedes desactivar el autenticador mientras mantengas perfiles privilegiados vigentes.</p>}
         <button type="button" className="sii-outline-button" disabled={!ready || !fresh} onClick={() => void regenerate()}>Renovar códigos de recuperación</button>{' '}
-        <button type="button" className="sii-outline-button" disabled={!ready || !fresh} onClick={() => void revoke()}>Desactivar autenticador y cerrar otros dispositivos</button>
+        <button type="button" className="sii-outline-button" disabled={!ready || !fresh || status.requiredByRole} aria-describedby={status.requiredByRole?'mfa-required-by-role':undefined} onClick={() => void revoke()}>Desactivar autenticador y cerrar otros dispositivos</button>
       </div>}
     </>}
     {codes.length > 0 && <div ref={savedCodes} tabIndex={-1} role="region" aria-labelledby="mfa-recovery-title">

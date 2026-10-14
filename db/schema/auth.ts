@@ -1,5 +1,6 @@
-import { pgEnum, pgTable, uuid, text, timestamp, integer, index, uniqueIndex, jsonb, check } from 'drizzle-orm/pg-core';
-import { institutions, platformUsers, userRoleEnum } from './core';
+import { pgEnum, pgTable, uuid, text, timestamp, integer, index, uniqueIndex, jsonb, check, foreignKey } from 'drizzle-orm/pg-core';
+import { institutions, platformUsers, userRoleEnum, campuses } from './core';
+import { academicPrograms } from './academic';
 import { sql } from 'drizzle-orm';
 
 export const membershipStatusEnum = pgEnum('membership_status', ['active', 'suspended']);
@@ -14,6 +15,7 @@ export const institutionMemberships = pgTable('institution_memberships', {
 }, table => ({
   uniqueMember: uniqueIndex('institution_member_unique').on(table.institutionId, table.userId),
   byUser: index('institution_member_user_idx').on(table.userId),
+  tenantReference: uniqueIndex('institution_membership_id_institution_uidx').on(table.id,table.institutionId),
 }));
 
 export const roleAssignments = pgTable('role_assignments', {
@@ -23,8 +25,21 @@ export const roleAssignments = pgTable('role_assignments', {
   grantedBy: uuid('granted_by').references(() => platformUsers.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  // Legacy institution grants may omit institutionId; scoped grants must supply it.
+  institutionId: uuid('institution_id'),
+  scopeType: text('scope_type').$type<'institution'|'program'|'campus'>().notNull().default('institution'),
+  programId: uuid('scope_program_id'),
+  campusId: uuid('scope_campus_id'),
+  expiresAt: timestamp('expires_at',{withTimezone:true}),
 }, table => ({
-  activeRole: uniqueIndex('role_assignment_unique_active').on(table.membershipId, table.role).where(sql`${table.revokedAt} IS NULL`),
+  activeRole: uniqueIndex('role_assignment_unique_active').on(table.membershipId, table.role).where(sql`${table.revokedAt} IS NULL AND ${table.scopeType} = 'institution'`),
+  activeProgramRole: uniqueIndex('role_assignment_unique_program').on(table.membershipId,table.role,table.programId).where(sql`${table.revokedAt} IS NULL AND ${table.scopeType} = 'program'`),
+  activeCampusRole: uniqueIndex('role_assignment_unique_campus').on(table.membershipId,table.role,table.campusId).where(sql`${table.revokedAt} IS NULL AND ${table.scopeType} = 'campus'`),
+  scopeValid:check('role_assignment_scope_check',sql`(${table.scopeType} = 'institution' AND ${table.programId} IS NULL AND ${table.campusId} IS NULL) OR (${table.scopeType} = 'program' AND ${table.institutionId} IS NOT NULL AND ${table.programId} IS NOT NULL AND ${table.campusId} IS NULL) OR (${table.scopeType} = 'campus' AND ${table.institutionId} IS NOT NULL AND ${table.campusId} IS NOT NULL AND ${table.programId} IS NULL)`),
+  adminScope:check('role_assignment_admin_scope_check',sql`${table.role}::text NOT IN ('admin','super_admin') OR ${table.scopeType} = 'institution'`),
+  membershipTenant:foreignKey({columns:[table.membershipId,table.institutionId],foreignColumns:[institutionMemberships.id,institutionMemberships.institutionId],name:'role_assignment_membership_tenant_fk'}),
+  programTenant:foreignKey({columns:[table.programId,table.institutionId],foreignColumns:[academicPrograms.id,academicPrograms.institutionId],name:'role_assignment_program_tenant_fk'}),
+  campusTenant:foreignKey({columns:[table.campusId,table.institutionId],foreignColumns:[campuses.id,campuses.institutionId],name:'role_assignment_campus_tenant_fk'}),
 }));
 
 export const authSessions = pgTable('auth_sessions', {
