@@ -1,12 +1,10 @@
+import {isolatedDatabaseUrl} from './database-url';
 import {spawn} from 'node:child_process';
 import {openSync,closeSync,mkdirSync,writeFileSync} from 'node:fs';
 import {randomBytes} from 'node:crypto';
 import pg from 'pg';
 export default async function setup(){
- if(process.env.SIII_DATABASE_ENV!=='test')throw new Error('ISOLATED_TEST_DATABASE_REQUIRED');
- const raw=process.env.INTEGRATION_DATABASE_URL??process.env.DATABASE_URL;
- if(!raw)throw new Error('ISOLATED_TEST_DATABASE_REQUIRED');
- const url=new URL(raw);if(!['127.0.0.1','localhost','[::1]'].includes(url.hostname))throw new Error('LOCAL_HTTP_TEST_DATABASE_REQUIRED');
+ const raw=isolatedDatabaseUrl(),url=new URL(raw);
  const admin=new pg.Client({connectionString:raw});await admin.connect();
  const role='p0_http_app_'+randomBytes(8).toString('hex'),password=randomBytes(32).toString('hex');
  await admin.query('CREATE ROLE "'+role+'" LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD '+pg.escapeLiteral(password));

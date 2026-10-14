@@ -7,15 +7,16 @@ async function main() {
   const connectionString=validateMigrationEnvironment(process.env);
   const pool=new pg.Pool({connectionString,max:1,connectionTimeoutMillis:5000,idleTimeoutMillis:10000,statement_timeout:60000});
   pool.on('error',()=>{console.error('MIGRATION_POOL_ERROR');process.exitCode=1;});
-  const client=await pool.connect();
+  let client:pg.PoolClient|undefined;
   try {
+    client=await pool.connect();
     await client.query("SELECT pg_advisory_lock(hashtext('siii:migrations'))");
     await assertMigrationLedger(client);
     await migrate(drizzle(client),{migrationsFolder:'./db/migrations'});
     console.log('MIGRATIONS_APPLIED');
   } finally {
-    await client.query("SELECT pg_advisory_unlock(hashtext('siii:migrations'))").catch(()=>undefined);
-    client.release();
+    if(client)await client.query("SELECT pg_advisory_unlock(hashtext('siii:migrations'))").catch(()=>undefined);
+    client?.release();
     await pool.end();
   }
 }

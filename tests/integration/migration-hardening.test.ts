@@ -1,10 +1,13 @@
+import {isolatedDatabaseUrl} from '../support/database-url';
+const testDatabaseUrl=isolatedDatabaseUrl();
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import pg from 'pg';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-const admin=new pg.Client({connectionString:process.env.DATABASE_URL});
+const admin=new pg.Client({connectionString:testDatabaseUrl});
 const prefix='p0_migration_'+randomUUID().replaceAll('-','').slice(0,12);
+const globalCreator=prefix+'_creator';
 const urls:Record<string,string>={};
 const clients:pg.Client[]=[];
 function command(script:string,url:string,extra:Record<string,string>={}){
@@ -15,7 +18,7 @@ function command(script:string,url:string,extra:Record<string,string>={}){
 }
 async function database(name:string,legacy:boolean){
  const dbname=prefix+'_'+name;await admin.query('CREATE DATABASE '+dbname);
- const url=new URL(process.env.DATABASE_URL!);url.pathname='/'+dbname;
+ const url=new URL(testDatabaseUrl);url.pathname='/'+dbname;
  urls[name]=url.toString();const c=new pg.Client({connectionString:urls[name]});await c.connect();clients.push(c);
  if(legacy){for(const tag of ['0000_siii_foundation_identity','0001_academic_catalogs'])await c.query(readFileSync('db/migrations/'+tag+'.sql','utf8'));}
  return c;
@@ -26,7 +29,9 @@ describe('migration hardening on empty and production-shaped databases',()=>{
   if(process.env.SIII_DATABASE_ENV!=='test')throw new Error('ISOLATED_TEST_DATABASE_REQUIRED');
   await admin.connect();
   await admin.query("DO $$ BEGIN IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF; IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF; END $$;");
+  await admin.query('CREATE ROLE '+globalCreator+' NOLOGIN');
   empty=await database('empty',false);baseline=await database('baseline',true);
+  for(const c of [empty,baseline]){await c.query('ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO anon,authenticated');await c.query('ALTER DEFAULT PRIVILEGES FOR ROLE '+globalCreator+' GRANT ALL ON TABLES TO anon,authenticated');await c.query('ALTER DEFAULT PRIVILEGES FOR ROLE '+globalCreator+' GRANT ALL ON SEQUENCES TO anon,authenticated');}
   const unit=(await baseline.query("INSERT INTO institutions(name,code) VALUES('Synthetic baseline','BASELINE') RETURNING id")).rows[0].id;
   await baseline.query("INSERT INTO academic_terms(institution_id,name,code,start_date,end_date) VALUES($1,'Historical synthetic term','LEGACY','2026-01-01 12:00:00','2026-06-30 18:00:00')",[unit]);
   await empty.query('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon,authenticated');
@@ -67,6 +72,15 @@ describe('migration hardening on empty and production-shaped databases',()=>{
   await empty.query('CREATE TABLE future_private(id int)');
   expect((await empty.query("SELECT has_table_privilege('anon','public.future_private','SELECT') AS allowed")).rows[0].allowed).toBe(false);
  });
+ it('revokes global defaults from a distinct object creator',async()=>{
+  await empty.query('GRANT USAGE,CREATE ON SCHEMA public TO '+globalCreator);
+  await empty.query('SET ROLE '+globalCreator);
+  try{await empty.query('CREATE TABLE globally_private(id integer)');await empty.query('CREATE SEQUENCE globally_private_sequence');}finally{await empty.query('RESET ROLE');}
+  for(const role of ['anon','authenticated']){
+   expect((await empty.query("SELECT has_table_privilege($1,'public.globally_private','SELECT') AS allowed",[role])).rows[0].allowed).toBe(false);
+   expect((await empty.query("SELECT has_sequence_privilege($1,'public.globally_private_sequence','USAGE') AS allowed",[role])).rows[0].allowed).toBe(false);
+  }
+ });
  it('gives the application DML while rejecting DDL',async()=>{
   await empty.query('SET ROLE siii_app');
   try{
@@ -91,6 +105,7 @@ describe('migration hardening on empty and production-shaped databases',()=>{
   await Promise.all(clients.map(c=>c.end()));
   // Only the uniquely named disposable databases created in this file are removed.
   for(const name of Object.keys(urls)){const dbname=prefix+'_'+name;await admin.query('DROP DATABASE '+dbname);}
+  await admin.query('DROP ROLE IF EXISTS '+globalCreator);
   await admin.end();
  });
 });

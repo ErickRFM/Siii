@@ -57,3 +57,10 @@ Reversa conserva la privacidad: no quitar RLS/REVOKE ni regresar a dependencias 
 - Fuera de Vercel, el cliente IP desconocido usa un bucket global; no se confía en X-Forwarded-For del cliente. Autohosting necesita proxy confiable antes de producción.
 - Se preserva RBAC v1 institucional. MFA, invitaciones (el POST de membresía por UUID sigue siendo deuda de P1), recuperación, scopes por programa/campus y visor de sesiones/auditoría son P1.
 - La validación de lector de pantalla y la medición en el runtime real deben tener evidencia separada; axe/teclado no sustituyen esas verificaciones.
+
+## Resolución de revisión
+
+Las escrituras académicas revalidan sesión/permiso dentro de la transacción. Las transiciones de planes bloquean programa antes que plan para serializar activación/archivo. Defaults prohibidos de tablas/secuencias se revocan tanto globalmente como en public: un REVOKE scoped no cancela un GRANT global. Esto afecta futuros objetos del creador también en otros schemas; evaluar este efecto en staging. Funciones/RPC no quedan cubiertas por esta migración y necesitan revisión explícita de EXECUTE/defaults antes de introducirlas.
+
+La UI conserva borradores y datos ante errores de mutación, asocia feedback de nombre y reintenta programas al actualizar. Hallazgos y límites del revisor: docs/audit/P0_REVIEW.md.
+Las bases de fixtures deben llamarse p0_* o terminar en _test; el selector prioriza INTEGRATION_DATABASE_URL y valida loopback y SIII_DATABASE_ENV=test antes de conectar. Esta convención no reemplaza la obligación de usar bases desechables sin datos personales.

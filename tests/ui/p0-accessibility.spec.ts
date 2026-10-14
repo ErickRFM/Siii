@@ -1,9 +1,11 @@
+import {isolatedDatabaseUrl} from '../support/database-url';
+const testDatabaseUrl=isolatedDatabaseUrl();
 import {test,expect,type Page} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
 import argon2 from 'argon2';
 import {randomUUID} from 'node:crypto';
-const sql=new pg.Client({connectionString:process.env.DATABASE_URL});
+const sql=new pg.Client({connectionString:testDatabaseUrl});
 const suffix=randomUUID().slice(0,8),password='Synthetic-ui-password-2026!';
 const username='qa-p0-'+suffix,student='qa-student-'+suffix;
 let institutionId:string;
@@ -88,4 +90,42 @@ test('mobile and dark catalog retain accessible names and contrast',async({page}
  await page.setViewportSize({width:390,height:844});await catalog(page);
  await page.getByRole('button',{name:'Activar tema oscuro'}).click();
  await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');await axe(page);
+});
+
+test('failed edits retain the draft and allow correction without reloading',async({page})=>{
+ await catalog(page);await page.getByRole('tab',{name:'Materias'}).click();
+ const first=page.locator('tbody tr').first();await first.getByRole('button',{name:'Editar'}).click();
+ const input=first.getByLabel('Nombre',{exact:true});
+ await input.fill('A');await first.getByRole('button',{name:'Guardar',exact:true}).click();
+ await expect(page.locator('.sii-catalog-error[role=alert]')).toBeVisible();
+ await expect(input).toBeVisible();await expect(input).toHaveValue('A');
+ await expect(input).toHaveAttribute('aria-invalid','true');
+ await expect(input).toHaveAttribute('aria-describedby','catalog-mutation-error');
+ await input.fill('Corrección sin perder borrador');await first.getByRole('button',{name:'Guardar',exact:true}).click();
+ await expect(page.getByRole('status').filter({hasText:'Cambios guardados'})).toBeVisible();
+ await expect(page.locator('tbody tr')).toHaveCount(50);await axe(page);
+});
+test('retrying a transient program load restores curriculum creation',async({page})=>{
+ await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,$2,'Retry program','ingenieria','presencial')",[institutionId,'RETRY'+suffix]);
+ await catalog(page);let fail=true;
+ await page.route('**/academic/programs?*',route=>fail?route.fulfill({status:503,contentType:'application/json',body:'{"error":{"code":"TEMPORARY"}}'}):route.continue());
+ await page.getByRole('tab',{name:'Planes'}).click();
+ await expect(page.locator('.sii-catalog-error[role=alert]')).toContainText('No se pudieron cargar los programas');
+ fail=false;await page.getByRole('button',{name:'Actualizar',exact:true}).click();
+ await expect(page.locator('.sii-catalog-error[role=alert]')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Guardar registro'})).toBeEnabled();
+ await expect(page.getByLabel('Programa académico').locator('option')).toHaveCount(2);
+});
+
+
+
+test('a rejected archive keeps valid catalog rows available',async({page})=>{
+ const parent=(await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,$2,'Archive rejection fixture','ingenieria','presencial') RETURNING id",[institutionId,'ARCHIVE'+suffix])).rows[0];
+ await sql.query("INSERT INTO curriculum_versions(institution_id,program_id,version) VALUES($1,$2,'active-plan')",[institutionId,parent.id]);
+ await catalog(page);page.once('dialog',dialog=>dialog.accept());
+ const row=page.locator('tbody tr').filter({hasText:'Archive rejection fixture'});
+ await row.getByRole('button',{name:'Archivar'}).click();
+ await expect(page.locator('.sii-catalog-error[role=alert]')).toContainText('planes activos');
+ await expect(row).toBeVisible();await expect(row.getByText('Activo',{exact:true})).toBeVisible();
+ await axe(page);
 });

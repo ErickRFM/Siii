@@ -65,4 +65,6 @@ export const platformUsers = pgTable('platform_users', {
   lockedUntil: timestamp('locked_until', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, table => ({
+  lockoutLevelValid: check('platform_users_lockout_level_check',sql`${table.lockoutLevel} >= 0`),
+}));

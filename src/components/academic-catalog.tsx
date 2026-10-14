@@ -25,6 +25,7 @@ const typeLabels: Record<string,string> = {
 function getError(code?: string) {
   switch(code) {
     case 'DUPLICATE_CODE': return 'Esa clave ya está registrada en la institución.';
+    case 'PROGRAM_NOT_ACTIVE': return 'El programa del plan está inactivo o archivado. No se puede reactivar este plan.';
     case 'PROGRAM_NOT_FOUND': return 'El programa seleccionado no existe, está inactivo o pertenece a otra institución.';
     case 'FORBIDDEN': return 'No tienes permisos para realizar esta operación.';
     case 'ACTIVE_DEPENDENCIES': return 'Este programa tiene planes activos. Resuelve sus dependencias antes de archivarlo.';
@@ -41,7 +42,12 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   const [programs,setPrograms] = useState<RecordRow[]>([]);
   const [loading,setLoading] = useState(true);
   const [saving,setSaving] = useState(false);
-  const [error,setError] = useState('');
+  const [loadError,setLoadError] = useState('');
+  const [mutationError,setMutationError]=useState('');
+  const [nameError,setNameError]=useState(false);
+  const [programsReload,setProgramsReload]=useState(0);
+  const mutationErrorRef=useRef<HTMLParagraphElement>(null);
+  useEffect(()=>{if(mutationError){if(nameError)document.getElementById('catalog-edit-name')?.focus();else mutationErrorRef.current?.focus();}},[mutationError,nameError]);
   const [notice,setNotice] = useState('');
   const [search,setSearch] = useState('');
   const [editing,setEditing] = useState<string | null>(null);
@@ -64,7 +70,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
     const controller=new AbortController();activeRequest.current=controller;
     const cancel=()=>controller.abort();signal?.addEventListener('abort',cancel,{once:true});
     const timer=setTimeout(cancel,20000);
-    setLoading(true);setError('');
+    setLoading(true);setLoadError('');
     try{
       const query=new URLSearchParams({limit:'50'});if(cursor)query.set('cursor',cursor);
       const response=await fetch(`${base}/${resource}?${query}`,{cache:'no-store',credentials:'same-origin',signal:controller.signal});
@@ -76,7 +82,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
     }catch(e){
       if(activeRequest.current===controller&&!signal?.aborted){
         setRows([]);setNextCursor(null);
-        setError(e instanceof TypeError?'No se pudo conectar con el servidor. Comprueba tu conexión.':getError(e instanceof Error?e.message:undefined));
+        setLoadError(e instanceof TypeError?'No se pudo conectar con el servidor. Comprueba tu conexión.':getError(e instanceof Error?e.message:undefined));
       }
       return false;
     }finally{
@@ -103,7 +109,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
       if(!controller.signal.aborted)setPrograms(all.filter(p=>p.status==='active'));
     })().catch(()=>{if(!controller.signal.aborted)setProgramsError('No se pudieron cargar los programas para crear un plan. Actualiza el catálogo.');});
     return ()=>controller.abort();
-  },[base,tab]);
+  },[base,tab,programsReload]);
   async function page(direction:'previous'|'next'){
     const destination=direction==='next'?nextCursor:history[history.length-2];
     if(destination===undefined)return;
@@ -120,11 +126,11 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   }
 
   function choose(next:CatalogResource) {
-    setTab(next);setNotice('');setError('');setSearch('');setEditing(null);
+    setTab(next);setNotice('');setLoadError('');setMutationError('');setNameError(false);setSearch('');setEditing(null);
   }
 
   async function mutate(method:'POST'|'PATCH', payload:Record<string,unknown>) {
-    setSaving(true);setNotice('');setError('');
+    setSaving(true);setNotice('');setMutationError('');setNameError(false);
     try {
       const response=await fetch(`${base}/${tab}`,{
         method, credentials:'same-origin', headers:{'Content-Type':'application/json'},
@@ -132,11 +138,11 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
       });
       if(!response.ok) {
         const body=await response.json().catch(()=>({error:{code:'SERVER_ERROR'}})) as {error?:{code?:string}};
-        setError(getError(body.error?.code));return false;
+        setNameError(body.error?.code==='VALIDATION_ERROR'&&method==='PATCH'&&typeof payload.name==='string');setMutationError(getError(body.error?.code));return false;
       }
       setNotice(method==='POST'?'Registro creado correctamente.':'Cambios guardados correctamente.');
       setHistory([null]);await load(tab);return true;
-    } catch {setError('No se pudo conectar con el servidor. Comprueba tu conexión.');return false;}
+    } catch {setMutationError('No se pudo conectar con el servidor. Comprueba tu conexión.');return false;}
     finally{setSaving(false);}
   }
 
@@ -155,6 +161,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   }
 
   async function saveName(id:string) {
+    if(editName.trim().length<3||editName.trim().length>160){setNameError(true);setMutationError('El nombre debe tener entre 3 y 160 caracteres. Corrígelo y vuelve a guardar.');return;}
     if(await mutate('PATCH',{id,name:editName.trim()}))setEditing(null);
   }
 
@@ -180,7 +187,8 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
         <span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span>
       </div>
       {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
-      {error&&<p className="sii-catalog-error" role="alert">{error}</p>}
+      {loadError&&<p className="sii-catalog-error" role="alert">{loadError}</p>}
+      {mutationError&&<p className="sii-catalog-error" role="alert" id="catalog-mutation-error" tabIndex={-1} ref={mutationErrorRef}>{mutationError}</p>}
       {!online&&<p className="sii-catalog-error" role="status">Sin conexión. Los datos mostrados pueden estar desactualizados. Las operaciones estarán disponibles al reconectar.</p>}
       {programsError&&<p className="sii-catalog-error" role="alert">{programsError}</p>}
       <div id="catalog-panel" className="sii-catalog-layout" role="tabpanel" aria-labelledby={'catalog-tab-'+tab} aria-busy={loading}>
@@ -189,23 +197,23 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
             <label htmlFor="catalog-search">Buscar en esta página de {selected.label.toLowerCase()}</label>
             <input id="catalog-search" type="search" value={search} onChange={e=>setSearch(e.target.value)}
               placeholder="Nombre, clave o versión…"/>
-            <button type="button" className="sii-outline-button" onClick={()=>void load(tab,undefined,currentCursor)} disabled={loading||saving||!online}>Actualizar</button>
+            <button type="button" className="sii-outline-button" onClick={()=>{setMutationError('');setNameError(false);if(tab==='curricula')setProgramsReload(value=>value+1);void load(tab,undefined,currentCursor);}} disabled={loading||saving||!online}>Actualizar</button>
           </div>
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>
-          :error?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
+          :loadError?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
           :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canManage?'Utiliza el formulario para agregar el primero.':'Tu institución aún no ha publicado datos en este catálogo.'}</p></div>
           :<div className="sii-catalog-scroll"><table className="sii-catalog-table">
             <thead><tr><th scope="col">Clave / Versión</th><th scope="col">Nombre / Detalle</th><th scope="col">Estado</th>{canManage&&<th scope="col">Acciones</th>}</tr></thead>
             <tbody>{filtered.map(row=><tr key={row.id}>
               <td><span className="sii-catalog-code">{row.code??row.version??'—'}</span></td>
               <td>
-                {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><input id="catalog-edit-name" value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><button type="button" disabled={saving||!online} onClick={()=>void saveName(row.id)}>Guardar</button><button type="button" onClick={()=>setEditing(null)}>Cancelar</button></div>
+                {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><input id="catalog-edit-name" aria-invalid={nameError||undefined} aria-describedby={nameError?'catalog-mutation-error':undefined} value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><button type="button" disabled={saving||!online} onClick={()=>void saveName(row.id)}>Guardar</button><button type="button" onClick={()=>setEditing(null)}>Cancelar</button></div>
                 :<><strong>{row.name??(programs.find(p=>p.id===row.programId)?.name??'Plan de estudios')}</strong>
                   <small>{row.level?typeLabels[row.level]+' · '+typeLabels[row.modality??'']:row.credits!==undefined?`${row.credits} créditos`:row.startDate?`${String(row.startDate).slice(0,10)} — ${String(row.endDate).slice(0,10)}`:''}</small></>}
               </td>
               <td><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></td>
               {canManage&&<td><div className="sii-catalog-actions">
-                {tab!=='curricula'&&<button type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');}}>Editar</button>}
+                {tab!=='curricula'&&<button type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');setNameError(false);setMutationError('');}}>Editar</button>}
                 <button type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</button>
               </div></td>}
             </tr>)}</tbody>

@@ -3,6 +3,7 @@ import {and,eq} from 'drizzle-orm';
 import {db} from '@/infrastructure/database';
 import {academicPrograms,curriculumVersions} from '../../../../../../../../db/schema';
 import {authorizeInstitution} from '@/shared/auth/session';
+import {lockWriteAccess} from '@/shared/auth/write-access';
 import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
 import {uuid} from '@/shared/auth/validation';
 import {catalogResource,type CatalogResource} from '@/modules/academic/catalog-validation';
@@ -42,20 +43,21 @@ export const POST=withErrors(async(req:NextRequest,ctx:Ctx)=>{
  const parsed=entry.createSchema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
  const {requestId}=context(req);
  try{
-  const data=await db.transaction(async tx=>{
+  const result=await db.transaction(async tx=>{
+   if(!await lockWriteAccess(tx,access.identity,access.access,'academic.manage'))return {error:'FORBIDDEN',status:403} as const;
    if(resource==='curricula'){
     const {programId}=parsed.data as {programId:string};
     const [parent]=await tx.select({id:academicPrograms.id}).from(academicPrograms)
      .where(and(eq(academicPrograms.id,programId),eq(academicPrograms.institutionId,institutionId),eq(academicPrograms.status,'active'))).limit(1).for('update');
-    if(!parent)return null;
+    if(!parent)return {error:'PROGRAM_NOT_FOUND',status:422} as const;
    }
    const row=await entry.insert(tx,institutionId,parsed.data);
    const data=entry.publicRow(row);
    await audit(tx,{actorUserId:access.identity.id,institutionId,action:'academic.'+resource+'.create',target:resource+':'+row.id,requestId,details:{after:data}});
-   return data;
+   return {data} as const;
   });
-  if(!data)return jsonError('PROGRAM_NOT_FOUND',422);
-  return NextResponse.json({data},{status:201,headers:noCache});
+  if('error'in result && result.error)return jsonError(result.error,result.status ?? 500);
+  return NextResponse.json(result,{status:201,headers:noCache});
  }catch(error){return constraintResponse(error);}
 });
 export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
@@ -68,6 +70,17 @@ export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
  const {requestId}=context(req);
  try{
   const result=await db.transaction(async tx=>{
+   if(!await lockWriteAccess(tx,access.identity,access.access,'academic.manage'))return {error:'FORBIDDEN',status:403} as const;
+   if(resource==='curricula'){
+    // programId is immutable. Lock parent before child, matching create/archive order.
+    const [candidate]=await tx.select({programId:curriculumVersions.programId}).from(curriculumVersions)
+     .where(and(eq(curriculumVersions.id,change.id),eq(curriculumVersions.institutionId,institutionId))).limit(1);
+    if(!candidate)return {error:'NOT_FOUND',status:404} as const;
+    const [parent]=await tx.select({status:academicPrograms.status}).from(academicPrograms)
+     .where(and(eq(academicPrograms.id,candidate.programId),eq(academicPrograms.institutionId,institutionId))).limit(1).for('update');
+    if(!parent)return {error:'NOT_FOUND',status:404} as const;
+    if(change.status==='active'&&parent.status!=='active')return {error:'PROGRAM_NOT_ACTIVE',status:409} as const;
+   }
    const before=await entry.find(tx,institutionId,change.id);
    if(!before)return {error:'NOT_FOUND',status:404} as const;
    if(change.status&&!canTransition(resource,before.status,change.status))return {error:'INVALID_TRANSITION',status:409} as const;

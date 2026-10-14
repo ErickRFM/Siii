@@ -80,14 +80,19 @@ BEGIN
  FOR owner_role IN
   SELECT DISTINCT name FROM (
    SELECT current_user::text AS name UNION SELECT 'siii_migrator'
-   UNION SELECT pg_get_userbyid(defaclrole) FROM pg_default_acl d JOIN pg_namespace n ON n.oid=d.defaclnamespace WHERE n.nspname='public'
+   UNION SELECT pg_get_userbyid(defaclrole) FROM pg_default_acl d LEFT JOIN pg_namespace n ON n.oid=d.defaclnamespace WHERE d.defaclnamespace=0 OR n.nspname='public'
   ) creators
  LOOP
+  -- Global grants survive schema-scoped REVOKE; remove both levels for prohibited API roles.
+  EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL ON TABLES FROM PUBLIC',owner_role);
+  EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL ON SEQUENCES FROM PUBLIC',owner_role);
   EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON TABLES FROM PUBLIC',owner_role);
   EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON SEQUENCES FROM PUBLIC',owner_role);
   FOREACH api_role IN ARRAY ARRAY['anon','authenticated']
   LOOP
    IF EXISTS(SELECT FROM pg_roles WHERE rolname=api_role) THEN
+    EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL ON TABLES FROM %I',owner_role,api_role);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL ON SEQUENCES FROM %I',owner_role,api_role);
     EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON TABLES FROM %I',owner_role,api_role);
     EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON SEQUENCES FROM %I',owner_role,api_role);
    END IF;

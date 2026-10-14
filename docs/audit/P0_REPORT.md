@@ -23,9 +23,9 @@ Entorno: PostgreSQL 17.10 portable en 127.0.0.1:55432, bases locales desechables
 | npm run db:migrate | MIGRATIONS_APPLIED en vacío; repetición sin DDL adicional |
 | npm run typecheck | Exit 0 |
 | npm run lint | Exit 0 |
-| npm test | 6 archivos / 37 pruebas pasaron |
-| npm run test:integration | 4 archivos / 55 pruebas pasaron |
-| npm run test:ui | 7 pruebas pasaron (45.7 s) |
+| npm test | 7 archivos / 41 pruebas pasaron |
+| npm run test:integration | 4 archivos / 60 pruebas pasaron |
+| npm run test:ui | 10 pruebas pasaron (47.6 s) |
 | npm run build | Exit 0; todas las rutas dinámicas; typedRoutes actualizado |
 | npm audit | found 0 vulnerabilities |
 
@@ -33,9 +33,13 @@ Pruebas de migración: base vacía, segunda ejecución, baseline sin ledger con 
 
 Evidencia de correcciones RED → GREEN: timing de login inexistente/real; revocación durante cambio de contraseña (200 → 401); expiración mientras espera bloqueo (200 → 401); alias SQL de baseline y ausencia de ledger ante rechazo; lector de cursor/tab keys/offline/contraste; fallo de auditoría revierte curso creado.
 
+Medición local Argon2id (7 muestras, concurrencia 1, Node v24.18.0 Windows x64): hash mediana 125 ms / máximo 137 ms; verify mediana 126 ms / máximo 133 ms; pico RSS del proceso 105176 KiB. Incluye runtime y memoria nativa; no extrapolar a hosting ni concurrencia de producción.
+
+Comprobación del build de producción local: 11 scripts con nonce que coincide con CSP, nonce distinto en dos peticiones, HSTS presente, sin unsafe-eval, botón hidratado funcional y cero violaciones CSP en Chromium.
+
 Auditoría Supabase read-only: docs/audit/P0_PRODUCTION_READONLY.json. Solo metadata: 12 tablas públicas sin RLS, grants efectivos anon/authenticated prohibidos ausentes, defaults abiertos, ledger Supabase presente y Drizzle ausente.
 
-CI remota: pendiente de push/PR. Revisión independiente: pendiente. Este informe se actualizará con resultados y hallazgos.
+PR borrador: https://github.com/ErickRFM/Siii/pull/19. Los runs iniciales 38524854646 (push) y 38524886227 (PR) pasaron sobre 9d72c00a. Revisión independiente: 4 importantes y 2 menores atendidos; resolución y límites en docs/audit/P0_REVIEW.md. La CI del commit corregido se registrará antes del cierre.
 
 ## 3. No realizado y motivo
 
@@ -46,6 +50,8 @@ CI remota: pendiente de push/PR. Revisión independiente: pendiente. Este inform
 
 ## 4. Riesgos, decisiones y coste si resultan incorrectas
 
+Correcciones de revisión verificadas: autorización académica bajo transacción, orden programa → plan, defaults globales/scoped, conservación de borrador y reintento de selector. Detalle y decisiones sobre límites: docs/audit/P0_REVIEW.md.
+
 - Se preserva RBAC v1 institucional; scopes finos/invitaciones quedan en P1. Coste: habilitación real depende de P1 y de las puertas de seguridad posteriores.
 - IP desconocida fuera de Vercel usa bucket global; no se acepta X-Forwarded-For manipulable. Coste: un despliegue propio necesita integración con proxy confiable para evitar penalizar tráfico compartido.
 - SQL LF canónico evita hashes diferentes Windows/Linux. Coste: staging con ledger CRLF exige reconciliación explícita, nunca edición ciega de checksums.
@@ -53,7 +59,7 @@ CI remota: pendiente de push/PR. Revisión independiente: pendiente. Este inform
 - Se sustituye lint de Next por TypeScript/hooks/JSX accesible para retirar cadena vulnerable de dependencias sin parche. Coste: reglas específicas de Next deben restituirse cuando exista una cadena corregida; build advierte ausencia del plugin.
 - El puente Drizzle del registro borra el genérico a una unión concreta solo al seleccionar tabla; inputs conservan validación específica. Coste: tests reales por recurso deben cubrir errores de mapeo.
 - RLS backend permite DML del grupo servidor; el aislamiento institucional sigue en la autorización de handlers. Coste: cualquier nuevo handler debe usar esos guards y probar tenant/usuario/recurso/estado.
-- El operador de migración debe poder revocar defaults de cada propietario cloud. El script falla antes de aceptar una promoción incompleta. Coste: reconciliación de privilegios y procedimiento staging antes de producción.
+- El operador de migración debe poder revocar defaults globales y scoped de cada propietario cloud; el efecto global afecta futuros objetos en otros schemas de ese creador. Funciones/RPC futuras requieren revisión explícita de EXECUTE y no quedan cubiertas por RLS de tablas. El script falla antes de aceptar una promoción incompleta. Coste: reconciliación de privilegios y procedimiento staging antes de producción.
 
 Reversa/promoción detalladas en docs/implementation/P0_HARDENING.md. Conservar RLS y REVOKE durante reversa; no regresar a dependencias vulnerables ni borrar auditoría/ledger.
 
@@ -63,4 +69,3 @@ Reversa/promoción detalladas en docs/implementation/P0_HARDENING.md. Conservar 
 - ¿Cuál será el entorno staging aprobado y el runtime donde medir Argon2id con concurrencia realista?
 
 Estas preguntas no impiden publicar un PR de revisión; sí impiden afirmar que toda la DoD y la promoción productiva están verificadas.
-Medición local Argon2id (7 muestras, concurrencia 1, Node v24.18.0 Windows x64): hash mediana 125 ms / máximo 137 ms; verify mediana 126 ms / máximo 133 ms; pico RSS del proceso 105176 KiB. Incluye runtime y memoria nativa; no extrapolar a hosting ni concurrencia de producción.

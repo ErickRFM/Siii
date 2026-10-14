@@ -39,7 +39,7 @@
 - [x] RED: rechazar producción, URL ausente, esquema sin ledger, ledger divergente; base vacía permitida.
 - [x] Implementar guard con cierre de pool en finally y mensajes sin credenciales.
 - [x] Baseline bajo advisory lock: verificar esquema de referencia 0000/0001 antes de registrar hashes; nunca reaplicar DDL.
-- [x] Migración aditiva: RLS, REVOKE presentes/futuros, roles siii_app/siii_migrator; CHECK vocabularios/periodos, fechas date con validación previa de hora, índices tenant/campus principal.
+- [x] Migración aditiva: RLS, REVOKE presentes/futuros, roles siii_app/siii_migrator; CHECK vocabularios/periodos, fechas date con preservación de hora legacy, índices tenant/campus principal.
 - [x] Añadir last_seen_at y throttle persistente; datos de auditoría antes/después JSON.
 - [x] GREEN: migrar vacío y baseline sintético, segunda ejecución sin cambios, SELECT/INSERT anon denegados, app DML permitido/DDL denegado, restricciones rechazadas.
 
@@ -100,6 +100,6 @@
 ## Task 10: Cierre y revisión
 **Files:** docs/implementation/P0_HARDENING.md, docs/audit/P0_REPORT.md, docs/BLOCKERS.md si aplica.
 - [x] Documentar reversa sin destruir datos y promoción staging (producción fuera de esta ejecución).
-- [ ] Revisión independiente, resolver hallazgos y volver a comprobar lo afectado.
+- [x] Revisión independiente, resolver hallazgos y volver a comprobar lo afectado.
 - [x] Reporte sección 10: cambios, comandos/salidas, pendientes, riesgos, preguntas.
 - [ ] Sin merge. P0 completa solo si sus criterios y DoD tienen evidencia real.

@@ -1,10 +1,12 @@
+import {isolatedDatabaseUrl} from '../support/database-url';
+const testDatabaseUrl=isolatedDatabaseUrl();
 import {beforeAll,beforeEach,afterAll,describe,it,expect} from 'vitest';
 import pg from 'pg';
 import argon2 from 'argon2';
 import {randomUUID,createHash} from 'node:crypto';
 const base='http://127.0.0.1:3107',suffix=randomUUID().slice(0,8);
 const username='local-p0-'+suffix,password='Synthetic-password-2026!';
-const sql=new pg.Client({connectionString:process.env.DATABASE_URL});
+const sql=new pg.Client({connectionString:testDatabaseUrl});
 let userId:string,institutionA:string,institutionB:string,cookie='';
 async function request(path:string,method='GET',body?:unknown,session=cookie,headers:Record<string,string>={}){
  return fetch(base+path,{method,redirect:'manual',headers:{origin:base,...(body?{'content-type':'application/json'}:{}),...(session?{cookie:session}:{}),...headers},...(body?{body:JSON.stringify(body)}:{})});
@@ -266,7 +268,7 @@ describe('password and cleanup handlers',()=>{
 it('rejects password mutation when the session is revoked while waiting for its account lock',async()=>{
  await sql.query('DELETE FROM auth_throttle');cookie=(await login()).cookie;
  const original=(await sql.query('SELECT password_hash FROM platform_users WHERE id=$1',[userId])).rows[0].password_hash;
- const gate=new pg.Client({connectionString:process.env.DATABASE_URL});await gate.connect();await gate.query('BEGIN');
+ const gate=new pg.Client({connectionString:testDatabaseUrl});await gate.connect();await gate.query('BEGIN');
  let pending:Promise<Response>|undefined;
  try{
   await gate.query('SELECT id FROM platform_users WHERE id=$1 FOR UPDATE',[userId]);
@@ -291,7 +293,7 @@ it('rechecks expiry after waiting for the session row lock',async()=>{
  await sql.query('DELETE FROM auth_throttle');cookie=(await login()).cookie;
  const digest=createHash('sha256').update(cookie.split('=')[1]).digest('hex');
  await sql.query("UPDATE auth_sessions SET expires_at=now()+interval '1 second' WHERE token_hash=$1",[digest]);
- const gate=new pg.Client({connectionString:process.env.DATABASE_URL});await gate.connect();await gate.query('BEGIN');
+ const gate=new pg.Client({connectionString:testDatabaseUrl});await gate.connect();await gate.query('BEGIN');
  let pending:Promise<Response>|undefined;
  try{
   await gate.query('SELECT id FROM auth_sessions WHERE token_hash=$1 FOR UPDATE',[digest]);
@@ -319,5 +321,53 @@ it('rolls back a catalog write when its audit insert fails',async()=>{
  }finally{await sql.query('DROP TRIGGER '+name+' ON security_audit_log');await sql.query('DROP FUNCTION '+name+'()');}
 });
 
+it.each(['POST','PATCH'])('rechecks catalog permission after session revocation during %s authorization',async method=>{
+ await sql.query('DELETE FROM auth_throttle');cookie=(await login()).cookie;
+ const digest=createHash('sha256').update(cookie.split('=')[1]).digest('hex');
+ const row=(await sql.query("INSERT INTO academic_courses(institution_id,code,name,credits) VALUES($1,$2,'Before revocation',3) RETURNING id",[institutionA,'DELAY'+method+suffix])).rows[0];
+ const body=method==='POST'?{code:'AFTER'+method+suffix,name:'Unauthorized after revocation',credits:3}:{id:row.id,name:'Unauthorized after revocation'};
+ const gate=new pg.Client({connectionString:testDatabaseUrl});await gate.connect();await gate.query('BEGIN');
+ let pending:Promise<Response>|undefined;
+ try{
+  await gate.query('LOCK TABLE role_assignments IN ACCESS EXCLUSIVE MODE');
+  pending=request('/api/v1/institutions/'+institutionA+'/academic/courses',method,body);
+  let blocked=false;
+  for(let i=0;i<60;i++){
+   blocked=(await sql.query("SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=current_database() AND application_name='siii-app' AND wait_event_type='Lock' AND query LIKE '%role_assignments%'")).rows[0].n>0;
+   if(blocked)break;await new Promise(resolve=>setTimeout(resolve,50));
+  }
+  expect(blocked).toBe(true);
+  await sql.query('UPDATE auth_sessions SET revoked_at=now() WHERE token_hash=$1',[digest]);
+  await gate.query('COMMIT');
+  expect((await pending).status).toBe(403);
+  expect((await sql.query('SELECT name FROM academic_courses WHERE id=$1',[row.id])).rows[0].name).toBe('Before revocation');
+  expect((await sql.query('SELECT count(*)::int AS n FROM academic_courses WHERE institution_id=$1 AND code=$2',[institutionA,('AFTER'+method+suffix).toUpperCase()])).rows[0].n).toBe(0);
+  expect((await sql.query("SELECT count(*)::int AS n FROM security_audit_log WHERE actor_user_id=$1 AND action='academic.courses.update' AND target=$2",[userId,'courses:'+row.id])).rows[0].n).toBe(0);
+ }finally{await gate.query('ROLLBACK').catch(()=>undefined);await gate.end();if(pending)await pending;}
+});
+it('does not reactivate a curriculum beneath an archived program',async()=>{
+ await sql.query('DELETE FROM auth_throttle');cookie=(await login()).cookie;
+ const program=(await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,$2,'Reactivation parent','ingenieria','presencial') RETURNING id",[institutionA,'REACT'+suffix])).rows[0];
+ const plan=(await sql.query("INSERT INTO curriculum_versions(institution_id,program_id,version,status) VALUES($1,$2,'reactivate','inactive') RETURNING id",[institutionA,program.id])).rows[0];
+ expect((await request('/api/v1/institutions/'+institutionA+'/academic/programs','PATCH',{id:program.id,status:'archived'})).status).toBe(200);
+ const result=await request('/api/v1/institutions/'+institutionA+'/academic/curricula','PATCH',{id:plan.id,status:'active'});
+ expect(result.status).toBe(409);
+ expect((await sql.query('SELECT status FROM curriculum_versions WHERE id=$1',[plan.id])).rows[0].status).toBe('inactive');
+});
+it('serializes competing program archival and curriculum activation',async()=>{
+ await sql.query('DELETE FROM auth_throttle');cookie=(await login()).cookie;
+ const actor=(await sql.query("INSERT INTO platform_users(person_id,username,password_hash) SELECT person_id,$1,password_hash FROM platform_users WHERE id=$2 RETURNING id",['competing-'+suffix,userId])).rows[0];
+ const member=(await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id',[institutionA,actor.id])).rows[0];
+ await sql.query("INSERT INTO role_assignments(membership_id,role) VALUES($1,'admin')",[member.id]);
+ const otherCookie=(await login('competing-'+suffix)).cookie;
+ for(let round=0;round<3;round++){
+  const program=(await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,$2,'Competing parent','ingenieria','presencial') RETURNING id",[institutionA,'RACE'+suffix+round])).rows[0];
+  const plan=(await sql.query("INSERT INTO curriculum_versions(institution_id,program_id,version,status) VALUES($1,$2,'competing','inactive') RETURNING id",[institutionA,program.id])).rows[0];
+  const root='/api/v1/institutions/'+institutionA+'/academic/';
+  const responses=await Promise.all([request(root+'programs','PATCH',{id:program.id,status:'archived'},cookie),request(root+'curricula','PATCH',{id:plan.id,status:'active'},otherCookie)]);
+  expect(responses.map(result=>result.status).sort()).toEqual([200,409]);
+  expect((await sql.query("SELECT p.status='archived' AND c.status='active' AS invalid FROM academic_programs p JOIN curriculum_versions c ON c.program_id=p.id WHERE c.id=$1",[plan.id])).rows[0].invalid).toBe(false);
+ }
+});
  afterAll(async()=>{await sql.end();});
 });
