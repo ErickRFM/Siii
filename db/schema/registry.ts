@@ -77,9 +77,10 @@ export const sectionTeachers = pgTable('section_teachers', {
   institutionId: uuid('institution_id').notNull().references(() => institutions.id, { onDelete: 'restrict' }),
   sectionId: uuid('section_id').notNull(),
   teacherId: uuid('teacher_id').notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
   ...auditDates,
 }, table => ({
-  uniqueTeacherAssignment: uniqueIndex('section_teacher_unique').on(table.sectionId, table.teacherId),
+  uniqueTeacherAssignment: uniqueIndex('section_teacher_unique').on(table.sectionId, table.teacherId).where(sql`${table.revokedAt} IS NULL`),
   scopedSection: foreignKey({ columns: [table.sectionId, table.institutionId], foreignColumns: [academicSections.id, academicSections.institutionId], name: 'section_teachers_section_tenant_fk' }),
   scopedTeacher: foreignKey({ columns: [table.teacherId, table.institutionId], foreignColumns: [institutionalTeachers.id, institutionalTeachers.institutionId], name: 'section_teachers_teacher_tenant_fk' }),
 }));
