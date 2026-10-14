@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, uniqueIndex, check } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, uniqueIndex, check, foreignKey } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { entityStatusEnum, institutions } from './core';
 
@@ -14,6 +14,7 @@ export const academicPrograms = pgTable('academic_programs', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   uniqueCode: uniqueIndex('academic_programs_institution_code_uidx').on(table.institutionId, table.code),
+  institutionReference: uniqueIndex('academic_programs_id_institution_uidx').on(table.id, table.institutionId),
 }));
 
 export const academicCourses = pgTable('academic_courses', {
@@ -40,4 +41,5 @@ export const curriculumVersions = pgTable('curriculum_versions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   uniqueVersion: uniqueIndex('curriculum_versions_program_version_uidx').on(table.programId, table.version),
+  scopedProgram: foreignKey({ columns: [table.programId, table.institutionId], foreignColumns: [academicPrograms.id, academicPrograms.institutionId], name: 'curriculum_program_tenant_fk' }),
 }));

@@ -33,3 +33,11 @@ CREATE TABLE "curriculum_versions" (
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );--> statement-breakpoint
 CREATE UNIQUE INDEX "curriculum_versions_program_version_uidx" ON "curriculum_versions" ("program_id","version");
+--> statement-breakpoint
+-- Protect institution-scoped catalog codes on existing foundational tables.
+CREATE UNIQUE INDEX "campuses_institution_code_uidx" ON "campuses" ("institution_id","code");--> statement-breakpoint
+CREATE UNIQUE INDEX "academic_terms_institution_code_uidx" ON "academic_terms" ("institution_id","code");--> statement-breakpoint
+-- Composite FK prevents associating a plan with a program in another institution.
+CREATE UNIQUE INDEX "academic_programs_id_institution_uidx" ON "academic_programs" ("id","institution_id");--> statement-breakpoint
+ALTER TABLE "curriculum_versions" ADD CONSTRAINT "curriculum_program_tenant_fk"
+  FOREIGN KEY ("program_id","institution_id") REFERENCES "academic_programs"("id","institution_id") ON DELETE RESTRICT;
