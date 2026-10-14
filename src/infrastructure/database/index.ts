@@ -27,4 +27,3 @@ export function assertApplicationRole():Promise<void>{
  });
  return roleCheck;
 }
-
