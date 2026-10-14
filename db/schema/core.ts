@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, pgEnum, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, pgEnum, integer, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const entityStatusEnum = pgEnum('entity_status', ['active', 'inactive', 'archived', 'suspended']);
 export const userRoleEnum = pgEnum('user_role', [
@@ -23,7 +23,9 @@ export const campuses = pgTable('campuses', {
   status: entityStatusEnum('status').notNull().default('active'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, table => ({
+  uniqueCode: uniqueIndex('campuses_institution_code_uidx').on(table.institutionId, table.code),
+}));
 export const academicTerms = pgTable('academic_terms', {
   id: uuid('id').primaryKey().defaultRandom(),
   institutionId: uuid('institution_id').notNull().references(() => institutions.id),
@@ -33,7 +35,9 @@ export const academicTerms = pgTable('academic_terms', {
   status: entityStatusEnum('status').notNull().default('active'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, table => ({
+  uniqueCode: uniqueIndex('academic_terms_institution_code_uidx').on(table.institutionId, table.code),
+}));
 export const people = pgTable('people', {
   id: uuid('id').primaryKey().defaultRandom(), firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(), middleName: text('middle_name'),

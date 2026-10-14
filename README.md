@@ -30,3 +30,17 @@ Monolito modular universitario: Next.js App Router, TypeScript, PostgreSQL/Drizz
 - No utilizar para datos personales reales hasta completar la auditoría de seguridad, login rate limiting por IP, provisión de usuarios/invitaciones, revocación/recuperación y pruebas de integración sobre PostgreSQL real.
 - No sustituye Compañero: requiere adaptador Ktor independiente y validación de contratos.
 - Véase `docs/architecture/SUPABASE_ADAPTER.md` y `docs/ux/PRODUCT_INFORMATION_ARCHITECTURE.md`.
+
+## F3 — Catálogo académico institucional (primera entrega)
+
+En una institución autorizada, abre `/dashboard/institutions/<institutionId>/academic`.
+El portal ofrece **programas, materias, planes (versiones), periodos y campus** respaldados por PostgreSQL,
+con GET/POST/PATCH, roles `academic.read` y `academic.manage`, auditoría y validación.
+La interfaz permite crear, consultar, renombrar cuando aplica, archivar y reactivar.
+No incluye aún expedientes de alumnos/docentes, grupos, horarios, inscripciones ni calificaciones: esos procesos siguen pendientes.
+
+La migración aditiva `db/migrations/0001_academic_catalogs.sql` introduce 3 tablas y restricciones.
+**Advertencia de producción:** la migración inicial se aplicó mediante Supabase, no el journal interno de Drizzle.
+No ejecutar `npm run db:migrate` contra la base productiva sin reconciliar historiales. Consulta
+`docs/implementation/F3_ACADEMIC_CATALOG.md`. La migración retira accesos por roles públicos de Supabase
+de las tres tablas nuevas.
