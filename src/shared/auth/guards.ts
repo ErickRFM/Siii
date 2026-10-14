@@ -10,7 +10,10 @@ export function assertSameOrigin(req: NextRequest): boolean {
   // require a valid session and their own authorization checks.
   if (!origin) return true;
   try {
-    return new URL(origin).origin === req.nextUrl.origin;
+    const host=req.headers.get('host');
+    if(host && /[\s/@?#]/.test(host))return false;
+    const expected=host?new URL(req.nextUrl.protocol+'//'+host).origin:req.nextUrl.origin;
+    return new URL(origin).origin === expected;
   } catch {
     return false;
   }

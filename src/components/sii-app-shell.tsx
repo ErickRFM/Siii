@@ -65,7 +65,7 @@ export default function SiiAppShell({
             </form>
           </div>
         </header>
-        <main className="sii-page">{children}</main>
+        <main id="main-content" tabIndex={-1} className="sii-page">{children}</main>
       </div>
     </div>
   );

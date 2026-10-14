@@ -92,3 +92,10 @@ describe('privileged membership changes', () => {
     expect(canManageMembership(['student'], [])).toBe(false);
   });
 });
+
+it('accepts a literal loopback origin despite NextURL normalization',()=>{
+ const req=new NextRequest('http://127.0.0.1:3107/api/v1/auth/login',{
+  method:'POST',headers:{origin:'http://127.0.0.1:3107',host:'127.0.0.1:3107','sec-fetch-site':'same-origin'}
+ });
+ expect(assertSameOrigin(req)).toBe(true);
+});

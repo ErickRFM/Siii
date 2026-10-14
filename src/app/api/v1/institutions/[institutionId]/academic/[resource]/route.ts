@@ -1,159 +1,88 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { and, eq, desc } from 'drizzle-orm';
-import { z } from 'zod';
-import { db } from '@/infrastructure/database';
-import {
-  academicCourses, academicPrograms, academicTerms, campuses, curriculumVersions,
-  securityAuditLog,
-} from '../../../../../../../../db/schema';
-import { authorizeInstitution } from '@/shared/auth/session';
-import { assertSameOrigin, jsonError } from '@/shared/auth/guards';
-import { catalogCreate, catalogResource, catalogUpdate } from '@/modules/academic/catalog-validation';
-
-export const runtime = 'nodejs';
-type Ctx = { params: Promise<{ institutionId: string; resource: string }> };
-const uuid = z.uuid();
-const noCache = { 'Cache-Control': 'no-store' };
-
-async function routeContext(ctx: Ctx) {
-  const { institutionId, resource } = await ctx.params;
-  if (!uuid.safeParse(institutionId).success || !catalogResource.safeParse(resource).success) return null;
-  return { institutionId, resource: catalogResource.parse(resource) };
+import {NextRequest,NextResponse} from 'next/server';
+import {and,eq} from 'drizzle-orm';
+import {db} from '@/infrastructure/database';
+import {academicPrograms,curriculumVersions} from '../../../../../../../../db/schema';
+import {authorizeInstitution} from '@/shared/auth/session';
+import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
+import {uuid} from '@/shared/auth/validation';
+import {catalogResource,type CatalogResource} from '@/modules/academic/catalog-validation';
+import {catalogRegistry} from '@/modules/academic/catalog-registry';
+import {canTransition} from '@/modules/academic/catalog-state';
+import {context,audit} from '@/shared/http/request-context';
+import {withErrors} from '@/shared/http/route-errors';
+import {parsePage,pageEnvelope} from '@/shared/http/pagination';
+export const runtime='nodejs';
+type Ctx={params:Promise<{institutionId:string;resource:string}>};
+const noCache={'Cache-Control':'no-store'};
+async function routeContext(ctx:Ctx){
+ const {institutionId,resource}=await ctx.params;
+ const parsed=catalogResource.safeParse(resource);
+ return uuid.safeParse(institutionId).success&&parsed.success?{institutionId,resource:parsed.data as CatalogResource}:null;
 }
-
-export async function GET(_req: NextRequest, ctx: Ctx) {
-  const params = await routeContext(ctx);
-  if (!params) return jsonError('INVALID_RESOURCE', 404);
-  const access = await authorizeInstitution(params.institutionId, 'academic.read');
-  if (!access) return jsonError('FORBIDDEN', 403);
-  const { institutionId, resource } = params;
-  const data = resource === 'campuses'
-    ? await db.select().from(campuses).where(eq(campuses.institutionId, institutionId)).orderBy(desc(campuses.createdAt)).limit(200)
-    : resource === 'terms'
-      ? await db.select().from(academicTerms).where(eq(academicTerms.institutionId, institutionId)).orderBy(desc(academicTerms.createdAt)).limit(200)
-      : resource === 'programs'
-        ? await db.select().from(academicPrograms).where(eq(academicPrograms.institutionId, institutionId)).orderBy(desc(academicPrograms.createdAt)).limit(200)
-        : resource === 'courses'
-          ? await db.select().from(academicCourses).where(eq(academicCourses.institutionId, institutionId)).orderBy(desc(academicCourses.createdAt)).limit(200)
-          : await db.select().from(curriculumVersions).where(eq(curriculumVersions.institutionId, institutionId)).orderBy(desc(curriculumVersions.createdAt)).limit(200);
-  return NextResponse.json({ data }, { headers: noCache });
+function constraintResponse(error:unknown){
+ const e=error as {code?:string;cause?:{code?:string}},code=e.code??e.cause?.code;
+ if(code==='23505')return jsonError('DUPLICATE_CODE',409);
+ if(code==='23503'||code==='23514')return jsonError('ACADEMIC_CONSTRAINT',422);
+ throw error;
 }
-
-async function audit(tx: Parameters<Parameters<typeof db.transaction>[0]>[0], actor: string, institutionId: string, resource: string, id: string, operation: string) {
-  await tx.insert(securityAuditLog).values({
-    actorUserId: actor, institutionId,
-    action: `academic.${resource}.${operation}`,
-    target: `${resource}:${id}`,
+export const GET=withErrors(async(req:NextRequest,ctx:Ctx)=>{
+ const params=await routeContext(ctx);if(!params)return jsonError('INVALID_RESOURCE',404);
+ if(!await authorizeInstitution(params.institutionId,'academic.read'))return jsonError('FORBIDDEN',403);
+ const scope='academic:'+params.institutionId+':'+params.resource;
+ const input=parsePage(req,scope);if(!input)return jsonError('INVALID_PAGE',400);
+ const entry=catalogRegistry[params.resource],rows=await entry.list(params.institutionId,input);
+ const {visible,page}=pageEnvelope(rows,input,scope);
+ return NextResponse.json({data:visible.map(entry.publicRow),page},{headers:noCache});
+});
+export const POST=withErrors(async(req:NextRequest,ctx:Ctx)=>{
+ if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
+ const params=await routeContext(ctx);if(!params)return jsonError('INVALID_RESOURCE',404);
+ const access=await authorizeInstitution(params.institutionId,'academic.manage');if(!access)return jsonError('FORBIDDEN',403);
+ const {institutionId,resource}=params,entry=catalogRegistry[resource];
+ const parsed=entry.createSchema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
+ const {requestId}=context(req);
+ try{
+  const data=await db.transaction(async tx=>{
+   if(resource==='curricula'){
+    const {programId}=parsed.data as {programId:string};
+    const [parent]=await tx.select({id:academicPrograms.id}).from(academicPrograms)
+     .where(and(eq(academicPrograms.id,programId),eq(academicPrograms.institutionId,institutionId),eq(academicPrograms.status,'active'))).limit(1).for('update');
+    if(!parent)return null;
+   }
+   const row=await entry.insert(tx,institutionId,parsed.data);
+   const data=entry.publicRow(row);
+   await audit(tx,{actorUserId:access.identity.id,institutionId,action:'academic.'+resource+'.create',target:resource+':'+row.id,requestId,details:{after:data}});
+   return data;
   });
-}
-
-function errorResponse(error: unknown) {
-  const constraint = error as { code?: string; cause?: { code?: string } };
-  const code = constraint.code ?? constraint.cause?.code;
-  if (code === '23505') return jsonError('DUPLICATE_CODE', 409);
-  if (code === '23503' || code === '23514') return jsonError('ACADEMIC_CONSTRAINT', 422);
-  throw error;
-}
-
-export async function POST(req: NextRequest, ctx: Ctx) {
-  if (!assertSameOrigin(req)) return jsonError('INVALID_ORIGIN', 403);
-  const params = await routeContext(ctx);
-  if (!params) return jsonError('INVALID_RESOURCE', 404);
-  const access = await authorizeInstitution(params.institutionId, 'academic.manage');
-  if (!access) return jsonError('FORBIDDEN', 403);
-  const { resource, institutionId } = params;
-  const body: unknown = await req.json().catch(() => null);
-  try {
-    if (resource === 'campuses') {
-      const v = catalogCreate.campuses.safeParse(body);
-      if (!v.success) return jsonError('VALIDATION_ERROR', 422);
-      const data = await db.transaction(async tx => {
-        const [row] = await tx.insert(campuses).values({ ...v.data, institutionId }).returning();
-        await audit(tx, access.identity.id, institutionId, resource, row.id, 'create');
-        return row;
-      });
-      return NextResponse.json({ data }, { status: 201, headers: noCache });
-    }
-    if (resource === 'terms') {
-      const v = catalogCreate.terms.safeParse(body);
-      if (!v.success) return jsonError('VALIDATION_ERROR', 422);
-      const data = await db.transaction(async tx => {
-        const [row] = await tx.insert(academicTerms).values({
-          code: v.data.code, name: v.data.name,
-          startDate: new Date(`${v.data.startDate}T12:00:00Z`),
-          endDate: new Date(`${v.data.endDate}T12:00:00Z`), institutionId,
-        }).returning();
-        await audit(tx, access.identity.id, institutionId, resource, row.id, 'create');
-        return row;
-      });
-      return NextResponse.json({ data }, { status: 201, headers: noCache });
-    }
-    if (resource === 'programs') {
-      const v = catalogCreate.programs.safeParse(body);
-      if (!v.success) return jsonError('VALIDATION_ERROR', 422);
-      const data = await db.transaction(async tx => {
-        const [row] = await tx.insert(academicPrograms).values({ ...v.data, institutionId }).returning();
-        await audit(tx, access.identity.id, institutionId, resource, row.id, 'create');
-        return row;
-      });
-      return NextResponse.json({ data }, { status: 201, headers: noCache });
-    }
-    if (resource === 'courses') {
-      const v = catalogCreate.courses.safeParse(body);
-      if (!v.success) return jsonError('VALIDATION_ERROR', 422);
-      const data = await db.transaction(async tx => {
-        const [row] = await tx.insert(academicCourses).values({ ...v.data, institutionId }).returning();
-        await audit(tx, access.identity.id, institutionId, resource, row.id, 'create');
-        return row;
-      });
-      return NextResponse.json({ data }, { status: 201, headers: noCache });
-    }
-    const v = catalogCreate.curricula.safeParse(body);
-    if (!v.success) return jsonError('VALIDATION_ERROR', 422);
-    const data = await db.transaction(async tx => {
-      const program = await tx.select({ id: academicPrograms.id }).from(academicPrograms)
-        .where(and(eq(academicPrograms.id, v.data.programId), eq(academicPrograms.institutionId, institutionId), eq(academicPrograms.status, 'active'))).limit(1);
-      if (!program.length) return null;
-      const [row] = await tx.insert(curriculumVersions).values({ ...v.data, institutionId }).returning();
-      await audit(tx, access.identity.id, institutionId, resource, row.id, 'create');
-      return row;
-    });
-    if (!data) return jsonError('PROGRAM_NOT_FOUND', 422);
-    return NextResponse.json({ data }, { status: 201, headers: noCache });
-  } catch (error) { return errorResponse(error); }
-}
-
-export async function PATCH(req: NextRequest, ctx: Ctx) {
-  if (!assertSameOrigin(req)) return jsonError('INVALID_ORIGIN', 403);
-  const params = await routeContext(ctx);
-  if (!params) return jsonError('INVALID_RESOURCE', 404);
-  const access = await authorizeInstitution(params.institutionId, 'academic.manage');
-  if (!access) return jsonError('FORBIDDEN', 403);
-  const { resource, institutionId } = params;
-  const body: unknown = await req.json().catch(() => null);
-  const parsed = catalogUpdate[resource].safeParse(body);
-  if (!parsed.success) return jsonError('VALIDATION_ERROR', 422);
-  const update = z.object({ id: uuid, name: z.string().trim().min(3).max(160).optional(),
-    status: z.enum(['active','inactive','archived','suspended']).optional() }).parse(body);
-  if (!update.status && !update.name) return jsonError('NO_CHANGES', 422);
-  if (resource === 'curricula' && update.name) return jsonError('VALIDATION_ERROR', 422);
-  try {
-    const data = await db.transaction(async tx => {
-      const set = { ...(update.name ? { name: update.name } : {}), ...(update.status ? { status: update.status } : {}), updatedAt: new Date() };
-      const changed = resource === 'campuses'
-        ? await tx.update(campuses).set(set).where(and(eq(campuses.id, update.id),eq(campuses.institutionId,institutionId))).returning()
-        : resource === 'terms'
-          ? await tx.update(academicTerms).set(set).where(and(eq(academicTerms.id, update.id),eq(academicTerms.institutionId,institutionId))).returning()
-          : resource === 'programs'
-            ? await tx.update(academicPrograms).set(set).where(and(eq(academicPrograms.id, update.id),eq(academicPrograms.institutionId,institutionId))).returning()
-            : resource === 'courses'
-              ? await tx.update(academicCourses).set(set).where(and(eq(academicCourses.id, update.id),eq(academicCourses.institutionId,institutionId))).returning()
-              : await tx.update(curriculumVersions).set({ status: update.status, updatedAt:new Date() })
-                .where(and(eq(curriculumVersions.id,update.id),eq(curriculumVersions.institutionId,institutionId))).returning();
-      if (changed.length) await audit(tx, access.identity.id, institutionId, resource, update.id, 'update');
-      return changed[0] ?? null;
-    });
-    if (!data) return jsonError('NOT_FOUND', 404);
-    return NextResponse.json({ data }, { headers: noCache });
-  } catch (error) { return errorResponse(error); }
-}
+  if(!data)return jsonError('PROGRAM_NOT_FOUND',422);
+  return NextResponse.json({data},{status:201,headers:noCache});
+ }catch(error){return constraintResponse(error);}
+});
+export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
+ if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
+ const params=await routeContext(ctx);if(!params)return jsonError('INVALID_RESOURCE',404);
+ const access=await authorizeInstitution(params.institutionId,'academic.manage');if(!access)return jsonError('FORBIDDEN',403);
+ const {institutionId,resource}=params,entry=catalogRegistry[resource];
+ const parsed=entry.updateSchema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
+ const change=parsed.data;if(!change.name&&!change.status)return jsonError('NO_CHANGES',422);
+ const {requestId}=context(req);
+ try{
+  const result=await db.transaction(async tx=>{
+   const before=await entry.find(tx,institutionId,change.id);
+   if(!before)return {error:'NOT_FOUND',status:404} as const;
+   if(change.status&&!canTransition(resource,before.status,change.status))return {error:'INVALID_TRANSITION',status:409} as const;
+   if(resource==='programs'&&change.status==='archived'){
+    const plans=await tx.select({id:curriculumVersions.id}).from(curriculumVersions)
+     .where(and(eq(curriculumVersions.programId,change.id),eq(curriculumVersions.institutionId,institutionId),eq(curriculumVersions.status,'active'))).limit(1);
+    if(plans.length)return {error:'ACTIVE_DEPENDENCIES',status:409} as const;
+   }
+   const row=await entry.update(tx,institutionId,change);
+   if(!row)return {error:'NOT_FOUND',status:404} as const;
+   const data=entry.publicRow(row);
+   await audit(tx,{actorUserId:access.identity.id,institutionId,action:'academic.'+resource+'.update',target:resource+':'+row.id,requestId,details:{before:entry.publicRow(before),after:data}});
+   return {data} as const;
+  });
+  if('error'in result && result.error)return jsonError(result.error,result.status ?? 500);
+  return NextResponse.json(result,{headers:noCache});
+ }catch(error){return constraintResponse(error);}
+});

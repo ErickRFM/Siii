@@ -1,25 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { and, eq, ne } from 'drizzle-orm';
-import argon2 from 'argon2';
-import { z } from 'zod';
-import { db } from '@/infrastructure/database';
-import { authSessions, platformUsers, securityAuditLog } from '../../../../../../../db/schema';
-import { getIdentity } from '@/shared/auth/session';
-import { assertSameOrigin,jsonError } from '@/shared/auth/guards';
+import {NextRequest,NextResponse} from 'next/server';
+import {eq} from 'drizzle-orm';
+import {platformUsers} from '../../../../../../../db/schema';
+import {getIdentity} from '@/shared/auth/session';
+import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
+import {passwordBody} from '@/shared/auth/validation';
+import {hashPassword} from '@/shared/auth/password';
+import {credentials,credentialTransaction} from '@/shared/auth/credential-flow';
+import {clientIp} from '@/shared/auth/throttle';
+import {context,audit} from '@/shared/http/request-context';
+import {withErrors} from '@/shared/http/route-errors';
+import {createSession,revokeUserSessions} from '@/shared/auth/session-write';
+import {SESSION_COOKIE,cookieOptions} from '@/shared/auth/session-policy';
 export const runtime='nodejs';
-const schema=z.object({currentPassword:z.string().min(1),newPassword:z.string().min(12).max(128)})
-.refine(x=>x.currentPassword!==x.newPassword,{path:['newPassword'],message:'New password must differ'});
-export async function POST(req:NextRequest){
+export const POST=withErrors(async(req:NextRequest)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const identity=await getIdentity();if(!identity)return jsonError('UNAUTHENTICATED',401);
- const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('INVALID_PASSWORD_POLICY',422);
- const users=await db.select({passwordHash:platformUsers.passwordHash}).from(platformUsers).where(eq(platformUsers.id,identity.id)).limit(1);
- if(!users[0]?.passwordHash || !await argon2.verify(users[0].passwordHash,parsed.data.currentPassword))return jsonError('INVALID_CREDENTIALS',401);
- const newHash=await argon2.hash(parsed.data.newPassword,{type:argon2.argon2id});
- await db.transaction(async(tx)=>{
-  await tx.update(platformUsers).set({passwordHash:newHash,mustChangePassword:false,failedLoginAttempts:0,lockedUntil:null}).where(eq(platformUsers.id,identity.id));
-  await tx.update(authSessions).set({revokedAt:new Date()}).where(and(eq(authSessions.userId,identity.id),ne(authSessions.id,identity.sessionId)));
-  await tx.insert(securityAuditLog).values({actorUserId:identity.id,action:'auth.password.change',target:`user:${identity.id}`});
+ const parsed=passwordBody.safeParse(await req.json().catch(()=>null));
+ if(!parsed.success)return jsonError('INVALID_PASSWORD_POLICY',422);
+ const {requestId}=context(req);
+ const result=await credentialTransaction(async tx=>{
+  const now=new Date();
+  const decision=await credentials(tx,{username:identity.username,password:parsed.data.currentPassword,ip:clientIp(req),requestId,kind:'password',sessionId:identity.sessionId},now);
+  if(decision.status!==200)return decision;
+  await tx.update(platformUsers).set({passwordHash:await hashPassword(parsed.data.newPassword),mustChangePassword:false}).where(eq(platformUsers.id,identity.id));
+  const revoked=await revokeUserSessions(tx,identity.id,now);
+  const session=await createSession(tx,identity.id,now);
+  await audit(tx,{actorUserId:identity.id,action:'auth.password.change',target:'user:'+identity.id,requestId,details:{before:{mustChangePassword:decision.user.mustChangePassword},after:{mustChangePassword:false,sessionRevocations:revoked.length}}});
+  return {status:200 as const,...session};
  });
- return NextResponse.json({ok:true},{headers:{'Cache-Control':'no-store'}});
-}
+ if(result.status!==200)return jsonError(result.status===429?'RATE_LIMITED':'INVALID_CREDENTIALS',result.status);
+ const response=NextResponse.json({ok:true},{headers:{'Cache-Control':'no-store'}});
+ response.cookies.set(SESSION_COOKIE,result.token,cookieOptions(result.expires));
+ return response;
+});

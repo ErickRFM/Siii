@@ -44,3 +44,9 @@ La migración aditiva `db/migrations/0001_academic_catalogs.sql` introduce 3 tab
 No ejecutar `npm run db:migrate` contra la base productiva sin reconciliar historiales. Consulta
 `docs/implementation/F3_ACADEMIC_CATALOG.md`. La migración retira accesos por roles públicos de Supabase
 de las tres tablas nuevas.
+
+## P0: endurecimiento en revisión
+
+Véase [P0_HARDENING.md](docs/implementation/P0_HARDENING.md) para el migrador seguro, baseline, roles PostgreSQL, cookie/sesión, cursor y pruebas reales de handlers/UI. `npm run db:migrate` requiere SIII_DATABASE_ENV no productivo explícito y no admite producción. `npm run db:baseline` adopta únicamente el esquema conocido tras verificarlo; no reaplica DDL. Las migraciones SQL usan LF canónico.
+
+`npm run test:ui` ejecuta Chromium con axe y teclado. Integración y UI usan PostgreSQL local desechable y un login web separado del propietario. Ningún dato de producción se usa como fixture.

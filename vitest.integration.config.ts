@@ -4,13 +4,15 @@ import path from 'path';
 export default defineConfig({
   test: {
     globals: true,
+    globalSetup: ['tests/support/http-setup.ts'],
+    fileParallelism: false,
     environment: 'node',
     include: ['tests/integration/**/*.test.ts', 'tests/contracts/**/*.test.ts'],
     testTimeout: 30000,
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
 });

@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, uuid, text, timestamp, integer, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, uuid, text, timestamp, integer, index, uniqueIndex, jsonb, check } from 'drizzle-orm/pg-core';
 import { institutions, platformUsers, userRoleEnum } from './core';
 import { sql } from 'drizzle-orm';
 
@@ -32,9 +32,10 @@ export const authSessions = pgTable('auth_sessions', {
   userId: uuid('user_id').notNull().references(() => platformUsers.id, { onDelete: 'cascade' }),
   tokenHash: text('token_hash').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-}, table => ({ byUser: index('auth_sessions_user_idx').on(table.userId) }));
+}, table => ({ byUser: index('auth_sessions_user_idx').on(table.userId), byLastSeen: index('auth_sessions_last_seen_idx').on(table.lastSeenAt) }));
 
 export const securityAuditLog = pgTable('security_audit_log', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -43,5 +44,19 @@ export const securityAuditLog = pgTable('security_audit_log', {
   action: text('action').notNull(),
   target: text('target').notNull(),
   requestId: text('request_id'),
+  details: jsonb('details').$type<{before?:unknown;after?:unknown;reason?:string}>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({ byInstitution: index('audit_institution_created_idx').on(table.institutionId, table.createdAt) }));
+
+export const authThrottle = pgTable('auth_throttle', {
+  key: text('key').primaryKey(),
+  scope: text('scope').notNull(),
+  failures: integer('failures').notNull().default(0),
+  windowStartedAt: timestamp('window_started_at', {withTimezone:true}).notNull().defaultNow(),
+  blockedUntil: timestamp('blocked_until', {withTimezone:true}),
+  expiresAt: timestamp('expires_at', {withTimezone:true}).notNull(),
+},table=>({
+  scopeValid:check('auth_throttle_scope_check',sql`${table.scope} IN ('login_account','login_ip','password_account','password_ip')`),
+  failuresValid:check('auth_throttle_failures_check',sql`${table.failures} >= 0`),
+  byExpiry:index('auth_throttle_expires_idx').on(table.expiresAt),
+}));

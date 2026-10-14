@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import type { CatalogResource } from '@/modules/academic/catalog-validation';
 
 type RecordRow = {
@@ -27,6 +27,8 @@ function getError(code?: string) {
     case 'DUPLICATE_CODE': return 'Esa clave ya está registrada en la institución.';
     case 'PROGRAM_NOT_FOUND': return 'El programa seleccionado no existe, está inactivo o pertenece a otra institución.';
     case 'FORBIDDEN': return 'No tienes permisos para realizar esta operación.';
+    case 'ACTIVE_DEPENDENCIES': return 'Este programa tiene planes activos. Resuelve sus dependencias antes de archivarlo.';
+    case 'INVALID_TRANSITION': return 'Este cambio de estado no está permitido.';
     case 'ACADEMIC_CONSTRAINT': return 'La operación no cumple una restricción académica.';
     case 'VALIDATION_ERROR': return 'Revisa los datos ingresados y sus formatos.';
     case 'NOT_FOUND': return 'El registro ya no está disponible. Actualiza el catálogo.';
@@ -46,31 +48,76 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   const [editName,setEditName] = useState('');
   const base = `/api/v1/institutions/${institutionId}/academic`;
 
-  const load = useCallback(async(resource:CatalogResource, signal?:AbortSignal) => {
-    setLoading(true);setError('');
-    try {
-      const response = await fetch(`${base}/${resource}`,{cache:'no-store',credentials:'same-origin',signal});
-      if(!response.ok) throw new Error(response.status===403 ? 'FORBIDDEN':'SERVER_ERROR');
-      const body = await response.json() as {data:RecordRow[]};
-      if(!signal?.aborted) setRows(body.data);
-    } catch(e) {
-      if(!signal?.aborted) setError(getError(e instanceof Error?e.message:undefined));
-    } finally { if(!signal?.aborted) setLoading(false); }
-  },[base]);
-
+  const [nextCursor,setNextCursor]=useState<string|null>(null);
+  const [history,setHistory]=useState<Array<string|null>>([null]);
+  const [online,setOnline]=useState(true);
+  const [programsError,setProgramsError]=useState('');
+  const activeRequest=useRef<AbortController|null>(null);
+  const currentCursor=history[history.length-1];
   useEffect(()=>{
-    const controller=new AbortController(); void load(tab,controller.signal);
-    return ()=>controller.abort();
+    const update=()=>setOnline(navigator.onLine);
+    update();window.addEventListener('online',update);window.addEventListener('offline',update);
+    return ()=>{window.removeEventListener('online',update);window.removeEventListener('offline',update);};
+  },[]);
+  const load=useCallback(async(resource:CatalogResource,signal?:AbortSignal,cursor:string|null=null)=>{
+    activeRequest.current?.abort();
+    const controller=new AbortController();activeRequest.current=controller;
+    const cancel=()=>controller.abort();signal?.addEventListener('abort',cancel,{once:true});
+    const timer=setTimeout(cancel,20000);
+    setLoading(true);setError('');
+    try{
+      const query=new URLSearchParams({limit:'50'});if(cursor)query.set('cursor',cursor);
+      const response=await fetch(`${base}/${resource}?${query}`,{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+      if(!response.ok)throw new Error(response.status===403?'FORBIDDEN':'SERVER_ERROR');
+      const body=await response.json() as {data:RecordRow[];page:{nextCursor:string|null}};
+      if(!Array.isArray(body.data)||!body.page)throw new Error('SERVER_ERROR');
+      if(activeRequest.current!==controller||signal?.aborted)return false;
+      setRows(body.data);setNextCursor(body.page.nextCursor);return true;
+    }catch(e){
+      if(activeRequest.current===controller&&!signal?.aborted){
+        setRows([]);setNextCursor(null);
+        setError(e instanceof TypeError?'No se pudo conectar con el servidor. Comprueba tu conexión.':getError(e instanceof Error?e.message:undefined));
+      }
+      return false;
+    }finally{
+      clearTimeout(timer);signal?.removeEventListener('abort',cancel);
+      if(activeRequest.current===controller&&!signal?.aborted)setLoading(false);
+    }
+  },[base]);
+  useEffect(()=>{
+    const controller=new AbortController();setHistory([null]);setNextCursor(null);
+    void load(tab,controller.signal);return ()=>controller.abort();
   },[tab,load]);
   useEffect(()=>{
     if(tab!=='curricula')return;
-    const controller=new AbortController();
-    void fetch(`${base}/programs`,{cache:'no-store',credentials:'same-origin',signal:controller.signal})
-      .then(r=>r.ok?r.json():Promise.reject(new Error('PROGRAMS_LOAD_FAILED')))
-      .then((j:{data:RecordRow[]})=>{if(!controller.signal.aborted)setPrograms(j.data.filter(p=>p.status==='active'));})
-      .catch(()=>{if(!controller.signal.aborted)setPrograms([])});
+    const controller=new AbortController();setPrograms([]);setProgramsError('');
+    void (async()=>{
+      const all:RecordRow[]=[];let cursor:string|null=null;
+      do{
+        const query=new URLSearchParams({limit:'100'});if(cursor)query.set('cursor',cursor);
+        const response=await fetch(`${base}/programs?${query}`,{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+        if(!response.ok)throw new Error('PROGRAMS_LOAD_FAILED');
+        const body=await response.json() as {data:RecordRow[];page:{nextCursor:string|null}};
+        all.push(...body.data);cursor=body.page.nextCursor;
+      }while(cursor&&!controller.signal.aborted);
+      if(!controller.signal.aborted)setPrograms(all.filter(p=>p.status==='active'));
+    })().catch(()=>{if(!controller.signal.aborted)setProgramsError('No se pudieron cargar los programas para crear un plan. Actualiza el catálogo.');});
     return ()=>controller.abort();
   },[base,tab]);
+  async function page(direction:'previous'|'next'){
+    const destination=direction==='next'?nextCursor:history[history.length-2];
+    if(destination===undefined)return;
+    if(await load(tab,undefined,destination)){
+      setHistory(previous=>direction==='next'?[...previous,destination]:previous.slice(0,-1));
+    }
+  }
+  function moveTab(event:KeyboardEvent<HTMLButtonElement>,resource:CatalogResource){
+    const index=tabs.findIndex(item=>item.id===resource);
+    const next=event.key==='ArrowRight'?(index+1)%tabs.length:event.key==='ArrowLeft'?(index+tabs.length-1)%tabs.length:event.key==='Home'?0:event.key==='End'?tabs.length-1:-1;
+    if(next<0)return;
+    event.preventDefault();choose(tabs[next].id);
+    requestAnimationFrame(()=>document.getElementById('catalog-tab-'+tabs[next].id)?.focus());
+  }
 
   function choose(next:CatalogResource) {
     setTab(next);setNotice('');setError('');setSearch('');setEditing(null);
@@ -88,7 +135,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
         setError(getError(body.error?.code));return false;
       }
       setNotice(method==='POST'?'Registro creado correctamente.':'Cambios guardados correctamente.');
-      await load(tab);return true;
+      setHistory([null]);await load(tab);return true;
     } catch {setError('No se pudo conectar con el servidor. Comprueba tu conexión.');return false;}
     finally{setSaving(false);}
   }
@@ -112,8 +159,9 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   }
 
   async function setStatus(row:RecordRow) {
+    if(row.status==='archived')return;
     const next=row.status==='active'?'archived':'active';
-    if(!window.confirm(`¿Confirmas cambiar este registro a ${statusLabels[next].toLowerCase()}?`))return;
+    if(!window.confirm(`¿Confirmas cambiar este registro a ${statusLabels[next].toLowerCase()}? Los registros archivados no se reactivan.`))return;
     await mutate('PATCH',{id:row.id,status:next});
   }
 
@@ -123,43 +171,50 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   return (
     <div className="sii-academic">
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
-        {tabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id}
+        {tabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
           className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
           onClick={()=>choose(t.id)}><span aria-hidden="true">{t.icon}</span>{t.label}</button>)}
       </div>
       <div className="sii-catalog-summary">
         <div><span className="sii-section-kicker">CATÁLOGO INSTITUCIONAL</span><h2>{selected.label}</h2><p>{selected.description}</p></div>
-        <span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros`}</span>
+        <span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span>
       </div>
       {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
       {error&&<p className="sii-catalog-error" role="alert">{error}</p>}
-      <div className="sii-catalog-layout">
+      {!online&&<p className="sii-catalog-error" role="status">Sin conexión. Los datos mostrados pueden estar desactualizados. Las operaciones estarán disponibles al reconectar.</p>}
+      {programsError&&<p className="sii-catalog-error" role="alert">{programsError}</p>}
+      <div id="catalog-panel" className="sii-catalog-layout" role="tabpanel" aria-labelledby={'catalog-tab-'+tab} aria-busy={loading}>
         <section className="sii-panel sii-catalog-table-panel" aria-label={`Listado de ${selected.label.toLowerCase()}`}>
           <div className="sii-catalog-toolbar">
-            <label htmlFor="catalog-search">Buscar en {selected.label.toLowerCase()}</label>
+            <label htmlFor="catalog-search">Buscar en esta página de {selected.label.toLowerCase()}</label>
             <input id="catalog-search" type="search" value={search} onChange={e=>setSearch(e.target.value)}
               placeholder="Nombre, clave o versión…"/>
-            <button type="button" className="sii-outline-button" onClick={()=>void load(tab)} disabled={loading||saving}>Actualizar</button>
+            <button type="button" className="sii-outline-button" onClick={()=>void load(tab,undefined,currentCursor)} disabled={loading||saving||!online}>Actualizar</button>
           </div>
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>
+          :error?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
           :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canManage?'Utiliza el formulario para agregar el primero.':'Tu institución aún no ha publicado datos en este catálogo.'}</p></div>
           :<div className="sii-catalog-scroll"><table className="sii-catalog-table">
             <thead><tr><th scope="col">Clave / Versión</th><th scope="col">Nombre / Detalle</th><th scope="col">Estado</th>{canManage&&<th scope="col">Acciones</th>}</tr></thead>
             <tbody>{filtered.map(row=><tr key={row.id}>
               <td><span className="sii-catalog-code">{row.code??row.version??'—'}</span></td>
               <td>
-                {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><input id="catalog-edit-name" value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><button type="button" disabled={saving} onClick={()=>void saveName(row.id)}>Guardar</button><button type="button" onClick={()=>setEditing(null)}>Cancelar</button></div>
+                {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><input id="catalog-edit-name" value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><button type="button" disabled={saving||!online} onClick={()=>void saveName(row.id)}>Guardar</button><button type="button" onClick={()=>setEditing(null)}>Cancelar</button></div>
                 :<><strong>{row.name??(programs.find(p=>p.id===row.programId)?.name??'Plan de estudios')}</strong>
                   <small>{row.level?typeLabels[row.level]+' · '+typeLabels[row.modality??'']:row.credits!==undefined?`${row.credits} créditos`:row.startDate?`${String(row.startDate).slice(0,10)} — ${String(row.endDate).slice(0,10)}`:''}</small></>}
               </td>
               <td><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></td>
               {canManage&&<td><div className="sii-catalog-actions">
-                {tab!=='curricula'&&<button type="button" disabled={saving} onClick={()=>{setEditing(row.id);setEditName(row.name??'');}}>Editar</button>}
-                <button type="button" disabled={saving} onClick={()=>void setStatus(row)}>{row.status==='active'?'Archivar':'Reactivar'}</button>
+                {tab!=='curricula'&&<button type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');}}>Editar</button>}
+                <button type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</button>
               </div></td>}
             </tr>)}</tbody>
           </table></div>}
-          {rows.length>=200&&<p className="sii-catalog-limit">Se muestran hasta 200 registros. La paginación avanzada se incorporará en una siguiente entrega.</p>}
+          <nav className="sii-catalog-pagination" aria-label="Paginación del catálogo">
+            <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!online} onClick={()=>void page('previous')}>Página anterior</button>
+            <span aria-live="polite">Página {history.length}</span>
+            <button type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!online} onClick={()=>void page('next')}>Siguiente página</button>
+          </nav>
         </section>
         {canManage&&<aside className="sii-panel sii-catalog-create">
           <span className="sii-section-kicker">NUEVO REGISTRO</span><h3>Agregar {selected.label.toLowerCase()}</h3>
@@ -181,7 +236,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
             </>}
             {tab==='courses'&&<label>Créditos<input type="number" name="credits" min={0} max={30} step={1} required defaultValue={6}/></label>}
             {tab==='terms'&&<><label>Inicio del periodo<input name="startDate" type="date" required/></label><label>Fin del periodo<input name="endDate" type="date" required/></label></>}
-            <button className="sii-submit" type="submit" disabled={saving||(tab==='curricula'&&programs.length===0)}>{saving?'Guardando…':'Guardar registro'} <span aria-hidden="true">→</span></button>
+            <button className="sii-submit" type="submit" disabled={saving||!online||(tab==='curricula'&&programs.length===0)}>{saving?'Guardando…':'Guardar registro'} <span aria-hidden="true">→</span></button>
           </form>
         </aside>}
       </div>

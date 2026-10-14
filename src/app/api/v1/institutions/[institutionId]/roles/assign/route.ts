@@ -1,35 +1,37 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { eq,and,isNull } from 'drizzle-orm';
-import { z } from 'zod';
-import { db } from '@/infrastructure/database';
-import { institutionMemberships, roleAssignments, securityAuditLog } from '../../../../../../../../db/schema';
-import { authorizeInstitution } from '@/shared/auth/session';
-import { assertSameOrigin,jsonError } from '@/shared/auth/guards';
-import { canGrantRole, canManageMembership } from '@/shared/auth/roles';
+import {NextRequest,NextResponse} from 'next/server';
+import {and,eq,isNull} from 'drizzle-orm';
+import {db} from '@/infrastructure/database';
+import {institutionMemberships,roleAssignments} from '../../../../../../../../db/schema';
+import {authorizeInstitution} from '@/shared/auth/session';
+import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
+import {uuid,roleBody} from '@/shared/auth/validation';
+import {canGrantRole,canManageMembership} from '@/shared/auth/roles';
+import {lockWriteAccess} from '@/shared/auth/write-access';
+import {revokeUserSessions} from '@/shared/auth/session-write';
+import {context,audit} from '@/shared/http/request-context';
+import {withErrors} from '@/shared/http/route-errors';
 export const runtime='nodejs';
 type Ctx={params:Promise<{institutionId:string}>};
-const schema=z.object({membershipId:z.string().uuid(),role:z.enum(['student','workshop_participant','teacher_pending','teacher','tutor','coordinator','admin','super_admin'])});
-export async function POST(req:NextRequest,ctx:Ctx){
+export const POST=withErrors(async(req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
- const {institutionId}=await ctx.params;if(!z.string().uuid().safeParse(institutionId).success)return jsonError('INVALID_ID',400);
- const a=await authorizeInstitution(institutionId,'roles.assign');if(!a)return jsonError('FORBIDDEN',403);
- const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
- if(!canGrantRole(a.access.roles,parsed.data.role))return jsonError('ROLE_GRANT_DENIED',403);
- const {membershipId,role}=parsed.data;
- const membership=await db.select().from(institutionMemberships).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId),eq(institutionMemberships.status,'active'))).limit(1);
- if(!membership.length || membership[0].userId===a.identity.id)return jsonError('INVALID_TARGET',403);
- const targetRoles=await db.select({role:roleAssignments.role}).from(roleAssignments)
-   .where(and(eq(roleAssignments.membershipId,membershipId),isNull(roleAssignments.revokedAt)));
- if(!canManageMembership(a.access.roles,targetRoles.map(x=>x.role)))return jsonError('TARGET_ROLE_PROTECTED',403);
- const existing=await db.select({id:roleAssignments.id}).from(roleAssignments).where(and(eq(roleAssignments.membershipId,membershipId),eq(roleAssignments.role,role),isNull(roleAssignments.revokedAt))).limit(1);
- if(existing.length)return jsonError('ALREADY_ASSIGNED',409);
- // Partial unique DB index is the final race-condition guard.
- try {
-  const rows=await db.transaction(async(tx)=>{
-   const inserted=await tx.insert(roleAssignments).values({membershipId,role,grantedBy:a.identity.id}).returning({id:roleAssignments.id});
-   await tx.insert(securityAuditLog).values({actorUserId:a.identity.id,institutionId,action:'role.assign',target:`membership:${membershipId}:role:${role}`});
-   return inserted;
-  });
-  return NextResponse.json({data:rows[0]},{status:201});
- }catch {return jsonError('CONFLICT',409);}
-}
+ const {institutionId}=await ctx.params;if(!uuid.safeParse(institutionId).success)return jsonError('INVALID_ID',400);
+ const actor=await authorizeInstitution(institutionId,'roles.assign');if(!actor)return jsonError('FORBIDDEN',403);
+ const parsed=roleBody.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
+ const {membershipId,role}=parsed.data,{requestId}=context(req);
+ const result=await db.transaction(async tx=>{
+  const [target]=await tx.select().from(institutionMemberships).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId),eq(institutionMemberships.status,'active'))).limit(1);
+  if(!target||target.userId===actor.identity.id)return {error:'INVALID_TARGET',status:403} as const;
+  const actorRoles=await lockWriteAccess(tx,actor.identity,actor.access,'roles.assign',target);
+  if(!actorRoles)return {error:'FORBIDDEN',status:403} as const;
+  if(!canGrantRole(actorRoles,role))return {error:'ROLE_GRANT_DENIED',status:403} as const;
+  const before=(await tx.select({role:roleAssignments.role}).from(roleAssignments).where(and(eq(roleAssignments.membershipId,membershipId),isNull(roleAssignments.revokedAt)))).map(row=>row.role);
+  if(!canManageMembership(actorRoles,before))return {error:'TARGET_ROLE_PROTECTED',status:403} as const;
+  if(before.includes(role))return {error:'ALREADY_ASSIGNED',status:409} as const;
+  const [row]=await tx.insert(roleAssignments).values({membershipId,role,grantedBy:actor.identity.id}).returning({id:roleAssignments.id});
+  const revoked=await revokeUserSessions(tx,target.userId);
+  await audit(tx,{actorUserId:actor.identity.id,institutionId,action:'role.assign',target:'membership:'+membershipId+':role:'+role,requestId,details:{before:{roles:before},after:{roles:[...before,role],sessionRevocations:revoked.length}}});
+  return {data:row} as const;
+ });
+ if('error'in result&&result.error)return jsonError(result.error,result.status??500);
+ return NextResponse.json(result,{status:201,headers:{'Cache-Control':'no-store'}});
+});

@@ -1,5 +1,6 @@
 // One-time local bootstrap. Execute with environment variables from a secret manager.
-import argon2 from 'argon2';
+import {randomUUID} from 'node:crypto';
+import {hashPassword} from '../src/shared/auth/password';
 import { db,pool } from '../src/infrastructure/database';
 import { institutions,people,platformUsers,institutionMemberships,roleAssignments,securityAuditLog } from '../db/schema';
 async function main(){
@@ -9,7 +10,7 @@ async function main(){
  const username=process.env.SIII_BOOTSTRAP_USERNAME!.trim().toLowerCase();
  const password=process.env.SIII_BOOTSTRAP_PASSWORD!;
  if(password.length<16 || username.length<3)throw new Error('Weak initial credentials');
- const passwordHash=await argon2.hash(password,{type:argon2.argon2id});
+ const passwordHash=await hashPassword(password);
  await db.transaction(async(tx)=>{
   const existing=await tx.select({id:platformUsers.id}).from(platformUsers).limit(1);
   if(existing.length)throw new Error('Bootstrap only allowed for an empty identity database');
@@ -18,8 +19,8 @@ async function main(){
   const [user]=await tx.insert(platformUsers).values({personId:person.id,username,passwordHash,mustChangePassword:true}).returning({id:platformUsers.id});
   const [member]=await tx.insert(institutionMemberships).values({institutionId:inst.id,userId:user.id}).returning({id:institutionMemberships.id});
   await tx.insert(roleAssignments).values({membershipId:member.id,role:'super_admin',grantedBy:user.id});
-  await tx.insert(securityAuditLog).values({actorUserId:user.id,institutionId:inst.id,action:'bootstrap.initial',target:`institution:${inst.id}`});
+  await tx.insert(securityAuditLog).values({actorUserId:user.id,institutionId:inst.id,action:'bootstrap.initial',requestId:randomUUID(),target:`institution:${inst.id}`});
  });
  console.log('Initial institution administrator created. Change password at first login.');
 }
-main().catch(e=>{console.error(e.message);process.exitCode=1}).finally(()=>pool.end());
+main().catch(()=>{console.error('BOOTSTRAP_FAILED');process.exitCode=1}).finally(()=>pool.end());

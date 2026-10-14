@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { SiiBrand } from '@/components/sii-brand';
 import SiiThemeToggle from '@/components/sii-theme-toggle';
@@ -10,11 +10,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const errorRef=useRef<HTMLDivElement>(null);
+  const [credentialsInvalid,setCredentialsInvalid]=useState(false);
+  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
-    setError('');
+    setError('');setCredentialsInvalid(false);
     setLoading(true);
     const form = new FormData(event.currentTarget);
     try {
@@ -29,6 +32,7 @@ export default function LoginPage() {
         }),
       });
       if (!response.ok) {
+        setCredentialsInvalid(response.status===401);
         if (response.status === 429) {
           setError('Se alcanzó el límite de intentos. Espera unos minutos antes de volver a entrar.');
         } else if (response.status >= 500) {
@@ -48,7 +52,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="sii-auth">
+    <main id="main-content" tabIndex={-1} className="sii-auth">
       <section className="sii-auth-story" aria-label="Presentación de SII">
         <div className="sii-auth-story-top"><SiiBrand light/><span className="sii-story-tag">UNIVERSITY OS</span></div>
         <div className="sii-auth-story-content">
@@ -77,21 +81,21 @@ export default function LoginPage() {
             <div className="sii-field-wrap">
               <span className="sii-field-symbol" aria-hidden="true">♙</span>
               <input id="sii-login-username" name="username" type="text" autoComplete="username"
-                autoCapitalize="none" spellCheck={false} required minLength={3} maxLength={120}
+                aria-invalid={credentialsInvalid} aria-describedby={error?'sii-login-error':undefined} autoCapitalize="none" spellCheck={false} required minLength={3} maxLength={120}
                 placeholder="Tu usuario" disabled={loading}/>
             </div>
             <label htmlFor="sii-login-password">Contraseña</label>
             <div className="sii-field-wrap">
               <span className="sii-field-symbol" aria-hidden="true">✧</span>
               <input id="sii-login-password" name="password" type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password" required placeholder="Ingresa tu contraseña" disabled={loading}/>
+                aria-invalid={credentialsInvalid} aria-describedby={error?'sii-login-error':undefined} maxLength={512} autoComplete="current-password" required placeholder="Ingresa tu contraseña" disabled={loading}/>
               <button className="sii-password-toggle" type="button" onClick={() => setShowPassword(p => !p)}
                 aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 aria-pressed={showPassword} disabled={loading}>
                 {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
-            {error && <div className="sii-auth-error" role="alert"><span aria-hidden="true">!</span> {error}</div>}
+            {error && <div id="sii-login-error" ref={errorRef} tabIndex={-1} className="sii-auth-error" role="alert"><span aria-hidden="true">!</span> {error}</div>}
             <button type="submit" className="sii-submit" disabled={loading} aria-busy={loading}>
               {loading ? 'Validando acceso…' : 'Entrar al sistema'} <span aria-hidden="true">→</span>
             </button>

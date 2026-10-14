@@ -1,5 +1,7 @@
 # Siii — Reglas persistentes de implementación
 
+Antes de cualquier tarea lee `docs/agent/MASTER_PROMPT.md`.
+
 ## Producto
 SIS universitario multitenant, backend institucional en Next.js/TypeScript + Drizzle + PostgreSQL alojado en Supabase. Compañero Android/iOS y Ktor son servicios separados.
 

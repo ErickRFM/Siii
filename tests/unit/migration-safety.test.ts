@@ -1,0 +1,28 @@
+import { describe, expect, it } from 'vitest';
+import { spawnSync } from 'node:child_process';
+function migrate(env: Record<string,string|undefined>) {
+  const result=spawnSync(process.execPath,['--import','tsx','db/migrate.ts'],{
+    env:{...process.env,DATABASE_URL:'postgresql://test:placeholder@127.0.0.1:1/test',SIII_DATABASE_ENV:undefined,...env},
+    encoding:'utf8',timeout:10000,windowsHide:true
+  });
+  return {status:result.status,output:result.stdout+result.stderr};
+}
+describe('migration environment gate',()=>{
+  it('rejects production before connecting',()=>{
+    const r=migrate({NODE_ENV:'production',SIII_DATABASE_ENV:'test'});
+    expect(r.status).toBe(1);expect(r.output).toContain('PRODUCTION_MIGRATION_FORBIDDEN');
+    expect(r.output).not.toContain('ECONNREFUSED');
+  });
+  it('requires a declared isolated environment',()=>{
+    const r=migrate({NODE_ENV:'development'});
+    expect(r.status).toBe(1);expect(r.output).toContain('DATABASE_ENV_REQUIRED');
+  });
+  it('requires an explicit connection URL',()=>{
+    const r=migrate({NODE_ENV:'test',SIII_DATABASE_ENV:'test',DATABASE_URL:''});
+    expect(r.status).toBe(1);expect(r.output).toContain('DATABASE_URL_REQUIRED');
+  });
+  it('never prints the connection secret on connection failure',()=>{
+    const r=migrate({NODE_ENV:'test',SIII_DATABASE_ENV:'test'});
+    expect(r.status).toBe(1);expect(r.output).not.toContain('placeholder');
+  });
+});
