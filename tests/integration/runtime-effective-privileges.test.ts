@@ -41,3 +41,23 @@ it.each(['CREATEROLE_PARENT','NOINHERIT_APP'])('refuses runtime privilege escala
   await owner.end();
  }
 });
+
+it('rejects a SET-only secondary role that can truncate audit',async()=>{
+ const raw=isolatedDatabaseUrl(),owner=new pg.Client({connectionString:raw});await owner.connect();
+ const suffix=randomBytes(6).toString('hex'),role='p0_1_switch_'+suffix,parent='p0_1_trunc_'+suffix,secret=randomBytes(32).toString('hex');
+ await owner.query('CREATE ROLE '+role+' LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD '+pg.escapeLiteral(secret));
+ await owner.query('CREATE ROLE '+parent+' NOLOGIN');
+ await owner.query('GRANT siii_app TO '+role);
+ await owner.query('GRANT TRUNCATE ON security_audit_log TO '+parent);
+ await owner.query('GRANT '+parent+' TO '+role+' WITH INHERIT FALSE, SET TRUE');
+ const app=new URL(raw);app.username=role;app.password=secret;
+ const original=process.env.DATABASE_URL;process.env.DATABASE_URL=app.toString();vi.resetModules();
+ let module:typeof import('@/infrastructure/database')|undefined;
+ try{
+  const {GET}=await import('@/app/api/ready/route');module=await import('@/infrastructure/database');
+  const result=await GET();expect(result.status).toBe(503);expect(await result.json()).toHaveProperty('error.code','DATABASE_ROLE_UNSAFE');
+ }finally{
+  await module?.pool.end();process.env.DATABASE_URL=original;vi.resetModules();
+  await owner.query('DROP OWNED BY '+parent);await owner.query('DROP ROLE '+role);await owner.query('DROP ROLE '+parent);await owner.end();
+ }
+});

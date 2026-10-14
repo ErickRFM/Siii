@@ -49,3 +49,37 @@ describe.sequential('P0.1 reused roles and RPC privacy',()=>{
  });
  afterAll(async()=>{await owner?.end();await admin.query('DROP DATABASE '+name);await admin.end();});
 });
+
+it('reconciles inherited API RPC/defaults and excessive app defaults additively',async()=>{
+ const admin=new pg.Client({connectionString:raw});await admin.connect();
+ const suffix=randomBytes(6).toString('hex'),database='p0_1_inherit_'+suffix+'_test',group='p0_1_rpc_'+suffix;
+ const target=new URL(raw);target.pathname='/'+database;
+ await admin.query('CREATE DATABASE '+database);await admin.query('CREATE ROLE '+group+' NOLOGIN');
+ const client=new pg.Client({connectionString:target.toString()});await client.connect();await client.query('CREATE SCHEMA drizzle');await client.query('CREATE TABLE drizzle.__drizzle_migrations(id serial PRIMARY KEY,hash text NOT NULL,created_at bigint)');
+ try{
+  for(const tag of ['0000_siii_foundation_identity','0001_academic_catalogs','0002_p0_hardening','0003_p0_1_privacy'])await client.query(readFileSync('db/migrations/'+tag+'.sql','utf8'));
+  await client.query("CREATE FUNCTION public.synthetic_inherited_rpc() RETURNS integer LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$ SELECT 1 $$");
+  await client.query('GRANT EXECUTE ON FUNCTION public.synthetic_inherited_rpc() TO '+group);
+  await client.query('GRANT '+group+' TO anon');
+  await client.query('ALTER DEFAULT PRIVILEGES GRANT EXECUTE ON FUNCTIONS TO '+group);
+  await client.query('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO '+group);
+  for(const namespace of ['', ' IN SCHEMA public']){
+   await client.query('ALTER DEFAULT PRIVILEGES'+namespace+' GRANT ALL ON TABLES TO siii_app');
+   await client.query('ALTER DEFAULT PRIVILEGES'+namespace+' GRANT ALL ON SEQUENCES TO siii_app');
+  }
+  expect((await client.query("SELECT has_function_privilege('anon','public.synthetic_inherited_rpc()','EXECUTE') AS allowed")).rows[0].allowed).toBe(true);
+  await client.query('CREATE TABLE public.synthetic_before(id integer)');
+  expect((await client.query("SELECT has_table_privilege('siii_app','public.synthetic_before','TRUNCATE') AS allowed")).rows[0].allowed).toBe(true);
+  await client.query(readFileSync('db/migrations/0004_p0_1_inherited_privileges.sql','utf8'));
+  await client.query('CREATE TABLE public.synthetic_after(id integer)');
+  await client.query('CREATE SEQUENCE public.synthetic_after_seq');
+  await client.query("CREATE FUNCTION public.synthetic_after_rpc() RETURNS integer LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$ SELECT 2 $$");
+  for(const fn of ['synthetic_inherited_rpc','synthetic_after_rpc'])expect((await client.query('SELECT has_function_privilege($1,$2,\'EXECUTE\') AS allowed',['anon','public.'+fn+'()'])).rows[0].allowed).toBe(false);
+  expect((await client.query("SELECT has_table_privilege('siii_app','public.synthetic_after','DELETE,TRUNCATE,TRIGGER,REFERENCES') AS allowed")).rows[0].allowed).toBe(false);
+  expect((await client.query("SELECT has_sequence_privilege('siii_app','public.synthetic_after_seq','USAGE,SELECT,UPDATE') AS allowed")).rows[0].allowed).toBe(false);
+  await client.query(readFileSync('db/migrations/0004_p0_1_inherited_privileges.sql','utf8'));
+ }finally{
+  await client.query('REVOKE '+group+' FROM anon');await client.query('DROP OWNED BY '+group);await client.end();
+  await admin.query('DROP DATABASE '+database);await admin.query('DROP ROLE '+group);await admin.end();
+ }
+},30000);
