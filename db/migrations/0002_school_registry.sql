@@ -62,12 +62,13 @@ CREATE TABLE "section_teachers" (
   "institution_id" uuid NOT NULL REFERENCES "institutions"("id") ON DELETE RESTRICT,
   "section_id" uuid NOT NULL,
   "teacher_id" uuid NOT NULL,
+  "revoked_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT "section_teachers_section_tenant_fk" FOREIGN KEY ("section_id","institution_id") REFERENCES "academic_sections"("id","institution_id") ON DELETE RESTRICT,
   CONSTRAINT "section_teachers_teacher_tenant_fk" FOREIGN KEY ("teacher_id","institution_id") REFERENCES "institutional_teachers"("id","institution_id") ON DELETE RESTRICT
 );--> statement-breakpoint
-CREATE UNIQUE INDEX "section_teacher_unique" ON "section_teachers" ("section_id","teacher_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "section_teacher_unique" ON "section_teachers" ("section_id","teacher_id") WHERE "revoked_at" IS NULL;--> statement-breakpoint
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
