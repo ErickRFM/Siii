@@ -43,7 +43,8 @@ async function requireHardening(client: pg.Client) {
   const latest = readMigrationFiles({ migrationsFolder: './db/migrations' });
   if (latest.length < 4 || ledger.rows[0].n !== latest.length) reject('DATE_ROLLBACK_REQUIRES_HARDENING');
   const tables = await client.query("SELECT c.relname,c.relrowsecurity AS rls,pg_get_userbyid(c.relowner) AS owner FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p')");
-  if (tables.rowCount !== 13 || tables.rows.some(t => !t.rls || t.owner !== 'siii_migrator')) reject('DATE_ROLLBACK_REQUIRES_HARDENING');
+  const requiredTables=['institutions','people','platform_users','institution_memberships','role_assignments','auth_sessions','auth_throttle','campuses','academic_programs','academic_terms','curriculum_versions','academic_courses','security_audit_log'];
+  if (requiredTables.some(name=>!tables.rows.some(t=>t.relname===name)) || tables.rows.some(t => !t.rls || t.owner !== 'siii_migrator')) reject('DATE_ROLLBACK_REQUIRES_HARDENING');
   const roles = await client.query("SELECT rolname,rolsuper,rolbypassrls,rolcreaterole,rolcreatedb FROM pg_roles WHERE rolname IN ('siii_app','siii_migrator')");
   if (roles.rowCount !== 2 || roles.rows.some(r => r.rolsuper || r.rolbypassrls || r.rolcreaterole || r.rolcreatedb)) reject('DATE_ROLLBACK_REQUIRES_HARDENING');
   const audit = await client.query("SELECT has_table_privilege('siii_app','public.security_audit_log','SELECT') AND has_table_privilege('siii_app','public.security_audit_log','INSERT') AND NOT has_any_column_privilege('siii_app','public.security_audit_log','UPDATE') AND NOT has_table_privilege('siii_app','public.security_audit_log','DELETE,TRUNCATE') AS safe");

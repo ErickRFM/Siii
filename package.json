@@ -22,9 +22,11 @@
     "test:ui": "playwright test"
   },
   "dependencies": {
+    "@otplib/plugin-crypto-node": "13.5.0",
     "argon2": "^0.45.1",
     "drizzle-orm": "0.45.4",
     "next": "15.5.27",
+    "otplib": "13.5.0",
     "pg": "^8.16.3",
     "pino": "^9.11.0",
     "react": "^19.3.0",

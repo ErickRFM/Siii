@@ -5,8 +5,10 @@ import {db,assertApplicationRole} from '@/infrastructure/database';
 import {authSessions,platformUsers,people,institutionMemberships,institutions,roleAssignments} from '../../../db/schema';
 import type {Role,Permission} from './roles';
 import {hasPermission} from './roles';
-import {SESSION_COOKIE,SESSION_IDLE_MS} from './session-policy';
+import {SESSION_COOKIE} from './session-policy';
 import {digestToken} from './session-write';
+import {lockMfaFactor} from './mfa-session';
+import {sessionIsCurrent} from './mfa-session-policy';
 export {SESSION_COOKIE,SESSION_DAYS} from './session-policy';
 export {digestToken,generateToken} from './session-write';
 export async function getIdentity(){
@@ -17,12 +19,13 @@ export async function getIdentity(){
   const [candidate]=await tx.select({id:authSessions.id,userId:authSessions.userId}).from(authSessions).where(eq(authSessions.tokenHash,digestToken(raw))).limit(1);
   if(!candidate)return null;
   // All credential/privilege operations lock user before session; reads use the same order.
-  const [identity]=await tx.select({id:platformUsers.id,username:platformUsers.username,firstName:people.firstName,lastName:people.lastName,mustChangePassword:platformUsers.mustChangePassword})
+  const [identity]=await tx.select({id:platformUsers.id,username:platformUsers.username,firstName:people.firstName,lastName:people.lastName,mustChangePassword:platformUsers.mustChangePassword,isActive:platformUsers.isActive,authVersion:platformUsers.authVersion})
    .from(platformUsers).innerJoin(people,eq(platformUsers.personId,people.id)).where(and(eq(platformUsers.id,candidate.userId),eq(platformUsers.isActive,true))).limit(1).for('share',{of:platformUsers});
   if(!identity)return null;
+  const factor=await lockMfaFactor(tx,identity.id,'share');
   const [session]=await tx.select().from(authSessions).where(and(eq(authSessions.id,candidate.id),eq(authSessions.userId,identity.id))).limit(1).for('update');
   const now=new Date();
-  if(!session||session.revokedAt||session.expiresAt<=now||session.lastSeenAt.getTime()<=now.getTime()-SESSION_IDLE_MS)return null;
+  if(!session||!sessionIsCurrent(identity,session,factor,now))return null;
   await tx.update(authSessions).set({lastSeenAt:now}).where(eq(authSessions.id,session.id));
   return {...identity,sessionId:session.id};
  });

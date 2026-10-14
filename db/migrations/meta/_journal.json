@@ -43,6 +43,13 @@
       "when": 1792001102854,
       "tag": "0005_p0_1_runtime_upgrade",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792001310881,
+      "tag": "0006_p1_mfa",
+      "breakpoints": true
     }
   ]
 }

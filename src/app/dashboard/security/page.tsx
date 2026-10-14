@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getIdentity } from '@/shared/auth/session';
 import SiiAppShell from '@/components/sii-app-shell';
 import PasswordChange from '../password-change';
+import MfaSecurity from '@/components/mfa-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,12 +17,15 @@ export default async function SecurityPage() {
         <Link href="/dashboard" className="sii-outline-button sii-back-link">← Volver a inicio</Link>
       </div>
       <div className="sii-security-layout">
+        <div>
         <section className="sii-panel sii-security-card">
           <span className="sii-section-kicker">ACCESO INSTITUCIONAL</span>
           <h2>Cambiar contraseña</h2>
           <p>Para proteger tu cuenta, utiliza una contraseña distinta de la anterior y con al menos 12 caracteres.</p>
           <PasswordChange/>
         </section>
+        <MfaSecurity/>
+        </div>
         <aside className="sii-panel sii-security-aside">
           <span className="sii-security-shield" aria-hidden="true">◇</span>
           <h2>Información protegida</h2>

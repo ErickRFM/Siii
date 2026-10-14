@@ -60,6 +60,7 @@ export const platformUsers = pgTable('platform_users', {
   username: text('username').notNull().unique(),
   passwordHash: text('password_hash'), isActive: boolean('is_active').notNull().default(true),
   mustChangePassword: boolean('must_change_password').notNull().default(false),
+  authVersion: integer('auth_version').notNull().default(0),
   lockoutLevel: integer('lockout_level').notNull().default(0),
   failedLoginAttempts: integer('failed_login_attempts').notNull().default(0),
   lockedUntil: timestamp('locked_until', { withTimezone: true }),
@@ -67,4 +68,5 @@ export const platformUsers = pgTable('platform_users', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   lockoutLevelValid: check('platform_users_lockout_level_check',sql`${table.lockoutLevel} >= 0`),
+  authVersionValid: check('platform_users_auth_version_check',sql`${table.authVersion} >= 0`),
 }));
