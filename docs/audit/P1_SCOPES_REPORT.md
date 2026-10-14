@@ -38,3 +38,7 @@ La primera ejecución integral se interrumpió por Modern Standby de Windows: lo
 ## Límites
 
 No certifica staging cloud, capacidad del hosting, lector de pantalla manual, gestión completa de usuarios, invitaciones ni administración institucional completa. Se mantienen los bloqueos P0 de docs/BLOCKERS.md. Ningún PR dependiente se declara completo antes de CI, revisión y merge autorizado.
+
+## Corrección del harness detectada por CI
+
+Los runs 38642843612 y 38642983960 de 41d251fe fallaron en Chromium: el servidor tenía una clave MFA sintética generada por globalSetup, pero el proceso de los fixtures no la recibía (MFA_KEY_UNAVAILABLE). La configuración local explícita había ocultado la diferencia. Se genera ahora una sola clave en process.env del global setup y se transmite a workers y servidor; el runtime de la aplicación no tiene fallback. Typecheck y la suite Chromium completa se repitieron sin SIII_MFA_KEYS/SIII_MFA_ACTIVE_KEY_ID preconfiguradas: 18/18, 2.2 minutos. CI del nuevo commit pendiente; la evidencia backend 539/139 corresponde a la misma fuente de aplicación.
