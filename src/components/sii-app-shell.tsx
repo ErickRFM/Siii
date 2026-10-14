@@ -39,7 +39,7 @@ export default function SiiAppShell({
             onClick={() => setMenuOpen(false)}>
               <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
           </Link> : <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico <span className="sii-nav-soon">Selecciona institución</span></span>}
-          <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▣</span> Control escolar <span className="sii-nav-soon">Pronto</span></span>
+          {institutionId ? <Link href={`/dashboard/institutions/${institutionId}/registry`} className="sii-nav-item" onClick={() => setMenuOpen(false)}><span className="sii-nav-glyph" aria-hidden="true">▣</span> Control escolar</Link> : <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▣</span> Control escolar <span className="sii-nav-soon">Selecciona institución</span></span>}
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▤</span> Calificaciones <span className="sii-nav-soon">Pronto</span></span>
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">⇄</span> Integraciones <span className="sii-nav-soon">Pronto</span></span>
         </div>
