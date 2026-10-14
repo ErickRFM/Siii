@@ -56,7 +56,7 @@ CREATE TABLE "section_enrollments" (
   CONSTRAINT "enrollments_section_tenant_fk" FOREIGN KEY ("section_id","institution_id") REFERENCES "academic_sections"("id","institution_id") ON DELETE RESTRICT,
   CONSTRAINT "enrollments_student_tenant_fk" FOREIGN KEY ("student_id","institution_id") REFERENCES "institutional_students"("id","institution_id") ON DELETE RESTRICT
 );--> statement-breakpoint
-CREATE UNIQUE INDEX "section_student_unique" ON "section_enrollments" ("section_id","student_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "section_student_unique" ON "section_enrollments" ("section_id","student_id") WHERE "status" = 'enrolled';--> statement-breakpoint
 CREATE TABLE "section_teachers" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "institution_id" uuid NOT NULL REFERENCES "institutions"("id") ON DELETE RESTRICT,
