@@ -25,6 +25,7 @@ export const campuses = pgTable('campuses', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   uniqueCode: uniqueIndex('campuses_institution_code_uidx').on(table.institutionId, table.code),
+  idTenant: uniqueIndex('campuses_id_institution_uidx').on(table.id,table.institutionId),
 }));
 export const academicTerms = pgTable('academic_terms', {
   id: uuid('id').primaryKey().defaultRandom(),
