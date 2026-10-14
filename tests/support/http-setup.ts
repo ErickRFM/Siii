@@ -6,6 +6,11 @@ import pg from 'pg';
 export default async function setup(){
  const raw=isolatedDatabaseUrl(),url=new URL(raw);
  const admin=new pg.Client({connectionString:raw});await admin.connect();
+ for(const name of ['anon','authenticated']){
+  const existing=(await admin.query('SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolcanlogin FROM pg_roles WHERE rolname=$1',[name])).rows[0];
+  if(!existing)await admin.query('CREATE ROLE '+name+' NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE');
+  else if(Object.values(existing).some(Boolean))throw new Error('HTTP_TEST_API_ROLE_UNSAFE');
+ }
  const role='p0_http_app_'+randomBytes(8).toString('hex'),password=randomBytes(32).toString('hex');
  await admin.query('CREATE ROLE "'+role+'" LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD '+pg.escapeLiteral(password));
  await admin.query('GRANT siii_app TO "'+role+'"');

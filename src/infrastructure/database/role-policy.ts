@@ -4,7 +4,7 @@ export const APPLICATION_ROLE_QUERY=`
   SELECT r.oid FROM pg_roles r WHERE r.rolname=current_user OR pg_has_role(session_user,r.oid,'SET')
  )
  SELECT
- EXISTS(SELECT FROM pg_roles r WHERE (pg_has_role(session_user,r.oid,'MEMBER') OR pg_has_role(current_user,r.oid,'MEMBER')) AND (r.rolsuper OR r.rolbypassrls OR r.rolcreatedb OR r.rolcreaterole)) OR EXISTS(SELECT FROM pg_auth_members m WHERE m.admin_option AND pg_has_role(session_user,m.member,'MEMBER')) AS privileged,
+ EXISTS(SELECT FROM pg_roles r WHERE (pg_has_role(session_user,r.oid,'MEMBER') OR pg_has_role(current_user,r.oid,'MEMBER')) AND (r.rolsuper OR r.rolbypassrls OR r.rolcreatedb OR r.rolcreaterole)) OR EXISTS(SELECT FROM pg_auth_members m WHERE m.admin_option AND pg_has_role(session_user,m.member,'MEMBER')) OR EXISTS(SELECT FROM pg_roles r WHERE r.rolname NOT IN(current_user,session_user,'siii_app') AND pg_has_role(session_user,r.oid,'MEMBER')) AS privileged,
  EXISTS(SELECT FROM usable_roles r WHERE has_schema_privilege(r.oid,'public','CREATE')) AS can_ddl,
  pg_has_role(current_user,'siii_app','USAGE') AS app_member,
  pg_has_role(session_user,'siii_migrator','MEMBER') AS migrator_member,
