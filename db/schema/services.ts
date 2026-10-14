@@ -67,6 +67,7 @@ export const institutionalWorkshops=pgTable('institutional_workshops',{
  capacityRange:check('workshop_capacity_check',sql`${t.capacity} BETWEEN 1 AND 1000`),
  validStatus:check('workshop_status_check',sql`${t.status} IN ('DRAFT','PUBLISHED','CANCELLED')`),
  byInstitution:index('workshops_institution_status_idx').on(t.institutionId,t.status),
+ scopedId:uniqueIndex('institutional_workshops_scope_uidx').on(t.id,t.institutionId),
 }));
 
 export const workshopEnrollments=pgTable('workshop_enrollments',{
