@@ -24,6 +24,7 @@ export async function externalAcademicLoad(institutionId:string,externalId:strin
  if(!student)return {error:'STUDENT_NOT_FOUND',status:404} as const;
  const [person]=await db.select({id:institutionalStudents.id}).from(institutionalStudents)
   .where(and(eq(institutionalStudents.institutionId,institutionId),eq(institutionalStudents.enrollmentNumber,externalId))).limit(1);
+ if(!person)return {error:'STUDENT_NOT_FOUND',status:404} as const;
  const rows=await db.select({
   sectionId:academicSections.id,groupName:academicSections.code,
   courseId:academicCourses.id,subjectCode:academicCourses.code,subjectName:academicCourses.name,credits:academicCourses.credits,
@@ -32,7 +33,8 @@ export async function externalAcademicLoad(institutionId:string,externalId:strin
  .innerJoin(academicSections,eq(sectionEnrollments.sectionId,academicSections.id))
  .innerJoin(academicCourses,eq(academicSections.courseId,academicCourses.id))
  .innerJoin(academicTerms,eq(academicSections.termId,academicTerms.id))
- .where(and(eq(sectionEnrollments.studentId,person.id),eq(sectionEnrollments.institutionId,institutionId),eq(sectionEnrollments.status,'enrolled'))).limit(100);
+ .where(and(eq(sectionEnrollments.studentId,person.id),eq(sectionEnrollments.institutionId,institutionId),eq(sectionEnrollments.status,'enrolled'))).limit(101);
+ if(rows.length>100)return {error:'ACADEMIC_LOAD_LIMIT_EXCEEDED',status:409} as const;
  const enrollments:{
   course:{externalId:string;subject:{externalCode:string;name:string;credits:number};teacher:{externalId:string;fullName:string;institutionalEmail:string|null;departmentCode:null};term:string;groupName:string};
   enrolledAtIso:string;
