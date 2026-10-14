@@ -19,6 +19,12 @@ describe('encrypted invitation delivery outbox',()=>{
   expect(()=>openInvitationDelivery(sealed,row,'29421a4f-82a6-4588-b6ec-c369fcfe4e6b')).toThrow('INVITATION_DELIVERY_INVALID');
   expect(()=>openInvitationDelivery(sealed,'d6ae75e6-6951-4268-99a9-18c770f1f098',tenant)).toThrow('INVITATION_DELIVERY_INVALID');
  });
+ it('authenticates key identity even when two aliases contain identical key bytes',()=>{
+  const key=randomBytes(32).toString('base64');
+  vi.stubEnv('SIII_INVITATION_KEYS',JSON.stringify({old:key,new:key}));vi.stubEnv('SIII_INVITATION_ACTIVE_KEY_ID','old');
+  const envelope=JSON.parse(sealInvitationDelivery(message,row,tenant));envelope.keyId='new';
+  expect(()=>openInvitationDelivery(JSON.stringify(envelope),row,tenant)).toThrow('INVITATION_DELIVERY_INVALID');
+ });
  it('allows old ciphertext after active key rotation; missing old key fails closed',()=>{
   keys('old');const sealed=sealInvitationDelivery(message,row,tenant);
   vi.stubEnv('SIII_INVITATION_ACTIVE_KEY_ID','new');expect(openInvitationDelivery(sealed,row,tenant)).toEqual(message);

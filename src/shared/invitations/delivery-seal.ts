@@ -20,9 +20,9 @@ function keyring():Record<string,Buffer> {
   return result;
  }catch{return unavailable();}
 }
-function aad(eventId:string,institutionId:string):Buffer {
+function aad(eventId:string,institutionId:string,id:string):Buffer {
  if(!z.uuid().safeParse(eventId).success || !z.uuid().safeParse(institutionId).success) return invalid();
- return Buffer.from(JSON.stringify(['SIII:invitation-delivery',1,eventId.toLowerCase(),institutionId.toLowerCase()]));
+ return Buffer.from(JSON.stringify(['SIII:invitation-delivery',1,id,eventId.toLowerCase(),institutionId.toLowerCase()]));
 }
 function binary(value:string,expectedLength?:number):Buffer {
  if(!/^[A-Za-z0-9_-]+$/.test(value)) return invalid();
@@ -34,21 +34,22 @@ function binary(value:string,expectedLength?:number):Buffer {
 export function sealInvitationDelivery(message:TransactionalEmail,eventId:string,institutionId:string):string {
  const parsed=transactionalEmailSchema.safeParse(message);
  if(!parsed.success || parsed.data.eventId!==eventId) return invalid();
- const context=aad(eventId,institutionId),ring=keyring(),active=process.env.SIII_INVITATION_ACTIVE_KEY_ID;
+ const ring=keyring(),active=process.env.SIII_INVITATION_ACTIVE_KEY_ID;
  if(!active || !keyId.safeParse(active).success || !Object.hasOwn(ring,active)) return unavailable();
+ const context=aad(eventId,institutionId,active);
  const plaintext=Buffer.from(JSON.stringify(parsed.data),'utf8');if(plaintext.length>512*1024) return invalid();
  const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',ring[active],iv,{authTagLength:16});cipher.setAAD(context);
  const ciphertext=Buffer.concat([cipher.update(plaintext),cipher.final()]);
  return JSON.stringify({version:1,keyId:active,iv:iv.toString('base64url'),tag:cipher.getAuthTag().toString('base64url'),ciphertext:ciphertext.toString('base64url')});
 }
 export function openInvitationDelivery(value:string,eventId:string,institutionId:string):TransactionalEmail {
- const context=aad(eventId,institutionId);
  let envelope:z.infer<typeof envelopeSchema>;
  try {
   if(typeof value!=='string' || value.length>701000) return invalid();
   envelope=envelopeSchema.parse(JSON.parse(value));
  }catch{return invalid();}
  const ring=keyring();if(!Object.hasOwn(ring,envelope.keyId)) return unavailable();
+ const context=aad(eventId,institutionId,envelope.keyId);
  try {
   const decipher=createDecipheriv('aes-256-gcm',ring[envelope.keyId],binary(envelope.iv,12),{authTagLength:16});
   decipher.setAAD(context);decipher.setAuthTag(binary(envelope.tag,16));

@@ -22,3 +22,5 @@ Referencias primarias revisadas:
 ## Extensión de estados y errores transitorios
 
 La política de estados admite solo invitaciones pending no consumidas y anteriores a expiración. La cola rechaza lease activo, retry futuro, eventos vencidos y ocho intentos agotados; reintentos limitados a23horas para conservar el contrato de idempotencia24horas del proveedor. El adaptador distingue409 concurrent_idempotent_requests/resource_locked de payload conflictivo; dos regresiones fallaron antes de la corrección y las39pruebas nuevas pasan después. Typecheck y lint pasan. No se efectuó ningún envío externo.
+
+Antes de persistir el primer outbox se amplió AAD para autenticar también keyId. La prueba con dos aliases del mismo material falló antes y pasa después.40unitarias nuevas ytypecheck verdes. No había mensajes persistidos ni migración de invitaciones aplicada; no se cambiaron ledgers.
