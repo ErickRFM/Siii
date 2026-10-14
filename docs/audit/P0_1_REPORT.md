@@ -31,3 +31,10 @@ La revisión de fff49f88 verificó las tres correcciones iniciales y pidió camb
 
 0004 reconcilia ACL de tablas/columnas/secuencias/RPC públicos de los grupos alcanzables por los roles Data API, revoca defaults globales/scoped excesivos y comprueba permisos efectivos al terminar. Rechaza pertenencia de APIroles a propietarios, roles privilegiados, siii_app o siii_migrator; no cambia membresías ni esquemas gestionados. Las tablas futuras del runtime necesitan grants explícitos revisados y políticas RLS. El guard también inspecciona DDL/DML/RPC de roles alcanzables mediante SET ROLE.
 Archivo runtime-effective-privileges: 6/6; p0-1-privacy: 4/4, incluyendo idempotencia 0004. Revisión independiente posterior de estas ampliaciones y CI final aún pendientes.
+
+## Upgrade previo y ADMIN OPTION
+0005 normaliza ACL actuales de siii_app cuando defaults defectuosos crearon tablas entre 0003 y 0004. Solo restaura grants mínimos de las 13 tablas conocidas; tablas desconocidas permanecen sin grants de runtime y con RLS habilitada. La postcondición comprueba permisos efectivos prohibidos.
+
+El guard rechaza ADMIN OPTION directo o indirecto de membresías, además de MAINTAIN. Un LOGIN sintético con ADMIN TRUE/INHERIT FALSE/SET FALSE pudo concederse SET y alcanzar TRUNCATE; readiness anterior a esa operación pasó de 200 a 503 tras la corrección. Archivos efectivos/privacidad: 11/11 pruebas pasaron en p0_1_verified_test.
+
+Se preservaron las bases sintéticas anteriores y sus ledgers. Una normalización de fin de archivo de 0004 durante preparación cambió sus bytes respecto al primer fixture local; la rama publicada conserva los bytes revisados y las bases nuevas verifican ese SQL desde cero. No se reescribió ningún ledger ni se cambió SQL histórico 0000–0002 para forzar aceptación. P1 reconcilia la numeración de su migración nueva antes de publicación.
