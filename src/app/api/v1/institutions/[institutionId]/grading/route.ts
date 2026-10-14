@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { and,eq,sql,desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
-import { academicSections,assessmentComponents,assessmentScores,sectionEnrollments,gradePublications,finalGrades,securityAuditLog } from '../../../../../../../db/schema';
+import { academicSections,assessmentComponents,assessmentScores,sectionEnrollments,institutionalStudents,gradePublications,finalGrades,securityAuditLog } from '../../../../../../../db/schema';
 import { teachingScope } from '@/modules/grading/teaching-scope';
 import { gradeCommand,calculateWeightedGrade } from '@/modules/grading/validation';
 import { assertSameOrigin,jsonError } from '@/shared/auth/guards';
@@ -19,15 +19,18 @@ export async function GET(req:NextRequest,ctx:Ctx){
  const institutionId=await ctxId(ctx),sectionId=req.nextUrl.searchParams.get('sectionId');
  if(!institutionId||!sectionId||!z.uuid().safeParse(sectionId).success)return jsonError('INVALID_SECTION',422);
  if(!await teachingScope(institutionId,sectionId))return jsonError('FORBIDDEN',403);
- const [components,scores,publications]=await Promise.all([
+ const [components,scores,publications,roster]=await Promise.all([
   db.select().from(assessmentComponents).where(and(eq(assessmentComponents.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId))),
   db.select({id:assessmentScores.id,componentId:assessmentScores.componentId,studentId:assessmentScores.studentId,scoreHundredths:assessmentScores.scoreHundredths})
    .from(assessmentScores).innerJoin(assessmentComponents,eq(assessmentScores.componentId,assessmentComponents.id))
    .where(and(eq(assessmentScores.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId))),
   db.select({id:gradePublications.id,version:gradePublications.version,publishedAt:gradePublications.publishedAt})
-   .from(gradePublications).where(and(eq(gradePublications.institutionId,institutionId),eq(gradePublications.sectionId,sectionId))).orderBy(desc(gradePublications.version))
+   .from(gradePublications).where(and(eq(gradePublications.institutionId,institutionId),eq(gradePublications.sectionId,sectionId))).orderBy(desc(gradePublications.version)),
+  db.select({studentId:institutionalStudents.id,enrollmentNumber:institutionalStudents.enrollmentNumber,firstName:institutionalStudents.firstName,lastName:institutionalStudents.lastName})
+   .from(sectionEnrollments).innerJoin(institutionalStudents,eq(sectionEnrollments.studentId,institutionalStudents.id))
+   .where(and(eq(sectionEnrollments.institutionId,institutionId),eq(sectionEnrollments.sectionId,sectionId),eq(sectionEnrollments.status,'enrolled')))
  ]);
- return NextResponse.json({components,scores,publications},{headers:noCache});
+ return NextResponse.json({components,scores,publications,roster},{headers:noCache});
 }
 export async function POST(req:NextRequest,ctx:Ctx){
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
