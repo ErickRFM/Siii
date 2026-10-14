@@ -66,7 +66,7 @@ export const sectionEnrollments = pgTable('section_enrollments', {
   status: text('status').notNull().default('enrolled'),
   ...auditDates,
 }, table => ({
-  uniqueEnrollment: uniqueIndex('section_student_unique').on(table.sectionId, table.studentId),
+  uniqueEnrollment: uniqueIndex('section_student_unique').on(table.sectionId, table.studentId).where(sql`${table.status} = 'enrolled'`),
   scopedSection: foreignKey({ columns: [table.sectionId, table.institutionId], foreignColumns: [academicSections.id, academicSections.institutionId], name: 'enrollments_section_tenant_fk' }),
   scopedStudent: foreignKey({ columns: [table.studentId, table.institutionId], foreignColumns: [institutionalStudents.id, institutionalStudents.institutionId], name: 'enrollments_student_tenant_fk' }),
   validStatus: check('enrollments_status_check', sql`${table.status} IN ('enrolled','withdrawn')`),
