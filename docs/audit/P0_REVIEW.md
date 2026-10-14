@@ -31,4 +31,3 @@ Verificación adicional del ejecutor: todos los clientes de fixtures y configura
 
 ## P0.1 en curso — 2026-10-14
 La segunda inspección de P0 encontró tres nuevos hallazgos: grants efectivos excesivos sobre auditoría, carrera de eliminación del bucket de autenticación y limpieza que espera locks en orden incompatible con cambios de credenciales. Las correcciones aditivas y sus regresiones están en la rama dependiente chore/p0-1-release-gates (informe P0_1_REPORT.md). Se amplía el guard para roles privilegiados indirectos y membresía efectiva, y 0003 añade restricciones EXECUTE de RPC/defaults. Esta evidencia sustituye la limitación previa de RPC para el código nuevo; no afirma que producción esté migrada. La revisión independiente posterior de las correcciones sigue pendiente.
-

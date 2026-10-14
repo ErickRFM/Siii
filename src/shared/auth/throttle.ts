@@ -28,4 +28,3 @@ export async function consumeIp(tx:Transaction,ip:string,now:Date){
  await tx.update(authThrottle).set({failures:row.failures+1,blockedUntil:row.failures>=29?new Date(now.getTime()+60000):null}).where(eq(authThrottle.key,row.key));
  return true;
 }
-
