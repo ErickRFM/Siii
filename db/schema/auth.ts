@@ -13,6 +13,7 @@ export const institutionMemberships = pgTable('institution_memberships', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   uniqueMember: uniqueIndex('institution_member_unique').on(table.institutionId, table.userId),
+  scopedIdentity: uniqueIndex('institution_member_id_scope_uidx').on(table.id,table.institutionId),
   byUser: index('institution_member_user_idx').on(table.userId),
 }));
 
