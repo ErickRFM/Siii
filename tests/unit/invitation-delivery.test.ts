@@ -54,6 +54,14 @@ describe('transactional email provider boundary',()=>{
   vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('secret provider response',{status})));
   expect(await sendTransactionalEmail(email,config)).toEqual({status:'failed',code:'EMAIL_PROVIDER_REJECTED'});
  });
+ it.each(['concurrent_idempotent_requests','resource_locked'])('retries documented 409 %s without changing idempotency key',async name=>{
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({name,message:'private payload must not escape'}),{status:409})));
+  expect(await sendTransactionalEmail(email,config)).toEqual({status:'retryable',code:'EMAIL_PROVIDER_RETRY'});
+ });
+ it('does not retry a conflicting payload under an existing idempotency key',async()=>{
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({name:'invalid_idempotent_request',message:'private original recipient'}),{status:409})));
+  expect(await sendTransactionalEmail(email,config)).toEqual({status:'failed',code:'EMAIL_PROVIDER_REJECTED'});
+ });
  it('treats timeout and ambiguous acceptance as retryable with same event key',async()=>{
   const fetch=vi.fn().mockRejectedValueOnce(new Error('key and recipient must not escape')).mockResolvedValueOnce(new Response('{}',{status:200}));
   vi.stubGlobal('fetch',fetch);

@@ -18,3 +18,7 @@ Pendientes: schema/cola persistente y worker, permisos/estados/consentimiento de
 Referencias primarias revisadas:
 - https://resend.com/docs/api-reference/emails/send-email
 - https://resend.com/docs/dashboard/emails/idempotency-keys
+
+## Extensión de estados y errores transitorios
+
+La política de estados admite solo invitaciones pending no consumidas y anteriores a expiración. La cola rechaza lease activo, retry futuro, eventos vencidos y ocho intentos agotados; reintentos limitados a23horas para conservar el contrato de idempotencia24horas del proveedor. El adaptador distingue409 concurrent_idempotent_requests/resource_locked de payload conflictivo; dos regresiones fallaron antes de la corrección y las39pruebas nuevas pasan después. Typecheck y lint pasan. No se efectuó ningún envío externo.

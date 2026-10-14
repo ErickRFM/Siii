@@ -31,6 +31,11 @@ export async function sendTransactionalEmail(input:TransactionalEmail,configurat
    body:JSON.stringify({from:config.data.from,to:[message.data.to],reply_to:config.data.replyTo,subject:message.data.subject,text:message.data.text}),
   });
   if(response.status===429 || response.status>=500) return {status:'retryable',code:'EMAIL_PROVIDER_RETRY'};
+  if(response.status===409){
+   const detail:unknown=await response.json().catch(()=>null);
+   const transient=z.object({name:z.enum(['concurrent_idempotent_requests','resource_locked'])}).safeParse(detail);
+   return transient.success?{status:'retryable',code:'EMAIL_PROVIDER_RETRY'}:{status:'failed',code:'EMAIL_PROVIDER_REJECTED'};
+  }
   if(!response.ok) return {status:'failed',code:'EMAIL_PROVIDER_REJECTED'};
   const accepted=z.object({id:z.uuid()}).safeParse(await response.json());
   return accepted.success?{status:'accepted',messageId:accepted.data.id}:{status:'retryable',code:'EMAIL_PROVIDER_RETRY'};
