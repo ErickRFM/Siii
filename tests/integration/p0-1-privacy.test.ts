@@ -86,3 +86,17 @@ it('reconciles inherited API RPC/defaults and excessive app defaults additively'
   await admin.query('DROP DATABASE '+database);await admin.query('DROP ROLE '+group);await admin.end();
  }
 },30000);
+
+it('rejects server-access membership of a Data API role before changing public ACLs',async()=>{
+ const admin=new pg.Client({connectionString:raw});await admin.connect();
+ const database='p0_1_api_'+randomBytes(6).toString('hex')+'_test',target=new URL(raw);target.pathname='/'+database;
+ await admin.query('CREATE DATABASE '+database);
+ const client=new pg.Client({connectionString:target.toString()});await client.connect();
+ try{
+  await client.query('GRANT pg_read_server_files TO anon');
+  await expect(client.query(readFileSync('db/migrations/0005_p0_1_runtime_upgrade.sql','utf8'))).rejects.toHaveProperty('message','DATA_API_ROLE_UNSAFE');
+  expect((await client.query("SELECT count(*)::int AS n FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'")).rows[0].n).toBe(0);
+ }finally{
+  await client.query('REVOKE pg_read_server_files FROM anon');await client.end();await admin.query('DROP DATABASE '+database);await admin.end();
+ }
+});

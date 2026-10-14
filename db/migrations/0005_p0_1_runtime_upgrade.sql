@@ -1,8 +1,14 @@
 -- Reconcile an upgrade where unsafe defaults created objects after 0003.
 -- Unknown public tables receive no runtime grants; new capabilities grant explicitly.
 DO $$
-DECLARE item record;col record;
+DECLARE item record;col record;api text;
 BEGIN
+ FOREACH api IN ARRAY ARRAY['anon','authenticated']
+ LOOP
+  IF EXISTS(SELECT FROM pg_roles r JOIN pg_roles a ON a.rolname=api
+   WHERE r.rolname LIKE 'pg_%' AND pg_has_role(a.oid,r.oid,'MEMBER'))
+  THEN RAISE EXCEPTION 'DATA_API_ROLE_UNSAFE'; END IF;
+ END LOOP;
  FOR item IN SELECT c.oid,c.relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN('r','p')
  LOOP
   EXECUTE format('REVOKE ALL ON TABLE public.%I FROM siii_app',item.relname);
@@ -10,7 +16,7 @@ BEGIN
   LOOP EXECUTE format('REVOKE ALL (%I) ON TABLE public.%I FROM siii_app',col.attname,item.relname); END LOOP;
   IF item.relname='security_audit_log' THEN
    EXECUTE format('GRANT SELECT,INSERT ON TABLE public.%I TO siii_app',item.relname);
-  ELSIF item.relname=ANY(ARRAY['institutions','people','platform_users','institution_memberships','role_assignments','auth_sessions','auth_throttle','campuses','programs','academic_terms','curricula','courses']) THEN
+  ELSIF item.relname=ANY(ARRAY['institutions','people','platform_users','institution_memberships','role_assignments','auth_sessions','auth_throttle','campuses','academic_programs','academic_terms','curriculum_versions','academic_courses']) THEN
    EXECUTE format('GRANT SELECT,INSERT,UPDATE ON TABLE public.%I TO siii_app',item.relname);
   END IF;
   EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY',item.relname);

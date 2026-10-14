@@ -1,3 +1,4 @@
+import {assertNoConnectionOverrides} from './connection-url';
 import pg from 'pg';
 import { readMigrationFiles } from 'drizzle-orm/migrator';
 
@@ -7,6 +8,7 @@ export function validateMigrationEnvironment(env: NodeJS.ProcessEnv): string {
   if (!env.DATABASE_URL) throw new Error('DATABASE_URL_REQUIRED');
   const url=new URL(env.DATABASE_URL);
   if (!['postgres:','postgresql:'].includes(url.protocol)) throw new Error('INVALID_DATABASE_URL');
+  assertNoConnectionOverrides(url);
   // Audited production project: block direct and Supabase pooler connections even if mislabeled.
   const productionRef='kkjzbqsaummyralqjqrb';
   if(url.hostname.includes(productionRef) || decodeURIComponent(url.username).split('.').includes(productionRef))

@@ -38,3 +38,14 @@ Archivo runtime-effective-privileges: 6/6; p0-1-privacy: 4/4, incluyendo idempot
 El guard rechaza ADMIN OPTION directo o indirecto de membresías, además de MAINTAIN. Un LOGIN sintético con ADMIN TRUE/INHERIT FALSE/SET FALSE pudo concederse SET y alcanzar TRUNCATE; readiness anterior a esa operación pasó de 200 a 503 tras la corrección. Archivos efectivos/privacidad: 11/11 pruebas pasaron en p0_1_verified_test.
 
 Se preservaron las bases sintéticas anteriores y sus ledgers. Una normalización de fin de archivo de 0004 durante preparación cambió sus bytes respecto al primer fixture local; la rama publicada conserva los bytes revisados y las bases nuevas verifican ese SQL desde cero. No se reescribió ningún ledger ni se cambió SQL histórico 0000–0002 para forzar aceptación. P1 reconcilia la numeración de su migración nueva antes de publicación.
+
+## Verificación conjunta del código final
+En p0_1_release_test (base nueva, solo sintética) se verificó la secuencia 0000–0005 congelada para publicación. Lint/typecheck pasaron; 64 unitarias, 88 de integración y 10 Chromium pasaron; build pasó; npm audit 0.
+
+La revisión detectó y se corrigió antes de publicar 0005 una allowlist con nombres de rutas en vez de nombres SQL. El test positivo de LOGIN restringido ahora INSERT/SELECT/UPDATE las 12 tablas mutables (incluyendo academic_programs, academic_courses y curriculum_versions) y SELECT/INSERT auditoría; UPDATE/DELETE de auditoría rechazados. Se preservan los fixtures anteriores con el borrador previo y se validan bases nuevas, sin reescribir ledgers.
+
+La revisión también amplió los guards: el runtime acepta membresías únicamente del LOGIN y siii_app y rechaza ADMIN OPTION, roles predefinidos de acceso al servidor, DDL/DML/RPC peligrosos y MAINTAIN. La migración rechaza APIroles miembros de roles predefinidos. No se leen archivos del servidor ni se ejecutan sus programas en las pruebas.
+
+Los parámetros URL del driver que pueden sustituir host, usuario, contraseña o base se rechazan antes de conectar; solo se permiten sslmode/application_name sin duplicados ni fragmentos. Fixture, migrador y reversa comparten el guard. El globalSetup provisiona/verifica roles API sintéticos sin depender del orden de los tests.
+
+Revisión de fuente posterior: los hallazgos materiales anteriores resueltos; última observación de fixture cubierta en globalSetup. No se atribuyen al revisor los resultados ejecutados por el agente principal ni se certifica cloud/hosting/lector humano. CI del nuevo SHA pendiente.
