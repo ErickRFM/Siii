@@ -15,7 +15,7 @@ Base `main@7070a46` (catálogos F3 y acceso institucional). Esta rama añade:
 - Unicidad institucional de matrícula y número de empleado, unicidad de sección por periodo.
 - Claves foráneas compuestas `(resource_id, institution_id)` impiden referencias a otra universidad incluso si un handler falla.
 - La inscripción comprueba estudiante y sección activos, y serializa escrituras concurrentes por sección para evitar sobrecupos.
-- Inscripciones retiradas permanecen en historial; el modelo actual no permite reactivación automática de una inscripción retirada.
+- Inscripciones retiradas permanecen en historial; se permite una nueva inscripción posterior como registro nuevo, sin reescribir la anterior, siempre que el cupo siga disponible.
 - Revocar un docente no destruye su asignación; registra `revoked_at`.
 - Estas cuentas académicas son registros institucionales, **no credenciales de acceso**: la vinculación con cuentas de Siii/Compañero requiere otra fase con evidencia.
 
