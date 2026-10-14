@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import type { CatalogResource } from '@/modules/academic/catalog-validation';
+import { useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability, hasScopedCapability, CapabilityState, SecurityActionLink } from './institution-capabilities';
 
 type RecordRow = {
   id: string; code?: string | null; name?: string; version?: string;
@@ -28,6 +29,9 @@ function getError(code?: string) {
     case 'PROGRAM_NOT_ACTIVE': return 'El programa del plan está inactivo o archivado. No se puede reactivar este plan.';
     case 'PROGRAM_NOT_FOUND': return 'El programa seleccionado no existe, está inactivo o pertenece a otra institución.';
     case 'FORBIDDEN': return 'No tienes permisos para realizar esta operación.';
+    case 'MFA_REQUIRED': return 'Configura o verifica tu autenticador para continuar.';
+    case 'STEP_UP_REQUIRED': return 'Confirma tu identidad en seguridad y vuelve a intentar esta operación.';
+    case 'PASSWORD_CHANGE_REQUIRED': return 'Actualiza tu contraseña en seguridad para continuar.';
     case 'ACTIVE_DEPENDENCIES': return 'Este programa tiene planes activos. Resuelve sus dependencias antes de archivarlo.';
     case 'INVALID_TRANSITION': return 'Este cambio de estado no está permitido.';
     case 'ACADEMIC_CONSTRAINT': return 'La operación no cumple una restricción académica.';
@@ -36,7 +40,10 @@ function getError(code?: string) {
     default: return 'No se pudo completar la operación. Intenta nuevamente.';
   }
 }
-export default function AcademicCatalog({institutionId,canManage}:{institutionId:string;canManage:boolean}) {
+export default function AcademicCatalog({institutionId}:{institutionId:string}) {
+  const {data:access,loading:permissionsLoading,error:permissionsError}=useInstitutionCapabilities();
+  const availableTabs=tabs.filter(item=>hasAnyCapability(access,`${item.id}.read`));
+  const accessReady=Boolean(access&&!access.restricted);
   const [tab,setTab] = useState<CatalogResource>('programs');
   const [rows,setRows] = useState<RecordRow[]>([]);
   const [programs,setPrograms] = useState<RecordRow[]>([]);
@@ -44,6 +51,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   const [saving,setSaving] = useState(false);
   const [loadError,setLoadError] = useState('');
   const [mutationError,setMutationError]=useState('');
+  const [securityRequired,setSecurityRequired]=useState(false);
   const [nameError,setNameError]=useState(false);
   const [programsReload,setProgramsReload]=useState(0);
   const mutationErrorRef=useRef<HTMLParagraphElement>(null);
@@ -53,6 +61,10 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
   const [editing,setEditing] = useState<string | null>(null);
   const [editName,setEditName] = useState('');
   const base = `/api/v1/institutions/${institutionId}/academic`;
+  const selectedTab=availableTabs.some(item=>item.id===tab)?tab:availableTabs[0]?.id;
+  const canManage=Boolean(selectedTab&&hasAnyCapability(access,`${selectedTab}.manage`));
+  const canCreate=Boolean(selectedTab&&(hasInstitutionCapability(access,`${selectedTab}.manage`)||(selectedTab==='curricula'&&hasAnyCapability(access,'curricula.manage'))));
+  const canManageRow=(row:RecordRow)=>['active','inactive'].includes(row.status)&&Boolean(selectedTab&&(selectedTab==='programs'?hasScopedCapability(access,'programs.manage','program',row.id):selectedTab==='curricula'?hasScopedCapability(access,'curricula.manage','program',row.programId):selectedTab==='campuses'?hasScopedCapability(access,'campuses.manage','campus',row.id):hasInstitutionCapability(access,`${selectedTab}.manage`)));
 
   const [nextCursor,setNextCursor]=useState<string|null>(null);
   const [history,setHistory]=useState<Array<string|null>>([null]);
@@ -74,7 +86,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
     try{
       const query=new URLSearchParams({limit:'50'});if(cursor)query.set('cursor',cursor);
       const response=await fetch(`${base}/${resource}?${query}`,{cache:'no-store',credentials:'same-origin',signal:controller.signal});
-      if(!response.ok)throw new Error(response.status===403?'FORBIDDEN':'SERVER_ERROR');
+      if(!response.ok){const failure=await response.json().catch(()=>({})) as {error?:{code?:string}};if(['MFA_REQUIRED','STEP_UP_REQUIRED','PASSWORD_CHANGE_REQUIRED'].includes(failure.error?.code??''))setSecurityRequired(true);throw new Error(failure.error?.code??'SERVER_ERROR');}
       const body=await response.json() as {data:RecordRow[];page:{nextCursor:string|null}};
       if(!Array.isArray(body.data)||!body.page)throw new Error('SERVER_ERROR');
       if(activeRequest.current!==controller||signal?.aborted)return false;
@@ -91,11 +103,13 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
     }
   },[base]);
   useEffect(()=>{
+    if(!accessReady||!selectedTab)return;
+    if(selectedTab!==tab){setTab(selectedTab);return;}
     const controller=new AbortController();setHistory([null]);setNextCursor(null);
     void load(tab,controller.signal);return ()=>controller.abort();
-  },[tab,load]);
+  },[tab,load,accessReady,selectedTab]);
   useEffect(()=>{
-    if(tab!=='curricula')return;
+    if(tab!=='curricula'||!accessReady)return;
     const controller=new AbortController();setPrograms([]);setProgramsError('');
     void (async()=>{
       const all:RecordRow[]=[];let cursor:string|null=null;
@@ -109,7 +123,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
       if(!controller.signal.aborted)setPrograms(all.filter(p=>p.status==='active'));
     })().catch(()=>{if(!controller.signal.aborted)setProgramsError('No se pudieron cargar los programas para crear un plan. Actualiza el catálogo.');});
     return ()=>controller.abort();
-  },[base,tab,programsReload]);
+  },[base,tab,programsReload,accessReady]);
   async function page(direction:'previous'|'next'){
     const destination=direction==='next'?nextCursor:history[history.length-2];
     if(destination===undefined)return;
@@ -118,19 +132,19 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
     }
   }
   function moveTab(event:KeyboardEvent<HTMLButtonElement>,resource:CatalogResource){
-    const index=tabs.findIndex(item=>item.id===resource);
-    const next=event.key==='ArrowRight'?(index+1)%tabs.length:event.key==='ArrowLeft'?(index+tabs.length-1)%tabs.length:event.key==='Home'?0:event.key==='End'?tabs.length-1:-1;
+    const index=availableTabs.findIndex(item=>item.id===resource);
+    const next=event.key==='ArrowRight'?(index+1)%availableTabs.length:event.key==='ArrowLeft'?(index+availableTabs.length-1)%availableTabs.length:event.key==='Home'?0:event.key==='End'?availableTabs.length-1:-1;
     if(next<0)return;
-    event.preventDefault();choose(tabs[next].id);
-    requestAnimationFrame(()=>document.getElementById('catalog-tab-'+tabs[next].id)?.focus());
+    event.preventDefault();choose(availableTabs[next].id);
+    requestAnimationFrame(()=>document.getElementById('catalog-tab-'+availableTabs[next].id)?.focus());
   }
 
   function choose(next:CatalogResource) {
-    setTab(next);setNotice('');setLoadError('');setMutationError('');setNameError(false);setSearch('');setEditing(null);
+    setTab(next);setNotice('');setLoadError('');setMutationError('');setSecurityRequired(false);setNameError(false);setSearch('');setEditing(null);
   }
 
   async function mutate(method:'POST'|'PATCH', payload:Record<string,unknown>) {
-    setSaving(true);setNotice('');setMutationError('');setNameError(false);
+    setSaving(true);setNotice('');setMutationError('');setSecurityRequired(false);setNameError(false);
     try {
       const response=await fetch(`${base}/${tab}`,{
         method, credentials:'same-origin', headers:{'Content-Type':'application/json'},
@@ -138,7 +152,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
       });
       if(!response.ok) {
         const body=await response.json().catch(()=>({error:{code:'SERVER_ERROR'}})) as {error?:{code?:string}};
-        setNameError(body.error?.code==='VALIDATION_ERROR'&&method==='PATCH'&&typeof payload.name==='string');setMutationError(getError(body.error?.code));return false;
+        setSecurityRequired(['MFA_REQUIRED','STEP_UP_REQUIRED','PASSWORD_CHANGE_REQUIRED'].includes(body.error?.code??''));setNameError(body.error?.code==='VALIDATION_ERROR'&&method==='PATCH'&&typeof payload.name==='string');setMutationError(getError(body.error?.code));return false;
       }
       setNotice(method==='POST'?'Registro creado correctamente.':'Cambios guardados correctamente.');
       setHistory([null]);await load(tab);return true;
@@ -172,13 +186,15 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
     await mutate('PATCH',{id:row.id,status:next});
   }
 
-  const selected=tabs.find(t=>t.id===tab)!;
+  const selected=tabs.find(t=>t.id===(selectedTab??tab))!;
   const filtered=rows.filter(row=>[row.name??'',row.code??'',row.version??'']
     .some(v=>v.toLocaleLowerCase('es-MX').includes(search.trim().toLocaleLowerCase('es-MX'))));
+  if(permissionsLoading||permissionsError||access?.restricted)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/academic`}/>;
+  if(!access||availableTabs.length===0)return <p className="sii-info-banner">No tienes acceso a catálogos académicos.</p>;
   return (
     <div className="sii-academic">
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
-        {tabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
+        {availableTabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
           className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
           onClick={()=>choose(t.id)}><span aria-hidden="true">{t.icon}</span>{t.label}</button>)}
       </div>
@@ -189,6 +205,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
       {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
       {loadError&&<p className="sii-catalog-error" role="alert">{loadError}</p>}
       {mutationError&&<p className="sii-catalog-error" role="alert" id="catalog-mutation-error" tabIndex={-1} ref={mutationErrorRef}>{mutationError}</p>}
+      {securityRequired&&<SecurityActionLink returnTo={`/dashboard/institutions/${institutionId}/academic`}/>}
       {!online&&<p className="sii-catalog-error" role="status">Sin conexión. Los datos mostrados pueden estar desactualizados. Las operaciones estarán disponibles al reconectar.</p>}
       {programsError&&<p className="sii-catalog-error" role="alert">{programsError}</p>}
       <div id="catalog-panel" className="sii-catalog-layout" role="tabpanel" aria-labelledby={'catalog-tab-'+tab} aria-busy={loading}>
@@ -201,7 +218,7 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
           </div>
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>
           :loadError?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
-          :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canManage?'Utiliza el formulario para agregar el primero.':'Tu institución aún no ha publicado datos en este catálogo.'}</p></div>
+          :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canCreate?'Utiliza el formulario para agregar el primero.':'No hay datos disponibles dentro de tu ámbito en este catálogo.'}</p></div>
           :<div className="sii-catalog-scroll"><table className="sii-catalog-table">
             <thead><tr><th scope="col">Clave / Versión</th><th scope="col">Nombre / Detalle</th><th scope="col">Estado</th>{canManage&&<th scope="col">Acciones</th>}</tr></thead>
             <tbody>{filtered.map(row=><tr key={row.id}>
@@ -212,10 +229,10 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
                   <small>{row.level?typeLabels[row.level]+' · '+typeLabels[row.modality??'']:row.credits!==undefined?`${row.credits} créditos`:row.startDate?`${String(row.startDate).slice(0,10)} — ${String(row.endDate).slice(0,10)}`:''}</small></>}
               </td>
               <td><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></td>
-              {canManage&&<td><div className="sii-catalog-actions">
+              {canManage&&<td>{canManageRow(row)?<div className="sii-catalog-actions">
                 {tab!=='curricula'&&<button type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');setNameError(false);setMutationError('');}}>Editar</button>}
                 <button type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</button>
-              </div></td>}
+              </div>:<span>{row.status==='archived'?'Archivado':'Solo consulta'}</span>}</td>}
             </tr>)}</tbody>
           </table></div>}
           <nav className="sii-catalog-pagination" aria-label="Paginación del catálogo">
@@ -224,13 +241,13 @@ export default function AcademicCatalog({institutionId,canManage}:{institutionId
             <button type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!online} onClick={()=>void page('next')}>Siguiente página</button>
           </nav>
         </section>
-        {canManage&&<aside className="sii-panel sii-catalog-create">
+        {canCreate&&<aside className="sii-panel sii-catalog-create">
           <span className="sii-section-kicker">NUEVO REGISTRO</span><h3>Agregar {selected.label.toLowerCase()}</h3>
           <p>Los cambios quedarán guardados y auditados en la institución actual.</p>
           <form className="sii-catalog-form" onSubmit={e=>void create(e)}>
             {tab==='curricula'?<>
               <label>Programa académico<select name="programId" required defaultValue=""><option value="" disabled>Seleccionar programa</option>
-                {programs.map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}
+                {programs.filter(p=>hasScopedCapability(access,'curricula.manage','program',p.id)).map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}
               </select></label>
               <label>Versión del plan<input name="version" placeholder="2026-A" minLength={2} maxLength={25} pattern="[a-zA-Z0-9][a-zA-Z0-9_-]*" required/></label>
             </>:<>

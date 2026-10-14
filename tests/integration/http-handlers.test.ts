@@ -4,6 +4,7 @@ import {beforeAll,beforeEach,afterAll,describe,it,expect} from 'vitest';
 import pg from 'pg';
 import argon2 from 'argon2';
 import {randomUUID,createHash} from 'node:crypto';
+import {fixtureMfaLogin} from '../support/mfa-fixture';
 const base='http://127.0.0.1:3107',suffix=randomUUID().slice(0,8);
 const username='local-p0-'+suffix,password='Synthetic-password-2026!';
 const sql=new pg.Client({connectionString:testDatabaseUrl});
@@ -13,7 +14,7 @@ async function request(path:string,method='GET',body?:unknown,session=cookie,hea
 }
 async function login(name=username,pass=password){
  const r=await request('/api/v1/auth/login','POST',{username:name,password:pass},'');
- return {r,cookie:r.headers.get('set-cookie')?.split(';')[0]??''};
+ return {r,cookie:await fixtureMfaLogin(sql,base,name,pass,r)};
 }
 describe.sequential('real HTTP handlers and authorization',()=>{
  beforeAll(async()=>{
@@ -176,13 +177,13 @@ describe('institutional handlers',()=>{
   await auth();const subject=await target(false);
   expect((await request('/api/v1/institutions/'+institutionA+'/memberships','POST',{userId:subject.userId,status:'active'})).status).toBe(422);
  });
- it('audits membership creation and tenant-bound status changes',async()=>{
+ it('requires consent instead of global UUID attachment and audits tenant-bound status changes',async()=>{
   await auth();const subject=await target(false);
   const path='/api/v1/institutions/'+institutionA+'/memberships';
-  const created=await request(path,'POST',{userId:subject.userId});expect(created.status).toBe(201);
-  const data=(await created.json()).data;
-  const event=(await sql.query("SELECT request_id FROM security_audit_log WHERE action='membership.create' AND target=$1 ORDER BY created_at DESC LIMIT 1",['user:'+subject.userId])).rows[0];
-  expect(event.request_id).toBe(created.headers.get('x-request-id'));
+  const created=await request(path,'POST',{userId:subject.userId});expect(created.status).toBe(409);
+  expect(await created.json()).toEqual({error:{code:'INVITATION_REQUIRED'}});
+  expect((await sql.query('SELECT count(*)::int AS n FROM institution_memberships WHERE institution_id=$1 AND user_id=$2',[institutionA,subject.userId])).rows[0].n).toBe(0);
+  const data=(await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id',[institutionA,subject.userId])).rows[0];
   const changed=await request(path+'/'+data.id,'PATCH',{status:'suspended',reason:'security_review'});expect(changed.status).toBe(200);
   const status=(await sql.query("SELECT details,request_id FROM security_audit_log WHERE action='membership.status.change' AND target LIKE $1 ORDER BY created_at DESC LIMIT 1",['membership:'+data.id+'%'])).rows[0];
   expect(status.details.before.status).toBe('active');expect(status.details.after.status).toBe('suspended');expect(status.request_id).toBe(changed.headers.get('x-request-id'));
@@ -197,8 +198,9 @@ describe('institutional handlers',()=>{
   expect((await request(path+'/revoke','POST',{membershipId:foreign.membershipId,role:'student'})).status).toBe(404);
   const grant=await request(path+'/assign','POST',{membershipId:subject.membershipId,role:'teacher'});expect(grant.status).toBe(201);
   expect((await request('/api/v1/auth/me','GET',undefined,live.cookie)).status).toBe(401);
-  const event=(await sql.query("SELECT request_id,details FROM security_audit_log WHERE action='role.assign' AND target=$1 ORDER BY created_at DESC LIMIT 1",['membership:'+subject.membershipId+':role:teacher'])).rows[0];
-  expect(event.request_id).toBe(grant.headers.get('x-request-id'));expect(event.details.after.roles).toContain('teacher');
+  const granted=(await grant.json()).data;
+  const event=(await sql.query("SELECT request_id,details FROM security_audit_log WHERE action='role.assign' AND target=$1 ORDER BY created_at DESC LIMIT 1",['grant:'+granted.id])).rows[0];
+  expect(event.request_id).toBe(grant.headers.get('x-request-id'));expect(event.details.after.role).toBe('teacher');
   const second=await login(subject.username);
   const revoked=await request(path+'/revoke','POST',{membershipId:subject.membershipId,role:'teacher'});expect(revoked.status).toBe(200);
   expect((await request('/api/v1/auth/me','GET',undefined,second.cookie)).status).toBe(401);

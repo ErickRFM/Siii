@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import { hasPermission } from '@/shared/auth/roles';
 import SiiAppShell from '@/components/sii-app-shell';
 import AcademicCatalog from '@/components/academic-catalog';
 
@@ -14,8 +13,7 @@ export default async function AcademicCatalogPage({ params }: PageProps) {
   if (user.mustChangePassword) redirect('/dashboard/security');
   const { institutionId } = await params;
   const access = (await getInstitutionAccess(user.id)).find(item => item.institutionId === institutionId);
-  if (!access || !hasPermission(access.roles, 'academic.read')) notFound();
-  const canManage = hasPermission(access.roles, 'academic.manage');
+  if (!access) notFound();
   return (
     <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="academic" institutionId={institutionId}>
       <div className="sii-page-eyebrow">GESTIÓN ACADÉMICA <span className="sii-page-eyebrow-line"/></div>
@@ -24,7 +22,7 @@ export default async function AcademicCatalogPage({ params }: PageProps) {
           <p>{access.institutionName} · Administra programas, materias, campus, periodos y versiones de planes.</p></div>
         <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>
       </div>
-      <AcademicCatalog institutionId={institutionId} canManage={canManage} />
+      <AcademicCatalog institutionId={institutionId} />
     </SiiAppShell>
   );
 }

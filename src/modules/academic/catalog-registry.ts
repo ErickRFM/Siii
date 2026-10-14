@@ -1,4 +1,4 @@
-import {and,eq,desc,getTableColumns,type InferInsertModel} from 'drizzle-orm';
+import {and,eq,desc,getTableColumns,sql,type SQL,type InferInsertModel} from 'drizzle-orm';
 import type {PgUpdateSetSource} from 'drizzle-orm/pg-core';
 import type {z} from 'zod';
 import {db} from '@/infrastructure/database';
@@ -14,7 +14,7 @@ type Definition={
  insert(tx:Transaction,institutionId:string,payload:unknown):Promise<CatalogRow>;
  find(tx:Transaction,institutionId:string,id:string):Promise<CatalogRow|null>;
  update(tx:Transaction,institutionId:string,change:CatalogPatch):Promise<CatalogRow|null>;
- list(institutionId:string,page:PageInput):Promise<Array<CatalogRow&{cursorAt:string}>>;
+ list(institutionId:string,page:PageInput,visibility?:SQL):Promise<Array<CatalogRow&{cursorAt:string}>>;
  publicRow(row:CatalogRow):Record<string,unknown>;
 };
 function definition<T extends Table,S extends z.ZodType>(
@@ -39,9 +39,9 @@ function definition<T extends Table,S extends z.ZodType>(
    const [row]=await tx.update(table).set(set).where(and(eq(table.id,change.id),eq(table.institutionId,institutionId))).returning();
    return row as unknown as CatalogRow ?? null;
   },
-  async list(institutionId,page){
+  async list(institutionId,page,visibility=sql`false`){
    const rows=await db.select({...getTableColumns(table),cursorAt:cursorTimestamp(table.createdAt)}).from(table)
-    .where(and(eq(table.institutionId,institutionId),cursorPredicate(page,table.createdAt,table.id)))
+    .where(and(eq(table.institutionId,institutionId),visibility,cursorPredicate(page,table.createdAt,table.id)))
     .orderBy(desc(table.createdAt),desc(table.id)).limit(page.limit+1);
    return rows as unknown as Array<CatalogRow&{cursorAt:string}>;
   },

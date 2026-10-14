@@ -5,6 +5,7 @@ export const entityStatusEnum = pgEnum('entity_status', ['active', 'inactive', '
 export const userRoleEnum = pgEnum('user_role', [
   'student', 'workshop_participant', 'teacher_pending', 'teacher',
   'tutor', 'coordinator', 'admin', 'super_admin',
+  'guest', 'control_escolar', 'workshop_facilitator',
 ]);
 export const institutions = pgTable('institutions', {
   id: uuid('id').primaryKey().defaultRandom(),
