@@ -1,6 +1,6 @@
 # Informe de fase P0 — 2026-10-14
 
-Estado: implementación local en revisión; **no declarar cerrada la DoD ni promover a producción** hasta resolver docs/BLOCKERS.md. Rama feat/p0-hardening, base c7334cdf.
+Estado: implementación verificada localmente y en CI; **no declarar cerrada la DoD ni promover a producción** hasta resolver docs/BLOCKERS.md. Rama feat/p0-hardening, base c7334cdf.
 
 ## 1. Archivos y migración
 
@@ -31,7 +31,7 @@ Entorno: PostgreSQL 17.10 portable en 127.0.0.1:55432, bases locales desechables
 
 Pruebas de migración: base vacía, segunda ejecución, baseline sin ledger con datos existentes, conservación de hora legacy, drift/ledger alterado, rechazo sin crear ledger, privilegios/RLS/defaults y restricciones. HTTP real verifica login, CSRF, sesión/cuenta/tenant, IDOR/mass assignment de los cinco catálogos, membresías/roles, cursores y auditoría. El servidor usa LOGIN efímero de siii_app; una prueba aparte rechaza credenciales de propietario.
 
-Evidencia de correcciones RED → GREEN: timing de login inexistente/real; revocación durante cambio de contraseña (200 → 401); expiración mientras espera bloqueo (200 → 401); alias SQL de baseline y ausencia de ledger ante rechazo; lector de cursor/tab keys/offline/contraste; fallo de auditoría revierte curso creado.
+Evidencia de correcciones RED → GREEN: timing de login inexistente/real; revocación durante cambio de contraseña (200 → 401); expiración mientras espera bloqueo (200 → 401); alias SQL de baseline y ausencia de ledger ante rechazo; paginación, teclado de tabs, offline y contraste; fallo de auditoría revierte curso creado.
 
 Medición local Argon2id (7 muestras, concurrencia 1, Node v24.18.0 Windows x64): hash mediana 125 ms / máximo 137 ms; verify mediana 126 ms / máximo 133 ms; pico RSS del proceso 105176 KiB. Incluye runtime y memoria nativa; no extrapolar a hosting ni concurrencia de producción.
 
@@ -39,7 +39,7 @@ Comprobación del build de producción local: 11 scripts con nonce que coincide 
 
 Auditoría Supabase read-only: docs/audit/P0_PRODUCTION_READONLY.json. Solo metadata: 12 tablas públicas sin RLS, grants efectivos anon/authenticated prohibidos ausentes, defaults abiertos, ledger Supabase presente y Drizzle ausente.
 
-PR borrador: https://github.com/ErickRFM/Siii/pull/19. Los runs iniciales 38524854646 (push) y 38524886227 (PR) pasaron sobre 9d72c00a. Revisión independiente: 4 importantes y 2 menores atendidos; resolución y límites en docs/audit/P0_REVIEW.md. La CI del commit corregido se registrará antes del cierre.
+PR borrador: https://github.com/ErickRFM/Siii/pull/19. Los runs iniciales 38524854646 (push) y 38524886227 (PR) pasaron sobre 9d72c00a. Revisión independiente: 4 importantes y 2 menores atendidos; resolución y límites en docs/audit/P0_REVIEW.md. CI de correcciones sobre 27262fe1: [PR 38527323492](https://github.com/ErickRFM/Siii/actions/runs/38527323492) y [push 38527318085](https://github.com/ErickRFM/Siii/actions/runs/38527318085) completados con success en todos los pasos; preview Vercel también SUCCESS. Los [checks del PR](https://github.com/ErickRFM/Siii/pull/19/checks) muestran el estado de cualquier commit documental posterior. La DoD completa permanece pendiente de las puertas ambientales, no de esos checks.
 
 ## 3. No realizado y motivo
 

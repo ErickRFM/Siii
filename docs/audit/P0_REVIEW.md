@@ -15,7 +15,7 @@ También se asegura pool.end() si falla la adquisición inicial de conexión del
 
 ## Comportamientos que el revisor no certificó y decisión del ejecutor
 
-- **CI remota:** los dos runs iniciales (push y PR) de 9d72c00a pasaron; el commit de correcciones necesita su propio CI verde.
+- **CI remota:** los dos runs iniciales (push y PR) de 9d72c00a pasaron; el commit corregido 27262fe1 también pasó push/PR CI completo (runs 38527318085/38527323492).
 - **CSP/hidratación de producción:** verificación local separada pasó: 11 scripts con nonce coincidente, nonce distinto por petición, HSTS, sin unsafe-eval ni violaciones CSP, botón hidratado funcional.
 - **Resultados locales:** comprobados por comandos del ejecutor en el informe de fase; no se atribuyen al revisor.
 - **Lector de pantalla:** pendiente de evidencia humana por flujo. Coste si se omite: posibles barreras que axe/teclado no detectan.
