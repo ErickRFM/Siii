@@ -1,88 +1,46 @@
-# P0.1 F02 — Laboratorio Argon2 nativo preparado
+# P0.1 F02 — Argon2 en laboratorio Linux aprobado
 
-Estado: **preparado; medición Linux pendiente de aprobación y ejecución**. No se ejecutó el benchmark en Windows ni se lanzó un workflow. La validación del CLI fue únicamente help/dry-run, funciones puras, YAML, typecheck y lint; esos comandos no produjeron contraseñas, hashes ni latencias. Separadamente, la suite unitaria vigente pasó con 9 archivos y 64 tests a las 12:38 (3.19 s); no es evidencia de rendimiento Linux.
+Medición ejecutada una vez con aprobación humana del 2026-10-14. [Run 38618968477](https://github.com/ErickRFM/Siii/actions/runs/38618968477) terminó success, SHA f7ee7b7c428cdebdff8a8897ad5b6c5dd0b153d8. Se retiró SIII_ARGON2_LAB_APPROVED al terminar; el laboratorio permanece deshabilitado por defecto.
 
-## Alcance y parámetros conservados
+## Resultado observado
 
-scripts/benchmark-argon2.ts utiliza los helpers reales src/shared/auth/password.ts. Rechaza cambios en Argon2id 65536 KiB / timeCost 3 / parallelism 1 / hashLength 32. Las contraseñas son aleatorias, sintéticas y se mantienen solo en memoria; no existen flags para introducir una contraseña o un hash y ningún valor criptográfico se imprime o se escribe al artefacto.
+Docker Linux/amd64, Node v24.21.0, libUV 1.52.1/pool 4, argon2 0.45.1. cgroup v2 verificó exactamente 1 CPU y 1073741824 bytes de memoria, sin swap adicional. Imagen SHA256 470015c1ab1577c19efce2e80cdad4afd9c682cf8f4dcf3dccae5abfd9113397.
 
-| Escenario | Componente medido y resultado comprobado |
-| --- | --- |
-| verify_valid | verifyPassword(hash sintético válido, contraseña correcta), resultado true. |
-| verify_invalid | verifyPassword(mismo hash, contraseña sintética distinta), resultado false. |
-| verify_dummy | verifyPassword(null, contraseña sintética), ruta dummy real y resultado false. |
-| password_change_native | Verificación de contraseña actual y hash de reemplazo con parámetros vigentes. El setup verifica que el reemplazo funciona, rechaza la contraseña anterior y no necesita rehash. |
+Se conservaron Argon2id v19, memoria 65536 KiB, timeCost 3, parallelism 1 y hashLength 32. Setup verificó contraseña correcta, incorrecta, dummy y reemplazo sin necesidad de rehash. Warmup: dos operaciones por escenario. La medición completa duró 61300,40 ms: 384 muestras (24 por escenario/concurrencia), 399 operaciones de helper incluidas preparación/warmup, 0 errores y ninguna muestra incompleta. Concurrencia máxima 8; saturación realizada dentro de los límites. Pico RSS muestreado y maxRSS del kernel: 361316352 bytes (344,58 MiB).
 
-El componente de cambio mide old verify + new hash; la comprobación adicional del reemplazo queda fuera de esa latencia, en setup. No modifica sesiones, cookies, usuarios ni bases de datos.
+| Concurrencia | Verificación válida p50 / p95 ms | Inválida p95 ms | Dummy p95 ms | Cambio nativo p95 ms |
+|---|---:|---:|---:|---:|
+| 1 | 98,64 / 113,98 | 113,90 | 111,12 | 219,99 |
+| 2 | 205,47 / 264,28 | 262,61 | 205,86 | 472,77 |
+| 4 | 583,18 / 602,18 | 600,10 | 609,54 | 1199,64 |
+| 8 | 1100,33 / 1192,45 | 1195,48 | 1201,29 | 2880,48 |
 
-Esto mide el componente criptográfico nativo con su cola libUV y overhead del helper. No mide login HTTP completo, cuenta bloqueada, transacciones, session revocation, cold start de hosting ni red. Esos comportamientos corresponden a la integración existente; este laboratorio no sustituye sus pruebas.
+Fuente reproducible: P0_1_ARGON2_LINUX_REPORT.json, reporte agregado original. Incluye commit, digests de helper/lockfile/imagen, Node/NAPI/argon2, CPU, cgroup/throttling, muestras y RSS por caso. Percentiles nearest-rank; no afirmación estadística de igualdad de tiempos con 24 muestras.
 
-## Laboratorio concreto propuesto
+## Alcance y decisión
 
-Workflow preparado: .github/workflows/argon2-lab.yml. Admite push únicamente a chore/p0-1-release-gates y únicamente si cambian scripts/benchmark-argon2.ts o el propio workflow; permite medir antes del merge. El job exige vars.SIII_ARGON2_LAB_APPROVED == '1'; sin esa variable omite el job y no genera hashes. Conserva workflow_dispatch, que además requiere approvedRepresentative=true. No contiene pull_request ni horarios.
+La carga mide los helpers nativos reales, incluida la cola libUV. El cambio de contraseña mide old verify + new hash; su validez se comprueba en preparación. Se mantienen los parámetros actuales: la prueba no mostró errores, timeouts ni saturación de memoria dentro del perfil aprobado. Concurrencia 8 incrementa la cola y la latencia; este resultado sirve para dimensionar y limitar cargas en ese perfil.
 
-GitHub requiere el archivo workflow_dispatch en la rama predeterminada para admitir el evento manual. Por eso el push acotado permite ejecutar desde la rama P0.1 sin adelantar su merge. [Documentación primaria de GitHub](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+No mide login HTTP completo, bloqueo de cuenta, transacciones, revocación de sesiones, red, cold start ni memoria de Next.js. Esos flujos tienen pruebas de integración distintas. El proyecto Vercel declara Node24.x, pero su presupuesto efectivo de CPU/memoria no está disponible. No se certifica capacidad del hosting real ni un SLO de producción, y no se extrapola Windows.
 
-El agente principal, solo después de aprobación humana, establecería la variable temporal, publicaría el artefacto preparado mediante un push autorizado y retiraría la variable al terminar una ejecución. En esta subtarea no se modificaron variables del repositorio ni se hizo push/dispatch. Un job omitido carece de mediciones y no cierra F02.
+## Límites y privacidad
 
-Perfil propuesto para aprobación humana: GitHub runner ubuntu-24.04, Docker Linux/amd64, Node 24, 1 vCPU, 1 GiB de memoria sin swap adicional, UV_THREADPOOL_SIZE=4. La imagen node:24-bookworm-slim se resuelve a una identidad SHA256 y esa identidad se reutiliza para instalación y medición. Las dependencias se instalan desde package-lock.json en Linux. El contenedor de medición tiene network none, root filesystem read-only y únicamente /results writable para el JSON agregado.
+Máximo CLI 180 s (ejecución 120 s), 512 operaciones de helper/1024 llamadas nativas conservadoras, concurrencia 8, timeout individual 15 s, RSS 768 MiB, sampling 20 ms. Watchdog/timeout externo impiden que continúe una carga abortada; las APIs nativas no ofrecen cancelación.
 
-El proyecto Vercel observado por el agente principal declara nodeVersion=24.x; su resourceConfig no está disponible. Aprobar este perfil permitiría evidencia de laboratorio representativo declarado, sin afirmar equivalencia de CPU/memoria ni comportamiento del hosting de producción. La validación del destino real y cualquier SLO HTTP siguen requiriendo su evidencia propia.
+El contenedor de medida tenía network none, filesystem read-only, capabilities retiradas, no-new-privileges y salida escribible solo para el reporte agregado. No se usaron HTTP, SQL ni credenciales reales; contraseñas sintéticas solo en memoria. El JSON carece de contraseñas, hashes de contraseñas y variables secretas.
 
-No se publicaron estos archivos ni se autorizó/ejecutó el job en esta subtarea. La aprobación del laboratorio, la variable temporal y el push autorizado deben quedar registrados antes de la ejecución; el evento manual requiere además que el workflow esté disponible en la rama predeterminada.
+## Reproducir requiere una nueva aprobación
 
-## Carga, límites y métricas
+El workflow admite push acotado al CLI/workflow en chore/p0-1-release-gates con la variable de aprobación explícita. La variable ya fue retirada. workflow_dispatch requiere que el archivo exista en default branch y exige además approvedRepresentative=true. No hay ejecución por PR ni por horarios.
 
-Setup funcional y warmup de dos operaciones por escenario; 24 operaciones por escenario/concurrencia. Se ejecutan 1, 2 y 4. La saturación 8 es opcional y solo se intenta si queda presupuesto conservador de operaciones, CPU/tiempo y RSS; si no, saturation8.skipReason documenta la omisión.
-
-| Límite | Valor |
-| --- | --- |
-| Runtime configurado / máximo permitido | 120 s / 180 s, watchdog interno. |
-| Operaciones de helper / llamadas nativas conservadoras | 512 / 1024; verify reserva dos para su fallback excepcional. |
-| Concurrencia máxima | 8 operaciones; UV pool 4 y Argon2 parallelism 1. |
-| Timeout de operación | 15 s; se detiene la carga sin reemplazar trabajo nativo pendiente. |
-| RSS máximo | 768 MiB; aborta al superar el cap. |
-| Sampling RSS | 20 ms, más maxRSS del kernel al finalizar. |
-| Contenedor / job | Timeout externo 200 s con kill-after 5 s / job 12 minutos. |
-| Recursos obligatorios | cgroup v2 con cpu.max equivalente a 1 CPU y memory.max de 1073741824 bytes. |
-
-Las APIs nativas no ofrecen cancelación: el timeout deja de encolar y termina el proceso; el watchdog/timeout de contenedor acotan el trabajo pendiente. Nunca reduce el coste criptográfico para completar la carga.
-
-El JSON contiene por caso/concurrencia: requested/completed/errors, duración, p50/p95/max por nearest-rank, CPU user/system, RSS máximo muestreado y máximo in-flight. Incluye peak RSS global y maxRSS del kernel, cgroup cpu.max/memory.max/memory.current/memory.peak/cpu.stat antes/después, Node/libUV/NAPI/argon2 version, arquitectura, kernel, UV pool, commit, identidad de imagen y digests de fuente/lockfile. memory.peak es acumulado del cgroup y se conserva el valor inicial; no se presenta como RSS exclusivo de Argon2.
-
-Un abort deja un reporte parcial cuando es posible y falla el job. Errors, muestras incompletas, report ausente o status distinto de complete impiden considerar válida la medición. El artefacto contiene únicamente .argon2-lab/argon2-lab-report.json, con retención de siete días; no se adjuntan fuentes, env, logs ni hashes de contraseñas.
-
-## Comandos disponibles
-
-Dry-run local, sin medición ni generación de credenciales:
-
-~~~powershell
-node --import tsx scripts/benchmark-argon2.ts --help
-node --import tsx scripts/benchmark-argon2.ts --dry-run --saturation-8
-npm run typecheck -- --incremental false
-node node_modules/eslint/bin/eslint.js scripts/benchmark-argon2.ts
-~~~
-
-En el contenedor Linux aprobado, con SIII_ARGON2_LAB_APPROVED=1 y UV_THREADPOOL_SIZE=4, el workflow ejecutaría:
+Help/dry-run son LOCAL_ONLY, sin hashing:
 
 ~~~sh
-node --import tsx scripts/benchmark-argon2.ts \
-  --run --approved-representative --saturation-8 \
-  --operations 24 --warmup 2 --runtime-seconds 120 \
-  --output /results/argon2-lab-report.json
+node --import tsx scripts/benchmark-argon2.ts --help
+node --import tsx scripts/benchmark-argon2.ts --dry-run --saturation-8
 ~~~
 
-Los guards de plataforma, Node, aprobación y cgroup se ejecutan antes de importar los helpers nativos o generar contraseñas. Los mensajes de error solo incluyen códigos estables y no serializan excepciones del driver/addon.
+Una nueva medida debe registrar aprobación y volver a usar el perfil Linux/Node24/1CPU/1GiB. No modificar parámetros para hacer pasar el ensayo.
 
-## Evidencia actual y referencias
-
-Validación LOCAL_ONLY: comprobaciones puras RED→GREEN para percentiles, límites/flags inválidos y rechazo Windows/Node22/no aprobación; help/dry-run emitieron measurementsPerformed=false. El YAML fue parseado y se comprobaron su rama/paths acotados y los gates de variable/input. Typecheck y lint del CLI pasaron. No hay valores de rendimiento Linux que reportar; F02 permanece pendiente de ejecución aprobada.
-
-Referencias primarias: [Node 24 process/resourceUsage](https://nodejs.org/docs/latest-v24.x/api/process.html#processresourceusage), [Node/libUV threadpool](https://nodejs.org/api/cli.html#uv_threadpool_sizesize), [cgroup v2](https://docs.kernel.org/admin-guide/cgroup-v2.html), [límites Docker](https://docs.docker.com/engine/containers/resource_constraints/), y el código local node_modules/argon2 (versión 0.45.1 observada durante preparación; el reporte recoge la instalada al ejecutar).
-
-
-## Laboratorio aprobado
-El usuario aprobó una ejecución del laboratorio Linux/Node24/1 vCPU/1 GiB el 2026-10-14. Se habilita temporalmente SIII_ARGON2_LAB_APPROVED para un único push del workflow/CLI y se retirará al finalizar el job. Esta aprobación cubre la medida nativa sintética; no acredita límites reales del hosting ni latencia HTTP completa.
-
-La CI de P0.1 2ee29bff pasó: runs38614239243 y38614243402; Vercel preview también pasó. La revisión independiente final de fuente cerró los hallazgos de grants, roles, limpieza, URL y fixtures. P0 y las puertas cloud/lector humano/capacidad de hosting siguen pendientes.
+Referencias: [Node24 resourceUsage](https://nodejs.org/docs/latest-v24.x/api/process.html#processresourceusage), [libUV pool](https://nodejs.org/api/cli.html#uv_threadpool_sizesize), [cgroup v2](https://docs.kernel.org/admin-guide/cgroup-v2.html), [Docker limits](https://docs.docker.com/engine/containers/resource_constraints/).
 
