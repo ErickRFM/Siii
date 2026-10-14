@@ -27,6 +27,7 @@ export default async function InstitutionPage({ params }: PageProps) {
           <div className="sii-role-list">{access.roles.map(role => <span className="sii-role-pill" key={role}>{ROLE_LABELS[role]}</span>)}</div>
           {hasPermission(access.roles, 'academic.read') && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
           {hasPermission(access.roles, 'grades.publish') && <Link href={`/dashboard/institutions/${institutionId}/grading`} className="sii-outline-button">Abrir libro de calificaciones →</Link>}
+          {hasPermission(access.roles, 'academic.manage') && <Link href={`/dashboard/institutions/${institutionId}/scheduling`} className="sii-outline-button">Abrir planificador de horarios →</Link>}
           <div className="sii-info-banner">Ya puedes administrar programas, materias, campus, periodos y versiones de planes según tus permisos. Matrículas, grupos y calificaciones siguen en desarrollo.</div>
         </section>
         <aside className="sii-panel sii-security-aside"><span className="sii-security-shield" aria-hidden="true">▥</span>
