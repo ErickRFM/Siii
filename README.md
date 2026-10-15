@@ -4,9 +4,9 @@ Monolito modular universitario: Next.js App Router, TypeScript, PostgreSQL/Drizz
 
 ## Estado
 - F1 foundation inicial con API liveness/readiness y conexión PostgreSQL.
-- F2 parcial: login, sesión, cambio de contraseña, tabla de membresías y roles, políticas centralizadas, operaciones protegidas de membresía y asignación y una interfaz inicial de login/instituciones.
-- F3-F8 **NO implementadas** todavía: expedientes, matrículas, docentes, materias, inscripciones, ocurrencias, calificaciones y sincronización Ktor.
-- Interfaz nueva en fase shell; las tarjetas de módulos no simulan operaciones.
+- F2 parcial: login, sesión, cambio de contraseña, membresías y roles. Las ramas dependientes P1 incorporan MFA, capacidades por ámbito, delegación temporal e invitaciones con consentimiento; el ciclo completo administrativo de usuarios sigue pendiente.
+- F3 parcial: catálogos de programas, materias, planes, periodos y campus con endpoints reales. Siguen pendientes expedientes, matrículas, gestión de docentes, grupos, inscripciones, ocurrencias, calificaciones y sincronización Ktor.
+- Login, seguridad, catálogos, roles e invitaciones tienen flujos conectados en sus respectivas ramas. Las tarjetas de módulos pendientes no simulan operaciones.
 
 ## Local
 1. `npm ci`
@@ -27,7 +27,7 @@ Monolito modular universitario: Next.js App Router, TypeScript, PostgreSQL/Drizz
 
 ## Seguridad y pendientes
 - No compartir secretos ni enlaces internos de pooler en frontend/Git.
-- No utilizar para datos personales reales hasta completar la auditoría de seguridad, login rate limiting por IP, provisión de usuarios/invitaciones, revocación/recuperación y pruebas de integración sobre PostgreSQL real.
+- No habilitar datos personales reales hasta superar las puertas de docs/BLOCKERS.md y completar la revisión, CI e integración controlada. Las pruebas actuales usan PostgreSQL y datos sintéticos; la recepción real de correo sigue pendiente.
 - No sustituye Compañero: requiere adaptador Ktor independiente y validación de contratos.
 - Véase `docs/architecture/SUPABASE_ADAPTER.md` y `docs/ux/PRODUCT_INFORMATION_ARCHITECTURE.md`.
 
@@ -57,4 +57,14 @@ Autenticación TOTP real, recuperación de un uso y step-up disponibles en login
 
 ## P1 — Permisos en rama dependiente
 
-Capacidades verificadas por backend, concesiones por institución/programa/campus, delegación temporal, protección del último administrador y MFA obligatorio. API y UI de roles conectadas; véase [P1_SCOPES_REPORT.md](docs/audit/P1_SCOPES_REPORT.md). La vinculación por UUID requiere invitación con consentimiento (409 INVITATION_REQUIRED). Invitaciones, ciclo completo de usuarios y administración siguen en ejecución.
+Capacidades verificadas por backend, concesiones por institución/programa/campus, delegación temporal, protección del último administrador y MFA obligatorio. API y UI de roles conectadas; véase [P1_SCOPES_REPORT.md](docs/audit/P1_SCOPES_REPORT.md). La vinculación por UUID requiere invitación con consentimiento (409 INVITATION_REQUIRED). Invitaciones están implementadas en la rama dependiente F08 y pendientes de validación final e integración; el ciclo completo de usuarios y administración sigue en ejecución.
+
+## P1 — Invitaciones con consentimiento en rama dependiente
+
+Emisión, consulta paginada, reenvío y revocación reales en /dashboard/institutions/:institutionId/invitations. La aceptación o rechazo se realiza en /invitations/accept, con token de un uso, caducidad, consentimiento explícito y prueba propia de cuenta para usuarios existentes. Se conservan tenant, ámbito, duración, restricciones de delegación, MFA y auditoría de F07. La migración 0008 agrega invitaciones, outbox cifrado y prueba de email; las migraciones anteriores permanecen intactas.
+
+Las APIs institucionales GET/POST /api/v1/institutions/:institutionId/invitations y POST de /:invitationId/resend o /revoke están conectadas a UI. Las APIs POST /api/v1/invitations/preview, /accept y /reject validan el bearer y el consentimiento. El enlace transporta el token en fragmento; se retira antes de inicializar el router y solo permanece en memoria. Para recargar, reabrir el enlace original del correo.
+
+El lote real npx tsx worker/invitations.ts usa un LOGIN restringido a siii_app, leases y CAS, payload/remitente inmutables e idempotencia por evento. Su scheduler operativo sigue pendiente. Configurar solo en servidor SIII_PUBLIC_ORIGIN, SIII_INVITATION_KEYS, SIII_INVITATION_ACTIVE_KEY_ID, RESEND_API_KEY, SIII_EMAIL_FROM y SIII_EMAIL_REPLY_TO, además de las claves MFA. Sin configuración de correo, la entrega queda pendiente con EMAIL_NOT_CONFIGURED; accepted del proveedor no equivale a entrega al buzón. No se enviaron correos externos en las pruebas.
+
+Evidencia dirigida confirmada: 38 pruebas de integración F08 y 7 de Chromium. La verificación completa ya confirma 592 unitarias y 177 integraciones, con typecheck/lint verdes; Chromium completo, build, audit, CI y merge siguen pendientes de registro. La segunda revisión de fuente es favorable, condicionada a QA y los límites externos. Configuración, endpoints, seguridad y límites: [P1_INVITATIONS_REPORT.md](docs/audit/P1_INVITATIONS_REPORT.md). Las puertas de [BLOCKERS.md](docs/BLOCKERS.md) siguen abiertas; esta rama no constituye una promoción a producción ni el cierre de P1.

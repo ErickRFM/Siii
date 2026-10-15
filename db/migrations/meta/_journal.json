@@ -57,6 +57,13 @@
       "when": 1792001500000,
       "tag": "0007_p1_permission_scopes",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792017000000,
+      "tag": "0008_p1_invitations",
+      "breakpoints": true
     }
   ]
 }

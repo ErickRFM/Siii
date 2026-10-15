@@ -21,6 +21,9 @@ export default async function setup(){
  // Global setup passes process.env to workers as well as the application child.
  process.env.SIII_MFA_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
  process.env.SIII_MFA_ACTIVE_KEY_ID ||= 'fixture';
+ process.env.SIII_INVITATION_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
+ process.env.SIII_INVITATION_ACTIVE_KEY_ID ||= 'fixture';
+ process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
  const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,NODE_ENV:'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS||JSON.stringify({fixture:randomBytes(32).toString('base64')}),SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID||'fixture',NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
  closeSync(log);
  async function stop(){
