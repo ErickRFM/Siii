@@ -1,0 +1,26 @@
+{
+  "kind": "SIII_CLOUD_POSTGRES_REHEARSAL",
+  "projectRef": "vsnrbjexusidlvhkhmqg",
+  "phase": "prepare",
+  "at": "2026-10-15T19:27:40.289Z",
+  "data": {
+    "databases": [
+      "p01_empty_rehearsal",
+      "p01_legacy_rehearsal"
+    ],
+    "roles": {
+      "owner": "p01_eca305341546_owner",
+      "creator": "p01_eca305341546_creator",
+      "service": "p01_eca305341546_service",
+      "dashboard": "p01_eca305341546_dashboard",
+      "runtime": "p01_eca305341546_runtime"
+    },
+    "inventoryRecordedBeforeApply": true,
+    "resourcesPreserved": true
+  },
+  "limits": [
+    "Disposable cloud PostgreSQL; managed postgres defaults/migrations remain blocked",
+    "No Supabase Auth, Data API, Storage, Realtime or hosting certification",
+    "Date reversal is partial recovery, not full migration rollback or an application-ready schema"
+  ]
+}
