@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { SiiBrand } from '@/components/sii-brand';
 import SiiThemeToggle from '@/components/sii-theme-toggle';
 
@@ -161,7 +162,7 @@ export default function LoginPage() {
               {loading ? 'Validando acceso…' : 'Entrar al sistema'} <span aria-hidden="true">→</span>
             </button>
           </form>}
-          <p className="sii-auth-help"><strong>¿Problemas para acceder?</strong> Solicita ayuda a la administración de tu institución.</p>
+          <p className="sii-auth-help"><Link href="/password/forgot">Recuperar mi contraseña</Link><br/><strong>¿Problemas para acceder?</strong> Solicita ayuda a la administración de tu institución.</p>
           <div className="sii-auth-divider"><span>ACCESO PERSONALIZADO</span></div>
           <div className="sii-auth-role-notice">
             <span className="sii-auth-role-glyph" aria-hidden="true">▣</span>

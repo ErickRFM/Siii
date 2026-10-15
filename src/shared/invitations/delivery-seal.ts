@@ -1,62 +1,6 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import { z } from 'zod';
-import { transactionalEmailSchema, type TransactionalEmail } from '../../infrastructure/email/transactional';
-
-const keyId=z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
-const envelopeSchema=z.object({version:z.literal(1),keyId,iv:z.string().length(16),tag:z.string().length(22),ciphertext:z.string().min(1).max(700000)}).strict();
-function invalid():never {throw new Error('INVITATION_DELIVERY_INVALID');}
-function unavailable():never {throw new Error('INVITATION_KEY_UNAVAILABLE');}
-function keyring():Record<string,Buffer> {
- try {
-  const ring:unknown=JSON.parse(process.env.SIII_INVITATION_KEYS??'');
-  if(!ring || typeof ring!=='object' || Array.isArray(ring)) return unavailable();
-  const entries=Object.entries(ring);if(entries.length<1 || entries.length>16) return unavailable();
-  const result:Record<string,Buffer>=Object.create(null);
-  for(const [id,key] of entries){
-   if(!keyId.safeParse(id).success || typeof key!=='string' || !/^[A-Za-z0-9+/]{43}=$/.test(key)) return unavailable();
-   const bytes=Buffer.from(key,'base64');if(bytes.length!==32 || bytes.toString('base64')!==key) return unavailable();
-   result[id]=bytes;
-  }
-  return result;
- }catch{return unavailable();}
-}
-function aad(eventId:string,institutionId:string,id:string):Buffer {
- if(!z.uuid().safeParse(eventId).success || !z.uuid().safeParse(institutionId).success) return invalid();
- return Buffer.from(JSON.stringify(['SIII:invitation-delivery',1,id,eventId.toLowerCase(),institutionId.toLowerCase()]));
-}
-function binary(value:string,expectedLength?:number):Buffer {
- if(!/^[A-Za-z0-9_-]+$/.test(value)) return invalid();
- const bytes=Buffer.from(value,'base64url');
- if(bytes.toString('base64url')!==value || (expectedLength!==undefined && bytes.length!==expectedLength)) return invalid();
- return bytes;
-}
-/** The durable queue persists this envelope; never recipient addresses or bearer links in logs or plain queue payloads. */
-export function sealInvitationDelivery(message:TransactionalEmail,eventId:string,institutionId:string):string {
- const parsed=transactionalEmailSchema.safeParse(message);
- if(!parsed.success || parsed.data.eventId!==eventId) return invalid();
- const ring=keyring(),active=process.env.SIII_INVITATION_ACTIVE_KEY_ID;
- if(!active || !keyId.safeParse(active).success || !Object.hasOwn(ring,active)) return unavailable();
- const context=aad(eventId,institutionId,active);
- const plaintext=Buffer.from(JSON.stringify(parsed.data),'utf8');if(plaintext.length>512*1024) return invalid();
- const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',ring[active],iv,{authTagLength:16});cipher.setAAD(context);
- const ciphertext=Buffer.concat([cipher.update(plaintext),cipher.final()]);
- return JSON.stringify({version:1,keyId:active,iv:iv.toString('base64url'),tag:cipher.getAuthTag().toString('base64url'),ciphertext:ciphertext.toString('base64url')});
-}
-export function openInvitationDelivery(value:string,eventId:string,institutionId:string):TransactionalEmail {
- let envelope:z.infer<typeof envelopeSchema>;
- try {
-  if(typeof value!=='string' || value.length>701000) return invalid();
-  envelope=envelopeSchema.parse(JSON.parse(value));
- }catch{return invalid();}
- const ring=keyring();if(!Object.hasOwn(ring,envelope.keyId)) return unavailable();
- const context=aad(eventId,institutionId,envelope.keyId);
- try {
-  const decipher=createDecipheriv('aes-256-gcm',ring[envelope.keyId],binary(envelope.iv,12),{authTagLength:16});
-  decipher.setAAD(context);decipher.setAuthTag(binary(envelope.tag,16));
-  const plaintext=Buffer.concat([decipher.update(binary(envelope.ciphertext)),decipher.final()]);
-  if(plaintext.length>512*1024) return invalid();
-  const message=transactionalEmailSchema.parse(JSON.parse(plaintext.toString('utf8')));
-  if(message.eventId!==eventId) return invalid();
-  return message;
- }catch{return invalid();}
-}
+import {sealDelivery,openDelivery} from '@/shared/email/delivery-seal';
+import type {TransactionalEmail} from '@/infrastructure/email/transactional';
+const config=()=>({purpose:'invitation' as const,keys:process.env.SIII_INVITATION_KEYS,activeKeyId:process.env.SIII_INVITATION_ACTIVE_KEY_ID});
+function mapped<T>(operation:()=>T):T{try{return operation();}catch(error){throw Error(error instanceof Error&&error.message==='DELIVERY_KEY_UNAVAILABLE'?'INVITATION_KEY_UNAVAILABLE':'INVITATION_DELIVERY_INVALID');}}
+export const sealInvitationDelivery=(message:TransactionalEmail,eventId:string,contextId:string)=>mapped(()=>sealDelivery(message,eventId,contextId,config()));
+export const openInvitationDelivery=(value:string,eventId:string,contextId:string)=>mapped(()=>openDelivery(value,eventId,contextId,config()));

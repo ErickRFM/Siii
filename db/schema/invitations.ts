@@ -1,4 +1,4 @@
-import {pgTable,uuid,text,timestamp,integer,index,unique,check,foreignKey} from 'drizzle-orm/pg-core';
+import {pgTable,uuid,text,timestamp,integer,index,unique,uniqueIndex,check,foreignKey} from 'drizzle-orm/pg-core';
 import {sql} from 'drizzle-orm';
 import {institutions,platformUsers,userRoleEnum,campuses} from './core';
 import {academicPrograms} from './academic';
@@ -53,6 +53,7 @@ export const accountEmailVerifications=pgTable('account_email_verifications',{
  userId:uuid('user_id').primaryKey().references(()=>platformUsers.id,{onDelete:'restrict'}),verifiedEmail:text('verified_email').notNull().unique('account_email_verifications_verified_email_key'),
  proofInvitationId:uuid('proof_invitation_id').notNull(),verifiedAt:timestamp('verified_at',{withTimezone:true}).notNull().defaultNow(),
 },t=>({
+ userEmail:uniqueIndex('account_verified_user_email_uidx').on(t.userId,t.verifiedEmail),
  emailValid:check('account_verified_email_check',sql`verified_email=lower(verified_email) AND length(verified_email) BETWEEN 3 AND 254`),
  proof:foreignKey({columns:[t.proofInvitationId,t.verifiedEmail,t.userId],foreignColumns:[institutionInvitations.id,institutionInvitations.email,institutionInvitations.acceptedUserId],name:'account_email_proof_fk'}),
 }));
