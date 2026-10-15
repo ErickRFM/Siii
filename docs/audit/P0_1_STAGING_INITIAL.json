@@ -1,0 +1,23 @@
+{
+  "projectRef": "vsnrbjexusidlvhkhmqg",
+  "projectName": "siii-staging-p01",
+  "observedAt": "2026-10-14T22:13:42.325Z",
+  "connection": "Session pooler 5432, TLS verify-full",
+  "identity": {
+    "database": "postgres",
+    "session_user": "postgres",
+    "executor": "postgres",
+    "version": 170011
+  },
+  "public_objects": 0,
+  "managed_defaults_signature": "4cd1de9e498e1c42273acecb2a1ef2c8",
+  "executor_attributes": [
+    {
+      "name": "postgres",
+      "create_role": true,
+      "create_database": true
+    }
+  ],
+  "existing_rehearsal_databases": [],
+  "writesPerformed": false
+}

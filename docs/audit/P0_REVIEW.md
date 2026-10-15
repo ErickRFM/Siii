@@ -28,3 +28,6 @@ También se asegura pool.end() si falla la adquisición inicial de conexión del
 No se difiere ninguno de los cuatro importantes ni los dos menores del revisor. Las puertas ambientales siguen explícitas en docs/BLOCKERS.md.
 
 Verificación adicional del ejecutor: todos los clientes de fixtures y configuración Vitest usan el mismo selector de INTEGRATION_DATABASE_URL local. Se rechazan bases sin prefijo p0_ o sufijo _test incluso si el entorno dice test. Caso de nombre ordinario local RED → GREEN; una URL remota de runtime nunca se elige cuando existe la URL aislada. Reduce riesgo de escribir fixtures en una base accidental al ejecutar los tests.
+
+## P0.1 en curso — 2026-10-14
+La segunda inspección de P0 encontró tres nuevos hallazgos: grants efectivos excesivos sobre auditoría, carrera de eliminación del bucket de autenticación y limpieza que espera locks en orden incompatible con cambios de credenciales. Las correcciones aditivas y sus regresiones están en la rama dependiente chore/p0-1-release-gates (informe P0_1_REPORT.md). Se amplía el guard para roles privilegiados indirectos y membresía efectiva, y 0003 añade restricciones EXECUTE de RPC/defaults. Esta evidencia sustituye la limitación previa de RPC para el código nuevo; no afirma que producción esté migrada. La revisión independiente posterior de las correcciones sigue pendiente.
