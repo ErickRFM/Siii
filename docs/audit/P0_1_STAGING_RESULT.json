@@ -1,0 +1,2223 @@
+{
+  "kind": "SIII_P0_1_STAGING_REHEARSAL_RESULT",
+  "projectName": "siii-staging-p01",
+  "projectRef": "vsnrbjexusidlvhkhmqg",
+  "run": "eca305341546",
+  "observedAt": "2026-10-15T19:52:16.896Z",
+  "status": "FAILED_NOT_CLOSED",
+  "connection": "Session pooler5432; TLS verify-full; trusted CA; secrets only ignored local files",
+  "scope": {
+    "databases": [
+      "p01_empty_rehearsal",
+      "p01_legacy_rehearsal"
+    ],
+    "productionWrites": false,
+    "managedSchemaWrites": false,
+    "cleanupExecuted": false,
+    "readonlyInventoryMutations": false
+  },
+  "tests": [
+    {
+      "name": "Read-only preflight and exact staging authority",
+      "status": "PASSED",
+      "evidence": "PG170011, exact project, postgres identity, all inventory transactions READ ONLY"
+    },
+    {
+      "name": "Prepare isolated databases and minimal roles",
+      "status": "PASSED",
+      "evidence": "Two template0 databases and seven role OIDs match manifest"
+    },
+    {
+      "name": "Selected managed control metadata comparison",
+      "status": "PASSED",
+      "evidence": "Before/after SHA256 equal, including observation after baseline repeat"
+    },
+    {
+      "name": "Empty canonical migrator",
+      "status": "FAILED",
+      "evidence": "Historical0003 ALTER ROLE requires superuser; captured42501/alter_role. Institutional transaction rolled back; empty ledger initialization objects remain"
+    },
+    {
+      "name": "Corrected legacy exact replay",
+      "status": "PASSED",
+      "evidence": "Coordinator single rerun of reviewed source353472...; operation7cef65e7 successful. Both exact baseline signatures verified again read-only"
+    },
+    {
+      "name": "Reject missing ledger before baseline",
+      "status": "PASSED",
+      "evidence": "Original CLI returned BASELINE_REQUIRED; operation6647d4ef successful"
+    },
+    {
+      "name": "Baseline adoption",
+      "status": "PASSED",
+      "evidence": "Original CLI BASELINE_ADOPTED; operationc115fabc successful. Exactly hashes0–1 retained"
+    },
+    {
+      "name": "Synthetic legacy fixture seed",
+      "status": "PASSED",
+      "evidence": "Operatione2981a8d successful; readonly confirms1institution,2terms,1SECDEF fixtureRPC,12defaultACLentries"
+    },
+    {
+      "name": "Original existing baseline CLI idempotence",
+      "status": "PASSED",
+      "evidence": "One independent repeat returned BASELINE_ALREADY_RECORDED; ledger/signature/rowcounts/routines unchanged"
+    },
+    {
+      "name": "Legacy canonical migrator",
+      "status": "FAILED",
+      "evidence": "Operation841b2210 returned CLOUD_CLI_FAILED at2026-10-15T19:47:42Z. No captured legacySQLSTATE; do not infer confirmed42501. Ledger stays0–1, baseline schema remains unchanged"
+    },
+    {
+      "name": "Full canonical migration idempotence and full ledger hashes",
+      "status": "NOT_RUN",
+      "evidence": "No MIGRATIONS_APPLIED on either route"
+    },
+    {
+      "name": "Real runtime readonly LOGIN and identity in both databases",
+      "status": "PASSED",
+      "evidence": "session_user/current_user equal restrictedLOGIN; BEGIN READ ONLY. NOSUPER/NOBYPASS/NOCREATEDB/NOCREATEROLE/NOREPLICATION; CREATEpublic=false"
+    },
+    {
+      "name": "Application role guard in empty database",
+      "status": "PASSED",
+      "evidence": "Original APPLICATION_ROLE_QUERY plus assertRoleInspection accepts app member without DDL, ownership, privileged or unsafe capabilities"
+    },
+    {
+      "name": "Application role guard in legacy database",
+      "status": "REJECTED_UNSAFE_LEGACY_FIXTURE",
+      "evidence": "Original guard rejects DATABASE_ROLE_UNSAFE solely unsafe_rpc=true from deliberate SECURITY DEFINER fixture EXECUTE grant; no RPC executed"
+    },
+    {
+      "name": "Runtime CRUD and audit append",
+      "status": "NOT_RUN",
+      "evidence": "Readonly login probe performs no institutional row queries, RPC execution or writes"
+    },
+    {
+      "name": "Applied RLS against permissive policy/grant",
+      "status": "NOT_RUN",
+      "evidence": "12legacytables intentionally remain RLSfalse before hardening"
+    },
+    {
+      "name": "Hardened current/future table, sequence and RPC privileges",
+      "status": "NOT_RUN",
+      "evidence": "SECDEF fixtureRPC deliberately remains executable by anon/authenticated/siii_app; not hardened"
+    },
+    {
+      "name": "Date reversal and retained security/ledger/audit",
+      "status": "NOT_RUN",
+      "evidence": "Canonical verify prerequisites absent"
+    }
+  ],
+  "failures": {
+    "empty": {
+      "kind": "MIGRATION_SQL_DIAGNOSTIC",
+      "source": "Root observed unchanged canonical migrator driver; not repeated by inventory",
+      "statementSha256": "f78e7d227715c22a4d0ecfc79b426c825306216ffccd5393cb31654a8cd6de30",
+      "command": "--",
+      "sqlState": "42501",
+      "routine": "alter_role",
+      "flags": [
+        "SUPERUSER",
+        "PERMISSION"
+      ]
+    },
+    "legacy": {
+      "initialReplay": {
+        "code": "CLOUD_OPERATION_FAILED",
+        "causeConfidence": "INFERRED_FROM_READONLY_CATALOG_AND_GENERATED_SOURCE_THEN_REPRODUCED_LOCALLY",
+        "missingPermission": "Mapped synthetic owners lacked CREATE on public before ALTER TYPE OWNER",
+        "corrected": true
+      },
+      "canonicalAfterSuccessfulReplay": {
+        "code": "CLOUD_CLI_FAILED",
+        "observedAt": "2026-10-15T19:47:42Z",
+        "sqlState": null,
+        "causeConfidence": "No raw legacy driver diagnostic captured; empty route confirmed0003 superuser prerequisite",
+        "ledgerUnchangedAtBaseline": true,
+        "noCanonicalRetry": true
+      },
+      "reference": "https://www.postgresql.org/docs/17/sql-altertype.html"
+    }
+  },
+  "expectedHistoricalLedger": [
+    {
+      "hash": "90f21da63a18a652828d86457f944bf75283b5f06a4561e32fbe2fbd98a7bb40",
+      "created_at": "1791900000000"
+    },
+    {
+      "hash": "d82b7540e77fa6952f9588b338a797d3681d93b1288025e13ad178bfb69417d7",
+      "created_at": "1791938000000"
+    },
+    {
+      "hash": "dbee01de25ecf6326d2529ef60cc03200b003019282f75c403a6b0961407a86a",
+      "created_at": "1791940000000"
+    },
+    {
+      "hash": "f78e7d227715c22a4d0ecfc79b426c825306216ffccd5393cb31654a8cd6de30",
+      "created_at": "1791999037864"
+    },
+    {
+      "hash": "e6bbbfbef8fb62621183da97349b5d0340047803ec7cfe74b1794baf1fb9c4d9",
+      "created_at": "1792000681637"
+    },
+    {
+      "hash": "9dc43ac162027ba95074dc4091461e700bb6729647790f014a867073e5cbb534",
+      "created_at": "1792001102854"
+    }
+  ],
+  "inventory": {
+    "kind": "SIII_STAGING_READONLY_FAILURE_INVENTORY",
+    "projectRef": "vsnrbjexusidlvhkhmqg",
+    "run": "eca305341546",
+    "observedAt": "2026-10-15T19:49:44.103Z",
+    "mutationsExecuted": false,
+    "control": {
+      "identity": {
+        "database": "postgres",
+        "session_user": "postgres",
+        "executor": "postgres",
+        "version": 170011,
+        "read_only": "on"
+      },
+      "controlHashBefore": "efcfb5ef4928cc8f79b8a81469cfbdee797f488079dcfce0e65a9a1b314ea28a",
+      "controlHashAfter": "efcfb5ef4928cc8f79b8a81469cfbdee797f488079dcfce0e65a9a1b314ea28a",
+      "managedControlUnchanged": true,
+      "databases": [
+        {
+          "oid": 17659,
+          "datname": "p01_empty_rehearsal",
+          "owner": "postgres"
+        },
+        {
+          "oid": 17660,
+          "datname": "p01_legacy_rehearsal",
+          "owner": "postgres"
+        }
+      ],
+      "roles": [
+        {
+          "oid": 17647,
+          "rolname": "p01_eca305341546_creator",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": false,
+          "rolinherit": false
+        },
+        {
+          "oid": 17653,
+          "rolname": "p01_eca305341546_dashboard",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": false,
+          "rolinherit": false
+        },
+        {
+          "oid": 17644,
+          "rolname": "p01_eca305341546_owner",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": false,
+          "rolinherit": false
+        },
+        {
+          "oid": 17656,
+          "rolname": "p01_eca305341546_runtime",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": true,
+          "rolinherit": true
+        },
+        {
+          "oid": 17650,
+          "rolname": "p01_eca305341546_service",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": false,
+          "rolinherit": false
+        },
+        {
+          "oid": 17638,
+          "rolname": "siii_app",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": false,
+          "rolinherit": false
+        },
+        {
+          "oid": 17641,
+          "rolname": "siii_migrator",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "rolcanlogin": false,
+          "rolinherit": false
+        }
+      ],
+      "memberships": [
+        {
+          "parent": "siii_app",
+          "member": "p01_eca305341546_runtime",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "siii_app",
+          "member": "postgres",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "siii_app",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "parent": "siii_migrator",
+          "member": "postgres",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "siii_migrator",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "parent": "p01_eca305341546_owner",
+          "member": "postgres",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "p01_eca305341546_owner",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "parent": "p01_eca305341546_creator",
+          "member": "postgres",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "p01_eca305341546_creator",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "parent": "p01_eca305341546_service",
+          "member": "postgres",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "p01_eca305341546_service",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "parent": "p01_eca305341546_dashboard",
+          "member": "postgres",
+          "grantor": "postgres",
+          "admin_option": false,
+          "inherit_option": true,
+          "set_option": true
+        },
+        {
+          "parent": "p01_eca305341546_dashboard",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "parent": "p01_eca305341546_runtime",
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        }
+      ]
+    },
+    "empty": {
+      "identity": {
+        "database": "p01_empty_rehearsal",
+        "session_user": "postgres",
+        "executor": "postgres",
+        "version": 170011,
+        "read_only": "on"
+      },
+      "schemas": [
+        {
+          "nspname": "drizzle",
+          "owner": "postgres",
+          "acl": null
+        },
+        {
+          "nspname": "public",
+          "owner": "pg_database_owner",
+          "acl": "{pg_database_owner=UC/pg_database_owner,=U/pg_database_owner}"
+        }
+      ],
+      "relations": [
+        {
+          "oid": 17667,
+          "relname": "__drizzle_migrations",
+          "relkind": "r",
+          "owner": "postgres",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "drizzle"
+        },
+        {
+          "oid": 17666,
+          "relname": "__drizzle_migrations_id_seq",
+          "relkind": "S",
+          "owner": "postgres",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "drizzle"
+        },
+        {
+          "oid": 17673,
+          "relname": "__drizzle_migrations_pkey",
+          "relkind": "i",
+          "owner": "postgres",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "drizzle"
+        }
+      ],
+      "types": [],
+      "defaults": [
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 0,
+          "kind": "f",
+          "acl": "{=X/p01_eca305341546_owner,anon=X/p01_eca305341546_owner,authenticated=X/p01_eca305341546_owner,siii_app=X/p01_eca305341546_owner,p01_eca305341546_owner=X/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 2200,
+          "kind": "f",
+          "acl": "{anon=X/p01_eca305341546_owner,authenticated=X/p01_eca305341546_owner,siii_app=X/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 0,
+          "kind": "f",
+          "acl": "{=X/p01_eca305341546_creator,anon=X/p01_eca305341546_creator,authenticated=X/p01_eca305341546_creator,siii_app=X/p01_eca305341546_creator,p01_eca305341546_creator=X/p01_eca305341546_creator}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 2200,
+          "kind": "f",
+          "acl": "{anon=X/p01_eca305341546_creator,authenticated=X/p01_eca305341546_creator,siii_app=X/p01_eca305341546_creator}"
+        }
+      ],
+      "authority": [
+        {
+          "rolname": "p01_eca305341546_creator",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "p01_eca305341546_dashboard",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "p01_eca305341546_owner",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "p01_eca305341546_runtime",
+          "executor_inherits": false,
+          "executor_can_set": false,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "p01_eca305341546_service",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "pg_database_owner",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": true
+        },
+        {
+          "rolname": "postgres",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": true
+        },
+        {
+          "rolname": "siii_app",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "siii_migrator",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        }
+      ],
+      "privileges": [],
+      "ledgerExists": "drizzle.__drizzle_migrations",
+      "ledger": [],
+      "auditCount": null
+    },
+    "legacy": {
+      "identity": {
+        "database": "p01_legacy_rehearsal",
+        "session_user": "postgres",
+        "executor": "postgres",
+        "version": 170011,
+        "read_only": "on"
+      },
+      "schemas": [
+        {
+          "nspname": "drizzle",
+          "owner": "postgres",
+          "acl": null
+        },
+        {
+          "nspname": "public",
+          "owner": "pg_database_owner",
+          "acl": "{pg_database_owner=UC/pg_database_owner,=U/pg_database_owner,p01_eca305341546_owner=UC/pg_database_owner,anon=U/pg_database_owner,authenticated=U/pg_database_owner,p01_eca305341546_service=U/pg_database_owner,p01_eca305341546_creator=UC/pg_database_owner}"
+        }
+      ],
+      "relations": [
+        {
+          "oid": 19309,
+          "relname": "__drizzle_migrations",
+          "relkind": "r",
+          "owner": "postgres",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "drizzle"
+        },
+        {
+          "oid": 19308,
+          "relname": "__drizzle_migrations_id_seq",
+          "relkind": "S",
+          "owner": "postgres",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "drizzle"
+        },
+        {
+          "oid": 19315,
+          "relname": "__drizzle_migrations_pkey",
+          "relkind": "i",
+          "owner": "postgres",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "drizzle"
+        },
+        {
+          "oid": 19087,
+          "relname": "academic_courses",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19188,
+          "relname": "academic_courses_institution_code_uidx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19198,
+          "relname": "academic_courses_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19096,
+          "relname": "academic_programs",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19189,
+          "relname": "academic_programs_id_institution_uidx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19190,
+          "relname": "academic_programs_institution_code_uidx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19200,
+          "relname": "academic_programs_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19105,
+          "relname": "academic_terms",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19191,
+          "relname": "academic_terms_institution_code_uidx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19202,
+          "relname": "academic_terms_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19197,
+          "relname": "audit_institution_created_idx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19114,
+          "relname": "auth_sessions",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19204,
+          "relname": "auth_sessions_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19222,
+          "relname": "auth_sessions_token_hash_key",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19192,
+          "relname": "auth_sessions_user_idx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19121,
+          "relname": "campuses",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19193,
+          "relname": "campuses_institution_code_uidx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19206,
+          "relname": "campuses_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19131,
+          "relname": "curriculum_versions",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19208,
+          "relname": "curriculum_versions_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19194,
+          "relname": "curriculum_versions_program_version_uidx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19224,
+          "relname": "institution_member_unique",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19195,
+          "relname": "institution_member_user_idx",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19140,
+          "relname": "institution_memberships",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19210,
+          "relname": "institution_memberships_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19147,
+          "relname": "institutions",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19226,
+          "relname": "institutions_code_key",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19212,
+          "relname": "institutions_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19157,
+          "relname": "people",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19214,
+          "relname": "people_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19165,
+          "relname": "platform_users",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19216,
+          "relname": "platform_users_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19228,
+          "relname": "platform_users_username_key",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19196,
+          "relname": "role_assignment_unique_active",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19176,
+          "relname": "role_assignments",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19218,
+          "relname": "role_assignments_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19181,
+          "relname": "security_audit_log",
+          "relkind": "r",
+          "owner": "p01_eca305341546_owner",
+          "acl": "{p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}",
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        },
+        {
+          "oid": 19220,
+          "relname": "security_audit_log_pkey",
+          "relkind": "i",
+          "owner": "p01_eca305341546_owner",
+          "acl": null,
+          "rls": false,
+          "force_rls": false,
+          "schema": "public"
+        }
+      ],
+      "types": [
+        {
+          "typname": "_academic_courses",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_academic_programs",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_academic_terms",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_auth_sessions",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_campuses",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_curriculum_versions",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_entity_status",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_institution_memberships",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_institutions",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_membership_status",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_people",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_platform_users",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_role_assignments",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_security_audit_log",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "_user_role",
+          "typtype": "b",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "academic_courses",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "academic_programs",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "academic_terms",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "auth_sessions",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "campuses",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "curriculum_versions",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "entity_status",
+          "typtype": "e",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "institution_memberships",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "institutions",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "membership_status",
+          "typtype": "e",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "people",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "platform_users",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "role_assignments",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "security_audit_log",
+          "typtype": "c",
+          "owner": "p01_eca305341546_owner"
+        },
+        {
+          "typname": "user_role",
+          "typtype": "e",
+          "owner": "p01_eca305341546_owner"
+        }
+      ],
+      "defaults": [
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 0,
+          "kind": "S",
+          "acl": "{siii_app=rwU/p01_eca305341546_owner,p01_eca305341546_owner=U/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 0,
+          "kind": "f",
+          "acl": "{=X/p01_eca305341546_owner,anon=X/p01_eca305341546_owner,authenticated=X/p01_eca305341546_owner,siii_app=X/p01_eca305341546_owner,p01_eca305341546_owner=X/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 0,
+          "kind": "r",
+          "acl": "{siii_app=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 2200,
+          "kind": "S",
+          "acl": "{anon=rwU/p01_eca305341546_owner,authenticated=rwU/p01_eca305341546_owner,siii_app=rwU/p01_eca305341546_owner,p01_eca305341546_owner=rwU/p01_eca305341546_owner,p01_eca305341546_service=rwU/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 2200,
+          "kind": "f",
+          "acl": "{anon=X/p01_eca305341546_owner,authenticated=X/p01_eca305341546_owner,siii_app=X/p01_eca305341546_owner,p01_eca305341546_owner=X/p01_eca305341546_owner,p01_eca305341546_service=X/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_owner",
+          "schema_oid": 2200,
+          "kind": "r",
+          "acl": "{anon=arwdDxtm/p01_eca305341546_owner,authenticated=arwdDxtm/p01_eca305341546_owner,siii_app=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_owner=arwdDxtm/p01_eca305341546_owner,p01_eca305341546_service=arwdDxtm/p01_eca305341546_owner}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 0,
+          "kind": "S",
+          "acl": "{siii_app=rwU/p01_eca305341546_creator,p01_eca305341546_creator=U/p01_eca305341546_creator}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 0,
+          "kind": "f",
+          "acl": "{=X/p01_eca305341546_creator,anon=X/p01_eca305341546_creator,authenticated=X/p01_eca305341546_creator,siii_app=X/p01_eca305341546_creator,p01_eca305341546_creator=X/p01_eca305341546_creator}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 0,
+          "kind": "r",
+          "acl": "{siii_app=arwdDxtm/p01_eca305341546_creator,p01_eca305341546_creator=arwdDxtm/p01_eca305341546_creator}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 2200,
+          "kind": "S",
+          "acl": "{anon=rwU/p01_eca305341546_creator,authenticated=rwU/p01_eca305341546_creator,siii_app=rwU/p01_eca305341546_creator,p01_eca305341546_owner=rwU/p01_eca305341546_creator,p01_eca305341546_service=rwU/p01_eca305341546_creator}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 2200,
+          "kind": "f",
+          "acl": "{anon=X/p01_eca305341546_creator,authenticated=X/p01_eca305341546_creator,siii_app=X/p01_eca305341546_creator,p01_eca305341546_owner=X/p01_eca305341546_creator,p01_eca305341546_service=X/p01_eca305341546_creator}"
+        },
+        {
+          "owner": "p01_eca305341546_creator",
+          "schema_oid": 2200,
+          "kind": "r",
+          "acl": "{anon=arwdDxtm/p01_eca305341546_creator,authenticated=arwdDxtm/p01_eca305341546_creator,siii_app=arwdDxtm/p01_eca305341546_creator,p01_eca305341546_owner=arwdDxtm/p01_eca305341546_creator,p01_eca305341546_service=arwdDxtm/p01_eca305341546_creator}"
+        }
+      ],
+      "authority": [
+        {
+          "rolname": "p01_eca305341546_creator",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": true
+        },
+        {
+          "rolname": "p01_eca305341546_dashboard",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "p01_eca305341546_owner",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": true
+        },
+        {
+          "rolname": "p01_eca305341546_runtime",
+          "executor_inherits": false,
+          "executor_can_set": false,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "p01_eca305341546_service",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "pg_database_owner",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": true
+        },
+        {
+          "rolname": "postgres",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": true
+        },
+        {
+          "rolname": "siii_app",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        },
+        {
+          "rolname": "siii_migrator",
+          "executor_inherits": true,
+          "executor_can_set": true,
+          "public_usage": true,
+          "public_create": false
+        }
+      ],
+      "privileges": [
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "academic_courses",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "academic_programs",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "academic_terms",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "auth_sessions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "campuses",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "curriculum_versions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "institution_memberships",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "institutions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "people",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "platform_users",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "role_assignments",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "anon",
+          "schema": "public",
+          "relation": "security_audit_log",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "academic_courses",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "academic_programs",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "academic_terms",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "auth_sessions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "campuses",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "curriculum_versions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "institution_memberships",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "institutions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "people",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "platform_users",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "role_assignments",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "authenticated",
+          "schema": "public",
+          "relation": "security_audit_log",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "academic_courses",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "academic_programs",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "academic_terms",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "auth_sessions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "campuses",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "curriculum_versions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "institution_memberships",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "institutions",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "people",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "platform_users",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "role_assignments",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        },
+        {
+          "role": "siii_app",
+          "schema": "public",
+          "relation": "security_audit_log",
+          "read": false,
+          "insert": false,
+          "update": false,
+          "destructive": false
+        }
+      ],
+      "ledgerExists": "drizzle.__drizzle_migrations",
+      "ledger": [
+        {
+          "hash": "90f21da63a18a652828d86457f944bf75283b5f06a4561e32fbe2fbd98a7bb40",
+          "created_at": "1791900000000"
+        },
+        {
+          "hash": "d82b7540e77fa6952f9588b338a797d3681d93b1288025e13ad178bfb69417d7",
+          "created_at": "1791938000000"
+        }
+      ],
+      "auditCount": 0
+    }
+  },
+  "operationLog": {
+    "sha256": "af2660861206f7c8cfa8d8e4c9dd126e5106725c17e4281a6b99073b32f76f03",
+    "records": [
+      {
+        "id": "86d96967-57da-408d-bd59-ffaaf66bd01a",
+        "at": "2026-10-15T19:19:57.932Z",
+        "phase": "prepare",
+        "name": "create-fixture-roles",
+        "status": "FAILED",
+        "finishedAt": "2026-10-15T19:19:58.985Z",
+        "code": "CLOUD_OPERATION_FAILED"
+      },
+      {
+        "id": "c1cfbcb6-73a7-4106-8eaf-e03783cf111f",
+        "at": "2026-10-15T19:27:33.435Z",
+        "phase": "prepare",
+        "name": "create-fixture-roles",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:27:35.256Z"
+      },
+      {
+        "id": "67b71062-1ec5-4902-bee9-6eb76509f070",
+        "at": "2026-10-15T19:27:35.258Z",
+        "phase": "prepare",
+        "name": "create-disposable-database",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:27:36.486Z"
+      },
+      {
+        "id": "239111a1-5546-47a0-b964-3352c27f6b2d",
+        "at": "2026-10-15T19:27:37.235Z",
+        "phase": "prepare",
+        "name": "create-disposable-database",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:27:37.932Z"
+      },
+      {
+        "id": "c1b200c6-e756-46c4-b626-2f6450c6a2ad",
+        "at": "2026-10-15T19:28:25.258Z",
+        "phase": "empty",
+        "name": "seed-own-creator-defaults",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:28:26.052Z"
+      },
+      {
+        "id": "9fbcc0b1-6baf-4e85-b959-6dae0e37b131",
+        "at": "2026-10-15T19:28:26.053Z",
+        "phase": "empty",
+        "name": "canonical-migrate-cli",
+        "status": "FAILED",
+        "finishedAt": "2026-10-15T19:28:35.785Z",
+        "code": "CLOUD_CLI_FAILED"
+      },
+      {
+        "id": "a25b4990-804b-4509-a5e4-c0ac7f13b8dc",
+        "at": "2026-10-15T19:34:01.398Z",
+        "phase": "legacy",
+        "name": "replay-exact-legacy-schema",
+        "status": "FAILED",
+        "finishedAt": "2026-10-15T19:34:02.162Z",
+        "code": "CLOUD_OPERATION_FAILED"
+      },
+      {
+        "id": "7cef65e7-e153-4e52-9646-6964684d6b21",
+        "at": "2026-10-15T19:47:30.956Z",
+        "phase": "legacy",
+        "name": "replay-exact-legacy-schema",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:47:32.512Z"
+      },
+      {
+        "id": "6647d4ef-b1ca-43df-ae7d-439452351b3c",
+        "at": "2026-10-15T19:47:32.513Z",
+        "phase": "legacy",
+        "name": "reject-missing-ledger",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:47:34.222Z"
+      },
+      {
+        "id": "c115fabc-02e9-4534-bee4-547aaeb39441",
+        "at": "2026-10-15T19:47:34.969Z",
+        "phase": "legacy",
+        "name": "baseline-cli",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:47:36.818Z"
+      },
+      {
+        "id": "e2981a8d-6722-46fa-8756-c88bcac6e8c7",
+        "at": "2026-10-15T19:47:36.820Z",
+        "phase": "legacy",
+        "name": "seed-legacy-synthetic-fixtures",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:47:39.360Z"
+      },
+      {
+        "id": "841b2210-dcdc-4f7a-bec9-2544121aca52",
+        "at": "2026-10-15T19:47:39.362Z",
+        "phase": "legacy",
+        "name": "canonical-migrate-cli",
+        "status": "FAILED",
+        "finishedAt": "2026-10-15T19:47:42.731Z",
+        "code": "CLOUD_CLI_FAILED"
+      },
+      {
+        "id": "3525b4f9-6c8a-4ca4-b3c9-1d5a31bcdc4b",
+        "at": "2026-10-15T19:49:33.808Z",
+        "phase": "legacy",
+        "name": "independent-existing-baseline-cli-idempotence",
+        "status": "SUCCESS",
+        "finishedAt": "2026-10-15T19:49:35.448Z",
+        "result": "BASELINE_ALREADY_RECORDED"
+      }
+    ]
+  },
+  "controlCoverage": [
+    "Managed postgres pg_default_acl metadata",
+    "Owner/ACL for selected known schemas",
+    "Managed postgres public relation metadata",
+    "Selected managed role attributes and memberships into selected roles"
+  ],
+  "limits": [
+    "Selected metadata hash does not certify full data, backups or all service health",
+    "No canonical cloud migration succeeded; local results cannot replace this gate",
+    "No historical SQL or ledger rewritten, skipped or manually marked applied",
+    "All staging databases, roles, defaults and initialized ledger objects preserved; no cleanup",
+    "Canonical retry requires supported executor able to run unchanged historical role ALTER",
+    "Human screen reader, real hosting capacity/HTTP SLO, CI/review and merge gates remain"
+  ],
+  "localHarnessCorrection": {
+    "status": "LOCALLY_VERIFIED_AND_SINGLE_CLOUD_REPLAY_PASSED",
+    "description": "Grant USAGE/CREATE on isolated public to both mapped synthetic owners inside the same validated single replay transaction; final captured source schema ACL restored by exporter",
+    "historicalSqlChanged": false,
+    "exporterChanged": false,
+    "red": "Real local non-superuser database owner: original replay fails42501 permission denied for schema public",
+    "green": {
+      "legacySqlTests": 3,
+      "permissionProbeSqlTests": 3,
+      "boundaryUnitTests": 57,
+      "checks": [
+        "Exact audited baseline12tables without pre-existing fixture CREATE",
+        "Runtime22012 failure after full replay DDL rolls back preparatory grants/defaults/types/objects",
+        "Final schema ACL removes temporary owner CREATE again",
+        "Missing, duplicate or extended replay boundaries rejected"
+      ]
+    },
+    "files": [
+      "scripts/rehearse-cloud-schema.ts",
+      "tests/integration/cloud-legacy-replay.test.ts",
+      "tests/integration/cloud-permission-probes.test.ts",
+      "tests/unit/cloud-rehearsal.test.ts"
+    ],
+    "scriptSha256": "353472280868837f3c9e0ade45668de24184d4166503df700e0b23f010588715",
+    "limitations": [
+      "Canonical cloud0003 superuser prerequisite remains unresolved",
+      "No SQL historical/exporter changes or ledger rewrites",
+      "Local fixtures removed only from guarded randomly named local test databases"
+    ]
+  },
+  "observationHistory": [
+    {
+      "observedAt": "2026-10-15T19:39:41.761Z",
+      "status": "FAILED_NOT_CLOSED",
+      "legacyReplay": "FAILED before CREATE prerequisite correction; entire replay transaction rolled back",
+      "emptyCanonical": "FAILED42501 alter_role; zero ledger rows",
+      "controlHash": "efcfb5ef4928cc8f79b8a81469cfbdee797f488079dcfce0e65a9a1b314ea28a",
+      "legacyInventoryBeforeCorrection": {
+        "identity": {
+          "database": "p01_legacy_rehearsal",
+          "session_user": "postgres",
+          "executor": "postgres",
+          "version": 170011,
+          "read_only": "on"
+        },
+        "schemas": [
+          {
+            "nspname": "public",
+            "owner": "pg_database_owner",
+            "acl": "{pg_database_owner=UC/pg_database_owner,=U/pg_database_owner}"
+          }
+        ],
+        "relations": [],
+        "types": [],
+        "defaults": [],
+        "authority": [
+          {
+            "rolname": "p01_eca305341546_creator",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": false
+          },
+          {
+            "rolname": "p01_eca305341546_dashboard",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": false
+          },
+          {
+            "rolname": "p01_eca305341546_owner",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": false
+          },
+          {
+            "rolname": "p01_eca305341546_runtime",
+            "executor_inherits": false,
+            "executor_can_set": false,
+            "public_usage": true,
+            "public_create": false
+          },
+          {
+            "rolname": "p01_eca305341546_service",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": false
+          },
+          {
+            "rolname": "pg_database_owner",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": true
+          },
+          {
+            "rolname": "postgres",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": true
+          },
+          {
+            "rolname": "siii_app",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": false
+          },
+          {
+            "rolname": "siii_migrator",
+            "executor_inherits": true,
+            "executor_can_set": true,
+            "public_usage": true,
+            "public_create": false
+          }
+        ],
+        "privileges": [],
+        "ledgerExists": null,
+        "ledger": null,
+        "auditCount": null
+      }
+    }
+  ],
+  "baselineRepeat": {
+    "kind": "SIII_STAGING_EXISTING_BASELINE_REPEAT",
+    "at": "2026-10-15T19:49:38.153Z",
+    "projectRef": "vsnrbjexusidlvhkhmqg",
+    "status": "PASSED",
+    "result": "BASELINE_ALREADY_RECORDED",
+    "originalCli": true,
+    "existingBranchOnly": true,
+    "ledgerUnchanged": true,
+    "signatureUnchanged": true,
+    "syntheticRowsUnchanged": true,
+    "routinesUnchanged": true,
+    "before": {
+      "identity": {
+        "database": "p01_legacy_rehearsal",
+        "session_user": "postgres",
+        "executor": "postgres",
+        "version": 170011,
+        "read_only": "on"
+      },
+      "ledger": [
+        {
+          "hash": "90f21da63a18a652828d86457f944bf75283b5f06a4561e32fbe2fbd98a7bb40",
+          "created_at": "1791900000000"
+        },
+        {
+          "hash": "d82b7540e77fa6952f9588b338a797d3681d93b1288025e13ad178bfb69417d7",
+          "created_at": "1791938000000"
+        }
+      ],
+      "baselineReferences": [
+        "0001-schema.json",
+        "supabase-2026-10-14-schema.json"
+      ],
+      "baselineSignatureSha256": "51a09a54d79ff8f9da8d831667ac7378cee79f51c0ad6f6b8fc2f0cb8bd67aa3",
+      "exactSignaturesMatch": true,
+      "counts": [
+        {
+          "table": "academic_courses",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "academic_programs",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "academic_terms",
+          "rls": false,
+          "count": 2
+        },
+        {
+          "table": "auth_sessions",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "campuses",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "curriculum_versions",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "institution_memberships",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "institutions",
+          "rls": false,
+          "count": 1
+        },
+        {
+          "table": "people",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "platform_users",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "role_assignments",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "security_audit_log",
+          "rls": false,
+          "count": 0
+        }
+      ],
+      "syntheticTermFixtures": [
+        {
+          "code": "HISTORICAL",
+          "start_date": "2026-01-01 12:00:00",
+          "end_date": "2026-06-30 18:00:00"
+        },
+        {
+          "code": "MODIFIED",
+          "start_date": "2026-02-01 09:00:00",
+          "end_date": "2026-07-31 16:00:00"
+        }
+      ],
+      "routines": [
+        {
+          "oid": 19321,
+          "proname": "cloud_legacy_rpc",
+          "owner": "p01_eca305341546_creator",
+          "security_definer": true,
+          "acl": "{=X/p01_eca305341546_creator,anon=X/p01_eca305341546_creator,authenticated=X/p01_eca305341546_creator,siii_app=X/p01_eca305341546_creator,p01_eca305341546_owner=X/p01_eca305341546_creator,p01_eca305341546_creator=X/p01_eca305341546_creator,p01_eca305341546_service=X/p01_eca305341546_creator}",
+          "proconfig": [
+            "search_path=\"\""
+          ],
+          "anon_execute": true,
+          "authenticated_execute": true,
+          "app_execute": true
+        }
+      ]
+    },
+    "after": {
+      "identity": {
+        "database": "p01_legacy_rehearsal",
+        "session_user": "postgres",
+        "executor": "postgres",
+        "version": 170011,
+        "read_only": "on"
+      },
+      "ledger": [
+        {
+          "hash": "90f21da63a18a652828d86457f944bf75283b5f06a4561e32fbe2fbd98a7bb40",
+          "created_at": "1791900000000"
+        },
+        {
+          "hash": "d82b7540e77fa6952f9588b338a797d3681d93b1288025e13ad178bfb69417d7",
+          "created_at": "1791938000000"
+        }
+      ],
+      "baselineReferences": [
+        "0001-schema.json",
+        "supabase-2026-10-14-schema.json"
+      ],
+      "baselineSignatureSha256": "51a09a54d79ff8f9da8d831667ac7378cee79f51c0ad6f6b8fc2f0cb8bd67aa3",
+      "exactSignaturesMatch": true,
+      "counts": [
+        {
+          "table": "academic_courses",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "academic_programs",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "academic_terms",
+          "rls": false,
+          "count": 2
+        },
+        {
+          "table": "auth_sessions",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "campuses",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "curriculum_versions",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "institution_memberships",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "institutions",
+          "rls": false,
+          "count": 1
+        },
+        {
+          "table": "people",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "platform_users",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "role_assignments",
+          "rls": false,
+          "count": 0
+        },
+        {
+          "table": "security_audit_log",
+          "rls": false,
+          "count": 0
+        }
+      ],
+      "syntheticTermFixtures": [
+        {
+          "code": "HISTORICAL",
+          "start_date": "2026-01-01 12:00:00",
+          "end_date": "2026-06-30 18:00:00"
+        },
+        {
+          "code": "MODIFIED",
+          "start_date": "2026-02-01 09:00:00",
+          "end_date": "2026-07-31 16:00:00"
+        }
+      ],
+      "routines": [
+        {
+          "oid": 19321,
+          "proname": "cloud_legacy_rpc",
+          "owner": "p01_eca305341546_creator",
+          "security_definer": true,
+          "acl": "{=X/p01_eca305341546_creator,anon=X/p01_eca305341546_creator,authenticated=X/p01_eca305341546_creator,siii_app=X/p01_eca305341546_creator,p01_eca305341546_owner=X/p01_eca305341546_creator,p01_eca305341546_creator=X/p01_eca305341546_creator,p01_eca305341546_service=X/p01_eca305341546_creator}",
+          "proconfig": [
+            "search_path=\"\""
+          ],
+          "anon_execute": true,
+          "authenticated_execute": true,
+          "app_execute": true
+        }
+      ]
+    }
+  },
+  "projectMetadata": {
+    "source": "Coordinator Supabase get_project",
+    "projectRef": "vsnrbjexusidlvhkhmqg",
+    "name": "siii-staging-p01",
+    "status": "ACTIVE_HEALTHY",
+    "postgresVersion": "17.11.0.003",
+    "region": "us-east-1",
+    "organizationId": "rlduedthykpsfcrgaytn",
+    "limitation": "Provider project status does not certify functional health of all services"
+  },
+  "sourceReview": {
+    "sha256": "353472280868837F3C9E0ADE45668DE24184D4166503DF700E0B23F010588715",
+    "result": "FAVORABLE",
+    "source": "Independent source review reported by coordinator",
+    "historicalSqlAndExporterUnchanged": true
+  },
+  "localQa": {
+    "source": "Coordinator final process11313 exit0",
+    "status": "PASSED",
+    "npmCi": true,
+    "typecheck": true,
+    "lint": true,
+    "unit": {
+      "passed": 121,
+      "total": 121
+    },
+    "migratorRepeated": true,
+    "integration": {
+      "passed": 94,
+      "total": 94,
+      "durationSeconds": 72.43
+    },
+    "chromium": {
+      "passed": 10,
+      "total": 10,
+      "durationSeconds": 46.8
+    },
+    "build": true,
+    "npmAuditVulnerabilities": 0,
+    "diffCheck": true,
+    "temporaryAwakeRequestReleased": true,
+    "pr20Commit": "PENDING",
+    "pr20ExactHeadRemoteCi": "PENDING",
+    "limitation": "Local QA does not replace failed or not-run cloud gates"
+  },
+  "runtimeReadonlyLogin": {
+    "kind": "SIII_STAGING_REAL_RUNTIME_READONLY_LOGIN",
+    "observedAt": "2026-10-15T19:52:16.896Z",
+    "projectRef": "vsnrbjexusidlvhkhmqg",
+    "run": "eca305341546",
+    "tls": "verify-full with trusted CA",
+    "results": [
+      {
+        "database": "p01_empty_rehearsal",
+        "connection": "PASSED",
+        "identity": "PASSED",
+        "identityDetails": {
+          "database": "p01_empty_rehearsal",
+          "session_user": "p01_eca305341546_runtime",
+          "executor": "p01_eca305341546_runtime",
+          "read_only": "on"
+        },
+        "attributes": {
+          "rolname": "p01_eca305341546_runtime",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "public_create": false,
+          "public_usage": true
+        },
+        "applicationRoleGuard": "PASSED",
+        "inspection": {
+          "privileged": false,
+          "can_ddl": false,
+          "app_member": true,
+          "migrator_member": false,
+          "owns_objects": false,
+          "unsafe_dml": false,
+          "unsafe_rpc": false
+        },
+        "readonly": true,
+        "dataOrSchemaMutations": false
+      },
+      {
+        "database": "p01_legacy_rehearsal",
+        "connection": "PASSED",
+        "identity": "PASSED",
+        "identityDetails": {
+          "database": "p01_legacy_rehearsal",
+          "session_user": "p01_eca305341546_runtime",
+          "executor": "p01_eca305341546_runtime",
+          "read_only": "on"
+        },
+        "attributes": {
+          "rolname": "p01_eca305341546_runtime",
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false,
+          "public_create": false,
+          "public_usage": true
+        },
+        "applicationRoleGuard": "FAILED_DATABASE_ROLE_UNSAFE",
+        "inspection": {
+          "privileged": false,
+          "can_ddl": false,
+          "app_member": true,
+          "migrator_member": false,
+          "owns_objects": false,
+          "unsafe_dml": false,
+          "unsafe_rpc": true
+        },
+        "readonly": true,
+        "dataOrSchemaMutations": false
+      }
+    ],
+    "limits": [
+      "No CRUD, audit append, RPC execution, RLS row access or schema writes performed",
+      "Role guard can reject intentionally unsafe legacy fixture before historical hardening"
+    ]
+  }
+}
