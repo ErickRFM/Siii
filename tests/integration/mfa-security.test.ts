@@ -73,7 +73,7 @@ describe.sequential('real MFA HTTP security and transaction boundaries', () => {
   it('preserves password-only login and reports real factor status', async () => {
     expect((await request('/api/v1/auth/me')).status).toBe(200);
     const response = await request('/api/v1/auth/mfa');
-    expect(await response.json()).toEqual({ data: { configured: false, pending: false, recoveryCodesRemaining: 0, stepUpExpiresAt: null } });
+    expect(await response.json()).toEqual({ data: { configured: false, requiredByRole:false, pending: false, recoveryCodesRemaining: 0, stepUpExpiresAt: null } });
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
   it('requires the mandatory password change before enrollment or step-up', async () => {

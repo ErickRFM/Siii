@@ -18,6 +18,9 @@ export default async function setup(){
  mkdirSync('.superpowers/sdd/2026-10-13-p0-hardening',{recursive:true});
  writeFileSync('.superpowers/sdd/2026-10-13-p0-hardening/app-connection.json',JSON.stringify({connectionString:appUrl.toString()}));
  const log=openSync('.superpowers/sdd/2026-10-13-p0-hardening/http-server.log','w');
+ // Global setup passes process.env to workers as well as the application child.
+ process.env.SIII_MFA_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
+ process.env.SIII_MFA_ACTIVE_KEY_ID ||= 'fixture';
  const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,NODE_ENV:'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS||JSON.stringify({fixture:randomBytes(32).toString('base64')}),SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID||'fixture',NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
  closeSync(log);
  async function stop(){

@@ -53,4 +53,8 @@ Véase [P0_HARDENING.md](docs/implementation/P0_HARDENING.md) para el migrador s
 
 ## P1 — MFA en rama dependiente
 
-Autenticación TOTP real, recuperación de un uso y step-up disponibles en login y /dashboard/security, respaldados por la migración 0006. El runtime requiere SIII_MFA_KEYS y SIII_MFA_ACTIVE_KEY_ID solo servidor; no hay claves de fallback. Configuración, endpoints, pruebas y limitaciones: [P1_MFA_REPORT.md](docs/audit/P1_MFA_REPORT.md). La integración de MFA obligatorio con perfiles privilegiados sigue pendiente en IAM; P1 no está cerrado.
+Autenticación TOTP real, recuperación de un uso y step-up disponibles en login y /dashboard/security, respaldados por la migración 0006. El runtime requiere SIII_MFA_KEYS y SIII_MFA_ACTIVE_KEY_ID solo servidor; no hay claves de fallback. Configuración, endpoints, pruebas y limitaciones: [P1_MFA_REPORT.md](docs/audit/P1_MFA_REPORT.md). MFA obligatorio para perfiles privilegiados está integrado en la rama dependiente de permisos; P1 no está cerrado.
+
+## P1 — Permisos en rama dependiente
+
+Capacidades verificadas por backend, concesiones por institución/programa/campus, delegación temporal, protección del último administrador y MFA obligatorio. API y UI de roles conectadas; véase [P1_SCOPES_REPORT.md](docs/audit/P1_SCOPES_REPORT.md). La vinculación por UUID requiere invitación con consentimiento (409 INVITATION_REQUIRED). Invitaciones, ciclo completo de usuarios y administración siguen en ejecución.

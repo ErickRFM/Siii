@@ -2,8 +2,10 @@ import {NextRequest,NextResponse} from 'next/server';
 import {and,eq} from 'drizzle-orm';
 import {db} from '@/infrastructure/database';
 import {academicPrograms,curriculumVersions} from '../../../../../../../../db/schema';
-import {authorizeInstitution} from '@/shared/auth/session';
-import {lockWriteAccess} from '@/shared/auth/write-access';
+import {institutionContext} from '@/shared/auth/session';
+import {can} from '@/shared/auth/capabilities';
+import {catalogCapability,catalogMayAccess,catalogVisibility,catalogRecord} from '@/shared/auth/catalog-access';
+import {lockInstitutionContext} from '@/shared/auth/write-access';
 import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
 import {uuid} from '@/shared/auth/validation';
 import {catalogResource,type CatalogResource} from '@/modules/academic/catalog-validation';
@@ -28,29 +30,34 @@ function constraintResponse(error:unknown){
 }
 export const GET=withErrors(async(req:NextRequest,ctx:Ctx)=>{
  const params=await routeContext(ctx);if(!params)return jsonError('INVALID_RESOURCE',404);
- if(!await authorizeInstitution(params.institutionId,'academic.read'))return jsonError('FORBIDDEN',403);
+ const actor=await institutionContext(params.institutionId);
+ if(!actor||!catalogMayAccess(actor.subject,actor.access,actor.identity,params.resource,'read'))return jsonError('FORBIDDEN',403);
  const scope='academic:'+params.institutionId+':'+params.resource;
  const input=parsePage(req,scope);if(!input)return jsonError('INVALID_PAGE',400);
- const entry=catalogRegistry[params.resource],rows=await entry.list(params.institutionId,input);
+ const entry=catalogRegistry[params.resource],rows=await entry.list(params.institutionId,input,catalogVisibility(actor.subject,actor.access,actor.identity.sessionId,params.resource,{id:entry.table.id,programId:curriculumVersions.programId}));
  const {visible,page}=pageEnvelope(rows,input,scope);
  return NextResponse.json({data:visible.map(entry.publicRow),page},{headers:noCache});
 });
 export const POST=withErrors(async(req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const params=await routeContext(ctx);if(!params)return jsonError('INVALID_RESOURCE',404);
- const access=await authorizeInstitution(params.institutionId,'academic.manage');if(!access)return jsonError('FORBIDDEN',403);
+ const access=await institutionContext(params.institutionId);
+ if(!access||!catalogMayAccess(access.subject,access.access,access.identity,params.resource,'manage'))return jsonError('FORBIDDEN',403);
  const {institutionId,resource}=params,entry=catalogRegistry[resource];
  const parsed=entry.createSchema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
  const {requestId}=context(req);
  try{
   const result=await db.transaction(async tx=>{
-   if(!await lockWriteAccess(tx,access.identity,access.access,'academic.manage'))return {error:'FORBIDDEN',status:403} as const;
+   const current=await lockInstitutionContext(tx,access.identity,access.access);
+   if(!current)return {error:'FORBIDDEN',status:403} as const;
    if(resource==='curricula'){
     const {programId}=parsed.data as {programId:string};
     const [parent]=await tx.select({id:academicPrograms.id}).from(academicPrograms)
      .where(and(eq(academicPrograms.id,programId),eq(academicPrograms.institutionId,institutionId),eq(academicPrograms.status,'active'))).limit(1).for('update');
     if(!parent)return {error:'PROGRAM_NOT_FOUND',status:422} as const;
    }
+   const trusted={institutionId,status:'active',...(resource==='curricula'?{programId:(parsed.data as {programId:string}).programId}:{})};
+   if(!can(current.subject,catalogCapability(resource,'manage'),trusted,new Date()))return {error:'FORBIDDEN',status:403} as const;
    const row=await entry.insert(tx,institutionId,parsed.data);
    const data=entry.publicRow(row);
    await audit(tx,{actorUserId:access.identity.id,institutionId,action:'academic.'+resource+'.create',target:resource+':'+row.id,requestId,details:{after:data}});
@@ -63,14 +70,16 @@ export const POST=withErrors(async(req:NextRequest,ctx:Ctx)=>{
 export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const params=await routeContext(ctx);if(!params)return jsonError('INVALID_RESOURCE',404);
- const access=await authorizeInstitution(params.institutionId,'academic.manage');if(!access)return jsonError('FORBIDDEN',403);
+ const access=await institutionContext(params.institutionId);
+ if(!access||!catalogMayAccess(access.subject,access.access,access.identity,params.resource,'manage'))return jsonError('FORBIDDEN',403);
  const {institutionId,resource}=params,entry=catalogRegistry[resource];
  const parsed=entry.updateSchema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
  const change=parsed.data;if(!change.name&&!change.status)return jsonError('NO_CHANGES',422);
  const {requestId}=context(req);
  try{
   const result=await db.transaction(async tx=>{
-   if(!await lockWriteAccess(tx,access.identity,access.access,'academic.manage'))return {error:'FORBIDDEN',status:403} as const;
+   const current=await lockInstitutionContext(tx,access.identity,access.access);
+   if(!current)return {error:'FORBIDDEN',status:403} as const;
    if(resource==='curricula'){
     // programId is immutable. Lock parent before child, matching create/archive order.
     const [candidate]=await tx.select({programId:curriculumVersions.programId}).from(curriculumVersions)
@@ -83,6 +92,7 @@ export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
    }
    const before=await entry.find(tx,institutionId,change.id);
    if(!before)return {error:'NOT_FOUND',status:404} as const;
+   if(!can(current.subject,catalogCapability(resource,'manage'),catalogRecord(resource,before),new Date()))return {error:'FORBIDDEN',status:403} as const;
    if(change.status&&!canTransition(resource,before.status,change.status))return {error:'INVALID_TRANSITION',status:409} as const;
    if(resource==='programs'&&change.status==='archived'){
     const plans=await tx.select({id:curriculumVersions.id}).from(curriculumVersions)
