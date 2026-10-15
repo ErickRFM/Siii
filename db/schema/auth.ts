@@ -32,6 +32,7 @@ export const roleAssignments = pgTable('role_assignments', {
   campusId: uuid('scope_campus_id'),
   expiresAt: timestamp('expires_at',{withTimezone:true}),
 }, table => ({
+  idMember:uniqueIndex('role_assignment_id_member_uidx').on(table.id,table.membershipId),
   activeRole: uniqueIndex('role_assignment_unique_active').on(table.membershipId, table.role).where(sql`${table.revokedAt} IS NULL AND ${table.scopeType} = 'institution'`),
   activeProgramRole: uniqueIndex('role_assignment_unique_program').on(table.membershipId,table.role,table.programId).where(sql`${table.revokedAt} IS NULL AND ${table.scopeType} = 'program'`),
   activeCampusRole: uniqueIndex('role_assignment_unique_campus').on(table.membershipId,table.role,table.campusId).where(sql`${table.revokedAt} IS NULL AND ${table.scopeType} = 'campus'`),
@@ -74,7 +75,7 @@ export const authThrottle = pgTable('auth_throttle', {
   blockedUntil: timestamp('blocked_until', {withTimezone:true}),
   expiresAt: timestamp('expires_at', {withTimezone:true}).notNull(),
 },table=>({
-  scopeValid:check('auth_throttle_scope_check',sql`${table.scope} IN ('login_account','login_ip','password_account','password_ip')`),
+  scopeValid:check('auth_throttle_scope_check',sql`${table.scope} IN ('login_account','login_ip','password_account','password_ip','invitation_sender','invitation_accept_ip','password_reset_account','password_reset_ip')`),
   failuresValid:check('auth_throttle_failures_check',sql`${table.failures} >= 0`),
   byExpiry:index('auth_throttle_expires_idx').on(table.expiresAt),
 }));

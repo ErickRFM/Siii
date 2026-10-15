@@ -4,7 +4,7 @@ import {hasFreshStepUp,MFA_STEP_UP_MS} from './mfa-session-policy';
 import type {InstitutionAccess} from './institution-policy';
 
 // Only backed API actions are disclosed as operable; domain placeholders are not UI affordances.
-const SUPPORTED:readonly Capability[]=['institutions.read','users.read','memberships.manage','roles.assign','programs.read','programs.manage','curricula.read','curricula.manage','courses.read','courses.manage','campuses.read','campuses.manage','terms.read','terms.manage'];
+const SUPPORTED:readonly Capability[]=['institutions.read','users.read','memberships.manage','roles.assign','invitations.manage','programs.read','programs.manage','curricula.read','curricula.manage','courses.read','courses.manage','campuses.read','campuses.manage','terms.read','terms.manage'];
 export function disclose(subject:Subject,access:InstitutionAccess,assurance:Assurance,now=new Date(),requestedScope?:GrantScope){
  const restricted=!privilegedAssuranceAllows(access.grants,assurance,now);
  const capabilities=restricted?[]:SUPPORTED.filter(capability=>can(subject,capability,{institutionId:access.institutionId,status:'active'},now));

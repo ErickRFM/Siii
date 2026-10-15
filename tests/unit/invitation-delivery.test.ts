@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { newInvitationToken, hashInvitationToken, invitationLink } from '../../src/shared/invitations/token';
-import { sendTransactionalEmail } from '../../src/infrastructure/email/transactional';
+import { sendTransactionalEmail, emailSenderSnapshot, sendFrozenTransactionalEmail } from '../../src/infrastructure/email/transactional';
 
 const invitationId='8d82db37-07d6-4d76-b454-365f185ef083';
 const tenant='de63dd9a-f6d6-4c8d-8583-1d37313438d0';
@@ -71,5 +71,26 @@ describe('transactional email provider boundary',()=>{
  it.each([{...email,to:'other@example.com\r\nBcc: victim@example.com'}, {...email,eventId:'bad-key'}, {...email,subject:'invite\r\nheader'}, {...email,text:'x'.repeat(100001)}])('rejects invalid messages before contacting provider',async input=>{
   const fetch=vi.fn(); vi.stubGlobal('fetch',fetch);
   expect(await sendTransactionalEmail(input,config)).toEqual({status:'failed',code:'EMAIL_MESSAGE_INVALID'}); expect(fetch).not.toHaveBeenCalled();
+ });
+});
+
+describe('outbox immutable provider routing',()=>{
+ it('freezes a validated routing pair only when a complete server configuration is available',()=>{
+  expect(emailSenderSnapshot(config)).toEqual({from:config.from,replyTo:config.replyTo});
+  expect(emailSenderSnapshot({from:config.from,replyTo:config.replyTo})).toBeNull();
+  expect(emailSenderSnapshot({...config,from:'bad\r\nBcc: victim@example.com'})).toBeNull();
+ });
+ it('retains sender and reply-to across environment rotation while using the current API key',async()=>{
+  const fetch=vi.fn().mockResolvedValue(new Response(JSON.stringify({id:invitationId}),{status:200})); vi.stubGlobal('fetch',fetch);
+  const frozen={from:'original@example.com',replyTo:'original-support@example.com'};
+  expect(await sendFrozenTransactionalEmail(email,frozen,{...config,apiKey:'re_rotated_key',from:'changed@example.com',replyTo:'changed-support@example.com'})).toEqual({status:'accepted',messageId:invitationId});
+  const [,init]=fetch.mock.calls[0]; const body=JSON.parse(init.body);
+  expect(body.from).toBe(frozen.from); expect(body.reply_to).toBe(frozen.replyTo); expect(init.headers.Authorization).toBe('Bearer re_rotated_key');
+  expect(init.headers['Idempotency-Key']).toBe('siii-invitation-'+invitationId);
+ });
+ it('never falls back to environment routing when the frozen pair is invalid',async()=>{
+  const fetch=vi.fn(); vi.stubGlobal('fetch',fetch);
+  expect(await sendFrozenTransactionalEmail(email,{from:'bad\r\nheader',replyTo:config.replyTo},config)).toEqual({status:'failed',code:'EMAIL_MESSAGE_INVALID'});
+  expect(fetch).not.toHaveBeenCalled();
  });
 });

@@ -43,3 +43,17 @@ export async function sendTransactionalEmail(input:TransactionalEmail,configurat
   return {status:'retryable',code:'EMAIL_PROVIDER_RETRY'};
  }
 }
+
+export type FrozenEmailSender={from:string;replyTo:string};
+const senderSchema=z.object({from:address,replyTo:address}).strict();
+/** Persist this pair before first submission; it must remain immutable for this event's retries. */
+export function emailSenderSnapshot(configuration:EmailConfiguration=emailConfiguration()):FrozenEmailSender|null {
+ const config=configSchema.safeParse(configuration);
+ return config.success?{from:config.data.from,replyTo:config.data.replyTo}:null;
+}
+/** Rotate the API credential independently; never alter a previously claimed event's provider payload. */
+export async function sendFrozenTransactionalEmail(input:TransactionalEmail,sender:FrozenEmailSender,configuration:EmailConfiguration=emailConfiguration()):Promise<EmailResult>{
+ const frozen=senderSchema.safeParse(sender);
+ if(!frozen.success)return {status:'failed',code:'EMAIL_MESSAGE_INVALID'};
+ return sendTransactionalEmail(input,{apiKey:configuration.apiKey,from:frozen.data.from,replyTo:frozen.data.replyTo});
+}

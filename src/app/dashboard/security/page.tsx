@@ -12,7 +12,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
   const user = await getIdentity();
   if (!user) redirect('/login');
   const {returnTo}=await searchParams;
-  const safeReturn=returnTo&&/^\/dashboard\/institutions\/[0-9a-f-]{36}(?:\/(?:academic|roles))?$/.test(returnTo)?returnTo:null;
+  const safeReturn=returnTo&&/^\/dashboard\/institutions\/[0-9a-f-]{36}(?:\/(?:academic|roles|invitations))?$/.test(returnTo)?returnTo:null;
   return (
     <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="security">
       <div className="sii-page-eyebrow">CENTRO PERSONAL <span className="sii-page-eyebrow-line"/></div>
