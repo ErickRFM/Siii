@@ -113,7 +113,7 @@ describe.sequential('local institutional replay with synthetic PostgreSQL roles'
     const all = await ledger(); expect(all.slice(0, 2)).toEqual(initial);
     expect(all).toEqual(readMigrationFiles({ migrationsFolder: './db/migrations' }).map(m => ({ hash: m.hash, created_at: String(m.folderMillis) })));
     expect(all).toHaveLength(readMigrationFiles({ migrationsFolder: './db/migrations' }).length);
-    const protectedTables = await security(); expect(protectedTables).toHaveLength(13);
+    const protectedTables = await security(); expect(protectedTables.map(t=>t.relname)).toEqual(expect.arrayContaining([...['institutions','people','platform_users','institution_memberships','role_assignments','auth_sessions','auth_throttle','campuses','academic_programs','academic_terms','curriculum_versions','academic_courses','security_audit_log'],'auth_mfa_factors','auth_mfa_enrollments','auth_mfa_challenges','auth_mfa_recovery_codes']));
     expect(protectedTables.every(t => t.rls && t.owner === 'siii_migrator')).toBe(true);
     for (const role of ['anon', 'authenticated', 'siii_app']) expect((await client.query("SELECT has_function_privilege($1,'public.synthetic_legacy_rpc()','EXECUTE') AS yes", [role])).rows[0].yes).toBe(false);
     const leaks = (await client.query("SELECT d.defaclobjtype FROM pg_default_acl d CROSS JOIN LATERAL aclexplode(d.defaclacl) acl WHERE d.defaclobjtype='f' AND d.defaclrole IN (SELECT oid FROM pg_roles WHERE rolname=ANY($1::text[])) AND (d.defaclnamespace=0 OR d.defaclnamespace='public'::regnamespace) AND acl.privilege_type='EXECUTE' AND (acl.grantee=0 OR acl.grantee IN (SELECT oid FROM pg_roles WHERE rolname IN ('anon','authenticated','siii_app')))", [[roleMap.postgres, roleMap.supabase_admin, 'siii_migrator']])).rows;

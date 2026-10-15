@@ -31,11 +31,14 @@ export const authSessions = pgTable('auth_sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => platformUsers.id, { onDelete: 'cascade' }),
   tokenHash: text('token_hash').notNull().unique(),
+  authVersion: integer('auth_version').notNull().default(0),
+  mfaVerifiedAt: timestamp('mfa_verified_at', { withTimezone: true }),
+  stepUpAt: timestamp('step_up_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
-}, table => ({ byUser: index('auth_sessions_user_idx').on(table.userId), byLastSeen: index('auth_sessions_last_seen_idx').on(table.lastSeenAt) }));
+}, table => ({ byUser: index('auth_sessions_user_idx').on(table.userId), byLastSeen: index('auth_sessions_last_seen_idx').on(table.lastSeenAt), authVersionValid: check('auth_sessions_auth_version_check',sql`${table.authVersion} >= 0`) }));
 
 export const securityAuditLog = pgTable('security_audit_log', {
   id: uuid('id').primaryKey().defaultRandom(),

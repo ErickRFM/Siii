@@ -11,6 +11,7 @@ import {context,audit} from '@/shared/http/request-context';
 import {withErrors} from '@/shared/http/route-errors';
 import {createSession,revokeUserSessions} from '@/shared/auth/session-write';
 import {SESSION_COOKIE,cookieOptions} from '@/shared/auth/session-policy';
+import {invalidateMfaPending,MFA_CHALLENGE_COOKIE} from '@/shared/auth/mfa';
 export const runtime='nodejs';
 export const POST=withErrors(async(req:NextRequest)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
@@ -22,14 +23,17 @@ export const POST=withErrors(async(req:NextRequest)=>{
   const now=new Date();
   const decision=await credentials(tx,{username:identity.username,password:parsed.data.currentPassword,ip:clientIp(req),requestId,kind:'password',sessionId:identity.sessionId},now);
   if(decision.status!==200)return decision;
-  await tx.update(platformUsers).set({passwordHash:await hashPassword(parsed.data.newPassword),mustChangePassword:false}).where(eq(platformUsers.id,identity.id));
+  const authVersion=decision.user.authVersion+1;
+  await tx.update(platformUsers).set({passwordHash:await hashPassword(parsed.data.newPassword),mustChangePassword:false,authVersion}).where(eq(platformUsers.id,identity.id));
+  await invalidateMfaPending(tx,identity.id,now);
   const revoked=await revokeUserSessions(tx,identity.id,now);
-  const session=await createSession(tx,identity.id,now);
+  const session=await createSession(tx,identity.id,now,{authVersion,mfaVerifiedAt:decision.session?.mfaVerifiedAt});
   await audit(tx,{actorUserId:identity.id,action:'auth.password.change',target:'user:'+identity.id,requestId,details:{before:{mustChangePassword:decision.user.mustChangePassword},after:{mustChangePassword:false,sessionRevocations:revoked.length}}});
   return {status:200 as const,...session};
  });
  if(result.status!==200)return jsonError(result.status===429?'RATE_LIMITED':'INVALID_CREDENTIALS',result.status);
  const response=NextResponse.json({ok:true},{headers:{'Cache-Control':'no-store'}});
  response.cookies.set(SESSION_COOKIE,result.token,cookieOptions(result.expires));
+ response.cookies.set(MFA_CHALLENGE_COOKIE,'',{...cookieOptions(),maxAge:0});
  return response;
 });

@@ -5,6 +5,8 @@ import {audit,type Transaction} from '@/shared/http/request-context';
 import {consumeIp,lockThrottle} from './throttle';
 import {verifyPassword} from './password';
 import {SESSION_IDLE_MS} from './session-policy';
+import {lockMfaFactor} from './mfa-session';
+import {sessionIsCurrent} from './mfa-session-policy';
 export async function credentials(tx:Transaction,input:{username:string;password:string;ip:string;requestId:string;kind:'login'|'password';sessionId?:string},now:Date){
  const action='auth.'+input.kind;
  if(!await consumeIp(tx,input.ip,now)){
@@ -13,14 +15,17 @@ export async function credentials(tx:Transaction,input:{username:string;password
  }
  const account=await lockThrottle(tx,'login_account',input.username,now);
  const [user]=await tx.select().from(platformUsers).where(eq(platformUsers.username,input.username)).limit(1).for('update');
+ const factor=user?await lockMfaFactor(tx,user.id):null;
  now=new Date();
+ let verifiedSession:typeof authSessions.$inferSelect|undefined;
  if(input.kind==='password'){
-  const [session]=input.sessionId?await tx.select({id:authSessions.id}).from(authSessions).where(and(eq(authSessions.id,input.sessionId),eq(authSessions.userId,user?.id??'00000000-0000-0000-0000-000000000000'),isNull(authSessions.revokedAt),gt(authSessions.expiresAt,now),gt(authSessions.lastSeenAt,new Date(now.getTime()-SESSION_IDLE_MS)))).for('share'):[];
-  if(!session){
+  const [session]=input.sessionId?await tx.select().from(authSessions).where(and(eq(authSessions.id,input.sessionId),eq(authSessions.userId,user?.id??'00000000-0000-0000-0000-000000000000'),isNull(authSessions.revokedAt),gt(authSessions.expiresAt,now),gt(authSessions.lastSeenAt,new Date(now.getTime()-SESSION_IDLE_MS)))).for('share'):[];
+  if(!session||!user||!sessionIsCurrent(user,session,factor,new Date())){
    await verifyPassword(user?.passwordHash,input.password);
    await audit(tx,{actorUserId:user?.id,action:'auth.password.blocked',target:user?'user:'+user.id:'session:expired',requestId:input.requestId});
-   return {status:401 as const};
+   return {status:401 as const,code:'UNAUTHENTICATED' as const};
   }
+  verifiedSession=session;
  }
  now=new Date();
  const expired=!!(user?.lockedUntil&&user.lockedUntil<=now);
@@ -46,7 +51,7 @@ export async function credentials(tx:Transaction,input:{username:string;password
  }
  await tx.update(platformUsers).set({failedLoginAttempts:0,lockedUntil:null,lockoutLevel:0}).where(eq(platformUsers.id,user.id));
  await tx.update(authThrottle).set({failures:0,blockedUntil:null,windowStartedAt:now}).where(eq(authThrottle.key,account.key));
- return {status:200 as const,user};
+ return {status:200 as const,user,factor,session:verifiedSession};
 }
 export async function credentialTransaction<T extends {status:number}>(operation:(tx:Transaction)=>Promise<T>):Promise<T>{
  const start=performance.now();

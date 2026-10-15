@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
-import {or,lt,isNotNull,inArray,asc} from 'drizzle-orm';
+import {and,or,lt,isNotNull,inArray,asc} from 'drizzle-orm';
 import {db,pool,assertApplicationRole} from '../src/infrastructure/database';
-import {authSessions,authThrottle} from '../db/schema';
+import {authSessions,authThrottle,platformUsers} from '../db/schema';
 import {SESSION_IDLE_MS} from '../src/shared/auth/session-policy';
 import {audit} from '../src/shared/http/request-context';
 import {logger} from '../src/shared/logging';
@@ -9,10 +9,18 @@ async function cleanup(){
  const now=new Date(),requestId=randomUUID(),totals={deletedSessions:0,deletedThrottleBuckets:0};
  for(let batch=0;batch<50;batch++){
   const result=await db.transaction(async tx=>{
-   // Never wait on authentication locks: password/MFA flows can already hold a bucket/user.
-   const expiredSessions=await tx.select({id:authSessions.id}).from(authSessions)
-    .where(or(lt(authSessions.expiresAt,now),lt(authSessions.lastSeenAt,new Date(now.getTime()-SESSION_IDLE_MS)),isNotNull(authSessions.revokedAt)))
-    .orderBy(asc(authSessions.id)).limit(500).for('update',{skipLocked:true});
+   const expired=or(lt(authSessions.expiresAt,now),lt(authSessions.lastSeenAt,new Date(now.getTime()-SESSION_IDLE_MS)),isNotNull(authSessions.revokedAt));
+   // Discover without locking; MFA/password writes hold user before factor, enrollment and session.
+   // Session deletion cascades to enrollment rows, so session-first cleanup would invert that order.
+   const candidates=await tx.select({id:authSessions.id,userId:authSessions.userId}).from(authSessions)
+    .where(expired).orderBy(asc(authSessions.id)).limit(500);
+   const candidateUsers=[...new Set(candidates.map(row=>row.userId))];
+   const acquiredUsers=candidateUsers.length?await tx.select({id:platformUsers.id}).from(platformUsers)
+    .where(inArray(platformUsers.id,candidateUsers)).orderBy(asc(platformUsers.id)).for('update',{skipLocked:true}):[];
+   // Never wait on authentication locks; recheck expiry after acquiring the owning user locks.
+   const expiredSessions=acquiredUsers.length?await tx.select({id:authSessions.id}).from(authSessions)
+    .where(and(expired,inArray(authSessions.id,candidates.map(row=>row.id)),inArray(authSessions.userId,acquiredUsers.map(row=>row.id))))
+    .orderBy(asc(authSessions.id)).limit(500).for('update',{skipLocked:true}):[];
    const expiredBuckets=await tx.select({key:authThrottle.key}).from(authThrottle).where(lt(authThrottle.expiresAt,now))
     .orderBy(asc(authThrottle.key)).limit(500).for('update',{skipLocked:true});
    const sessions=expiredSessions.length?await tx.delete(authSessions).where(inArray(authSessions.id,expiredSessions.map(row=>row.id))).returning({id:authSessions.id}):[];

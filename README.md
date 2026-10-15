@@ -50,3 +50,7 @@ de las tres tablas nuevas.
 Véase [P0_HARDENING.md](docs/implementation/P0_HARDENING.md) para el migrador seguro, baseline, roles PostgreSQL, cookie/sesión, cursor y pruebas reales de handlers/UI. `npm run db:migrate` requiere SIII_DATABASE_ENV no productivo explícito y no admite producción. `npm run db:baseline` adopta únicamente el esquema conocido tras verificarlo; no reaplica DDL. Las migraciones SQL usan LF canónico.
 
 `npm run test:ui` ejecuta Chromium con axe y teclado. Integración y UI usan PostgreSQL local desechable y un login web separado del propietario. Ningún dato de producción se usa como fixture.
+
+## P1 — MFA en rama dependiente
+
+Autenticación TOTP real, recuperación de un uso y step-up disponibles en login y /dashboard/security, respaldados por la migración 0006. El runtime requiere SIII_MFA_KEYS y SIII_MFA_ACTIVE_KEY_ID solo servidor; no hay claves de fallback. Configuración, endpoints, pruebas y limitaciones: [P1_MFA_REPORT.md](docs/audit/P1_MFA_REPORT.md). La integración de MFA obligatorio con perfiles privilegiados sigue pendiente en IAM; P1 no está cerrado.
