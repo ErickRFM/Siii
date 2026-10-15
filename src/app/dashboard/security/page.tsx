@@ -12,7 +12,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
   const user = await getIdentity();
   if (!user) redirect('/login');
   const {returnTo}=await searchParams;
-  const safeReturn=returnTo&&/^\/dashboard\/institutions\/[0-9a-f-]{36}(?:\/(?:academic|roles|invitations))?$/.test(returnTo)?returnTo:null;
+  const safeReturn=returnTo&&/^\/dashboard\/institutions\/[0-9a-f-]{36}(?:\/(?:academic|roles|invitations|users|admin))?$/.test(returnTo)?returnTo:null;
   return (
     <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="security">
       <div className="sii-page-eyebrow">CENTRO PERSONAL <span className="sii-page-eyebrow-line"/></div>
@@ -36,7 +36,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
           <p>Las operaciones institucionales verifican permisos y membresías directamente en el servidor.</p>
           <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Tu usuario</strong><small>{user.username}</small></div></div>
           <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Sesión</strong><small>Autenticada y vigente</small></div></div>
-          <p className="sii-security-coming">La administración de dispositivos y recuperación de cuentas se habilitarán tras completar su verificación de seguridad.</p>
+          <p className="sii-security-coming">El restablecimiento de contraseña conserva tu verificación de identidad y requiere iniciar sesión de nuevo.</p>
         </aside>
       </div>
     </SiiAppShell>

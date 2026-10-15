@@ -5,6 +5,7 @@ import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 import { ROLE_LABELS, hasPermission } from '@/shared/auth/roles';
 import SiiAppShell from '@/components/sii-app-shell';
 import PasswordChange from './password-change';
+import {ManageableInstitutions} from '@/components/institution-admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,8 @@ export default async function Dashboard() {
           <Link href="/dashboard/security" className="sii-metric-link">Gestionar seguridad <span aria-hidden="true">↗</span></Link>
         </article>
       </section>
+
+      <ManageableInstitutions/>
 
       <div className="sii-content-grid">
         <section className="sii-panel sii-institutions-panel">
