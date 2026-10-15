@@ -1,7 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {and,eq} from 'drizzle-orm';
 import {db} from '@/infrastructure/database';
-import {institutionMemberships} from '../../../../../../../../db/schema';
+import {institutionMemberships,membershipEvents} from '../../../../../../../../db/schema';
 import {authorizeCapability} from '@/shared/auth/session';
 import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
 import {uuid,membershipChangeBody} from '@/shared/auth/validation';
@@ -10,6 +10,7 @@ import {anotherActiveAdministrator} from '@/shared/auth/institution-policy';
 import {lockWriteCapability} from '@/shared/auth/write-access';
 import {invalidatePrivileges,targetGrants} from '@/shared/auth/privilege-write';
 import {context,audit} from '@/shared/http/request-context';
+import {projectUserHistory} from '@/shared/users/history';
 import {withErrors} from '@/shared/http/route-errors';
 export const runtime='nodejs';
 type Ctx={params:Promise<{institutionId:string;membershipId:string}>};
@@ -26,6 +27,7 @@ export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
   const current=await lockWriteCapability(tx,actor.identity,actor.access,'memberships.manage',{institutionId,status:'active'},candidate,true);
   if(!current)return {error:'FORBIDDEN',status:403} as const;
   const [before]=await tx.select().from(institutionMemberships).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId)));
+  if(before.deletedAt)return {error:'MEMBERSHIP_DELETED',status:409} as const;
   const grants=await targetGrants(tx,membershipId,institutionId);
   if(!canManageTarget(current.subject,grants,institutionId,new Date()))return {error:'TARGET_ROLE_PROTECTED',status:403} as const;
   if(before.status===parsed.data.status)return {data:{id:membershipId,status:before.status,changed:false}} as const;
@@ -34,8 +36,11 @@ export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
   const [after]=await tx.update(institutionMemberships).set({status:parsed.data.status,updatedAt:new Date()}).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId))).returning({id:institutionMemberships.id,status:institutionMemberships.status});
   const invalidation=await invalidatePrivileges(tx,before.userId,new Date());
   await audit(tx,{actorUserId:actor.identity.id,institutionId,action:'membership.status.change',target:'membership:'+membershipId+':status:'+before.status+'->'+after.status+':reason:'+parsed.data.reason,requestId,details:{before:{status:before.status},after:{status:after.status,...invalidation},reason:parsed.data.reason}});
+  await tx.insert(membershipEvents).values({institutionId,membershipId,actorUserId:actor.identity.id,action:after.status==='suspended'?'suspend':'activate',reason:parsed.data.reason,changes:projectUserHistory({before:{status:before.status},after:{status:after.status}})});
   return {data:{...after,changed:true}} as const;
  });
  if('error'in result&&result.error)return jsonError(result.error,result.status??500);
  return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}});
 });
+
+export {userDetail as GET} from '@/shared/users/handlers';

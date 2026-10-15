@@ -64,6 +64,13 @@
       "when": 1792017000000,
       "tag": "0008_p1_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792085000000,
+      "tag": "0009_p1_user_management",
+      "breakpoints": true
     }
   ]
 }

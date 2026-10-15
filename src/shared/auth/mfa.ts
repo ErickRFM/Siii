@@ -17,7 +17,7 @@ import { createMfaSecret, sealMfaSecret, openMfaSecret, verifyTotp, createRecove
 import {hasPrivilegedMembership} from './institution-policy';
 
 export const MFA_CHALLENGE_COOKIE = process.env.NODE_ENV === 'production' ? '__Host-siii_mfa_challenge' : 'siii_mfa_challenge';
-const CHALLENGE_MS = 5 * 60000, ENROLLMENT_MS = 15 * 60000, BLOCK_MS = 15 * 60000;
+const CHALLENGE_MS = 5 * 60000, ENROLLMENT_MS = 15 * 60000;
 const MAX_ATTEMPTS = 5;
 const tokenFormat = /^[A-Za-z0-9_-]{43}$/;
 const factorFields = { code: z.string().regex(/^[0-9]{6}$/).optional(), recoveryCode: z.string().min(32).max(128).optional() };
@@ -27,6 +27,7 @@ const stepUpBody = z.object({ currentPassword: z.string().min(1).max(512), ...fa
 const enrollBody = z.object({ currentPassword: z.string().min(1).max(512) }).strict();
 const verifyBody = z.object({ enrollmentId: z.uuid(), code: z.string().regex(/^[0-9]{6}$/) }).strict();
 const emptyBody = z.object({}).strict();
+import {factorBlocked,recordFactorFailure,verifyFactor} from './mfa-proof';
 type Factor = NonNullable<Awaited<ReturnType<typeof lockMfaFactor>>>;
 const ok = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 const challengeHash = (token: string) => createHash('sha256').update('SIII:mfa-challenge\0' + token).digest('hex');
@@ -80,39 +81,6 @@ async function mfaIp(tx: Transaction, req: NextRequest, requestId: string): Prom
   if (await consumeIp(tx, clientIp(req), new Date())) return true;
   await audit(tx, { action: 'auth.mfa.throttled', target: 'ip:throttled', requestId });
   return false;
-}
-async function factorBlocked(tx: Transaction, factor: Factor, now: Date): Promise<boolean> {
-  if (factor.blockedUntil && factor.blockedUntil > now) return true;
-  if (factor.blockedUntil || factor.failedAttempts >= MAX_ATTEMPTS) {
-    await tx.update(mfaFactors).set({ blockedUntil: null, failedAttempts: 0 }).where(eq(mfaFactors.id, factor.id));
-    factor.failedAttempts = 0; factor.blockedUntil = null;
-  }
-  return false;
-}
-async function recordFactorFailure(tx: Transaction, factor: Factor, now: Date) {
-  const attempts = Math.min(MAX_ATTEMPTS, factor.failedAttempts + 1);
-  await tx.update(mfaFactors).set({ failedAttempts: attempts, blockedUntil: attempts >= MAX_ATTEMPTS ? new Date(now.getTime() + BLOCK_MS) : null }).where(eq(mfaFactors.id, factor.id));
-  return attempts;
-}
-/** User and factor locks are held; recovery consumption and TOTP replay state share the transaction. */
-async function verifyFactor(tx: Transaction, factor: Factor, input: { code?: string; recoveryCode?: string }, now: Date): Promise<boolean> {
-  // Always validate encryption configuration, including the recovery path.
-  const secret = openMfaSecret(factor.secretEncrypted ?? '', factor.userId);
-  if (input.code && !input.recoveryCode) {
-    const result = await verifyTotp(secret, input.code, factor.lastTimeStep, now);
-    if (!result.valid || result.timeStep === undefined) return false;
-    await tx.update(mfaFactors).set({ lastTimeStep: result.timeStep, failedAttempts: 0, blockedUntil: null }).where(eq(mfaFactors.id, factor.id));
-    return true;
-  }
-  if (!input.recoveryCode || input.code) return false;
-  const hash = digestRecoveryCode(input.recoveryCode, factor.userId);
-  if (!hash) return false;
-  const [recovery] = await tx.select().from(mfaRecoveryCodes).where(and(eq(mfaRecoveryCodes.factorId, factor.id), eq(mfaRecoveryCodes.userId, factor.userId), eq(mfaRecoveryCodes.codeHash, hash), isNull(mfaRecoveryCodes.consumedAt))).for('update');
-  if (!recovery) return false;
-  const used = await tx.update(mfaRecoveryCodes).set({ consumedAt: now }).where(and(eq(mfaRecoveryCodes.id, recovery.id), isNull(mfaRecoveryCodes.consumedAt))).returning({ id: mfaRecoveryCodes.id });
-  if (!used.length) return false;
-  await tx.update(mfaFactors).set({ failedAttempts: 0, blockedUntil: null }).where(eq(mfaFactors.id, factor.id));
-  return true;
 }
 async function replaceRecoveryCodes(tx: Transaction, factor: Factor, now: Date) {
   await tx.update(mfaRecoveryCodes).set({ consumedAt: now }).where(and(eq(mfaRecoveryCodes.userId, factor.userId), isNull(mfaRecoveryCodes.consumedAt)));

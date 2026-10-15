@@ -6,7 +6,7 @@ import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
-type Active = 'overview' | 'security' | 'institution' | 'academic' | 'roles' | 'invitations';
+type Active = 'overview' | 'security' | 'institution' | 'academic' | 'roles' | 'invitations' | 'users';
 
 export default function SiiAppShell({
   firstName, fullName, active, institutionId, children,
@@ -31,6 +31,7 @@ function Shell({firstName,fullName,active,institutionId,children}:{firstName:str
             className={active === 'overview' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}>
             <span className="sii-nav-glyph" aria-hidden="true">⌂</span> Inicio
           </Link>
+          {institutionId && hasInstitutionCapability(data,'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`} onClick={()=>setMenuOpen(false)} className={active==='users'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='users'?'page':undefined}><span className="sii-nav-glyph" aria-hidden="true">♙</span>Usuarios</Link>}
           {institutionId && hasInstitutionCapability(data,'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} onClick={()=>setMenuOpen(false)} className={active==='roles'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='roles'?'page':undefined}><span className="sii-nav-glyph" aria-hidden="true">♙</span>Roles y ámbitos</Link>}
           {institutionId && hasInstitutionCapability(data,'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} onClick={()=>setMenuOpen(false)} className={active==='invitations'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='invitations'?'page':undefined}><span className="sii-nav-glyph" aria-hidden="true">✉</span>Invitaciones</Link>}
           <Link href="/dashboard/security" onClick={() => setMenuOpen(false)}
@@ -62,7 +63,7 @@ function Shell({firstName,fullName,active,institutionId,children}:{firstName:str
         <header className="sii-topbar">
           <div className="sii-topbar-start">
             <button className="sii-menu-button" onClick={() => setMenuOpen(x => !x)} type="button" aria-expanded={menuOpen} aria-controls="sii-sidebar-mobile" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'}>☰</button>
-            <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':'Institución'}</span>
+            <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':'Institución'}</span>
           </div>
           <div className="sii-topbar-actions">
             <span className="sii-connection-label"><span className="sii-online-dot" /> Sesión autenticada</span>
