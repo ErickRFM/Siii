@@ -1,6 +1,6 @@
-# Matriz de operaciones — evidencia de P0
+# Matriz de operaciones — evidencia local P0/P1
 
-Estado IMPLEMENTED se refiere al endpoint y a su prueba real local. No certifica promoción a producción ni flujos de P1. Las pruebas HTTP usan Next.js, PostgreSQL y un LOGIN separado sin DDL; solo fixtures sintéticos.
+Estado IMPLEMENTED se refiere al endpoint y a su prueba real local. No certifica promoción a producción, merge ni cierre de P0/P1; P1 se entrega en ramas dependientes. Las pruebas HTTP usan Next.js, PostgreSQL y un LOGIN separado sin DDL; solo fixtures sintéticos.
 
 | ID | Operación / endpoint | Actor y alcance | Validación / transacción / auditoría | Evidencia | Estado |
 |---|---|---|---|---|---|
@@ -10,7 +10,7 @@ Estado IMPLEMENTED se refiere al endpoint y a su prueba real local. No certifica
 | OP-004 | POST /api/v1/auth/logout | Sesión propia | Origin, revocación transaccional y auth.logout | http-handlers.test.ts: logout revoca token | IMPLEMENTED |
 | OP-005 | POST /api/v1/auth/password/change | Cuenta propia activa | Contraseña actual/nueva, sesión revalidada bajo bloqueo, rotación y auditoría | http-handlers.test.ts: cambio, CSRF, revocación concurrente y expiración | IMPLEMENTED |
 | OP-006 | GET /api/v1/institutions | Membresías propias activas | Sesión, cursor estable; sin instituciones ajenas | http-handlers.test.ts: paginación/tenant; /auth/me restringe mustChangePassword | IMPLEMENTED |
-| OP-007 | GET/POST /api/v1/institutions/:institutionId/memberships | members.read / members.manage en institución | Zod estricto, tenant y política v1; POST transaccional, membership.create | http-handlers.test.ts: lectura, creación, tenant, mass assignment; invitación por correo pendiente P1 | IMPLEMENTED |
+| OP-007 | GET/POST /api/v1/institutions/:institutionId/memberships | users.read en el tenant; alta por consentimiento | GET con búsqueda/filtros/cursor y visibilidad vigente; POST por UUID devuelve INVITATION_REQUIRED, alta mediante F08 | permission-scopes.test.ts y user-management.test.ts: tenant, revalidación tras espera, filtros/cursores | IMPLEMENTED |
 | OP-008 | POST /api/v1/institutions/:institutionId/roles/assign | roles.assign; política v1 | Actor/destino revalidados; sin self-grant; transacción, revocación de sesiones y role.assign | http-handlers.test.ts y auth-policy.test.ts | IMPLEMENTED |
 | OP-009 | PATCH /api/v1/institutions/:institutionId/memberships/:membershipId | members.manage; política v1 | Scope, estado/razón, rol protegido, sin self-edit; transacción y antes/después | http-handlers.test.ts: tenant, IDOR, CSRF y revocación | IMPLEMENTED |
 | OP-010 | POST /api/v1/institutions/:institutionId/roles/revoke | roles.assign; política v1 | Sin self-revoke, rol protegido; transacción, sesiones y role.revoke | http-handlers.test.ts y auth-policy.test.ts | IMPLEMENTED |
@@ -20,3 +20,25 @@ Estado IMPLEMENTED se refiere al endpoint y a su prueba real local. No certifica
 | OP-014 | GET /api/v1/auth/me | Sesión propia activa | Expiración absoluta/inactividad/revocación y revalidación después del bloqueo | http-handlers.test.ts: sesiones inválidas y expiración mientras espera | IMPLEMENTED |
 
 Evidencia en tests/integration/, tests/unit/ y tests/ui/. Los estados reflejan verificaciones locales; el informe de fase registra CI, revisión y puertas pendientes.
+
+## Capacidades P1 en ramas dependientes
+
+Las filas anteriores conservan evidencia de P0; los contratos actuales incorporan capacidades por ámbito, MFA y concesiones vigentes de F07. Los endpoints sensibles revalidan autoridad tras locks. La promoción depende de BLOCKERS.md y del merge autorizado; IMPLEMENTED no significa COMPLETO según F13.
+
+| ID | Operación / endpoint | Actor y alcance | Validación / transacción / auditoría | Evidencia | Estado |
+|---|---|---|---|---|---|
+| OP-015 | GET /api/v1/auth/mfa; POST subrutas enroll,verify,challenge,step-up,recovery/regenerate,revoke | Identidad propia; desafío restringido y factor real | Secretos cifrados, TOTP/recovery de un uso, anti-replay, lockout, sesiones/versiones y auditoría | mfa-security.test.ts y mfa-flows.spec.ts; P1_MFA_REPORT.md | IMPLEMENTED |
+| OP-016 | GET /api/v1/institutions/:id/capabilities y gestión de roles | Concesiones vigentes, jerarquía y ámbito | No permisos del cliente ni grants superiores/extendidos; último admin permanente; invalidación y auditoría | permission-scopes.test.ts y permission-scopes.spec.ts; P1_SCOPES_REPORT.md | IMPLEMENTED |
+| OP-017 | GET/POST /api/v1/institutions/:id/invitations; POST /:invitationId/resend y /revoke | invitations.manage institucional; MFA/step-up | Consentimiento, ámbito, TTL, tokenhash, cooldown/budget; autoridad revalidada y auditoría | invitations.test.ts e invitation-flows.spec.ts; P1_INVITATIONS_REPORT.md | IMPLEMENTED |
+| OP-018 | POST /api/v1/invitations/preview,/accept,/reject | Destinatario con bearer válido y prueba propia cuando corresponde | Una vez, consentimiento y cuenta propia; sin elevación o resurrección de baja; token fuera de history/Flight/storage | invitations.test.ts e invitation-flows.spec.ts | IMPLEMENTED |
+| OP-019 | Worker real de invitaciones | LOGIN sólo siii_app; transporte explícito | Outbox cifrado, payload/remitente congelados, leases/CAS e idempotencia | Regresiones de worker HTTP/DB; recepción externa/scheduler pendientes | IMPLEMENTED, EXTERNO PENDIENTE |
+| OP-020 | GET memberships/:id y /history; PATCH /profile | users.read/update; perfil del tenant | Identidad global sólo lectura; whitelist, cursor, jerarquía, MFA, locks y evento/auditoría TX | user-management.test.ts y user-management.spec.ts | IMPLEMENTED |
+| OP-021 | POST memberships/:id/lifecycle; PATCH legacy de estado | users.suspend/restore, jerarquía y último admin | Baja lógica revoca grants; rehabilitar no los restaura; sesiones/versiones y rollback de historial/auditoría | user-management.test.ts y user-management.spec.ts | IMPLEMENTED |
+| OP-022 | POST memberships/:id/password-reset y POST /auth/password/reset/request | users.reset + step-up, o solicitud pública genérica | Sólo email global verificado; presupuesto compartido, anti-enumeración; sin enlace ni contraseña para admin | user-management.test.ts | IMPLEMENTED |
+| OP-023 | POST /auth/password/reset/preview y /complete | Titular con bearer y MFA activo cuando aplica | Hash por propósito/request/usuario/authVersion, un uso/30min; contraseña elegida, invalidación y login posterior | user-management.test.ts y user-management.spec.ts | IMPLEMENTED |
+| OP-024 | Worker real de recuperación | LOGIN sólo siii_app; keyring separado | Outbox cifrado, leases/CAS, idempotencia propia y límite de intentos/TTL | user-management.test.ts; recepción externa/scheduler pendientes | IMPLEMENTED, EXTERNO PENDIENTE |
+| OP-025 | GET /api/v1/institutions/manageable y GET /:id/settings | Propio admin/super_admin institucional con MFA | Gestión propia independiente de unidad activa; no autoridad global; cursor por identidad y revalidación SQL | institution-admin.test.ts, suite dirigida26/26 | IMPLEMENTED |
+| OP-026 | PATCH /api/v1/institutions/:id/settings y POST /:id/status | settings.manage/institutions.manage; step-up fresco | expectedVersion, archivo terminal, bloqueo ordenado y throw/rollback tras última espera; desactivar revoca invites/cancela leases | institution-admin.test.ts: concurrencia, estado y rollback | IMPLEMENTED |
+| OP-027 | GET /api/v1/institutions/:id/audit | audit.read propio, MFA actual | Proyección explícita, actor sólo por membresía tenant, filtros/cursor y comprobación final de autorización | institution-admin.test.ts; año0000 corregido con negativos HTTP/unit y dos revisiones | IMPLEMENTED |
+
+Interfaces reales: seguridad, catálogos, roles, invitaciones, usuarios y recuperación en sus rutas documentadas. Administración F09 tiene dos revisiones de fuente favorables y QA global local verde:682unitarias/243integraciones/40Chromium, build y audit0; CI del SHA publicado y merge se registran en el PR dependiente. Expedientes, matrículas, docentes/grupos/inscripciones/ocurrencias/calificaciones y sincronización Ktor completa siguen pendientes; sus pantallas no simulan operaciones.

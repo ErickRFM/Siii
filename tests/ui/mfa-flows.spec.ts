@@ -116,11 +116,24 @@ test('expired enrollment returns to a focused password form and creates a new ma
   await page.goto('/dashboard/security');
   await expect(page.getByText('No tienes un autenticador activo.', { exact: true })).toBeVisible();
   await page.getByLabel('Contraseña actual para activar').fill(password);
+  const enrollmentResponse = page.waitForResponse(response => response.url().endsWith('/api/v1/auth/mfa/enroll') && response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Configurar autenticador', exact: true }).click();
+  const started = await enrollmentResponse;
+  expect(started.status()).toBe(201);
+  const enrollmentId = (await started.json()).data.enrollmentId as string;
   const secret = await page.getByLabel('Clave manual del autenticador').inputValue();
-  await sql.query("UPDATE auth_mfa_enrollments SET expires_at=now()-interval '1 second' WHERE user_id=(SELECT id FROM platform_users WHERE username=$1)", [name]);
+  // A fixed past instant avoids comparing a one-second margin across process clocks.
+  const expired = await sql.query<{id: string; expires_at: Date; expired: boolean}>("UPDATE auth_mfa_enrollments SET expires_at=TIMESTAMPTZ '2000-01-01T00:00:00Z' WHERE id=$1 AND user_id=(SELECT id FROM platform_users WHERE username=$2) RETURNING id,expires_at,expires_at<clock_timestamp() AS expired", [enrollmentId, name]);
+  expect(expired.rowCount).toBe(1);
+  expect(expired.rows[0].id).toBe(enrollmentId);
+  expect(expired.rows[0].expired).toBe(true);
+  expect(expired.rows[0].expires_at.getTime()).toBeLessThan(Date.now());
   await page.getByLabel('Código para activar el autenticador').fill(await generate({ secret, algorithm: 'sha1', digits: 6, period: 30, crypto: new NodeCryptoPlugin() }));
+  const verificationResponse = page.waitForResponse(response => response.url().endsWith('/api/v1/auth/mfa/verify') && response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Activar autenticador', exact: true }).click();
+  const denied = await verificationResponse;
+  expect(denied.status()).toBe(401);
+  expect((await denied.json()).error?.code).toBe('MFA_ENROLLMENT_EXPIRED');
   await expect(page.locator('#mfa-error')).toContainText('La activación venció');
   await expect(page.getByLabel('Contraseña actual para activar')).toBeFocused();
   await expect(page.getByLabel('Clave manual del autenticador')).toHaveCount(0);

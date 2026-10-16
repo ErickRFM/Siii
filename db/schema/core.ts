@@ -13,10 +13,11 @@ export const institutions = pgTable('institutions', {
   shortName: text('short_name'),
   code: text('code').notNull().unique(),
   timezone: text('timezone').notNull().default('America/Mexico_City'),
+  adminVersion: integer('admin_version').notNull().default(0),
   status: entityStatusEnum('status').notNull().default('active'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, table => ({adminVersionValid: check('institutions_admin_version_check', sql`${table.adminVersion} >= 0`)}));
 export const campuses = pgTable('campuses', {
   id: uuid('id').primaryKey().defaultRandom(),
   institutionId: uuid('institution_id').notNull().references(() => institutions.id),
