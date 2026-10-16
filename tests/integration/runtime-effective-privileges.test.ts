@@ -48,6 +48,7 @@ it('rejects a SET-only secondary role that can truncate audit',async()=>{
  await owner.query('CREATE ROLE '+role+' LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD '+pg.escapeLiteral(secret));
  await owner.query('CREATE ROLE '+parent+' NOLOGIN');
  await owner.query('GRANT siii_app TO '+role);
+ await owner.query('GRANT USAGE ON SCHEMA public TO '+parent);
  await owner.query('GRANT TRUNCATE ON security_audit_log TO '+parent);
  await owner.query('GRANT '+parent+' TO '+role+' WITH INHERIT FALSE, SET TRUE');
  const app=new URL(raw);app.username=role;app.password=secret;
