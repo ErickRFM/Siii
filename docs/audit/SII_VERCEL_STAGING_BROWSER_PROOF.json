@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-16T04:48:44.538Z",
+  "project": "vsnrbjexusidlvhkhmqg",
+  "deployment": "dpl_E2N13oQJXmYcfmUmLo2Z6aTxe6e5",
+  "url": "https://siii-belh77s0h-er-i1.vercel.app",
+  "applicationCommit": "7621f20e2c27420fca53a1619cd2c819e47c8fca",
+  "readiness": 200,
+  "browserLogin": true,
+  "browserMfaChallenge": true,
+  "browserCatalogCreate": true,
+  "persistedAfterReload": true,
+  "crossTenantUiStatus": 404,
+  "requestId": "2e8cd646-f18e-430b-ad43-e1a66972e396",
+  "syntheticOnly": true,
+  "credentialsTransferredEncrypted": true,
+  "syntheticActorDisabledAfterProof": true,
+  "syntheticRecordsRetained": true
+}
