@@ -11,7 +11,8 @@ Las filas heredadas que siguen describen sus ramas originales. La promoción int
 | Lectura sensible de tutoría auditada | LOCAL_VERIFIED / UI_PENDING | consolidation-http.test.ts |
 | Compañero con suspensión institucional | LOCAL_VERIFIED / KTOR_E2E_PENDING | consolidation-http.test.ts |
 | Formularios con catálogos paginados y navegación | LOCAL_VERIFIED | consolidated-modules.spec.ts; consolidated-navigation.test.ts |
-| Migración y reversa cloud, Preview operativo | BLOCKED | BLOCKERS.md; proposals/P0_MANAGED_ROLE_NORMALIZATION.md |
+| Perfil de migración managed y restauración | STAGING_VERIFIED / PRODUCTION_PENDING | release-profile.test.ts; baseline-recovery.test.ts; SII_MANAGED_RELEASE_RUNBOOK.md |
+| Runtime mínimo y login/MFA/catálogo/auditoría cloud | STAGING_VERIFIED / VERCEL_PENDING | docs/audit/SII_STAGING_RUNTIME_PROOF.json; docs/audit/SII_STAGING_HTTP_PROOF.json |
 
 ---
 

@@ -1,5 +1,6 @@
 import {assertNoConnectionOverrides} from './connection-url';
 import pg from 'pg';
+import {storedReleaseProfile,readReleaseMigrations} from './release-profile';
 import { readMigrationFiles } from 'drizzle-orm/migrator';
 
 export function validateMigrationEnvironment(env: NodeJS.ProcessEnv): string {
@@ -32,7 +33,8 @@ export async function assertMigrationLedger(client: pg.Client | pg.PoolClient, f
   if (!exists) {if(tableCount>0)throw new Error('BASELINE_REQUIRED');return;}
   const ledger=await client.query<{hash:string;created_at:string}>('SELECT hash,created_at FROM drizzle.__drizzle_migrations ORDER BY created_at,id');
   if (!ledger.rowCount && tableCount>0) throw new Error('BASELINE_REQUIRED');
-  const migrations=readMigrationFiles({migrationsFolder:folder});
+  const profile=await storedReleaseProfile(client);
+  const migrations=profile?readReleaseMigrations(profile,folder):readMigrationFiles({migrationsFolder:folder});
   if(ledger.rows.length>migrations.length)throw new Error('MIGRATION_LEDGER_DRIFT');
   for(let i=0;i<ledger.rows.length;i++){
     if(ledger.rows[i].hash!==migrations[i].hash || Number(ledger.rows[i].created_at)!==migrations[i].folderMillis)

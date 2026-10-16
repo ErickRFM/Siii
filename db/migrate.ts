@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import pg from 'pg';
+import {storedReleaseProfile,migrateManagedRelease} from './release-profile';
 import { assertMigrationLedger, validateMigrationEnvironment } from './migration-safety';
 
 async function main() {
@@ -12,7 +13,9 @@ async function main() {
     client=await pool.connect();
     await client.query("SELECT pg_advisory_lock(hashtext('siii:migrations'))");
     await assertMigrationLedger(client);
-    await migrate(drizzle(client),{migrationsFolder:'./db/migrations'});
+    const stored=await storedReleaseProfile(client),requested=process.env.SIII_MIGRATION_PROFILE;
+    if(stored||requested&&requested!=='canonical')await migrateManagedRelease(client,requested??stored!);
+    else await migrate(drizzle(client),{migrationsFolder:'./db/migrations'});
     console.log('MIGRATIONS_APPLIED');
   } finally {
     if(client)await client.query("SELECT pg_advisory_unlock(hashtext('siii:migrations'))").catch(()=>undefined);
@@ -22,7 +25,7 @@ async function main() {
 }
 main().catch((error:unknown)=>{
   // Driver messages may include SQL or connection credentials; emit known stable codes only.
-  const safe=new Set(['PRODUCTION_MIGRATION_FORBIDDEN','PRODUCTION_MIGRATION_NOT_AUTHORIZED','DATABASE_ENV_REQUIRED','DATABASE_URL_REQUIRED','INVALID_DATABASE_URL','BASELINE_REQUIRED','MIGRATION_LEDGER_DRIFT']);
+  const safe=new Set(['PRODUCTION_MIGRATION_FORBIDDEN','PRODUCTION_MIGRATION_NOT_AUTHORIZED','DATABASE_ENV_REQUIRED','DATABASE_URL_REQUIRED','INVALID_DATABASE_URL','BASELINE_REQUIRED','MIGRATION_LEDGER_DRIFT','MIGRATION_PROFILE_INVALID','MIGRATION_PROFILE_DRIFT','MIGRATION_PROFILE_CONFLICT']);
   const code=error instanceof Error && safe.has(error.message)?error.message:'MIGRATION_FAILED';
   console.error(code);process.exitCode=1;
 });

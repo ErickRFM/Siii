@@ -1,0 +1,25 @@
+# Siii: managed PostgreSQL release and recovery
+
+Canonical SQL0000–0015 remains byte-for-byte unchanged. Supabase PostgreSQL cannot alter default privileges of its reserved `supabase_admin` role; a versioned `supabase-v1` profile pins the canonical files and the exact SQL actually executed. Only0002/0003/0004 have replacements. Drizzle stores the executed hashes. `drizzle.siii_release_profile` records the manifest fingerprint, checked on every managed run. Profile registration, DDL and ledger inserts share one transaction. Unknown inaccessible object creators abort the transaction.
+
+The provider exception is limited to the reserved role. Public schema USAGE is revoked from PUBLIC, anon and authenticated; the application retains explicit usage. Automatic Data API exposure is disabled and public is removed from exposed schemas. Additive0016 enables and forces RLS on all existing institutional tables. Provider-wide internal service configuration is not part of this application's logical recovery archive.
+
+## Recovery gate
+
+The production archive contains the actual12-table baseline,16 records, both application identities and their existing password hashes, three session records, exact schema signature, role/ACL/default metadata and three provider migration entries. It was encrypted inside PostgreSQL to an operator OpenPGP public key before transfer. Ciphertext, encrypted private key and its local passphrase remain outside Git with an exclusive user ACL. No runtime credential is stored in a plaintext file.
+
+`restoreBaselineBackup` in `scripts/baseline-recovery.ts` accepts a snapshot decrypted only in memory. It permits only an empty loopback `p0_` database, verifies the known schema and exact table set, restores records in dependency order and fixed provider history DDL, compares every row and history record, and commits atomically. It refuses overwrite. Roles and provider internal schemas are not recreated blindly. See `SII_PRODUCTION_BACKUP_PROOF.json`, `SII_RECOVERY_SOURCE_PROOF.json` and `SII_RESTORED_PRODUCTION_UPGRADE.json` in docs/audit. The rehearsal preserved114 original field values; calendar conversion retains legacy timestamps.
+
+Before production, compare the live source with the tested archive. `managedReleaseSql` requires a SHA256 digest for every original table for its default production target. Calculate each digest using PostgreSQL jsonb serialization, ordered by id, from the decrypted archive in a local database. The generated transport checks exact schema and every digest under the migration lock before legitimately adopting0000/0001. Any changed source fails with BACKUP_SOURCE_CHANGED; capture a new encrypted archive and repeat recovery if necessary. Never use an old archive to overwrite live data.
+
+## Execution
+
+Require exact-head green CI, independent review, successful staging and user authorization before production. Local/cloud CLI uses `SIII_MIGRATION_PROFILE=supabase-v1`. Existing production targeting additionally requires the explicit environment and acknowledgment already enforced in db/migration-safety.ts. The connector transport in `scripts/managed-release-sql.ts` defaults to database postgres, session actor postgres and refuses a superuser. Execute only against the verified project id. Both transports validate prefix hashes and timestamps, infer an existing profile and reject mixed or tampered histories. Repeat is idempotent. Never rewrite an existing ledger entry or execute canonical0003 over a managed ledger.
+
+The operator authorized `siii_staging_web_80f5c89b2ec2` and, after production gates, `siii_production_web_744fe951ed9c`, exclusively for Siii on Vercel. `runtimeRoleProvisioningSql` generates the password in PostgreSQL, grants only siii_app and encrypts the handoff to the operator. It refuses existing role names. The runtime has no DDL, elevated attributes, migration membership or owned institutional objects. TLS uses SIII_DATABASE_CA with certificate verification enabled. MFA, invitations and reset have distinct keyrings. Transfer only in process memory to Vercel Secret values via authenticated CLI stdin; do not print them, pull them into plaintext env files, or put them in command arguments.
+
+## Rollback and limits
+
+Keep the previous deployment and its environment snapshot. Stop traffic/promote that deployment if application smoke checks fail. The migration is additive and preserves original identity fields; prefer a reviewed forward repair. Do not drop new tables or rewrite history. For database disaster recovery, restore the encrypted archive into a separate empty isolated database, verify all values, then review a provider-specific cutover. Do not overwrite the official project or restore provider system roles from generic SQL.
+
+Staging HTTP evidence covers readiness, real login, MFA enrollment/verification/step-up, persisted catalog creation, tenant denial and audit request id. Advanced product domains remain subject to OPERATION_MATRIX.md; a deployment marked READY is not evidence of their completion.
