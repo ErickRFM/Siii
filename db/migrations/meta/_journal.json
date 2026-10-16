@@ -78,6 +78,41 @@
       "idx": 10,
       "breakpoints": true,
       "version": "7"
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792111000000,
+      "tag": "0011_school_registry",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792111001000,
+      "tag": "0012_grading_drafts",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792111002000,
+      "tag": "0013_schedules",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792111003000,
+      "tag": "0014_university_services",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792111004000,
+      "tag": "0015_academic_runtime_security",
+      "breakpoints": true
     }
   ]
 }

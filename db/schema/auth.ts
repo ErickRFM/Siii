@@ -19,6 +19,7 @@ export const institutionMemberships = pgTable('institution_memberships', {
   institutionalCodeUnique:uniqueIndex('membership_institutional_code_uidx').on(table.institutionId,table.institutionalCode).where(sql`institutional_code IS NOT NULL`),
   lifecycle:index('membership_lifecycle_created_idx').on(table.institutionId,table.status,table.deletedAt,table.createdAt,table.id),
   uniqueMember: uniqueIndex('institution_member_unique').on(table.institutionId, table.userId),
+  scopedIdentity: uniqueIndex('institution_member_id_scope_uidx').on(table.id,table.institutionId),
   byUser: index('institution_member_user_idx').on(table.userId),
   tenantReference: uniqueIndex('institution_membership_id_institution_uidx').on(table.id,table.institutionId),
 }));

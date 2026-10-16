@@ -1,3 +1,20 @@
+# Consolidación 2026-10-15 — estado verificado
+
+Las filas heredadas que siguen describen sus ramas originales. La promoción integral permanece PARTIAL; evidencia vigente en [SII_CONSOLIDATION_REPORT](../audit/SII_CONSOLIDATION_REPORT.md).
+
+| Operación integrada | Estado | Evidencia |
+|---|---|---|
+| RLS/runtime18 tablas académicas | LOCAL_VERIFIED | tests/integration/consolidation.test.ts |
+| Libro docente y administración institucional | LOCAL_VERIFIED | consolidation-http.test.ts; consolidated-modules.spec.ts |
+| Inscripción concurrente, actas y congelación de roster | LOCAL_VERIFIED | consolidation-http.test.ts |
+| Colisiones al inscribir/asignar y entre periodos | LOCAL_VERIFIED | consolidation-http.test.ts |
+| Lectura sensible de tutoría auditada | LOCAL_VERIFIED / UI_PENDING | consolidation-http.test.ts |
+| Compañero con suspensión institucional | LOCAL_VERIFIED / KTOR_E2E_PENDING | consolidation-http.test.ts |
+| Formularios con catálogos paginados y navegación | LOCAL_VERIFIED | consolidated-modules.spec.ts; consolidated-navigation.test.ts |
+| Migración y reversa cloud, Preview operativo | BLOCKED | BLOCKERS.md; proposals/P0_MANAGED_ROLE_NORMALIZATION.md |
+
+---
+
 # Matriz de operaciones — evidencia local P0/P1
 
 Estado IMPLEMENTED se refiere al endpoint y a su prueba real local. No certifica promoción a producción, merge ni cierre de P0/P1; P1 se entrega en ramas dependientes. Las pruebas HTTP usan Next.js, PostgreSQL y un LOGIN separado sin DDL; solo fixtures sintéticos.
@@ -42,3 +59,29 @@ Las filas anteriores conservan evidencia de P0; los contratos actuales incorpora
 | OP-027 | GET /api/v1/institutions/:id/audit | audit.read propio, MFA actual | Proyección explícita, actor sólo por membresía tenant, filtros/cursor y comprobación final de autorización | institution-admin.test.ts; año0000 corregido con negativos HTTP/unit y dos revisiones | IMPLEMENTED |
 
 Interfaces reales: seguridad, catálogos, roles, invitaciones, usuarios y recuperación en sus rutas documentadas. Administración F09 tiene dos revisiones de fuente favorables y QA global local verde:682unitarias/243integraciones/40Chromium, build y audit0; CI del SHA publicado y merge se registran en el PR dependiente. Expedientes, matrículas, docentes/grupos/inscripciones/ocurrencias/calificaciones y sincronización Ktor completa siguen pendientes; sus pantallas no simulan operaciones.
+## Academic stack pending consolidation verification
+
+# Operation Matrix
+
+| ID | Módulo | Nombre | Actor autorizado | Scope | Endpoint | Validación | Transacción | Auditoría | Prueba | Resultado | Evidencia | Estado |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| OP-001 | health | Health check | Público | Sistema | GET /api/health | N/A | N/A | N/A | unit | OK | - | IMPLEMENTED |
+| OP-002 | health | Readiness check | Público | Sistema | GET /api/ready | N/A | N/A | N/A | unit | OK | - | IMPLEMENTED |
+| OP-003 | auth | Login institucional | Público | Cuenta | POST /api/v1/auth/login | Zod, Argon2id, lockout | Sí | auth.login | unit/integration pendientes | Login y sesión implementados | Endpoint | PARTIAL |
+| OP-004 | auth | Logout | Usuario autenticado | Sesión | POST /api/v1/auth/logout | Cookie, origin | No | Revocación de sesión | E2E pendiente | Logout implementado | Endpoint | PARTIAL |
+| OP-005 | auth | Cambiar contraseña | Usuario autenticado | Cuenta propia | POST /api/v1/auth/password/change | Actual + nueva (mínimo 12 caracteres) | Sí | auth.password.change | E2E pendiente | Cambio y revocación de otras sesiones implementados | Endpoint | PARTIAL |
+| OP-006 | institution | Listar instituciones accesibles | Usuario autenticado | Membresías activas | GET /api/v1/institutions | Sesión y permisos | N/A | N/A | Tenancy E2E pendiente | Consulta implementada | Endpoint | PARTIAL |
+| OP-007 | membership | Listar y crear membresías | Admin autorizado | Institución | GET/POST /api/v1/institutions/:institutionId/memberships | UUID, alcance, sin duplicados | POST sí | membership.create | Integración/E2E pendiente | Endpoints implementados | Endpoint | PARTIAL |
+| OP-008 | roles | Asignar rol | Admin/super admin | Institución y membresía | POST /api/v1/institutions/:institutionId/roles/assign | Privilegios del actor y destino, sin self-grant | Sí | role.assign | Unidad RBAC, E2E pendiente | Protección de roles ampliada | Endpoint + auth-policy.test.ts | PARTIAL |
+| OP-009 | membership | Suspender/reactivar membresía | Admin/super admin | Institución y membresía | PATCH /api/v1/institutions/:institutionId/memberships/:membershipId | Origin, permisos, estado, razón, rol protegido, sin self-edit | Sí | membership.status.change | Unit policy + DB scope; E2E pendiente | Backend implementado sin UI | Endpoint + membership scope DB test | PARTIAL |
+| OP-010 | roles | Revocar rol | Admin/super admin | Institución y membresía | POST /api/v1/institutions/:institutionId/roles/revoke | Origin, permisos, rol protegido, sin self-edit | Sí | role.revoke | Unit policy, E2E pendiente | Backend implementado sin UI | Endpoint + auth-policy.test.ts | PARTIAL |
+
+| OP-011 | academia | Consultar catálogos F3 | academic.read | Institución | GET /api/v1/institutions/:institutionId/academic/:resource | Scope, Zod recurso, límite 200 | No | No | Unit/DB integration | Implementado; E2E pendiente | src/app/api/v1/institutions/[institutionId]/academic/[resource]/route.ts | PARTIAL |
+| OP-012 | academia | Crear programa, materia, plan, periodo o campus | academic.manage | Institución | POST /api/v1/institutions/:institutionId/academic/:resource | Zod, claves únicas, FK, CSRF, autorización | Sí | academic.:resource.create | Unit/DB integration | Implementado; E2E pendiente | F3 Academic API y migración 0001 | PARTIAL |
+| OP-013 | academia | Actualizar/archivar catálogo | academic.manage | Institución | PATCH /api/v1/institutions/:institutionId/academic/:resource | UUID, campos permitidos, scope, CSRF | Sí | academic.:resource.update | Unit/DB integration | Implementado; E2E pendiente | F3 Academic API y UI | PARTIAL |
+
+| OP-014 | control escolar | Crear/consultar/actualizar estudiantes | academic.manage | Institución | GET/POST/PATCH /api/v1/institutions/:id/registry/students | Matrícula, programa vigente, email, scopes | Sí | registry.student.create | Unit + DB, E2E pendiente | Código + CI | PARTIAL |
+| OP-015 | plantilla docente | Crear/consultar/actualizar docentes | academic.manage | Institución | GET/POST/PATCH /api/v1/institutions/:id/registry/teachers | Número de empleado único y estado | Sí | registry.teacher.create | Unit, E2E pendiente | Código | PARTIAL |
+| OP-016 | coordinación | Crear y cerrar secciones | academic.manage | Institución | GET/POST/PATCH /api/v1/institutions/:id/sections | Periodo + materia en tenant, cupo | Sí | section.create/status | Unit, CI pendiente | Código + migración 0002 | PARTIAL |
+| OP-017 | inscripciones | Inscribir y retirar estudiante | academic.manage | Institución | GET/POST/PATCH /api/v1/institutions/:id/enrollments | Estado, unicidad, fila bloqueada, capacidad | Sí | enrollment.create/withdraw | Unit, QA concurrencia pendiente | Código | PARTIAL |
+| OP-018 | carga docente | Asignar y revocar docente | academic.manage | Institución | GET/POST/PATCH /api/v1/institutions/:id/assignments | Asignación scoped y docente activo | Sí | teacher.assign/unassign | E2E pendiente | Código | PARTIAL |

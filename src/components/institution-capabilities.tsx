@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type {Route} from 'next';
+import {academicModuleLinks} from '@/shared/navigation/academic-modules';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
 export type InstitutionGrant = { id: string; role: string; scopeType: 'institution' | 'program' | 'campus'; scopeId: string | null; expiresAt: string | null };
@@ -79,6 +80,7 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
       {hasInstitutionCapability(data, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} className="sii-outline-button">Roles y ámbitos</Link>}
       {hasInstitutionCapability(data, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} className="sii-outline-button">Invitaciones</Link>}
     </>}
-    <div className="sii-info-banner">Los catálogos disponibles dependen de tus concesiones vigentes y su ámbito. Matrículas, grupos y calificaciones siguen en desarrollo.</div>
+    {data&&!data.restricted&&academicModuleLinks(data.capabilities).map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-outline-button">{module.label}</Link>)}
+    <div className="sii-info-banner">Cada módulo disponible valida tus permisos vigentes en el servidor.</div>
   </>;
 }

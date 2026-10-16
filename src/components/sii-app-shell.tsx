@@ -7,7 +7,9 @@ import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
-type Active = 'overview' | 'security' | 'institution' | 'academic' | 'roles' | 'invitations' | 'users' | 'administration';
+import {academicModuleLinks,type AcademicModule} from '@/shared/navigation/academic-modules';
+
+type Active = AcademicModule | 'overview' | 'security' | 'institution' | 'academic' | 'roles' | 'invitations' | 'users' | 'administration';
 
 export default function SiiAppShell({
   firstName, fullName, active, institutionId, institutionAdministrationAvailable = false, children,
@@ -19,6 +21,8 @@ export default function SiiAppShell({
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:Active;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data } = useInstitutionCapabilities();
+  const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
+  const activeModule=modules.find(module=>module.id===active);
   const academicAvailable = ['programs','courses','curricula','terms','campuses'].some(resource => hasAnyCapability(data,`${resource}.read`));
   return (
     <div className="sii-app">
@@ -50,8 +54,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
             onClick={() => setMenuOpen(false)}>
               <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
           </Link> : !institutionId ? <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico <span className="sii-nav-soon">Selecciona institución</span></span> : null}
-          <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▣</span> Control escolar <span className="sii-nav-soon">Pronto</span></span>
-          <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▤</span> Calificaciones <span className="sii-nav-soon">Pronto</span></span>
+          {institutionId&&modules.map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}><span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}</Link>)}
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">⇄</span> Integraciones <span className="sii-nav-soon">Pronto</span></span>
         </div>
         <div className="sii-sidebar-spacer"/>
@@ -65,7 +68,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
         <header className="sii-topbar">
           <div className="sii-topbar-start">
             <button className="sii-menu-button" onClick={() => setMenuOpen(x => !x)} type="button" aria-expanded={menuOpen} aria-controls="sii-sidebar-mobile" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'}>☰</button>
-            <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución'}</span>
+            <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {activeModule?activeModule.label:active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución'}</span>
           </div>
           <div className="sii-topbar-actions">
             <span className="sii-connection-label"><span className="sii-online-dot" /> Sesión autenticada</span>

@@ -27,3 +27,5 @@ describe('trusted capability disclosure',()=>{
   expect(data.scopedCapabilities[0].grantableRoles).not.toContain('admin');
  });
 });
+
+it('keeps the backed institutional administration link available throughout domain navigation',()=>{const grants=[{...access.grants[0],role:'admin' as const,scopeType:'institution' as const,scopeId:null}];expect(disclose({...subject,grants},{...access,roles:['admin'],grants},{mfaConfigured:true,mfaVerified:true,stepUpAt:now},now).capabilities).toContain('institutions.manage')});

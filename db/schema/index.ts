@@ -4,3 +4,7 @@ export * from './academic';
 export * from './mfa';
 export * from './invitations';
 export * from './users';
+export * from './registry';
+export * from './grading';
+export * from './schedule';
+export * from './services';
