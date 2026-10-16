@@ -22,7 +22,7 @@ async function main() {
 }
 main().catch((error:unknown)=>{
   // Driver messages may include SQL or connection credentials; emit known stable codes only.
-  const safe=new Set(['PRODUCTION_MIGRATION_FORBIDDEN','DATABASE_ENV_REQUIRED','DATABASE_URL_REQUIRED','INVALID_DATABASE_URL','BASELINE_REQUIRED','MIGRATION_LEDGER_DRIFT']);
+  const safe=new Set(['PRODUCTION_MIGRATION_FORBIDDEN','PRODUCTION_MIGRATION_NOT_AUTHORIZED','DATABASE_ENV_REQUIRED','DATABASE_URL_REQUIRED','INVALID_DATABASE_URL','BASELINE_REQUIRED','MIGRATION_LEDGER_DRIFT']);
   const code=error instanceof Error && safe.has(error.message)?error.message:'MIGRATION_FAILED';
   console.error(code);process.exitCode=1;
 });
