@@ -1,7 +1,7 @@
 /* SII University OS V2 — presentation layer. No synthetic data or mock endpoints. */
 :root {
   --sii-bg:#f4f6fa;--sii-surface:#fff;--sii-surface-soft:#f7f8fb;
-  --sii-text:#172237;--sii-muted:#6d7789;--sii-line:#e5e9f0;
+  --sii-text:#172237;--sii-muted:#5c6575;--sii-line:#e5e9f0;
   --sii-primary:#8b213b;--sii-primary-dark:#581326;--sii-primary-soft:#fcecf0;
   --sii-sidebar:#2b0e1b;--sii-sidebar-alt:#480e22;--sii-success:#147c5a;
   --sii-shadow:0 14px 42px rgba(29,39,62,.052);--sii-radius:18px;

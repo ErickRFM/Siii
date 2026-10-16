@@ -1,80 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { and, eq, isNull } from 'drizzle-orm';
-import { z } from 'zod';
-import { db } from '@/infrastructure/database';
-import { institutionMemberships, roleAssignments, securityAuditLog } from '../../../../../../../../db/schema';
-import { authorizeInstitution } from '@/shared/auth/session';
-import { assertSameOrigin, jsonError } from '@/shared/auth/guards';
-import { canManageMembership } from '@/shared/auth/roles';
-
-export const runtime = 'nodejs';
-type Ctx = { params: Promise<{ institutionId: string; membershipId: string }> };
-const uuid = z.string().uuid();
-const schema = z.object({
-  status: z.enum(['active', 'suspended']),
-  reason: z.enum(['institutional_change', 'policy_enforcement', 'security_review', 'record_correction', 'access_restored']),
+import {NextRequest,NextResponse} from 'next/server';
+import {and,eq} from 'drizzle-orm';
+import {db} from '@/infrastructure/database';
+import {institutionMemberships,membershipEvents} from '../../../../../../../../db/schema';
+import {authorizeCapability} from '@/shared/auth/session';
+import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
+import {uuid,membershipChangeBody} from '@/shared/auth/validation';
+import {canManageTarget,administratorState} from '@/shared/auth/capabilities';
+import {anotherActiveAdministrator} from '@/shared/auth/institution-policy';
+import {lockWriteCapability} from '@/shared/auth/write-access';
+import {invalidatePrivileges,targetGrants} from '@/shared/auth/privilege-write';
+import {context,audit} from '@/shared/http/request-context';
+import {projectUserHistory} from '@/shared/users/history';
+import {withErrors} from '@/shared/http/route-errors';
+export const runtime='nodejs';
+type Ctx={params:Promise<{institutionId:string;membershipId:string}>};
+export const PATCH=withErrors(async(req:NextRequest,ctx:Ctx)=>{
+ if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
+ const {institutionId,membershipId}=await ctx.params;if(!uuid.safeParse(institutionId).success||!uuid.safeParse(membershipId).success)return jsonError('INVALID_ID',400);
+ const actor=await authorizeCapability(institutionId,'memberships.manage',{institutionId,status:'active'},true);if(!actor)return jsonError('FORBIDDEN',403);
+ const parsed=membershipChangeBody.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
+ const {requestId}=context(req);
+ const result=await db.transaction(async tx=>{
+  const [candidate]=await tx.select().from(institutionMemberships).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId))).limit(1);
+  if(!candidate)return {error:'MEMBERSHIP_NOT_FOUND',status:404} as const;
+  if(candidate.userId===actor.identity.id)return {error:'SELF_CHANGE_DENIED',status:403} as const;
+  const current=await lockWriteCapability(tx,actor.identity,actor.access,'memberships.manage',{institutionId,status:'active'},candidate,true);
+  if(!current)return {error:'FORBIDDEN',status:403} as const;
+  const [before]=await tx.select().from(institutionMemberships).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId)));
+  if(before.deletedAt)return {error:'MEMBERSHIP_DELETED',status:409} as const;
+  const grants=await targetGrants(tx,membershipId,institutionId);
+  if(!canManageTarget(current.subject,grants,institutionId,new Date()))return {error:'TARGET_ROLE_PROTECTED',status:403} as const;
+  if(before.status===parsed.data.status)return {data:{id:membershipId,status:before.status,changed:false}} as const;
+  const administrators=administratorState(grants);
+  if(parsed.data.status==='suspended'&&administrators.any&&!await anotherActiveAdministrator(tx,institutionId,membershipId,new Date(),administrators.permanent))return {error:'LAST_ADMIN_REQUIRED',status:409} as const;
+  const [after]=await tx.update(institutionMemberships).set({status:parsed.data.status,updatedAt:new Date()}).where(and(eq(institutionMemberships.id,membershipId),eq(institutionMemberships.institutionId,institutionId))).returning({id:institutionMemberships.id,status:institutionMemberships.status});
+  const invalidation=await invalidatePrivileges(tx,before.userId,new Date());
+  await audit(tx,{actorUserId:actor.identity.id,institutionId,action:'membership.status.change',target:'membership:'+membershipId+':status:'+before.status+'->'+after.status+':reason:'+parsed.data.reason,requestId,details:{before:{status:before.status},after:{status:after.status,...invalidation},reason:parsed.data.reason}});
+  await tx.insert(membershipEvents).values({institutionId,membershipId,actorUserId:actor.identity.id,action:after.status==='suspended'?'suspend':'activate',reason:parsed.data.reason,changes:projectUserHistory({before:{status:before.status},after:{status:after.status}})});
+  return {data:{...after,changed:true}} as const;
+ });
+ if('error'in result&&result.error)return jsonError(result.error,result.status??500);
+ return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}});
 });
 
-export async function PATCH(req: NextRequest, ctx: Ctx) {
-  if (!assertSameOrigin(req)) return jsonError('INVALID_ORIGIN', 403);
-  const { institutionId, membershipId } = await ctx.params;
-  if (!uuid.safeParse(institutionId).success || !uuid.safeParse(membershipId).success) {
-    return jsonError('INVALID_ID', 400);
-  }
-  const actor = await authorizeInstitution(institutionId, 'users.manage');
-  if (!actor) return jsonError('FORBIDDEN', 403);
-  const parsed = schema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return jsonError('VALIDATION_ERROR', 422);
-
-  // All mutation predicates remain tenant-scoped. A user cannot suspend or
-  // reactivate their own membership via this administrative endpoint.
-  const membership = await db.select({
-    id: institutionMemberships.id,
-    userId: institutionMemberships.userId,
-    status: institutionMemberships.status,
-  }).from(institutionMemberships)
-    .where(and(eq(institutionMemberships.id, membershipId),
-      eq(institutionMemberships.institutionId, institutionId)))
-    .limit(1);
-
-  if (!membership.length) return jsonError('MEMBERSHIP_NOT_FOUND', 404);
-  if (membership[0].userId === actor.identity.id) return jsonError('SELF_CHANGE_DENIED', 403);
-
-  const grants = await db.select({ role: roleAssignments.role })
-    .from(roleAssignments)
-    .where(and(eq(roleAssignments.membershipId, membershipId), isNull(roleAssignments.revokedAt)));
-  if (!canManageMembership(actor.access.roles, grants.map(g => g.role))) {
-    return jsonError('TARGET_ROLE_PROTECTED', 403);
-  }
-
-  if (membership[0].status === parsed.data.status) {
-    return NextResponse.json({
-      data: { id: membershipId, status: membership[0].status, changed: false },
-    }, { headers: { 'Cache-Control': 'no-store' } });
-  }
-
-  const updated = await db.transaction(async tx => {
-    // Compare-and-swap prevents stale concurrent membership updates.
-    const rows = await tx.update(institutionMemberships)
-      .set({ status: parsed.data.status, updatedAt: new Date() })
-      .where(and(eq(institutionMemberships.id, membershipId),
-        eq(institutionMemberships.institutionId, institutionId),
-        eq(institutionMemberships.status, membership[0].status)))
-      .returning({ id: institutionMemberships.id, status: institutionMemberships.status });
-
-    if (rows.length) {
-      await tx.insert(securityAuditLog).values({
-        actorUserId: actor.identity.id,
-        institutionId,
-        action: 'membership.status.change',
-        target: `membership:${membershipId}:status:${membership[0].status}->${parsed.data.status}:reason:${parsed.data.reason}`,
-      });
-    }
-    return rows;
-  });
-
-  if (!updated.length) return jsonError('CONCURRENT_MEMBERSHIP_CHANGE', 409);
-  return NextResponse.json({
-    data: { ...updated[0], changed: true },
-  }, { headers: { 'Cache-Control': 'no-store' } });
-}
+export {userDetail as GET} from '@/shared/users/handlers';

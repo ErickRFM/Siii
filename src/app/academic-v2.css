@@ -46,3 +46,9 @@
 .sii-security-notice .password-form button{background:#8b213b;color:#fff}
 @media(max-width:1100px){.sii-catalog-layout{grid-template-columns:1fr}.sii-catalog-create{position:static}}
 @media(max-width:600px){.sii-catalog-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sii-catalog-tab{min-width:0}.sii-catalog-summary{align-items:flex-start}.sii-catalog-summary .sii-small-count{white-space:nowrap}}
+
+.sii-skip-link{position:absolute;top:8px;left:8px;z-index:10000;padding:12px 16px;background:#fff;color:#311328;border:2px solid currentColor;border-radius:6px;transform:translateY(-200%);}
+.sii-skip-link:focus{transform:translateY(0);outline:3px solid #572040;outline-offset:2px;}
+#main-content{scroll-margin-top:6rem;}
+.sii-catalog-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;}
+:where(button,input,select,a):focus-visible{outline:3px solid var(--sii-primary,#642343);outline-offset:3px;scroll-margin-top:6rem;}

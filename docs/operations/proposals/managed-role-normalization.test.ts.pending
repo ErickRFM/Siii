@@ -1,0 +1,13 @@
+import {describe,it,expect,beforeAll,afterAll} from 'vitest';import pg from 'pg';import {randomUUID} from 'node:crypto';import {readFileSync} from 'node:fs';import {isolatedDatabaseUrl} from '../support/database-url';
+const client=new pg.Client({connectionString:isolatedDatabaseUrl()});
+// Execute the exact role-normalization prefix; the rest of the canonical migration is covered by clean/baseline migration tests.
+const prefix=readFileSync('db/migrations/0003_p0_1_privacy.sql','utf8').split('REVOKE CREATE ON SCHEMA public FROM siii_app;')[0];
+describe('managed PostgreSQL role normalization',()=>{beforeAll(async()=>{await client.connect()});afterAll(async()=>{await client.end()});
+ it('accepts already-safe roles when the migration owner is not a superuser',async()=>{const role='p0_managed_'+randomUUID().replaceAll('-','');await client.query('BEGIN');try{
+ await client.query('CREATE ROLE '+role+' NOLOGIN NOSUPERUSER CREATEROLE CREATEDB BYPASSRLS');await client.query('GRANT siii_app,siii_migrator TO '+role+' WITH ADMIN OPTION');await client.query('SET LOCAL ROLE '+role);
+ await expect(client.query(prefix)).resolves.toBeDefined();const states=(await client.query(`SELECT rolcanlogin,rolsuper,rolcreatedb,rolcreaterole,rolbypassrls FROM pg_roles WHERE rolname IN ('siii_app','siii_migrator')`)).rows;expect(states).toHaveLength(2);expect(states.every(row=>Object.values(row).every(value=>value===false))).toBe(true);
+ }finally{await client.query('ROLLBACK')}});
+ it('still refuses a superuser target under a non-superuser migration owner',async()=>{const role='p0_managed_'+randomUUID().replaceAll('-','');await client.query('BEGIN');try{
+ await client.query('CREATE ROLE '+role+' NOLOGIN NOSUPERUSER CREATEROLE CREATEDB BYPASSRLS');await client.query('GRANT siii_app,siii_migrator TO '+role+' WITH ADMIN OPTION');await client.query('ALTER ROLE siii_app SUPERUSER');await client.query('SET LOCAL ROLE '+role);await expect(client.query(prefix)).rejects.toHaveProperty('code','42501');
+ }finally{await client.query('ROLLBACK')}});
+});

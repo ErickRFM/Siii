@@ -6,28 +6,28 @@ const code = z.string().trim().min(2).max(25).regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$
   .transform(value => value.toUpperCase());
 const name = z.string().trim().min(3).max(160);
 const date = z.iso.date();
-const states = z.enum(['active', 'inactive', 'archived', 'suspended']);
+const states = z.enum(['active', 'inactive', 'archived']);
 const uuid = z.uuid();
 
 export const catalogCreate = {
-  campuses: z.object({ code, name }),
-  terms: z.object({ code, name, startDate: date, endDate: date })
+  campuses: z.object({ code, name }).strict(),
+  terms: z.object({ code, name, startDate: date, endDate: date }).strict()
     .refine(value => value.endDate >= value.startDate, { message: 'La fecha de cierre no puede ser anterior al inicio', path: ['endDate'] }),
   programs: z.object({
     code, name,
     level: z.enum(['tecnico_superior', 'licenciatura', 'ingenieria', 'maestria', 'doctorado', 'otro']),
     modality: z.enum(['presencial', 'mixta', 'en_linea']),
-  }),
-  courses: z.object({ code, name, credits: z.number().int().min(0).max(30) }),
-  curricula: z.object({ programId: uuid, version: code }),
+  }).strict(),
+  courses: z.object({ code, name, credits: z.number().int().min(0).max(30) }).strict(),
+  curricula: z.object({ programId: uuid, version: code }).strict(),
 } as const;
 
 export const catalogUpdate = {
-  campuses: z.object({ id: uuid, name: name.optional(), status: states.optional() }),
-  terms: z.object({ id: uuid, name: name.optional(), status: states.optional() }),
-  programs: z.object({ id: uuid, name: name.optional(), status: states.optional() }),
-  courses: z.object({ id: uuid, name: name.optional(), status: states.optional() }),
-  curricula: z.object({ id: uuid, status: states.optional() }),
+  campuses: z.object({ id: uuid, name: name.optional(), status: states.optional() }).strict(),
+  terms: z.object({ id: uuid, name: name.optional(), status: states.optional() }).strict(),
+  programs: z.object({ id: uuid, name: name.optional(), status: states.optional() }).strict(),
+  courses: z.object({ id: uuid, name: name.optional(), status: states.optional() }).strict(),
+  curricula: z.object({ id: uuid, status: states.optional() }).strict(),
 } as const;
 
 export function parseCatalogCreate(resource: CatalogResource, payload: unknown) {

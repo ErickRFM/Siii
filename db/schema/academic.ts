@@ -15,6 +15,9 @@ export const academicPrograms = pgTable('academic_programs', {
 }, table => ({
   uniqueCode: uniqueIndex('academic_programs_institution_code_uidx').on(table.institutionId, table.code),
   institutionReference: uniqueIndex('academic_programs_id_institution_uidx').on(table.id, table.institutionId),
+  levelValid: check('academic_programs_level_valid',sql`${table.level} IN ('tecnico_superior','licenciatura','ingenieria','maestria','doctorado','otro')`),
+  modalityValid: check('academic_programs_modality_valid',sql`${table.modality} IN ('presencial','mixta','en_linea')`),
+  statusValid: check('academic_programs_status_valid',sql`${table.status} IN ('active','inactive','archived')`),
 }));
 
 export const academicCourses = pgTable('academic_courses', {
@@ -28,6 +31,8 @@ export const academicCourses = pgTable('academic_courses', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   uniqueCode: uniqueIndex('academic_courses_institution_code_uidx').on(table.institutionId, table.code),
+  institutionReference: uniqueIndex('academic_courses_id_institution_uidx').on(table.id, table.institutionId),
+  statusValid: check('academic_courses_status_valid',sql`${table.status} IN ('active','inactive','archived')`),
   creditsRange: check('academic_courses_credits_range', sql`${table.credits} >= 0 AND ${table.credits} <= 30`),
 }));
 
@@ -41,5 +46,6 @@ export const curriculumVersions = pgTable('curriculum_versions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   uniqueVersion: uniqueIndex('curriculum_versions_program_version_uidx').on(table.programId, table.version),
+  statusValid: check('curriculum_versions_status_valid',sql`${table.status} IN ('active','inactive','archived')`),
   scopedProgram: foreignKey({ columns: [table.programId, table.institutionId], foreignColumns: [academicPrograms.id, academicPrograms.institutionId], name: 'curriculum_program_tenant_fk' }),
 }));
