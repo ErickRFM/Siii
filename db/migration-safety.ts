@@ -3,16 +3,22 @@ import pg from 'pg';
 import { readMigrationFiles } from 'drizzle-orm/migrator';
 
 export function validateMigrationEnvironment(env: NodeJS.ProcessEnv): string {
-  if (env.NODE_ENV === 'production' || env.SIII_DATABASE_ENV === 'production') throw new Error('PRODUCTION_MIGRATION_FORBIDDEN');
-  if (!['development','test','staging'].includes(env.SIII_DATABASE_ENV ?? '')) throw new Error('DATABASE_ENV_REQUIRED');
   if (!env.DATABASE_URL) throw new Error('DATABASE_URL_REQUIRED');
   const url=new URL(env.DATABASE_URL);
   if (!['postgres:','postgresql:'].includes(url.protocol)) throw new Error('INVALID_DATABASE_URL');
   assertNoConnectionOverrides(url);
-  // Audited production project: block direct and Supabase pooler connections even if mislabeled.
+  // The production database is permitted only through an explicitly authorized release.
+  // Never infer safety from NODE_ENV or a caller-provided staging label.
   const productionRef='kkjzbqsaummyralqjqrb';
-  if(url.hostname.includes(productionRef) || decodeURIComponent(url.username).split('.').includes(productionRef))
-    throw new Error('PRODUCTION_MIGRATION_FORBIDDEN');
+  const targetsProduction=url.hostname.includes(productionRef) ||
+    decodeURIComponent(url.username).split('.').includes(productionRef);
+  if (targetsProduction) {
+    if (env.SIII_DATABASE_ENV !== 'production' ||
+        env.SIII_ALLOW_PRODUCTION_MIGRATIONS !== 'I_ACKNOWLEDGE_PRODUCTION_MIGRATION')
+      throw new Error('PRODUCTION_MIGRATION_NOT_AUTHORIZED');
+  } else if (!['development','test','staging'].includes(env.SIII_DATABASE_ENV ?? '')) {
+    throw new Error('DATABASE_ENV_REQUIRED');
+  }
   return env.DATABASE_URL;
 }
 
