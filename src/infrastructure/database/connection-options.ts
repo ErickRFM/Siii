@@ -6,7 +6,7 @@ export function databaseConnectionOptions(connectionString:string|undefined,cert
   if(!connectionString)throw Error();
   const url=new URL(connectionString),mode=url.searchParams.get('sslmode');
   if(!['postgres:','postgresql:'].includes(url.protocol)||mode&&!['require','verify-ca','verify-full'].includes(mode))throw Error();
-  for(const key of ['sslcert','sslkey','sslrootcert','sslpassword','sslnegotiation'])if(url.searchParams.has(key))throw Error();
+  for(const key of url.searchParams.keys())if(!['sslmode','application_name','connect_timeout'].includes(key))throw Error();
   url.searchParams.delete('sslmode');
   return{connectionString:url.href,ssl:{ca:certificate.replace(/\\n/g,'\n'),rejectUnauthorized:true}};
  }catch{throw Error('DATABASE_TLS_CONFIGURATION_INVALID')}

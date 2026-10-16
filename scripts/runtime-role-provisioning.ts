@@ -1,4 +1,4 @@
-import {releaseDefinitionHash} from '../db/release-profile';
+import {releaseDefinitionHash,readReleaseMigrations} from '../db/release-profile';
 /** Server-side random credential, encrypted to the operator; no password literal in the query. */
 export function runtimeRoleProvisioningSql(project:'staging'|'production',role:string,publicKey:string){
  if(!['staging','production'].includes(project)||!new RegExp('^siii_'+project+'_web_[a-f0-9]{12}$').test(role)||!publicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'))throw Error('RUNTIME_PROVISIONING_INPUT_INVALID');
@@ -6,7 +6,7 @@ export function runtimeRoleProvisioningSql(project:'staging'|'production',role:s
  const fingerprint=releaseDefinitionHash('supabase-v1');
  return `BEGIN;
 DO $guard$ BEGIN
- IF current_database()<>'postgres' OR session_user<>'postgres' OR NOT EXISTS(SELECT FROM drizzle.siii_release_profile WHERE profile='supabase-v1' AND definition_hash=${literal(fingerprint)}) OR (SELECT count(*) FROM drizzle.__drizzle_migrations)<>17 THEN RAISE EXCEPTION 'RELEASE_RUNTIME_PREFLIGHT_FAILED'; END IF;
+ IF current_database()<>'postgres' OR session_user<>'postgres' OR NOT EXISTS(SELECT FROM drizzle.siii_release_profile WHERE profile='supabase-v1' AND definition_hash=${literal(fingerprint)}) OR (SELECT count(*) FROM drizzle.__drizzle_migrations)<>${readReleaseMigrations('supabase-v1').length} THEN RAISE EXCEPTION 'RELEASE_RUNTIME_PREFLIGHT_FAILED'; END IF;
  IF EXISTS(SELECT FROM pg_roles WHERE rolname=${literal(role)}) THEN RAISE EXCEPTION 'RUNTIME_ROLE_ALREADY_EXISTS'; END IF;
 END $guard$;
 CREATE TABLE IF NOT EXISTS drizzle.siii_credential_handoff(role_name text PRIMARY KEY,ciphertext bytea NOT NULL,created_at timestamptz NOT NULL DEFAULT now());

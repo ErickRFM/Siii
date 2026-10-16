@@ -120,6 +120,13 @@
       "when": 1792121000000,
       "tag": "0016_force_institutional_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792126000000,
+      "tag": "0017_data_api_schema_isolation",
+      "breakpoints": true
     }
   ]
 }

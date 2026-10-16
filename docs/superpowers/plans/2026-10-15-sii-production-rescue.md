@@ -23,4 +23,4 @@
 - [ ] Configure required production secrets and production branch; stage reviewed main in Vercel, smoke-test authenticated flows, promote and verify domain.
 - [ ] Record actual GitHub/Supabase/Vercel/application evidence and remaining scope accurately.
 
-Progress: staging has17 executed migrations,41 forced-RLS tables and an authorized minimum runtime. Real staging HTTP login/MFA/catalog/persistence/tenant-denial/audit passed. Build passed. Full integration is being repeated against a fresh local database and one production server after a shared .next test collision. Runtime keys stay encrypted; Vercel CLI authenticated and branch-specific Secret upload awaits branch publication.
+Progress: staging has18 executed migrations,41 forced-RLS tables and an authorized minimum runtime. Real staging HTTP login/MFA/catalog/persistence/tenant-denial/audit passed. Build passed. Full integration is being repeated against a fresh local database and one production server after a shared .next test collision. Runtime keys stay encrypted; Vercel CLI authenticated and branch-specific Secret upload awaits branch publication.
