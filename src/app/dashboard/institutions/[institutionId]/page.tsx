@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import { ROLE_LABELS, hasPermission } from '@/shared/auth/roles';
 import SiiAppShell from '@/components/sii-app-shell';
+import { InstitutionOverview } from '@/components/institution-capabilities';
 
 export const dynamic = 'force-dynamic';
 type PageProps = { params: Promise<{ institutionId: string }> };
@@ -24,9 +24,7 @@ export default async function InstitutionPage({ params }: PageProps) {
         <section className="sii-panel sii-security-card">
           <span className="sii-section-kicker">INSTITUCIÓN AUTORIZADA</span>
           <h2>{access.institutionName}</h2><p>Clave institucional: {access.institutionCode}</p>
-          <div className="sii-role-list">{access.roles.map(role => <span className="sii-role-pill" key={role}>{ROLE_LABELS[role]}</span>)}</div>
-          {hasPermission(access.roles, 'academic.read') && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
-          <div className="sii-info-banner">Ya puedes administrar programas, materias, campus, periodos y versiones de planes según tus permisos. Matrículas, grupos y calificaciones siguen en desarrollo.</div>
+          <InstitutionOverview institutionId={institutionId}/>
         </section>
         <aside className="sii-panel sii-security-aside"><span className="sii-security-shield" aria-hidden="true">▥</span>
           <h2>Acceso por institución</h2>

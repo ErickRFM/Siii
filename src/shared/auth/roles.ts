@@ -1,6 +1,9 @@
-export type Role = 'student' | 'workshop_participant' | 'teacher_pending' | 'teacher' | 'tutor' | 'coordinator' | 'admin' | 'super_admin';
+export type Role = 'student' | 'workshop_participant' | 'teacher_pending' | 'teacher' | 'tutor' | 'coordinator' | 'admin' | 'super_admin' | 'guest' | 'control_escolar' | 'workshop_facilitator';
 export type Permission = 'institutions.read' | 'users.read' | 'users.manage' | 'roles.assign' | 'academic.read' | 'academic.manage' | 'grades.read' | 'grades.publish' | 'integrations.manage' | 'audit.read';
 const matrix: Record<Role, readonly Permission[]> = {
+  guest:['institutions.read'],
+  control_escolar:['institutions.read','users.read','academic.read','grades.read'],
+  workshop_facilitator:['institutions.read','academic.read','grades.read'],
   student: ['institutions.read','academic.read','grades.read'],
   workshop_participant: ['institutions.read'],
   teacher_pending: ['institutions.read'],
@@ -34,6 +37,7 @@ export function canManageMembership(actorRoles: readonly Role[], targetRoles: re
 }
 
 export const ROLE_LABELS: Record<Role, string> = {
+  guest:'Invitado',control_escolar:'Control escolar',workshop_facilitator:'Facilitador de taller',
   student:'Estudiante',workshop_participant:'Participante',teacher_pending:'Docente pendiente',teacher:'Docente',
   tutor:'Tutor académico',coordinator:'Coordinación',admin:'Administración',super_admin:'Superadministración',
 };
