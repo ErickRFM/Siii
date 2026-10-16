@@ -4,12 +4,16 @@ import {schemaSignature} from '../db/schema-signature';
 interface Snapshot {format:string;source_project:string;signature:Record<string,unknown>;records:Record<string,Record<string,unknown>[]>;auth_users:number;storage_objects:number;storage_buckets:unknown[];triggers:unknown[];policies:unknown[];history_columns:{name:string;type:string;not_null:boolean;default:string|null}[];supabase_migrations:unknown[]}
 const stable=(value:unknown):string=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 const identifier=(value:string)=>'"'+value.replaceAll('"','""')+'"';
+export function assertLocalRecoveryEndpoint(host:unknown,database:unknown){
+ if(typeof host!=='string'||!['localhost','127.0.0.1','::1'].includes(host)||typeof database!=='string'||!/^p0_[a-z0-9_]+$/.test(database))throw Error('LOCAL_RECOVERY_ONLY');
+}
 /** Accept decrypted data only in memory. Caller must supply an empty, isolated local database. */
 export async function restoreBaselineBackup(client:pg.Client,snapshot:Snapshot){
  const reference=JSON.parse(readFileSync(new URL('../db/baseline/0001-schema.json',import.meta.url),'utf8'));
  if(snapshot.format!=='SIII_APPLICATION_LOGICAL_BACKUP_V1'||snapshot.source_project!=='kkjzbqsaummyralqjqrb'||stable(snapshot.signature)!==stable(reference)||snapshot.auth_users!==0||snapshot.storage_objects!==0||snapshot.storage_buckets.length||snapshot.triggers.length||snapshot.policies.length)throw Error('BACKUP_SCOPE_OR_SCHEMA_NOT_SUPPORTED');
- const local=(await client.query("SELECT host(inet_server_addr()) AS host,current_database() AS database")).rows[0];
- if(!['localhost','127.0.0.1','::1'].includes(local.host)||!local.database.startsWith('p0_'))throw Error('LOCAL_RECOVERY_ONLY');
+ const local=(await client.query("SELECT current_database() AS database")).rows[0];
+ // A local Docker server reports its bridge IP; pg.Client.host is the effective client destination.
+ assertLocalRecoveryEndpoint((client as pg.Client & {host?:string}).host,local.database);
  if((await client.query("SELECT count(*)::int AS n FROM pg_tables WHERE schemaname='public'")).rows[0].n!==0)throw Error('EMPTY_RECOVERY_DATABASE_REQUIRED');
  await client.query('BEGIN');
  try{
