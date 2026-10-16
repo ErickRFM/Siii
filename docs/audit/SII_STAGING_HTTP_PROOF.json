@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-16T04:17:54.717Z",
+  "project": "vsnrbjexusidlvhkhmqg",
+  "runtimeRole": "siii_staging_web_80f5c89b2ec2",
+  "tlsAuthorized": true,
+  "ready": 200,
+  "login": 200,
+  "mfa": "enrolled-verified-step-up-over-http",
+  "catalogCreate": 201,
+  "persistedList": 200,
+  "crossTenantDenied": 403,
+  "syntheticOnly": true,
+  "fixtureTenant": "7066b51b-af9a-454d-858d-e6087faf4a7c",
+  "fixtureUser": "8c86e007-8c81-4317-a086-0b0520b5616a",
+  "auditEvents": 1
+}

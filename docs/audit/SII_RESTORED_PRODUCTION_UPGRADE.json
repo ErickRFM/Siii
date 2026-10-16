@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-16T04:05:10.274Z",
+  "sourceProject": "kkjzbqsaummyralqjqrb",
+  "localOnly": true,
+  "baseline": "BASELINE_ADOPTED",
+  "baselineRepeated": "BASELINE_ALREADY_RECORDED",
+  "migration": "MIGRATIONS_APPLIED",
+  "migrationRepeated": "MIGRATIONS_APPLIED",
+  "checkedOriginalFieldValues": 114,
+  "allExistingRowsPreserved": true,
+  "passwordHashValuesPreserved": true,
+  "sessionRowsPreserved": true,
+  "tables": 41,
+  "migration_entries": 17,
+  "unsafe_rls": 0
+}
