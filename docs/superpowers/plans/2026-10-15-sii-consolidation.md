@@ -39,3 +39,5 @@
 - Review: six material inherited/integration findings accepted and covered with real HTTP/Chromium RED→GREEN regressions.
 - Historical0003 managed-role experiment reproduced42501; automatic review rejected changing its hash. Original bytes restored exactly; proposal archived, not applied. User explicitly chose to preserve SQL and deliver the draft PR.
 - Unit708, initial integration279 and focused domain13/13, focused Chromium3/3 confirmed. Full integration285/285; canonical LF focused41/41; production Chromium43/43; build, audit0 and local recovery41 tables/16 ledger passed.
+
+- Draft PR26 published, initial HEAD38b9d046; Preview READY and login document HTTP200. First CI lacked Supabase API-role fixtures in its bare PostgreSQL service. Added isolated non-login role preparation; no SQL migration changed. Exact-head CI verification pending.

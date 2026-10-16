@@ -45,3 +45,7 @@ PR de consolidación debe permanecer borrador mientras estén abiertas las puert
 Pendientes obligatorios antes de main: CI/revisión sobre el HEAD, una solución aprobada para migración cloud sin falsificar ledgers, backup/restore/reversa staging, Preview con cuenta DML mínima y claves MFA separadas, cuentas reales sintéticas por rol, smoke/login remoto y accesibilidad humana. Producción no cambia.
 
 Decisión explícita del usuario: conservar SQL histórico y entregar PR en borrador. No ejecutar la propuesta. Vercel confirma producción READY sobre7070a461bc9480bd34bb26902959188cfcbde35a, rama feat/sis-foundation, sin promoción.
+
+## Publicación del borrador
+
+PR26: https://github.com/ErickRFM/Siii/pull/26, base main, rama integration/sii-consolidation-20261015. Primer HEAD38b9d046. Vercel Preview READY: https://siii-p8sn3erps-er-i1.vercel.app; GET /login200 con protección autenticada y CSP/HSTS/nosniff/frame-deny. Esto sólo valida hosting; no login de cuenta sin base Preview. CI38840610927 pasó instalación, lockfile, tipos, lint y708 unitarias; falló la migración del PostgreSQL puro antes de integración/UI. SQL0015 requiere los roles API que Supabase aporta, ausentes en PostgreSQL puro. Se añade preparación de fixtures anon/authenticated NOLOGIN y sin atributos elevados antes del migrador, limitada por isolatedDatabaseUrl a loopback y nombre de pruebas. No se cambia ningún SQL ni ledger. La nueva ejecución de CI debe confirmar el resultado.

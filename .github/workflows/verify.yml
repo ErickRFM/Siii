@@ -50,6 +50,8 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
+      - name: Prepare isolated Supabase API-role fixtures
+        run: node --import tsx scripts/prepare-test-api-roles.ts
       - name: Migrate disposable database
         run: npm run db:migrate
       - name: Handler and baseline integration tests
