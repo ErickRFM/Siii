@@ -70,11 +70,15 @@ test('settings persist with a reason, audit, version and preserved global identi
   await page.getByLabel('Nombre corto', {exact: true}).fill('QA corregida');
   await page.getByLabel('Motivo de la configuración').fill('Corrección institucional sintética');
   page.once('dialog', dialog => dialog.accept());
+<<<<<<< HEAD
   const saved = page.waitForResponse(response => response.url().endsWith(`/institutions/${institutionId}/settings`) && response.request().method() === 'PATCH');
   await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();
   const response = await saved;
   expect(response.status()).toBe(200);
   expect((await response.json()).data).toMatchObject({id: institutionId, name: 'Institución corregida QA', version: 1});
+=======
+  await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();
+>>>>>>> integrate/sii-v1
   await expect(page.getByRole('status').filter({hasText: 'Configuración guardada'})).toBeVisible();
   expect((await sql.query('SELECT name,short_name,admin_version AS version FROM institutions WHERE id=$1', [institutionId])).rows[0]).toMatchObject({name: 'Institución corregida QA', short_name: 'QA corregida', version: 1});
   expect((await sql.query('SELECT u.username,p.first_name,p.last_name FROM platform_users u JOIN people p ON p.id=u.person_id WHERE u.username=$1', [username])).rows).toEqual(identity.rows);

@@ -1,7 +1,11 @@
 import {isolatedDatabaseUrl} from './database-url';
 import {spawn} from 'node:child_process';
 import {openSync,closeSync,mkdirSync,writeFileSync} from 'node:fs';
+<<<<<<< HEAD
 import {randomBytes,randomUUID,createHash} from 'node:crypto';
+=======
+import {randomBytes} from 'node:crypto';
+>>>>>>> integrate/sii-v1
 import pg from 'pg';
 export default async function setup(){
  const raw=isolatedDatabaseUrl(),url=new URL(raw);
@@ -25,11 +29,16 @@ export default async function setup(){
  process.env.SIII_INVITATION_ACTIVE_KEY_ID ||= 'fixture';
  process.env.SIII_PASSWORD_RESET_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
  process.env.SIII_PASSWORD_RESET_ACTIVE_KEY_ID ||= 'fixture';
+<<<<<<< HEAD
  process.env.SIII_COMPANERO_INSTITUTION_ID ||= randomUUID();
  process.env.SIII_COMPANERO_TEST_TOKEN ||= randomBytes(32).toString('base64url');
  process.env.SIII_COMPANERO_TOKEN_SHA256 ||= createHash('sha256').update(process.env.SIII_COMPANERO_TEST_TOKEN).digest('hex');
  process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
  const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,NODE_ENV:process.env.SIII_HTTP_TEST_PRODUCTION==='1'?'production':'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS||JSON.stringify({fixture:randomBytes(32).toString('base64')}),SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID||'fixture',NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
+=======
+ process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
+ const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,NODE_ENV:'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS||JSON.stringify({fixture:randomBytes(32).toString('base64')}),SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID||'fixture',NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
+>>>>>>> integrate/sii-v1
  closeSync(log);
  async function stop(){
   child.kill();

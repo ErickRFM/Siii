@@ -1,3 +1,2 @@
 db/migrations/*.sql text eol=lf
-
 db/releases/**/*.sql text eol=lf

@@ -63,7 +63,6 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
               <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
           </Link> : !institutionId ? <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico <span className="sii-nav-soon">Selecciona institución</span></span> : null}
           {institutionId&&modules.map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}><span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}</Link>)}
-          <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">⇄</span> Integraciones <span className="sii-nav-soon">Pronto</span></span>
         </div>
         <div className="sii-sidebar-spacer"/>
         <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Plataforma institucional · Acceso protegido</div>
