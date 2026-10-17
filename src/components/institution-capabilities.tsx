@@ -75,7 +75,7 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
     <CapabilityState returnTo={`/dashboard/institutions/${institutionId}`}/>
     {data && <><div className="sii-role-list">{data.roles.map(role => <span className="sii-role-pill" key={role}>{PROFILE_LABELS[role] ?? role}</span>)}</div>
       {data.grants.length > 0 && <ul>{data.grants.map(grant => <li key={grant.id}>{PROFILE_LABELS[grant.role] ?? grant.role} · {grant.scopeType === 'institution' ? 'Institución' : grant.scopeType === 'program' ? 'Programa asignado' : 'Campus asignado'} · {grant.expiresAt ? `Vigente hasta ${new Date(grant.expiresAt).toLocaleString('es-MX')}` : 'Sin vencimiento'}</li>)}</ul>}
-      {['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
+      {!data.restricted && ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
       {hasInstitutionCapability(data, 'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`} className="sii-outline-button">Usuarios y membresías</Link>}
       {hasInstitutionCapability(data, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} className="sii-outline-button">Roles y ámbitos</Link>}
       {hasInstitutionCapability(data, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} className="sii-outline-button">Invitaciones</Link>}
