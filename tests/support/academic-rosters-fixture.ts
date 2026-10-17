@@ -3,6 +3,8 @@ import {sectionsFixture} from './sections-fixture';
 
 /** Synthetic fixture, used only with isolatedDatabaseUrl(). */
 export async function academicRostersFixture(sql:pg.Client){
+ // Sequential suites share one synthetic HTTP IP. Do not inherit another suite's exhausted budget.
+ await sql.query('DELETE FROM auth_throttle');
  const fixture=await sectionsFixture(sql),sections:Record<string,{main:string;alternate:string}>={};
  for(const [institutionId,count] of [[fixture.tenant,205],[fixture.other,3]] as const){
   const groups=(await sql.query('SELECT id FROM academic_sections WHERE institution_id=$1 ORDER BY code LIMIT 2',[institutionId])).rows;

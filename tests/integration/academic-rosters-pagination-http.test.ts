@@ -1,5 +1,6 @@
 import {afterAll,beforeAll,describe,expect,it} from 'vitest';
 import pg from 'pg';
+import {createHash} from 'node:crypto';
 import {isolatedDatabaseUrl} from '../support/database-url';
 import {academicRostersFixture} from '../support/academic-rosters-fixture';
 import {fixtureMfaLogin} from '../support/mfa-fixture';
@@ -9,7 +10,11 @@ type Resource='enrollments'|'assignments';
 async function request(resource:Resource,query='',tenant=fixture.tenant,authorization=cookie){return fetch(`${base}/api/v1/institutions/${tenant}/${resource}${query?'?'+query:''}`,{headers:{cookie:authorization}})}
 describe.sequential('academic rosters cursor contract through real HTTP',()=>{
  beforeAll(async()=>{
-  await sql.connect();fixture=await academicRostersFixture(sql);
+  await sql.connect();
+  // Reproduce the shared-IP state left by earlier auth suites; the fresh lab fixture must isolate it.
+  const inheritedIpKey=createHash('sha256').update('login_ip\0unknown').digest('hex');
+  await sql.query("INSERT INTO auth_throttle(key,scope,failures,window_started_at,expires_at) VALUES($1,'login_ip',27,now(),now()+interval '1 hour') ON CONFLICT(key) DO UPDATE SET failures=27,blocked_until=NULL,window_started_at=now()",[inheritedIpKey]);
+  fixture=await academicRostersFixture(sql);
   const login=await fetch(base+'/api/v1/auth/login',{method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify({username:fixture.username,password:fixture.password})});
   expect(login.status).toBe(200);cookie=await fixtureMfaLogin(sql,base,fixture.username,fixture.password,login);
  },30000);
