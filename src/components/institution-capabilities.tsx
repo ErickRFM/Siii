@@ -80,6 +80,7 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
       {hasInstitutionCapability(data, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} className="sii-outline-button">Roles y ámbitos</Link>}
       {hasInstitutionCapability(data, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} className="sii-outline-button">Invitaciones</Link>}
     </>}
+    {data && !data.restricted && ['programs','courses','curricula','terms','campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Catálogo académico</Link>}
     {data&&!data.restricted&&academicModuleLinks(data.capabilities).map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-outline-button">{module.label}</Link>)}
     <div className="sii-info-banner">Cada módulo disponible valida tus permisos vigentes en el servidor.</div>
   </>;
