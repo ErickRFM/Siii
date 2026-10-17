@@ -14,11 +14,7 @@ Main verificado: c7334cdfe524fe02d7c7090e0862884743008720. Se preservó el check
 | F07 RBAC/ámbitos | feat/p1-permission-scopes / d300ba75 | [22](https://github.com/ErickRFM/Siii/pull/22) | CI verde38801469956/38801478648; sin merge. |
 | F08 invitaciones | feat/p1-invitations / 24209285 | [23](https://github.com/ErickRFM/Siii/pull/23) | CI verde38802516329/38802525366; sin merge. |
 | F06 usuarios/recuperación | codex/p1-user-management / e2180879 | [24](https://github.com/ErickRFM/Siii/pull/24) | QA local y CI verde38804502406/38804508679; sin merge. |
-<<<<<<< HEAD
 | F09 administración | codex/p1-institution-admin desde e2180879 | [25](https://github.com/ErickRFM/Siii/pull/25), dependiente de24; SHA final en entrega exportada | Dos revisiones favorables y QA local verde; CI por SHA en el PR; sin merge. |
-=======
-| F09 administración | codex/p1-institution-admin desde e2180879 | PR dependiente de24; referencia y SHA finales en entrega exportada | Dos revisiones favorables y QA local verde; CI por SHA en el PR; sin merge. |
->>>>>>> integrate/sii-v1
 
 Las reconciliaciones finales d300ba75 y24209285 conservan sus árboles funcionales previamente verificados y añaden ascendencia compatible. Los PR dependen secuencialmente de la base anterior; no se fusionarán evitando las puertas de P0.
 
@@ -64,9 +60,5 @@ F06 final local: npm ci/typecheck/lint verdes,678 unitarias,216 integraciones,32
 | Producción y main | Sin escrituras ni promoción; PR sin fusionar. |
 
 SQL0010 publicado: SHA256 canónico LF E082937CD0326A2376E74E11505E8EFD0DCBFE1B6D8B89BAF095579947E7DD49. Cadena/journal completos de Git verificados mediante dos CLI reales sobre p1_institution_admin_lf_test nueva:11/11 ledger exacto; base anterior Windows/ledger preservados. La huella raw Windows1B9C…602 es distinta y no debe usarse para validar checkout LF. Detalle y límites en el informe F09.
-<<<<<<< HEAD
-
 
 Primera CI F09 c07d22c6: push38811760203 verde682/243/40/build/audit0; PR38811807434 verde682/243 y39/40UI, fallo en esperaDOM inicial de detalle de usuario F06. Correctivo del helper verificado mediante respuesta real retenida y suite7/7 de usuarios, typecheck/lint0; fuente de aplicación y schema intactos. CI del nuevo SHA se registra en PR25/entrega exportada; merge pendiente. Véase revisión F09 para límites de evidencia y reproducción controlada.
-=======
->>>>>>> integrate/sii-v1
