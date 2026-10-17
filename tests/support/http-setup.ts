@@ -39,7 +39,7 @@ export default async function setup(){
  const started=Date.now();
  while(Date.now()-started<60000){
   if(child.exitCode!==null){await stop();throw new Error('HTTP_TEST_SERVER_EXITED');}
-  try{if((await fetch('http://127.0.0.1:3107/api/health')).ok)return stop;}catch{}
+  try{if((await fetch('http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107)+'/api/health')).ok)return stop;}catch{}
   await new Promise(resolve=>setTimeout(resolve,300));
  }
  await stop();throw new Error('HTTP_TEST_SERVER_TIMEOUT');

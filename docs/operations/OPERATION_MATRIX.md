@@ -65,9 +65,19 @@ Interfaces reales: seguridad, catálogos, roles, invitaciones, usuarios y recupe
 
 | Operación | Evidencia real | Estado |
 |---|---|---|
-| Preparación inicial de catálogos por ámbito | academic-setup-presence.test.ts; academic-initial-setup.spec.ts | IMPLEMENTADO, validación consolidada en curso |
-| Retorno de MFA y revalidación de capacidades entre pestañas | security-return.test.ts; mfa-flows.spec.ts; permission-scopes.spec.ts | IMPLEMENTADO, validación consolidada en curso |
-| GET registry/students y registry/teachers con cursor tenant/recurso | consolidation-http.test.ts: ambos recursos, más de200registros, empates/microsegundos, negativos | PROBADO LOCALMENTE |
-| Paginación UI y selectores completos de servicios | consolidated-modules.spec.ts:205alumnos/65docentes | IMPLEMENTADO, validación consolidada en curso |
+| Preparación inicial de catálogos por ámbito | academic-setup-presence.test.ts; academic-initial-setup.spec.ts | PROBADO LOCALMENTE; INTEGRADO EN MAIN (PR35) |
+| Retorno de MFA y revalidación de capacidades entre pestañas | security-return.test.ts; mfa-flows.spec.ts; permission-scopes.spec.ts | PROBADO LOCALMENTE; INTEGRADO EN MAIN (PR35) |
+| GET registry/students y registry/teachers con cursor tenant/recurso | consolidation-http.test.ts: ambos recursos, más de200registros, empates/microsegundos, negativos | PROBADO LOCALMENTE; INTEGRADO EN MAIN (PR35) |
+| Paginación UI y selectores completos de servicios | consolidated-modules.spec.ts:205alumnos/65docentes | PROBADO LOCALMENTE; INTEGRADO EN MAIN (PR35) |
 
 El reporte FULL_INTEGRATION_PROGRESS.md separa integración en main, despliegue y validación productiva. No se introducen permisos nuevos en el cliente ni se altera la política MFA.
+
+PR35 quedó integrado en `main` mediante `06166d90936fc939334a71ba600ec118c58b2586` con head revisado `4d87d61f83fa95b7869a7e0981a88f52a525804b`: 765 pruebas unitarias, 300 de integración y 54 de Chromium aprobadas; build/typecheck/lint correctos, audit 0 y Verify SIS SUCCESS en las ejecuciones `39073966596` y `39073970270`. La recuperación del mismo ámbito tras un error conserva el borrador; un ámbito confirmado distinto invalida guía, tabla y selector. Evidencia en `academic-initial-setup.spec.ts`, `permission-scopes.spec.ts` y `catalog-access-key.test.ts`.
+
+## Secciones paginadas — incremento separado
+
+| ID | Operación / endpoint | Actor y alcance | Validación | Evidencia real | Estado |
+|---|---|---|---|---|---|
+| OP-028 | GET /api/v1/institutions/:id/sections | academic.manage institucional vigente | Autoridad antes del cursor; filtro tenant, cursor tenant/recurso, limit 1–100, orden por microsegundos/UUID; POST/PATCH idénticos | sections-pagination-http.test.ts: 8/8; sections-pagination.spec.ts: 1/1, 205 filas/206 opciones en operaciones y horarios; registry.test.ts: 5/5 | PROBADO LOCALMENTE; PR/CI PENDIENTES |
+
+La validación de secciones usa su propia base sintética PostgreSQL local y el puerto 3108. Su build de producción, typecheck y lint pasan. La reconciliación histórica de PR9/14/15/16/18/25 se documenta por equivalencia de archivos, migraciones y contratos en `docs/audit/HISTORICAL_PR_RECONCILIATION_20261017.md`; no se basa únicamente en ascendencia Git.
