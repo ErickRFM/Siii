@@ -10,11 +10,12 @@ import {ManageableInstitutions} from '@/components/institution-admin';
 export const dynamic = 'force-dynamic';
 
 const modules = [
-  { symbol: '▣', title: 'Control escolar', description: 'Expedientes, matrículas y procesos de inscripción.', stage: 'F3' },
-  { symbol: '▦', title: 'Planeación académica', description: 'Carreras, grupos, aulas y horarios institucionales.', stage: 'F4' },
-  { symbol: '▤', title: 'Evaluación y actas', description: 'Calificaciones y publicación de resultados oficiales.', stage: 'F6' },
-  { symbol: '⇄', title: 'Integraciones', description: 'Sincronización académica segura con Compañero.', stage: 'F10' },
-];
+  { symbol: '▣', title: 'Estudiantes y docentes', description: 'Expedientes académicos de alumnos y profesores.', route: 'registry' },
+  { symbol: '▤', title: 'Grupos e inscripciones', description: 'Grupos, secciones e inscripciones institucionales.', route: 'operations' },
+  { symbol: '◷', title: 'Horarios y aulas', description: 'Aulas, horarios e instancias de clase.', route: 'scheduling' },
+  { symbol: '▦', title: 'Calificaciones', description: 'Evaluación académica y actas autorizadas.', route: 'grading' },
+  { symbol: '✉', title: 'Servicios universitarios', description: 'Avisos, solicitudes, tutorías y talleres.', route: 'services' },
+] as const;
 
 export default async function Dashboard() {
   const user = await getIdentity();
@@ -98,19 +99,28 @@ export default async function Dashboard() {
 
       <section className="sii-modules-section">
         <div className="sii-panel-top sii-panel-top--outside">
-          <div><span className="sii-section-kicker">ECOSISTEMA SII</span><h2>Próximos espacios de trabajo</h2><p>Se habilitarán cuando su lógica y permisos estén verificados.</p></div>
-          <span className="sii-badge sii-badge--muted">Desarrollo por fases</span>
+          <div><span className="sii-section-kicker">ECOSISTEMA SII</span><h2>Módulos institucionales</h2><p>Selecciona tu institución para trabajar. Cada módulo verifica permisos y seguridad en el servidor.</p></div>
+          <span className="sii-badge sii-badge--muted">Acceso por institución</span>
         </div>
-        <div className="sii-module-grid">
-          {modules.map(module => (
-            <article className="sii-module-card" key={module.title}>
-              <span className="sii-module-glyph" aria-hidden="true">{module.symbol}</span>
-              <h3>{module.title}</h3>
-              <p>{module.description}</p>
-              <div className="sii-module-bottom"><span>En preparación · {module.stage}</span><span aria-hidden="true">↗</span></div>
-            </article>
-          ))}
-        </div>
+        {institutions.length === 0 ? (
+          <p className="sii-empty">Aún no tienes una institución asignada.</p>
+        ) : institutions.map(inst => (
+          <section key={inst.institutionId} aria-label={`Módulos de ${inst.institutionName}`}>
+            <h3>{inst.institutionName}</h3>
+            <div className="sii-module-grid">
+              {modules.map(module => (
+                <Link key={module.route}
+                  href={`/dashboard/institutions/${inst.institutionId}/${module.route}` as Route}
+                  className="sii-module-card">
+                  <span className="sii-module-glyph" aria-hidden="true">{module.symbol}</span>
+                  <h3>{module.title}</h3>
+                  <p>{module.description}</p>
+                  <div className="sii-module-bottom"><span>Acceder al módulo (según permisos)</span><span aria-hidden="true">↗</span></div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
       </section>
       <footer className="sii-footer">SII · Sistema Institucional Integral <span>Administración académica segura · Experiencia móvil en Compañero</span></footer>
     </SiiAppShell>
