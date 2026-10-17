@@ -17,6 +17,6 @@ export default async function RegistryPage({params}:Props){
   <div className="sii-page-heading"><div><h1>Personas académicas<span className="sii-welcome-period">.</span></h1>
    <p>{access.institutionName} · Expedientes de alumnos y docentes, con auditoría.</p></div>
    <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Volver</Link></div>
-  <SchoolRegistry institutionId={institutionId}/>
+  <SchoolRegistry key={institutionId} institutionId={institutionId}/>
  </SiiAppShell>;
 }
