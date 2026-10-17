@@ -1,4 +1,4 @@
-import {domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
+import {DomainConflict,domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, desc, eq, getTableColumns } from 'drizzle-orm';
@@ -8,7 +8,7 @@ import { db } from '@/infrastructure/database';
 import { academicPrograms, institutionalStudents, institutionalTeachers, securityAuditLog } from '../../../../../../../../db/schema';
 import { authorizeInstitution } from '@/shared/auth/session';
 import { assertSameOrigin, jsonError } from '@/shared/auth/guards';
-import { registryCreate, registryUpdate } from '@/modules/registry/validation';
+import { registryCreate, registryUpdate, registryProfileUpdate } from '@/modules/registry/validation';
 
 export const runtime='nodejs';
 type Context={params:Promise<{institutionId:string;resource:string}>};
@@ -75,6 +75,22 @@ export const PATCH=withDomainErrors(async (req:NextRequest,ctx:Context)=>{
   if(!access)return jsonError('FORBIDDEN',403);
   const body:unknown=await req.json().catch(()=>null);
   try{
+    if(typeof body==='object'&&body!==null&&'kind'in body){
+      const parsed=registryProfileUpdate.safeParse(body);
+      if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
+      const data=await domainTransaction(access,{permission:'academic.manage'},async tx=>{
+        const table=p.resource==='students'?institutionalStudents:institutionalTeachers;
+        const [current]=await tx.select().from(table).where(and(eq(table.id,parsed.data.id),eq(table.institutionId,p.institutionId))).for('update');
+        if(!current)return null;
+        const before={firstName:current.firstName,lastName:current.lastName,institutionalEmail:current.institutionalEmail};
+        const {expected,profile}=parsed.data;
+        if(before.firstName!==expected.firstName||before.lastName!==expected.lastName||before.institutionalEmail!==expected.institutionalEmail)throw new DomainConflict('REGISTRY_PROFILE_CONFLICT');
+        const [row]=await tx.update(table).set({...profile,updatedAt:new Date()}).where(and(eq(table.id,current.id),eq(table.institutionId,p.institutionId))).returning();
+        await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:p.institutionId,action:'registry.'+p.resource+'.profile',target:p.resource+':'+row.id,details:{before,after:profile}});
+        return row;
+      });
+      return data?NextResponse.json({data},{headers}):jsonError('NOT_FOUND',404);
+    }
     const data=await domainTransaction(access,{permission:'academic.manage'},async tx=>{
       const rows=p.resource==='students'
         ? (()=>{const v=registryUpdate.students.safeParse(body);return v.success?tx.update(institutionalStudents).set({status:v.data.status,updatedAt:new Date()}).where(and(eq(institutionalStudents.id,v.data.id),eq(institutionalStudents.institutionId,p.institutionId))).returning():null})()
