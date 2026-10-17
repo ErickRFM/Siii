@@ -58,7 +58,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">⇄</span> Integraciones <span className="sii-nav-soon">Pronto</span></span>
         </div>
         <div className="sii-sidebar-spacer"/>
-        <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Núcleo institucional · F2</div>
+        <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Plataforma institucional · Acceso protegido</div>
         <div className="sii-sidebar-user">
           <span className="sii-avatar sii-avatar--sidebar">{firstName.substring(0, 1).toLocaleUpperCase('es-MX')}</span>
           <span className="sii-sidebar-user-details"><strong>{fullName}</strong><small>Sesión institucional</small></span>
