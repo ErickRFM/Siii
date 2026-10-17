@@ -23,19 +23,20 @@ function Directory({institutionId,institutionName}:Institution){
     {loading && <p role="status">Consultando módulos autorizados…</p>}
     {error && <div role="alert"><p>{error}</p><button type="button" className="sii-outline-button" onClick={refresh}>Reintentar</button></div>}
     {data?.restricted && <p>Completa la verificación de seguridad de tu institución para habilitar los módulos. <Link href="/dashboard/security">Ir a seguridad</Link></p>}
-    {data && !data.restricted && visible.length===0 && !catalog && <p>No hay módulos habilitados para tu rol institucional.</p>}
-    {data && !data.restricted && <div className="sii-module-grid">
-      {catalog && <Link href={`/dashboard/institutions/${institutionId}/academic` as Route} className="sii-module-card">
-        <span className="sii-module-glyph" aria-hidden="true">▦</span><h3>Catálogo académico</h3><p>Programas, materias, campus y periodos.</p>
-        <div className="sii-module-bottom"><span>Abrir catálogo</span><span aria-hidden="true">↗</span></div>
-      </Link>}
-      {modules.filter(module => visible.some(link=>link.id===module.id)).map(module=><Link key={module.id}
-        href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-module-card">
-        <span className="sii-module-glyph" aria-hidden="true">{module.symbol}</span>
-        <h3>{module.title}</h3><p>{module.description}</p>
-        <div className="sii-module-bottom"><span>Abrir módulo</span><span aria-hidden="true">↗</span></div>
-      </Link>)}
-    </div>}
+    <div className="sii-module-grid">
+      {[{id:'academic',title:'Catálogo académico',symbol:'▦',description:'Programas, materias, campus y periodos.'},...modules].map(module=>{
+        const allowed = Boolean(data && !data.restricted && (module.id==='academic' ? catalog : visible.some(link=>link.id===module.id)));
+        const reason = loading ? 'Verificando permisos…' : error ? 'No se pudieron consultar permisos' : data?.restricted ? 'Requiere verificación de seguridad' : 'Sin permiso para este módulo';
+        const content = <>
+          <span className="sii-module-glyph" aria-hidden="true">{module.symbol}</span>
+          <h3>{module.title}</h3><p>{module.description}</p>
+          <div className="sii-module-bottom"><span>{allowed ? 'Abrir módulo' : reason}</span><span aria-hidden="true">{allowed ? '↗' : '•'}</span></div>
+        </>;
+        return allowed
+          ? <Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-module-card">{content}</Link>
+          : <article key={module.id} className="sii-module-card" aria-label={`${module.title}: ${reason}`}>{content}</article>;
+      })}
+    </div>
   </section>;
 }
 export default function InstitutionModuleDirectory(props:Institution){
