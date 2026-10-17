@@ -7,7 +7,7 @@ import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
-import {academicModuleLinks,type AcademicModule} from '@/shared/navigation/academic-modules';
+import {academicModuleLinks,allAcademicModuleLinks,type AcademicModule} from '@/shared/navigation/academic-modules';
 
 type Active = AcademicModule | 'overview' | 'security' | 'institution' | 'academic' | 'roles' | 'invitations' | 'users' | 'administration';
 
@@ -61,8 +61,21 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
             aria-current={active === 'academic' ? 'page' : undefined}
             onClick={() => setMenuOpen(false)}>
               <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
-          </Link> : !institutionId ? <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico <span className="sii-nav-soon">Selecciona institución</span></span> : null}
-          {institutionId&&modules.map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}><span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}</Link>)}
+          </Link> : <span className="sii-nav-item sii-nav-item--muted">
+            <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
+            <span className="sii-nav-soon">{!institutionId ? 'Selecciona institución' : 'Restringido'}</span>
+          </span>}
+          {allAcademicModuleLinks.map(module => {
+            const allowed=Boolean(institutionId && modules.some(item=>item.id===module.id));
+            return allowed ? <Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route}
+              className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'}
+              aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}>
+              <span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}
+            </Link> : <span key={module.id} className="sii-nav-item sii-nav-item--muted">
+              <span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}
+              <span className="sii-nav-soon">{!institutionId ? 'Selecciona institución' : 'Restringido'}</span>
+            </span>;
+          })}
         </div>
         <div className="sii-sidebar-spacer"/>
         <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Plataforma institucional · Acceso protegido</div>
