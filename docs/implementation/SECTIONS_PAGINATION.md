@@ -21,6 +21,6 @@ El health check de `tests/support/http-setup.ts` respeta `SIII_TEST_PORT`, igual
 
 ## Estado de la entrega anterior
 
-PR35 se revisó independientemente en el árbol exacto `4d87d61f83fa95b7869a7e0981a88f52a525804b` contra `c70adc40`, sin bloqueos restantes. Los archivos del ajuste de ámbito coinciden con `5e99941b`; se conserva el borrador después de un error temporal y recuperación del mismo ámbito.
+PR35 quedó integrado en main mediante `06166d90936fc939334a71ba600ec118c58b2586` y se revisó independientemente en el árbol exacto `4d87d61f83fa95b7869a7e0981a88f52a525804b` contra `c70adc40`, sin bloqueos restantes. Los archivos del ajuste de ámbito coinciden con `5e99941b`; se conserva el borrador después de un error temporal y recuperación del mismo ámbito.
 
 La rama integradora reportó build/typecheck/lint correctos, 765 pruebas unitarias, 300 de integración, 54 de Chromium y ambas ejecuciones Verify SIS en SUCCESS (`39073966596`, `39073970270`) para ese head. Esta evidencia se registra aquí sin reabrir PR35 para cambiar solo metadatos. La paginación de secciones es un incremento separado.
