@@ -127,6 +127,13 @@
       "when": 1792126000000,
       "tag": "0017_data_api_schema_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792278000000,
+      "tag": "0018_academic_section_outbox",
+      "breakpoints": true
     }
   ]
 }

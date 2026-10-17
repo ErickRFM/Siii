@@ -8,3 +8,4 @@ export * from './registry';
 export * from './grading';
 export * from './schedule';
 export * from './services';
+export * from './academic-outbox';
