@@ -24,7 +24,7 @@ export default async function Dashboard() {
   const roleNames = [...new Set(institutions.flatMap(item => item.roles))].map(role => ROLE_LABELS[role]);
 
   return (
-    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="overview">
+    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="overview" institutionId={institutions.length === 1 ? institutions[0].institutionId : undefined}>
       <div className="sii-page-eyebrow">CENTRO DE OPERACIONES <span className="sii-page-eyebrow-line"/></div>
       <div className="sii-page-heading">
         <div>
