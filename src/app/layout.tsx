@@ -6,6 +6,7 @@ import {passwordResetFragmentBootstrap} from '@/shared/password-reset/fragment-b
 import './globals.css';
 import './sii-v2.css';
 import './academic-v2.css';
+import './sii-glass.css';
 export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'SII · Sistema Institucional Integral',description:'Plataforma institucional de gestión académica'};
 export default async function RootLayout({children}:{children:React.ReactNode}){
