@@ -63,7 +63,7 @@ describe('transactional academic outbox PostgreSQL',()=>{
  });
  it('keeps canonical and managed0018 identical and denies API grants/immutable update under backend role',async()=>{
   expect(readReleaseMigrations('supabase-v1')[18].sql.join('')).toContain('academic_section_outbox');
-  const tables=(await pool.query("SELECT relname,relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname IN ('academic_section_outbox','academic_section_versions')")).rows;expect(tables).toHaveLength(2);expect(tables.every(r=>r.relrowsecurity&&r.relforcerowsecurity)).toBe(true);
+  const tables=(await pool.query("SELECT relname,relrowsecurity,relforcerowsecurity,pg_get_userbyid(relowner) AS owner FROM pg_class WHERE relname IN ('academic_section_outbox','academic_section_versions')")).rows;expect(tables).toHaveLength(2);expect(tables.every(r=>r.relrowsecurity&&r.relforcerowsecurity&&r.owner==='siii_migrator')).toBe(true);
   for(const role of ['anon','authenticated']){expect((await pool.query("SELECT has_any_column_privilege($1,'academic_section_outbox','SELECT,INSERT,UPDATE,REFERENCES') AS allowed",[role])).rows[0].allowed).toBe(false)}
   await expect(db.transaction(async tx=>{await tx.execute(sql.raw('SET LOCAL ROLE siii_app'));await tx.execute(sql.raw("UPDATE academic_section_outbox SET body_encrypted='tamper'"))})).rejects.toThrow();
  });
@@ -99,7 +99,7 @@ it('detects a SET-only inherited API path using isolated test roles without gran
 });
 
 it('passes the live application-role guard with a dedicated login and no DDL or immutable-column privilege',async()=>{
- const role='outbox_runtime_'+randomUUID().replaceAll('-','').slice(0,12);await pool.query('CREATE ROLE '+role+' LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE');await pool.query('GRANT siii_app TO '+role);const url=new URL(process.env.DATABASE_URL!);url.username=role;url.password='';const client=new pg.Client({connectionString:url.toString()});
+ const role='outbox_runtime_'+randomUUID().replaceAll('-','').slice(0,12),password=randomBytes(32).toString('hex');await pool.query('CREATE ROLE '+role+' LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '+pg.escapeLiteral(password));await pool.query('GRANT siii_app TO '+role);expect((await pool.query('SELECT rolpassword IS NOT NULL AS configured FROM pg_authid WHERE rolname=$1',[role])).rows[0].configured).toBe(true);const url=new URL(process.env.DATABASE_URL!);url.username=role;url.password=password;const client=new pg.Client({connectionString:url.toString()});
  try{await client.connect();const inspection=(await client.query(APPLICATION_ROLE_QUERY)).rows[0];expect(()=>assertRoleInspection(inspection)).not.toThrow();await expect(client.query('CREATE TABLE public.outbox_forbidden(id int)')).rejects.toHaveProperty('code','42501');expect((await client.query("SELECT has_column_privilege(current_user,'academic_section_outbox','body_encrypted','UPDATE') AS allowed")).rows[0].allowed).toBe(false)}finally{await client.end();await pool.query('DROP ROLE '+role)}
 });
 it('retains restrictive API denial even if a future SQL caller accidentally adds public schema/table grants',async()=>{

@@ -38,6 +38,8 @@ CREATE POLICY academic_outbox_deny_anon ON academic_section_versions AS RESTRICT
 CREATE POLICY academic_outbox_deny_authenticated ON academic_section_versions AS RESTRICTIVE FOR ALL TO authenticated USING(false) WITH CHECK(false);
 CREATE POLICY academic_outbox_deny_anon ON academic_section_outbox AS RESTRICTIVE FOR ALL TO anon USING(false) WITH CHECK(false);
 CREATE POLICY academic_outbox_deny_authenticated ON academic_section_outbox AS RESTRICTIVE FOR ALL TO authenticated USING(false) WITH CHECK(false);
+ALTER TABLE academic_section_versions OWNER TO siii_migrator;
+ALTER TABLE academic_section_outbox OWNER TO siii_migrator;
 -- Inherited and SET-only API paths must not reach backend grants or public schema.
 DO $$ DECLARE api record; reachable record; BEGIN
  FOR api IN SELECT oid FROM pg_roles WHERE rolname IN('anon','authenticated') LOOP
