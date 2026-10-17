@@ -132,10 +132,7 @@ describe.sequential('local institutional replay with synthetic PostgreSQL roles'
       await expect(client.query('TRUNCATE public.security_audit_log')).rejects.toHaveProperty('code','42501');
       await expect(client.query('CREATE TABLE public.unwanted(id integer)')).rejects.toHaveProperty('code','42501');
     });
-<<<<<<< HEAD
     await client.query('GRANT USAGE ON SCHEMA public TO anon,authenticated');
-=======
->>>>>>> integrate/sii-v1
     await client.query('GRANT SELECT ON public.people TO anon,authenticated');
     await client.query('CREATE POLICY synthetic_permissive ON public.people FOR SELECT TO anon,authenticated USING(true)');
     await client.query("INSERT INTO public.people(first_name,last_name) VALUES('Synthetic','Fixture')");
@@ -145,10 +142,7 @@ describe.sequential('local institutional replay with synthetic PostgreSQL roles'
     });
     await client.query('DROP POLICY synthetic_permissive ON public.people');
     await client.query('REVOKE SELECT ON public.people FROM anon,authenticated');
-<<<<<<< HEAD
     await client.query('REVOKE USAGE ON SCHEMA public FROM anon,authenticated');
-=======
->>>>>>> integrate/sii-v1
   });
 
   it('uses a real restricted LOGIN for positive INSERT SELECT UPDATE on all runtime tables and audit append-only', async () => {
@@ -286,4 +280,3 @@ describe.sequential('local institutional replay with synthetic PostgreSQL roles'
     await admin.end();
   }, 30000);
 });
-

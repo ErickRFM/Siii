@@ -1,10 +1,5 @@
 import pg from 'pg';
-<<<<<<< HEAD
 export const SCHEMA_SIGNATURE_SQL = `
-=======
-export async function schemaSignature(client: pg.Client | pg.PoolClient) {
- const result=await client.query<{signature:unknown}>(`
->>>>>>> integrate/sii-v1
  SELECT jsonb_build_object(
   'columns',COALESCE((SELECT jsonb_agg(to_jsonb(x) ORDER BY x.table_name,x.ordinal_position) FROM (
    SELECT table_name,column_name,ordinal_position,data_type,udt_name,is_nullable,column_default
@@ -23,12 +18,8 @@ export async function schemaSignature(client: pg.Client | pg.PoolClient) {
    JOIN pg_enum e ON e.enumtypid=t.oid WHERE n.nspname='public'
   ) x),'[]'::jsonb)
  ) AS signature
-<<<<<<< HEAD
  `;
 export async function schemaSignature(client: pg.Client | pg.PoolClient) {
  const result=await client.query<{signature:unknown}>(SCHEMA_SIGNATURE_SQL);
-=======
- `);
->>>>>>> integrate/sii-v1
  return result.rows[0].signature;
 }
