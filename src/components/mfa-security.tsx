@@ -48,6 +48,7 @@ export default function MfaSecurity() {
   const [offline, setOffline] = useState(false);
   const [recovery, setRecovery] = useState(false);
   const [error, setError] = useState('');
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [invalidField, setInvalidField] = useState<string | null>(null);
   const [restartEnrollment, setRestartEnrollment] = useState(false);
   const [notice, setNotice] = useState('');
@@ -62,7 +63,7 @@ export default function MfaSecurity() {
     const controller = new AbortController();
     request<{ data: MfaStatus }>('', undefined, controller.signal)
       .then(result => { if (!result.data) throw new MfaRequestError('SERVICE_UNAVAILABLE'); setStatus(result.data); })
-      .catch(cause => { if (!controller.signal.aborted) setError(errorMessage(cause)); })
+      .catch(cause => { if (!controller.signal.aborted) { setSessionExpired(cause instanceof MfaRequestError && cause.code === 'UNAUTHENTICATED'); setError(errorMessage(cause)); } })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, []);
@@ -90,13 +91,14 @@ export default function MfaSecurity() {
   }
   async function perform(operation: () => Promise<void>, fields?: { password?: string; factor?: string }) {
     if (busy || offline) return;
-    setBusy(true); setError(''); setNotice(''); setInvalidField(null); setRestartEnrollment(false);
+    setBusy(true); setError(''); setSessionExpired(false); setNotice(''); setInvalidField(null); setRestartEnrollment(false);
     try { await operation(); } catch (cause) {
       if (cause instanceof MfaRequestError) {
         if (cause.code === 'INVALID_CREDENTIALS') setInvalidField(fields?.password ?? null);
         if (cause.code === 'INVALID_MFA_CODE') setInvalidField(fields?.factor ?? null);
         if (cause.code === 'MFA_ENROLLMENT_EXPIRED') { setEnrollment(null); setRestartEnrollment(true); }
       }
+      setSessionExpired(cause instanceof MfaRequestError && cause.code === 'UNAUTHENTICATED');
       setError(errorMessage(cause));
     }
     finally { setBusy(false); setLoading(false); }
@@ -160,7 +162,7 @@ export default function MfaSecurity() {
     <p>Protege el acceso con una aplicación autenticadora. La contraseña y el código se verifican en el servidor.</p>
     {loading && <p role="status">Consultando el estado de seguridad…</p>}
     {offline && <p role="status">Sin conexión. Las operaciones se habilitarán cuando vuelvas a conectarte.</p>}
-    {error && <p id="mfa-error" ref={feedback} tabIndex={-1} className="sii-auth-error" role="alert">{error} <Link href="/login">Ir al acceso</Link></p>}
+    {error && <p id="mfa-error" ref={feedback} tabIndex={-1} className="sii-auth-error" role="alert">{error}{sessionExpired && <> <Link href="/login">Ir al acceso</Link></>}</p>}
     {notice && <p role="status">{notice}</p>}
     <button type="button" className="sii-outline-button" disabled={busy || offline} onClick={() => void perform(refresh)}>Actualizar estado de seguridad</button>
     {status && <>

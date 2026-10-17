@@ -35,3 +35,41 @@ test('registry writes real data and remains accessible in dark mobile layout',as
 test('teacher navigation exposes only the assigned gradebook module',async({page})=>{
  await fixture('teacher');await login(page);await expect(page.getByRole('link',{name:'Calificaciones',exact:true}).first()).toBeVisible();await expect(page.getByRole('link',{name:'Estudiantes y docentes',exact:true})).toHaveCount(0);await expect(page.getByRole('link',{name:'Usuarios',exact:true})).toHaveCount(0);await page.getByRole('link',{name:'Calificaciones',exact:true}).first().click();await expect(page.getByRole('option',{name:'Sin secciones asignadas'})).toBeAttached();await expect(page.locator('main [role="alert"]')).toHaveCount(0);
 });
+
+test('module directory keeps all six areas visible for an authenticated guest without granting links',async({page})=>{
+ await fixture('guest');await login(page);await page.goto('/dashboard');
+ const directory=page.getByRole('region',{name:'Módulos de QA consolidación'});
+ await expect(directory.locator('.sii-module-card')).toHaveCount(6);
+ for(const label of ['Catálogo académico','Estudiantes y docentes','Grupos e inscripciones','Calificaciones','Horarios y aulas','Servicios universitarios']){
+  await expect(directory.getByRole('heading',{name:label,exact:true})).toBeVisible();
+  await expect(directory.getByRole('link',{name:new RegExp(label)})).toHaveCount(0);
+ }
+ await expect(directory.locator('article')).toHaveCount(6);
+ await expect(directory.getByText('Sin permiso para este módulo',{exact:true})).toHaveCount(6);
+ await page.goto('/dashboard/institutions/'+tenant);
+ const navigation=page.getByRole('navigation',{name:'Gestión académica',exact:true});
+ await expect(navigation).toBeVisible();
+ await expect(navigation.getByRole('link')).toHaveCount(0);
+ await expect(navigation.getByText('Estudiantes y docentes',{exact:false})).toBeVisible();
+});
+
+test('registry pagination reaches persisted students beyond two hundred without losing earlier pages',async({page})=>{
+ await fixture('admin');
+ const program=(await sql.query('SELECT id FROM academic_programs WHERE institution_id=$1 LIMIT 1',[tenant])).rows[0].id;
+ await sql.query(`INSERT INTO institutional_students(institution_id,program_id,enrollment_number,first_name,last_name) SELECT $1,$2,'PAGER'||n,'Alumno','Sintético' FROM generate_series(1,205)n`,[tenant,program]);
+ await login(page);await page.getByRole('link',{name:'Estudiantes y docentes',exact:true}).first().click();
+ const rows=page.locator('tbody tr');await expect(rows).toHaveCount(50);
+ const firstPage=await rows.locator('td:first-child').allTextContents();
+ await page.getByRole('button',{name:'Siguiente página',exact:true}).click();await expect(rows).toHaveCount(50);
+ const secondPage=await rows.locator('td:first-child').allTextContents();expect(secondPage.every(value=>!firstPage.includes(value))).toBe(true);
+ await page.getByRole('button',{name:'Página anterior',exact:true}).click();await expect(rows.locator('td:first-child')).toHaveText(firstPage);
+ for(let pageNumber=2;pageNumber<=5;pageNumber++){await page.getByRole('button',{name:'Siguiente página',exact:true}).click();await expect(page.getByText('Página '+pageNumber,{exact:true})).toBeVisible()}
+ await expect(rows).toHaveCount(5);await expect(page.getByRole('button',{name:'Siguiente página',exact:true})).toBeDisabled();
+ await page.reload();await expect(rows).toHaveCount(50);expect((await sql.query('SELECT count(*)::int AS count FROM institutional_students WHERE institution_id=$1',[tenant])).rows[0].count).toBe(205);
+ await sql.query(`INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) SELECT $1,'FAC'||n,'Facilitador','Sintético' FROM generate_series(1,65)n`,[tenant]);
+ await page.getByRole('link',{name:'Servicios universitarios',exact:true}).first().click();
+ await page.getByRole('tab',{name:'Trámites estudiantiles',exact:true}).click();
+ await expect(page.getByLabel(/^Alumno/).locator('option')).toHaveCount(206);
+ await page.getByRole('tab',{name:'Talleres',exact:true}).click();
+ await expect(page.getByLabel(/^Facilitador/).locator('option')).toHaveCount(66);
+});

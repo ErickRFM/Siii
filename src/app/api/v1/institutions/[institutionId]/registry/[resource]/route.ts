@@ -1,7 +1,8 @@
 import {domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest, NextResponse } from 'next/server';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns } from 'drizzle-orm';
+import {parsePage,cursorTimestamp,cursorPredicate,pageEnvelope} from '@/shared/http/pagination';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
 import { academicPrograms, institutionalStudents, institutionalTeachers, securityAuditLog } from '../../../../../../../../db/schema';
@@ -23,13 +24,20 @@ function dbError(error:unknown) {
   if(code==='23503'||code==='23514')return jsonError('INSTITUTIONAL_CONSTRAINT',422);
   throw error;
 }
-export const GET=withDomainErrors(async (_req:NextRequest,ctx:Context)=>{
+export const GET=withDomainErrors(async (req:NextRequest,ctx:Context)=>{
   const p=await context(ctx); if(!p)return jsonError('INVALID_RESOURCE',404);
   if(!await authorizeInstitution(p.institutionId,'academic.manage'))return jsonError('FORBIDDEN',403);
-  const data=p.resource==='students'
-    ? await db.select().from(institutionalStudents).where(eq(institutionalStudents.institutionId,p.institutionId)).orderBy(desc(institutionalStudents.createdAt)).limit(200)
-    : await db.select().from(institutionalTeachers).where(eq(institutionalTeachers.institutionId,p.institutionId)).orderBy(desc(institutionalTeachers.createdAt)).limit(200);
-  return NextResponse.json({data,truncated:data.length===200},{headers});
+  const scope=p.institutionId+':registry:'+p.resource,page=parsePage(req,scope);
+  if(!page)return jsonError('INVALID_PAGINATION',422);
+  const rows=p.resource==='students'
+    ? await db.select({...getTableColumns(institutionalStudents),cursorAt:cursorTimestamp(institutionalStudents.createdAt)}).from(institutionalStudents)
+      .where(and(eq(institutionalStudents.institutionId,p.institutionId),cursorPredicate(page,institutionalStudents.createdAt,institutionalStudents.id)))
+      .orderBy(desc(institutionalStudents.createdAt),desc(institutionalStudents.id)).limit(page.limit+1)
+    : await db.select({...getTableColumns(institutionalTeachers),cursorAt:cursorTimestamp(institutionalTeachers.createdAt)}).from(institutionalTeachers)
+      .where(and(eq(institutionalTeachers.institutionId,p.institutionId),cursorPredicate(page,institutionalTeachers.createdAt,institutionalTeachers.id)))
+      .orderBy(desc(institutionalTeachers.createdAt),desc(institutionalTeachers.id)).limit(page.limit+1);
+  const result=pageEnvelope<(typeof rows)[number]>(rows,page,scope);
+  return NextResponse.json({data:result.visible.map(({cursorAt,...row})=>{void cursorAt;return row}),page:result.page},{headers});
 });
 export const POST=withDomainErrors(async (req:NextRequest,ctx:Context)=>{
   if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);

@@ -143,3 +143,25 @@ test('expired enrollment returns to a focused password form and creates a new ma
   await expect(page.getByLabel('Clave manual del autenticador')).not.toHaveValue(secret);
   await accessible(page);
 });
+
+test('return to grade publishing survives security and rejects an external destination', async ({ page }) => {
+  await credentials(page); await expect(page).toHaveURL(/\/dashboard$/);
+  const destination = '/dashboard/institutions/168c8230-94ea-4bae-bd10-8cf698882f52/grading';
+  await page.goto('/dashboard/security?returnTo=' + encodeURIComponent(destination));
+  await expect(page.getByRole('link', { name: 'Volver y reintentar la operación', exact: true })).toHaveAttribute('href', destination);
+  await page.goto('/dashboard/security?returnTo=' + encodeURIComponent('//example.com'));
+  await expect(page.getByRole('link', { name: 'Volver y reintentar la operación', exact: true })).toHaveCount(0);
+});
+
+test('MFA service failures keep the session separate from an expired-session error', async ({ page }) => {
+  await credentials(page); await expect(page).toHaveURL(/\/dashboard$/);
+  await page.route('**/api/v1/auth/mfa', route => route.fulfill({ status: 503, json: { error: { code: 'MFA_KEY_UNAVAILABLE' } } }));
+  await page.goto('/dashboard/security');
+  await expect(page.locator('#mfa-error')).toContainText('configuración de seguridad no está disponible');
+  await expect(page.locator('#mfa-error').getByRole('link', { name: 'Ir al acceso' })).toHaveCount(0);
+  await page.unroute('**/api/v1/auth/mfa');
+  await page.route('**/api/v1/auth/mfa', route => route.fulfill({ status: 401, json: { error: { code: 'UNAUTHENTICATED' } } }));
+  await page.getByRole('button', { name: 'Actualizar estado de seguridad', exact: true }).click();
+  await expect(page.locator('#mfa-error')).toContainText('Tu sesión venció');
+  await expect(page.locator('#mfa-error').getByRole('link', { name: 'Ir al acceso' })).toBeVisible();
+});

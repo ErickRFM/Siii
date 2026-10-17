@@ -84,6 +84,25 @@ describe.sequential('consolidated real domain handlers',()=>{
   await sql.query(`UPDATE institutions SET status='suspended' WHERE id=$1`,[id]);
   try{for(const path of paths)expect((await fetch(base+'/api/integrations/companion/v1/'+path,{headers:{authorization:'Bearer '+token}})).status).toBe(403)}finally{await sql.query(`UPDATE institutions SET status='active' WHERE id=$1`,[id])}
  });
+ it.each(['students','teachers'])('paginates every %s registry record beyond the old 200-row cap with stable scoped cursors',async resource=>{
+  const table=resource==='students'?'institutional_students':'institutional_teachers';
+  if(resource==='students')await sql.query(`INSERT INTO institutional_students(institution_id,program_id,enrollment_number,first_name,last_name,created_at) SELECT $1,$2,'PAGE'||n,'Persona','Sintética',('2026-10-01 12:00:00.12345'||(n%2+6)||'+00')::timestamptz FROM generate_series(1,205)n`,[tenant,program]);
+  else await sql.query(`INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name,created_at) SELECT $1,'PAGE'||n,'Persona','Sintética',('2026-10-01 12:00:00.12345'||(n%2+6)||'+00')::timestamptz FROM generate_series(1,205)n`,[tenant]);
+  const expected=(await sql.query('SELECT id FROM '+table+' WHERE institution_id=$1 ORDER BY created_at DESC,id DESC',[tenant])).rows.map(row=>row.id);
+  const path='/api/v1/institutions/'+tenant+'/registry/'+resource,ids:string[]=[],cursors=new Set<string>();let cursor:string|null=null;
+  do{
+   const response=await request(path+'?limit=37'+(cursor?'&cursor='+encodeURIComponent(cursor):''));expect(response.status).toBe(200);
+   const body=await response.json();expect(body).toHaveProperty('page.nextCursor');expect(body.data.length).toBeLessThanOrEqual(37);
+   expect(body.data.every((row:{institutionId:string})=>row.institutionId===tenant)).toBe(true);
+   ids.push(...body.data.map((row:{id:string})=>row.id));cursor=body.page.nextCursor;
+   if(cursor){expect(cursors.has(cursor)).toBe(false);cursors.add(cursor)}
+  }while(cursor);
+  expect(ids).toEqual(expected);expect(new Set(ids).size).toBe(expected.length);expect(ids.length).toBeGreaterThan(200);
+  const first=await request(path+'?limit=1'),firstCursor=(await first.json()).page.nextCursor;
+  expect((await request('/api/v1/institutions/'+tenant+'/registry/'+(resource==='students'?'teachers':'students')+'?cursor='+firstCursor)).status).toBe(422);
+  for(const query of ['limit=0','limit=101','limit=1&limit=2','cursor=invalid','unknown=1'])expect((await request(path+'?'+query)).status).toBe(422);
+  expect((await request(path+'?limit=1','GET',undefined,studentCookie)).status).toBe(403);
+ });
  it('rejects a grading session revoked after login',async()=>{await sql.query('UPDATE auth_sessions SET revoked_at=now() WHERE user_id=$1',[teacherUser]);expect((await request('/api/v1/institutions/'+tenant+'/grading?sectionId='+section,'GET',undefined,teacherCookie)).status).toBe(403)});
 });
 

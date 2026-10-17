@@ -169,3 +169,92 @@ test('privileged MFA remains required after fresh step-up and cannot be revoked'
   expect((await sql.query("SELECT count(*)::int AS total FROM auth_mfa_factors WHERE user_id=(SELECT id FROM platform_users WHERE username=$1) AND enabled_at IS NOT NULL AND revoked_at IS NULL AND secret_encrypted IS NOT NULL",[users.protected])).rows[0].total).toBe(1);
   await accessible(page);
 });
+
+test('returning focus rechecks capabilities while preserving an open draft and fails closed on denial', async ({ page }) => {
+  await signIn(page, users.coordinator);
+  await page.goto(`/dashboard/institutions/${institutionId}/academic`);
+  await expect(page.getByRole('button', { name: 'Editar', exact: true })).toHaveCount(1);
+  await page.getByRole('button', { name: 'Editar', exact: true }).click();
+  await page.getByLabel('Nombre', { exact: true }).fill('Borrador sin guardar');
+  const path = `/api/v1/institutions/${institutionId}/capabilities`;
+  const capabilities = (await (await page.request.get(path)).json()).data;
+  let release!: () => void;
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**' + path, async route => { await pending; await route.fulfill({ json: { data: capabilities } }); });
+  const refreshed = page.waitForRequest(request => request.url().endsWith(path), { timeout: 5000 });
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await refreshed;
+  // A background refresh must not temporarily unmount the editor.
+  await expect(page.getByLabel('Nombre', { exact: true })).toHaveValue('Borrador sin guardar');
+  const refreshedResponse = page.waitForResponse(response => response.url().endsWith(path));
+  release();
+  await refreshedResponse;
+  await expect(page.getByLabel('Nombre', { exact: true })).toHaveValue('Borrador sin guardar');
+  await page.unroute('**' + path);
+  await page.route('**' + path, route => route.fulfill({ status: 403, json: { error: { code: 'FORBIDDEN' } } }));
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await expect(page.locator('main').getByRole('alert')).toContainText('No tienes acceso vigente');
+  await expect(page.getByRole('button', { name: 'Guardar', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Roles y ámbitos', exact: true })).toHaveCount(0);
+  await page.unroute('**' + path);
+  let recover!: () => void;
+  const recovering = new Promise<void>(resolve => { recover = resolve; });
+  await page.route('**' + path, async route => { await recovering; await route.fulfill({ json: { data: capabilities } }); });
+  const recoveryRequest = page.waitForRequest(request => request.url().endsWith(path));
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await recoveryRequest;
+  // Keep the known failure visible until revalidation succeeds, instead of flashing
+  // an inaccurate empty-permissions state while no projection is available.
+  try {
+    await expect(page.locator('main').getByRole('alert')).toContainText('No tienes acceso vigente');
+    await expect(page.getByText('No tienes acceso a catálogos académicos.', { exact: true })).toHaveCount(0);
+  } finally { recover(); }
+  await expect(page.locator('main').getByRole('alert')).toHaveCount(0);
+  await expect(page.getByLabel('Nombre', { exact: true })).toHaveValue('Borrador sin guardar');
+});
+
+
+test('real MFA enrollment and step-up refresh the original institutional tab after session rotation', async ({ page, context }) => {
+  test.setTimeout(120000);
+  await signIn(page, users.onboarding);
+  await page.goto(`/dashboard/institutions/${institutionId}`);
+  await expect(page.getByText('Configura un autenticador para acceder a esta institución.', { exact: true })).toBeVisible();
+  const security = await context.newPage();
+  try {
+    await security.goto('/dashboard/security?returnTo=' + encodeURIComponent(`/dashboard/institutions/${institutionId}/grading`));
+    await expect(security.getByRole('link', { name: 'Volver y reintentar la operación', exact: true })).toHaveAttribute('href', `/dashboard/institutions/${institutionId}/grading`);
+    await security.getByLabel('Contraseña actual para activar').fill(password);
+    await security.getByRole('button', { name: 'Configurar autenticador', exact: true }).click();
+    const manual = await security.getByLabel('Clave manual del autenticador').inputValue();
+    await security.getByLabel('Código para activar el autenticador').fill(await generate({ secret: manual, algorithm: 'sha1', digits: 6, period: 30, crypto: new NodeCryptoPlugin() }));
+    const verified = security.waitForResponse(response => response.url().endsWith('/api/v1/auth/mfa/verify') && response.request().method() === 'POST');
+    await security.getByRole('button', { name: 'Activar autenticador', exact: true }).click();
+    expect((await verified).status()).toBe(200);
+    const recovery = security.getByRole('region', { name: 'Guarda estos códigos de recuperación' });
+    await expect(recovery.locator('code')).toHaveCount(10);
+    const recoveryCode = await recovery.locator('code').first().textContent();
+    const path = `/api/v1/institutions/${institutionId}/capabilities`;
+    const enabled = page.waitForResponse(response => response.url().endsWith(path), { timeout: 10000 });
+    await page.bringToFront();
+    // Headless Chromium can keep both tabs visible without emitting native focus.
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    const enrollmentCapabilities = (await (await enabled).json()).data;
+    expect(enrollmentCapabilities.restricted).toBe(false);
+    expect(enrollmentCapabilities.assurance).toMatchObject({ mfaConfigured: true, mfaVerified: true, stepUpExpiresAt: null });
+    await expect(page.getByRole('link', { name: 'Roles y ámbitos', exact: true }).first()).toBeVisible();
+    await security.bringToFront();
+    await security.getByLabel('Contraseña actual para confirmar').fill(password);
+    await security.getByRole('button', { name: 'Usar código de recuperación', exact: true }).click();
+    await security.getByLabel('Código de recuperación para confirmar').fill(recoveryCode!);
+    await security.getByRole('button', { name: 'Confirmar identidad', exact: true }).click();
+    await expect(security.getByRole('button', { name: 'Renovar códigos de recuperación', exact: true })).toBeEnabled();
+    const elevated = page.waitForResponse(response => response.url().endsWith(path), { timeout: 10000 });
+    await page.bringToFront();
+    // Headless Chromium can keep both tabs visible without emitting native focus.
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    const elevatedCapabilities = (await (await elevated).json()).data;
+    expect(elevatedCapabilities.restricted).toBe(false);
+    expect(new Date(elevatedCapabilities.assurance.stepUpExpiresAt).getTime()).toBeGreaterThan(Date.now());
+    expect((await page.request.get(path)).status()).toBe(200);
+  } finally { await security.close(); }
+});

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import type { CatalogResource } from '@/modules/academic/catalog-validation';
+import AcademicSetupChecklist from './academic-setup-checklist';
+import {catalogAccessKey} from '@/modules/academic/access-key';
 import { useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability, hasScopedCapability, CapabilityState, SecurityActionLink } from './institution-capabilities';
 
 type RecordRow = {
@@ -44,6 +46,8 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   const {data:access,loading:permissionsLoading,error:permissionsError}=useInstitutionCapabilities();
   const availableTabs=tabs.filter(item=>hasAnyCapability(access,`${item.id}.read`));
   const accessReady=Boolean(access&&!access.restricted);
+  const scopeKey=catalogAccessKey(access);
+  const lastConfirmedScope=useRef<string|null>(null);
   const [tab,setTab] = useState<CatalogResource>('programs');
   const [rows,setRows] = useState<RecordRow[]>([]);
   const [programs,setPrograms] = useState<RecordRow[]>([]);
@@ -54,6 +58,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   const [securityRequired,setSecurityRequired]=useState(false);
   const [nameError,setNameError]=useState(false);
   const [programsReload,setProgramsReload]=useState(0);
+  const [setupRevision,setSetupRevision]=useState(0);
   const mutationErrorRef=useRef<HTMLParagraphElement>(null);
   useEffect(()=>{if(mutationError){if(nameError)document.getElementById('catalog-edit-name')?.focus();else mutationErrorRef.current?.focus();}},[mutationError,nameError]);
   const [notice,setNotice] = useState('');
@@ -103,11 +108,18 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
     }
   },[base]);
   useEffect(()=>{
+    if(!accessReady||lastConfirmedScope.current===scopeKey)return;
+    lastConfirmedScope.current=scopeKey;
+    activeRequest.current?.abort();
+    setRows([]);setPrograms([]);setHistory([null]);setNextCursor(null);
+    setEditing(null);setEditName('');setSearch('');setNotice('');setMutationError('');setNameError(false);setSecurityRequired(false);
+  },[scopeKey,accessReady]);
+  useEffect(()=>{
     if(!accessReady||!selectedTab)return;
     if(selectedTab!==tab){setTab(selectedTab);return;}
     const controller=new AbortController();setHistory([null]);setNextCursor(null);
     void load(tab,controller.signal);return ()=>controller.abort();
-  },[tab,load,accessReady,selectedTab]);
+  },[tab,load,accessReady,selectedTab,scopeKey]);
   useEffect(()=>{
     if(tab!=='curricula'||!accessReady)return;
     const controller=new AbortController();setPrograms([]);setProgramsError('');
@@ -123,7 +135,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
       if(!controller.signal.aborted)setPrograms(all.filter(p=>p.status==='active'));
     })().catch(()=>{if(!controller.signal.aborted)setProgramsError('No se pudieron cargar los programas para crear un plan. Actualiza el catálogo.');});
     return ()=>controller.abort();
-  },[base,tab,programsReload,accessReady]);
+  },[base,tab,programsReload,accessReady,scopeKey]);
   async function page(direction:'previous'|'next'){
     const destination=direction==='next'?nextCursor:history[history.length-2];
     if(destination===undefined)return;
@@ -155,6 +167,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
         setSecurityRequired(['MFA_REQUIRED','STEP_UP_REQUIRED','PASSWORD_CHANGE_REQUIRED'].includes(body.error?.code??''));setNameError(body.error?.code==='VALIDATION_ERROR'&&method==='PATCH'&&typeof payload.name==='string');setMutationError(getError(body.error?.code));return false;
       }
       setNotice(method==='POST'?'Registro creado correctamente.':'Cambios guardados correctamente.');
+      setSetupRevision(value=>value+1);
       setHistory([null]);await load(tab);return true;
     } catch {setMutationError('No se pudo conectar con el servidor. Comprueba tu conexión.');return false;}
     finally{setSaving(false);}
@@ -193,6 +206,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   if(!access||availableTabs.length===0)return <p className="sii-info-banner">No tienes acceso a catálogos académicos.</p>;
   return (
     <div className="sii-academic">
+      <AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
         {availableTabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
           className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
@@ -244,7 +258,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
         {canCreate&&<aside className="sii-panel sii-catalog-create">
           <span className="sii-section-kicker">NUEVO REGISTRO</span><h3>Agregar {selected.label.toLowerCase()}</h3>
           <p>Los cambios quedarán guardados y auditados en la institución actual.</p>
-          <form className="sii-catalog-form" onSubmit={e=>void create(e)}>
+          <form key={scopeKey} className="sii-catalog-form" onSubmit={e=>void create(e)}>
             {tab==='curricula'?<>
               <label>Programa académico<select name="programId" required defaultValue=""><option value="" disabled>Seleccionar programa</option>
                 {programs.filter(p=>hasScopedCapability(access,'curricula.manage','program',p.id)).map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}
