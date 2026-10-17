@@ -2,7 +2,10 @@
 
 import Link from 'next/link';
 import type {Route} from 'next';
+<<<<<<< HEAD
 import {academicModuleLinks} from '@/shared/navigation/academic-modules';
+=======
+>>>>>>> integrate/sii-v1
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
 export type InstitutionGrant = { id: string; role: string; scopeType: 'institution' | 'program' | 'campus'; scopeId: string | null; expiresAt: string | null };
@@ -75,13 +78,21 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
     <CapabilityState returnTo={`/dashboard/institutions/${institutionId}`}/>
     {data && <><div className="sii-role-list">{data.roles.map(role => <span className="sii-role-pill" key={role}>{PROFILE_LABELS[role] ?? role}</span>)}</div>
       {data.grants.length > 0 && <ul>{data.grants.map(grant => <li key={grant.id}>{PROFILE_LABELS[grant.role] ?? grant.role} · {grant.scopeType === 'institution' ? 'Institución' : grant.scopeType === 'program' ? 'Programa asignado' : 'Campus asignado'} · {grant.expiresAt ? `Vigente hasta ${new Date(grant.expiresAt).toLocaleString('es-MX')}` : 'Sin vencimiento'}</li>)}</ul>}
+<<<<<<< HEAD
       {!data.restricted && ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
+=======
+      {['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
+>>>>>>> integrate/sii-v1
       {hasInstitutionCapability(data, 'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`} className="sii-outline-button">Usuarios y membresías</Link>}
       {hasInstitutionCapability(data, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} className="sii-outline-button">Roles y ámbitos</Link>}
       {hasInstitutionCapability(data, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} className="sii-outline-button">Invitaciones</Link>}
     </>}
+<<<<<<< HEAD
     {data && !data.restricted && ['programs','courses','curricula','terms','campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Catálogo académico</Link>}
     {data&&!data.restricted&&academicModuleLinks(data.capabilities).map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-outline-button">{module.label}</Link>)}
     <div className="sii-info-banner">Cada módulo disponible valida tus permisos vigentes en el servidor.</div>
+=======
+    <div className="sii-info-banner">Los catálogos disponibles dependen de tus concesiones vigentes y su ámbito. Matrículas, grupos y calificaciones siguen en desarrollo.</div>
+>>>>>>> integrate/sii-v1
   </>;
 }

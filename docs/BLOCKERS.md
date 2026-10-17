@@ -22,6 +22,7 @@ P0 permanece abierta. Staging Free siii-staging-p01 (vsnrbjexusidlvhkhmqg), Post
 QA local final del coordinador: npmci/typecheck/lint,121unitarias,94integración,10Chromium,build,audit0,diff-check; solicitud temporal contra suspensión liberada. Fuente353472… revisada favorable; commit ee6c39ec y CI remota de PR20 verdes (runs38797574280 y38797579552). Evidencia: [reporte staging](audit/P0_1_STAGING_RESULT.md) y [JSON](audit/P0_1_STAGING_RESULT.json). Permanecen lector humano, hosting/HTTP y promoción controlada. El laboratorio Linux Argon2 aprobado conserva su evidencia criptográfica; no se volvió a ejecutar.
 
 LOGIN real sólo lectura comprobado en ambas bases: identidad restringida correcta, sin DDL/privilegios elevados. El guard original acepta empty y rechaza legacy con DATABASE_ROLE_UNSAFE por unsafe_rpc=true, debido al fixture SECURITY DEFINER deliberadamente sin endurecer. No se ejecutó RPC ni se escribieron datos; CRUD/auditoría y seguridad end-to-end siguen pendientes.
+<<<<<<< HEAD
 
 ## Consolidación 2026-10-15
 
@@ -31,3 +32,5 @@ Rama aislada codex/sii-consolidation-20261015 reúne ambas cadenas sin modificar
 - Vercel ya permite consultar el proyecto tras reconexión; Preview no tiene DATABASE_URL. No se reutiliza el secreto production. Falta una base staging migrada/endurecida, credencial DML mínima, claves MFA separadas, pruebas de rol y login remoto. Un Preview que compile no acredita operación funcional.
 - Lectura humana con lector de pantalla, hosting/HTTP real, backup/restauración/reversa cloud y E2E Ktor continúan abiertos; la copia/restauración PostgreSQL local no los sustituye.
 - Main y producción permanecen sin cambios. PR consolidación debe mantenerse draft mientras falten estas puertas, aunque CI sea verde.
+=======
+>>>>>>> integrate/sii-v1
