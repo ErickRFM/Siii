@@ -3,6 +3,7 @@
 import {useEffect,useState} from 'react';
 import type {CatalogResource} from '@/modules/academic/catalog-validation';
 import {readCatalogPresence,type CatalogPresence} from '@/modules/academic/setup-presence';
+import {catalogAccessKey} from '@/modules/academic/access-key';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 
 const steps=[
@@ -17,6 +18,7 @@ const labels={loading:'Consultando…',empty:'Sin registros en tu ámbito',prese
 
 export default function AcademicSetupChecklist({institutionId,revision,onOpen,disabled=false}:{institutionId:string;revision:number;onOpen:(resource:CatalogResource)=>void;disabled?:boolean}){
  const {data:access}=useInstitutionCapabilities();
+ const scopeKey=catalogAccessKey(access);
  const readable=steps.filter(step=>hasAnyCapability(access,`${step.id}.read`)).map(step=>step.id).join(',');
  const [presence,setPresence]=useState<PresenceState>({});
  const [retry,setRetry]=useState(0);
@@ -33,7 +35,7 @@ export default function AcademicSetupChecklist({institutionId,revision,onOpen,di
    if(!controller.signal.aborted)setPresence(previous=>({...previous,[resource]:status}));
   })).then(()=>clearTimeout(timer));
   return ()=>{clearTimeout(timer);controller.abort()};
- },[institutionId,readable,revision,retry]);
+ },[institutionId,readable,revision,retry,scopeKey]);
  return <section className="sii-panel" aria-labelledby="academic-setup-heading">
   <h2 id="academic-setup-heading">Preparación inicial de catálogos</h2>
   <p>Revisa los datos guardados dentro de tu ámbito. Tener registros no confirma que la configuración académica esté completa.</p>

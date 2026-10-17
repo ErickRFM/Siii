@@ -60,3 +60,36 @@ test('presence stays within a program grant and never queries unreadable catalog
  await expect(guide.getByRole('button',{name:'Abrir Campus',exact:true})).toHaveCount(0);
  await guide.getByRole('button',{name:'Abrir Programas',exact:true}).click();await expect(page.getByRole('button',{name:'Guardar registro'})).toHaveCount(0);
 });
+
+test('focus refresh replaces same-resource scope data while preserving same-scope drafts',async({page})=>{
+ const tenant=await catalog(page,'coordinator',true),path=`/api/v1/institutions/${tenant}/capabilities`;
+ const guide=page.getByRole('region',{name:'Preparación inicial de catálogos'}),planStep=guide.getByRole('listitem').filter({hasText:'Planes'});
+ await expect(planStep).toContainText('Sin registros en tu ámbito');
+ await expect(page.getByRole('cell',{name:'OWN',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Editar',exact:true}).click();
+ await page.getByLabel('Nombre',{exact:true}).fill('Borrador del mismo ámbito');
+ async function focus(){
+  const refreshed=page.waitForResponse(response=>response.url().endsWith(path));
+  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));expect((await refreshed).status()).toBe(200);
+ }
+ await focus();await expect(page.getByLabel('Nombre',{exact:true})).toHaveValue('Borrador del mismo ámbito');
+ async function scope(code:string){
+  await sql.query("UPDATE role_assignments SET scope_program_id=(SELECT id FROM academic_programs WHERE institution_id=$1 AND code=$2) WHERE institution_id=$1 AND scope_type='program'",[tenant,code]);
+  await focus();
+ }
+ await scope('OTHER');
+ await expect(planStep).toContainText('Con registros');
+ await expect(page.getByRole('cell',{name:'OTHER',exact:true})).toBeVisible();
+ await expect(page.getByRole('cell',{name:'OWN',exact:true})).toHaveCount(0);
+ await expect(page.getByLabel('Nombre',{exact:true})).toHaveCount(0);
+ await guide.getByRole('button',{name:'Abrir Planes',exact:true}).click();
+ await expect(page.getByRole('cell',{name:'OTRO-2026',exact:true})).toBeVisible();
+ const programs=page.getByLabel(/^Programa académico/);
+ await expect(programs.locator('option')).toHaveCount(2);
+ await expect(programs.getByRole('option',{name:'OTHER · Programa ajeno',exact:true})).toBeAttached();
+ await scope('OWN');
+ await expect(planStep).toContainText('Sin registros en tu ámbito');
+ await expect(page.getByRole('cell',{name:'OTRO-2026',exact:true})).toHaveCount(0);
+ await expect(programs.getByRole('option',{name:'OWN · Programa propio',exact:true})).toBeAttached();
+ await expect(programs.getByRole('option',{name:'OTHER · Programa ajeno',exact:true})).toHaveCount(0);
+});

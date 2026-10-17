@@ -16,3 +16,13 @@ Para crear un plan se necesita un programa activo dentro del ámbito autorizado.
 `tests/unit/academic-setup-presence.test.ts` comprueba presencia, catálogo vacío, fallos HTTP, formato inválido, desconexión y cancelación. `tests/ui/academic-initial-setup.spec.ts` cubre catálogo vacío → alta real de campus → verificación SQL → recarga, reintento, consulta sin escritura, grants por programa y revisión axe. Todos los datos de esas pruebas son sintéticos y se restringen a PostgreSQL local de pruebas.
 
 Validación local previa al commit: `npm run typecheck`, `npm run lint` y `npm test` pasan (36 archivos, 729 pruebas). Se observó primero el fallo por el helper todavía inexistente y luego pasaron sus 7 casos. La ejecución de navegador, el build de producción y la prueba persistente de extremo a extremo quedan **pendientes de la validación conjunta en la rama integradora**; este documento no los declara aprobados.
+
+### Cambio de ámbito sin cambio de recursos visibles
+
+La guía, la tabla y el selector de programas se invalidan cuando cambia la identidad estable del acceso: institución, membresía, grants (id, perfil, ámbito y vigencia), capacidades institucionales o capacidades por ámbito. El orden de las listas del servidor no altera esa identidad. La frescura de MFA/step-up queda fuera de la firma para conservar los borradores cuando los permisos y el ámbito siguen iguales.
+
+Al cambiar la firma se cancelan lecturas obsoletas, se limpian filas y opciones previas, se reinicia la paginación y se descarta el editor del ámbito anterior. Los formularios de alta también reinician sus campos. La autoridad de cada operación permanece en la API.
+
+Pruebas añadidas primero: `tests/unit/catalog-access-key.test.ts` (12 casos) y regresión de navegador en `tests/ui/academic-initial-setup.spec.ts` que mueve un grant real entre programas A/B con los mismos recursos legibles, comprueba presencia, filas, selector y conservación del borrador tras foco sin cambio de ámbito. La suite unitaria completa pasa con 765 pruebas; la ejecución de esa nueva regresión de navegador queda pendiente de la validación conjunta en la rama integradora.
+
+Una falla temporal de capacidades oculta el formulario y conserva el último ámbito confirmado: recuperar ese mismo ámbito no descarta el borrador del editor. Solo una proyección autorizada nueva con una firma distinta confirma el cambio e invalida el estado anterior.
