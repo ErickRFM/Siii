@@ -163,10 +163,14 @@ test('privileged MFA remains required after fresh step-up and cannot be revoked'
   await expect(page.getByRole('button',{name:'Renovar códigos de recuperación',exact:true})).toBeEnabled();
   await expect(page.getByRole('button',{name:'Desactivar autenticador y cerrar otros dispositivos',exact:true})).toBeDisabled();
   await expect(page.getByText('No puedes desactivar el autenticador mientras mantengas perfiles privilegiados vigentes.',{exact:true})).toBeVisible();
-  const rejected=await page.request.post('/api/v1/auth/mfa/revoke',{data:{},headers:{Origin:'http://127.0.0.1:3107'}});
+  const rejected=await page.request.post('/api/v1/auth/mfa/revoke',{data:{},headers:{Origin:new URL(page.url()).origin}});
   expect(rejected.status()).toBe(403);
   expect((await rejected.json()).error.code).toBe('MFA_REQUIRED_BY_ROLE');
   expect((await sql.query("SELECT count(*)::int AS total FROM auth_mfa_factors WHERE user_id=(SELECT id FROM platform_users WHERE username=$1) AND enabled_at IS NOT NULL AND revoked_at IS NULL AND secret_encrypted IS NOT NULL",[users.protected])).rows[0].total).toBe(1);
+  // Client step-up state can settle before router.refresh restores streamed page metadata.
+  await expect(page).toHaveURL(/\/dashboard\/security$/);
+  await expect(page).toHaveTitle('SII · Sistema Institucional Integral');
+  await expect(page.getByRole('heading',{name:'Cuenta y seguridad.',exact:true})).toBeVisible();
   await accessible(page);
 });
 

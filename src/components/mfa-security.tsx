@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 
 type MfaStatus = { configured: boolean; pending: boolean; recoveryCodesRemaining: number; stepUpExpiresAt: string | null; requiredByRole:boolean };
 type Enrollment = { enrollmentId: string; secret: string; uri: string; expiresAt: string };
+const enrollmentCodeFormat = /^[0-9]{6}$/;
+const enrollmentCodeMessage = 'Escribe los 6 números de tu aplicación autenticadora. No uses la clave manual ni partes de ella.';
 class MfaRequestError extends Error {
   constructor(readonly code: string) { super(code); }
 }
@@ -42,6 +44,7 @@ export default function MfaSecurity() {
   const router = useRouter();
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+  const [enrollmentCodeError, setEnrollmentCodeError] = useState('');
   const [codes, setCodes] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -110,7 +113,7 @@ export default function MfaSecurity() {
     await perform(async () => {
       const result = await request<{ data: Enrollment }>('/enroll', { currentPassword });
       if (!result.data?.secret || !result.data.enrollmentId || !result.data.expiresAt) throw new MfaRequestError('SERVICE_UNAVAILABLE');
-      form.reset(); setEnrollment(result.data);
+      form.reset(); setEnrollmentCodeError(''); setEnrollment(result.data);
       await refresh();
     }, { password: 'mfa-enroll-password' });
   }
@@ -118,10 +121,11 @@ export default function MfaSecurity() {
     event.preventDefault(); if (!enrollment) return;
     const form = event.currentTarget;
     const code = String(new FormData(form).get('code') ?? '');
+    if (!enrollmentCodeFormat.test(code)) { setEnrollmentCodeError(enrollmentCodeMessage); codeInput.current?.focus(); return; }
     await perform(async () => {
       const result = await request<{ data: { recoveryCodes: string[] } }>('/verify', { enrollmentId: enrollment.enrollmentId, code });
       if (!Array.isArray(result.data?.recoveryCodes) || !result.data.recoveryCodes.length) throw new MfaRequestError('SERVICE_UNAVAILABLE');
-      form.reset(); setCodes(result.data.recoveryCodes); setEnrollment(null);
+      form.reset(); setEnrollmentCodeError(''); setCodes(result.data.recoveryCodes); setEnrollment(null);
       setNotice('Autenticador activado. Guarda tus códigos de recuperación.');
       await refresh(); router.refresh();
     }, { factor: 'mfa-enrollment-code' });
@@ -173,21 +177,45 @@ export default function MfaSecurity() {
         <button className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Preparando activación…' : status.pending ? 'Iniciar nueva activación' : 'Configurar autenticador'}</button>
       </form>}
       {enrollment && <div>
-        <h3>Agrega la cuenta a tu autenticador</h3>
-        <p id="mfa-key-help">Selecciona una clave manual, cuenta SIII, código basado en tiempo, seis dígitos y periodo de 30 segundos. Esta clave solo aparece durante esta activación.</p>
-        <div className="password-form">
-        <label htmlFor="mfa-manual-key">Clave manual del autenticador</label>
-        <input id="mfa-manual-key" value={enrollment.secret} readOnly aria-describedby="mfa-key-help"/>
-        <button type="button" className="sii-submit" disabled={!ready} onClick={() => void perform(async () => {
-          await navigator.clipboard.writeText(enrollment.secret); setNotice('Clave copiada. Pégala únicamente en tu aplicación autenticadora.');
-        })}>Copiar clave manual</button>
-        </div>
+        <h3>Activa tu autenticador en tres pasos</h3>
+        <ol>
+          <li>
+            <strong>Agrega una cuenta en tu aplicación autenticadora.</strong>
+            <p>Elige la opción de entrada manual y el nombre SIII. Configura TOTP (basado en tiempo), SHA-1, 6 dígitos y un periodo de 30 segundos.</p>
+          </li>
+          <li>
+            <strong>Copia la clave manual solo en esa aplicación.</strong>
+            <p id="mfa-key-help">Pega la clave completa en el campo «Clave» de tu aplicación autenticadora. Esta clave no es el código de verificación y solo aparece durante esta activación.</p>
+            <div className="password-form">
+              <label htmlFor="mfa-manual-key">Clave manual del autenticador</label>
+              <input id="mfa-manual-key" value={enrollment.secret} readOnly aria-describedby="mfa-key-help"/>
+              <button type="button" className="sii-submit" disabled={!ready} onClick={() => void perform(async () => {
+                await navigator.clipboard.writeText(enrollment.secret); setNotice('Clave copiada. Pégala únicamente en tu aplicación autenticadora.');
+              })}>Copiar clave manual</button>
+            </div>
+          </li>
+          <li>
+            <strong>Escribe en SIII el código que genera tu aplicación.</strong>
+            <p id="mfa-enrollment-code-help">Usa los 6 números que muestra esa cuenta en tu app; cambian cada 30 segundos. No escribas fragmentos de la clave manual.</p>
+            <form className="password-form" onSubmit={verifyEnrollment}>
+              <label htmlFor="mfa-enrollment-code">Código para activar el autenticador</label>
+              <input id="mfa-enrollment-code" ref={codeInput} name="code" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={!ready}
+                aria-invalid={Boolean(enrollmentCodeError) || invalidField === 'mfa-enrollment-code'}
+                aria-describedby={'mfa-enrollment-code-help' + (enrollmentCodeError ? ' mfa-enrollment-format-error' : '') + (error ? ' mfa-error' : '')}
+                onChange={event => setEnrollmentCodeError(/[^0-9]/.test(event.currentTarget.value) ? enrollmentCodeMessage : '')}
+                onBlur={event => { if (event.currentTarget.value && !enrollmentCodeFormat.test(event.currentTarget.value)) setEnrollmentCodeError(enrollmentCodeMessage); }}
+                onInvalid={event => { event.preventDefault(); setEnrollmentCodeError(enrollmentCodeMessage); codeInput.current?.focus(); }}/>
+              {enrollmentCodeError && <p id="mfa-enrollment-format-error" className="sii-auth-error" role="alert">{enrollmentCodeError}</p>}
+              <button className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Verificando…' : 'Activar autenticador'}</button>
+            </form>
+          </li>
+        </ol>
         <p>Activación válida hasta {new Date(enrollment.expiresAt).toLocaleTimeString('es-MX')}.</p>
-        <form className="password-form" onSubmit={verifyEnrollment}>
-          <label htmlFor="mfa-enrollment-code">Código para activar el autenticador</label>
-          <input id="mfa-enrollment-code" ref={codeInput} name="code" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={!ready} aria-invalid={invalidField === 'mfa-enrollment-code'} aria-describedby={error ? 'mfa-error' : undefined}/>
-          <button className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Verificando…' : 'Activar autenticador'}</button>
-        </form>
+        <button type="button" className="sii-outline-button" disabled={busy} onClick={() => {
+          setEnrollment(null); setEnrollmentCodeError(''); setInvalidField(null); setRestartEnrollment(true);
+          if (!sessionExpired) setError('');
+          setNotice('Confirma tu contraseña para generar una nueva clave. La nueva activación reemplazará la anterior.');
+        }}>Reiniciar activación</button>
       </div>}
       <h3>Confirma tu identidad</h3>
       <p id="mfa-step-up-help">Esta confirmación dura cinco minutos y permite renovar códigos{status.requiredByRole?'':' o desactivar el autenticador'}. Un código ya utilizado requiere esperar al siguiente.</p>
