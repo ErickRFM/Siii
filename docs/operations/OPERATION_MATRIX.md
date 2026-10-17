@@ -86,3 +86,9 @@ PR35 quedó integrado en `main` mediante `06166d90936fc939334a71ba600ec118c58b25
 | OP-031 | GET enrollments y assignments | academic.manage institucional vigente | Cursor tenant/recurso/sectionId, limit1–100, orden microsegundos/UUID; sin revocados en asignaciones, conserva bajas de inscripción; POST/PATCH idénticos | academic-rosters-pagination-http.test.ts23/23; suite339/339; academic-rosters-pagination.spec.ts208filas+baja/revocación/SQL/auditoría/recarga/axe; 58UI completas | PROBADO LOCALMENTE; CI/PUBLICACIÓN PENDIENTES |
 
 La validación de secciones usa su propia base sintética PostgreSQL local y el puerto 3108. Su build de producción, typecheck y lint pasan. La reconciliación histórica de PR9/14/15/16/18/25 se documenta por equivalencia de archivos, migraciones y contratos en `docs/audit/HISTORICAL_PR_RECONCILIATION_20261017.md`; no se basa únicamente en ascendencia Git.
+
+## Fundamento outbox académico — habilitación pendiente
+
+| ID | Operación | Actor y alcance | Validación y transacción | Evidencia | Estado |
+|---|---|---|---|---|---|
+| OP-030 | enqueueAcademicSection(tx,scope) y worker académico interno | Backend; autoridad heredada de la futura transacción académica autorizada | Snapshot completo tenant/section, sourceVersion atómico, body cifrado congelado, audit TX, lease/retry/CAS; flag disabled por defecto | academic-outbox.test.ts unit/integration, migración0018 y perfil managed | FOUNDATION LOCAL; WRITERS/TRANSPORTE/RECONCILIACIÓN/API MÓVIL PENDIENTES |
