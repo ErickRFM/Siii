@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type {Route} from 'next';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
@@ -20,6 +20,14 @@ export default function SiiAppShell({
 }
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:Active;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
   const { data } = useInstitutionCapabilities();
   const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
   const activeModule=modules.find(module=>module.id===active);
@@ -58,7 +66,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
           <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">⇄</span> Integraciones <span className="sii-nav-soon">Pronto</span></span>
         </div>
         <div className="sii-sidebar-spacer"/>
-        <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Núcleo institucional · F2</div>
+        <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Plataforma institucional · Acceso protegido</div>
         <div className="sii-sidebar-user">
           <span className="sii-avatar sii-avatar--sidebar">{firstName.substring(0, 1).toLocaleUpperCase('es-MX')}</span>
           <span className="sii-sidebar-user-details"><strong>{fullName}</strong><small>Sesión institucional</small></span>
