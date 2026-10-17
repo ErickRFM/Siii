@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import type { CatalogResource } from '@/modules/academic/catalog-validation';
+import AcademicSetupChecklist from './academic-setup-checklist';
 import { useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability, hasScopedCapability, CapabilityState, SecurityActionLink } from './institution-capabilities';
 
 type RecordRow = {
@@ -54,6 +55,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   const [securityRequired,setSecurityRequired]=useState(false);
   const [nameError,setNameError]=useState(false);
   const [programsReload,setProgramsReload]=useState(0);
+  const [setupRevision,setSetupRevision]=useState(0);
   const mutationErrorRef=useRef<HTMLParagraphElement>(null);
   useEffect(()=>{if(mutationError){if(nameError)document.getElementById('catalog-edit-name')?.focus();else mutationErrorRef.current?.focus();}},[mutationError,nameError]);
   const [notice,setNotice] = useState('');
@@ -155,6 +157,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
         setSecurityRequired(['MFA_REQUIRED','STEP_UP_REQUIRED','PASSWORD_CHANGE_REQUIRED'].includes(body.error?.code??''));setNameError(body.error?.code==='VALIDATION_ERROR'&&method==='PATCH'&&typeof payload.name==='string');setMutationError(getError(body.error?.code));return false;
       }
       setNotice(method==='POST'?'Registro creado correctamente.':'Cambios guardados correctamente.');
+      setSetupRevision(value=>value+1);
       setHistory([null]);await load(tab);return true;
     } catch {setMutationError('No se pudo conectar con el servidor. Comprueba tu conexión.');return false;}
     finally{setSaving(false);}
@@ -193,6 +196,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   if(!access||availableTabs.length===0)return <p className="sii-info-banner">No tienes acceso a catálogos académicos.</p>;
   return (
     <div className="sii-academic">
+      <AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
         {availableTabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
           className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
