@@ -55,7 +55,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
           </Link>
         </nav>
         <div className="sii-sidebar-heading sii-sidebar-heading--secondary">GESTIÓN ACADÉMICA</div>
-        <div className="sii-nav" aria-label="Gestión académica">
+        <nav className="sii-nav" aria-label="Gestión académica">
           {institutionId && academicAvailable ? <Link href={`/dashboard/institutions/${institutionId}/academic`}
             className={active === 'academic' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}
             aria-current={active === 'academic' ? 'page' : undefined}
@@ -76,7 +76,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
               <span className="sii-nav-soon">{!institutionId ? 'Selecciona institución' : 'Restringido'}</span>
             </span>;
           })}
-        </div>
+        </nav>
         <div className="sii-sidebar-spacer"/>
         <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Plataforma institucional · Acceso protegido</div>
         <div className="sii-sidebar-user">
