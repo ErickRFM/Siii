@@ -26,3 +26,11 @@ PR36 está integrado en main mediante dccdb2b78e9bbf32c3aa05a2fa86b39e07f4ba1c t
 PR35 ya había sido validado con 765 unitarias, 300 integraciones y 54 pruebas Chromium. El responsable de integración informó su despliegue READY y respuestas 200 del alias y /api/health/ready a las 22:37:38 UTC. Esa evidencia corresponde al portal integrado anterior; esta nueva ayuda TOTP todavía requiere PR, CI verde, revisión y despliegue.
 
 No se usaron cuentas, claves ni datos de producción. El reinicio de una clave real expuesta se gestiona por separado y no forma parte de la fixture.
+
+## Preparación del chequeo de accesibilidad tras step-up
+
+La ejecución CI 39076147805 del head 0165f56b falló sólo en document-title al analizar la página de seguridad tras step-up; 55/56 pruebas Chromium pasaron y la otra ejecución Verify SIS 39076151131 fue SUCCESS. RootLayout declara el título esperado. La prueba esperaba el estado local del botón, que puede actualizarse antes de terminar router.refresh y sus metadatos. No había artefactos descargables conservados en esa ejecución.
+
+permission-scopes.spec.ts ahora comprueba URL de seguridad, título exacto y encabezado de la página inmediatamente antes de axe. Conserva las reglas y la aserción de cero infracciones; un título permanentemente ausente sigue fallando. El Origin del rechazo de revoke se obtiene de la URL real para permitir el servidor aislado. Una espera exploratoria al tráfico interno RSC añadió un timeout y se descartó; la versión final usa sólo el contrato visible de la página.
+
+Evidencia de la versión final: caso privileged MFA remains required repetido cinco veces contra el mismo build de producción y PostgreSQL sintético propio en 3108: 5/5 aprobadas (22.7 s), incluidas la negativa HTTP 403 de revoke, persistencia del factor y axe. Typecheck y lint correctos. CI del nuevo SHA debe pasar antes de merge.
