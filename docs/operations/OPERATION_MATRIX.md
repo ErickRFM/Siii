@@ -60,3 +60,14 @@ Las filas anteriores conservan evidencia de P0; los contratos actuales incorpora
 | OP-027 | GET /api/v1/institutions/:id/audit | audit.read propio, MFA actual | Proyección explícita, actor sólo por membresía tenant, filtros/cursor y comprobación final de autorización | institution-admin.test.ts; año0000 corregido con negativos HTTP/unit y dos revisiones | IMPLEMENTED |
 
 Interfaces reales: seguridad, catálogos, roles, invitaciones, usuarios y recuperación en sus rutas documentadas. Administración F09 tiene dos revisiones de fuente favorables y QA global local verde:682unitarias/243integraciones/40Chromium, build y audit0; CI del SHA publicado y merge se registran en el PR dependiente. Expedientes, matrículas, docentes/grupos/inscripciones/ocurrencias/calificaciones y sincronización Ktor completa siguen pendientes; sus pantallas no simulan operaciones.
+
+## Ampliación2026-10-17 — preparación y expedientes
+
+| Operación | Evidencia real | Estado |
+|---|---|---|
+| Preparación inicial de catálogos por ámbito | academic-setup-presence.test.ts; academic-initial-setup.spec.ts | IMPLEMENTADO, validación consolidada en curso |
+| Retorno de MFA y revalidación de capacidades entre pestañas | security-return.test.ts; mfa-flows.spec.ts; permission-scopes.spec.ts | IMPLEMENTADO, validación consolidada en curso |
+| GET registry/students y registry/teachers con cursor tenant/recurso | consolidation-http.test.ts: ambos recursos, más de200registros, empates/microsegundos, negativos | PROBADO LOCALMENTE |
+| Paginación UI y selectores completos de servicios | consolidated-modules.spec.ts:205alumnos/65docentes | IMPLEMENTADO, validación consolidada en curso |
+
+El reporte FULL_INTEGRATION_PROGRESS.md separa integración en main, despliegue y validación productiva. No se introducen permisos nuevos en el cliente ni se altera la política MFA.

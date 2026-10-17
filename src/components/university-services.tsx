@@ -1,4 +1,5 @@
 'use client';
+import {readCollection} from '@/shared/client/read-collection';
 import { useCallback,useEffect,useState,type FormEvent } from 'react';
 type Module='announcements'|'requests'|'workshops';
 type RecordRow={id:string;title?:string;body?:string;description?:string;summary?:string;requestType?:string;studentId?:string;teacherId?:string;status:string;startsAt?:string};
@@ -13,6 +14,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
  const [tab,setTab]=useState<Module>('announcements'),[rows,setRows]=useState<RecordRow[]>([]);
  const [students,setStudents]=useState<Person[]>([]),[teachers,setTeachers]=useState<Person[]>([]);
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState('');
+ const [peopleError,setPeopleError]=useState(''),[peopleRevision,setPeopleRevision]=useState(0),[peopleLoading,setPeopleLoading]=useState(true);
  const fetchRows=useCallback(async(t:Module)=>{
   setLoading(true);setError('');
   try{
@@ -25,13 +27,13 @@ export default function UniversityServices({institutionId}:{institutionId:string
  },[base]);
  useEffect(()=>{void fetchRows(tab)},[tab,fetchRows]);
  useEffect(()=>{
-  let active=true;
-  void Promise.all(['students','teachers'].map(async p=>{
-   const r=await fetch(`${base}/registry/${p}`,{cache:'no-store'});if(!r.ok)return [] as Person[];
-   return (await r.json() as {data:Person[]}).data;
-  })).then(([s,t])=>{if(active){setStudents(s);setTeachers(t)}}).catch(()=>{});
-  return ()=>{active=false};
- },[base]);
+  const controller=new AbortController();setPeopleError('');setPeopleLoading(true);
+  void Promise.all(['students','teachers'].map(resource=>readCollection<Person>(`${base}/registry/${resource}`,{signal:controller.signal})))
+   .then(([studentsResult,teachersResult])=>{if(!controller.signal.aborted){setStudents(studentsResult.data);setTeachers(teachersResult.data)}})
+   .catch(()=>{if(!controller.signal.aborted){setStudents([]);setTeachers([]);setPeopleError('No se pudieron consultar estudiantes y docentes. Vuelve a intentar.')}})
+   .finally(()=>{if(!controller.signal.aborted)setPeopleLoading(false)});
+  return ()=>controller.abort();
+ },[base,peopleRevision]);
  async function execute(payload:Record<string,unknown>,method:'POST'|'PATCH'='POST'){
   setSaving(true);setError('');setNotice('');
   try{
@@ -69,6 +71,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
   </div>
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
+  {peopleError&&<div role="alert"><p>{peopleError}</p><button type="button" className="sii-outline-button" onClick={()=>setPeopleRevision(value=>value+1)}>Reintentar personas</button></div>}
   <div className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-table-panel">
     <h2>{tabs.find(t=>t.id===tab)?.label}</h2>
@@ -93,14 +96,14 @@ export default function UniversityServices({institutionId}:{institutionId:string
    <aside className="sii-panel sii-catalog-create"><h3>Nuevo registro</h3>
     <form className="sii-catalog-form" onSubmit={e=>void submit(e)}>
      {tab==='announcements'&&<><label>Título<input name="title" minLength={3} required/></label><label>Mensaje<textarea name="body" minLength={10} required rows={5}/></label></>}
-     {tab==='requests'&&<><label>Alumno<select name="studentId" defaultValue="" required><option value="" disabled>Seleccionar matrícula</option>
+     {tab==='requests'&&<><label>Alumno<select disabled={peopleLoading} name="studentId" defaultValue="" required><option value="" disabled>Seleccionar matrícula</option>
       {students.filter(x=>x.status==='active').map(x=><option value={x.id} key={x.id}>{x.enrollmentNumber} · {x.firstName} {x.lastName}</option>)}</select></label>
       <label>Tipo de trámite<select name="requestType" defaultValue="CERTIFICATE"><option value="CERTIFICATE">Constancia</option><option value="ENROLLMENT_CHANGE">Cambio de inscripción</option>
        <option value="JUSTIFICATION">Justificante</option><option value="OTHER">Otro</option></select></label>
       <label>Solicitud<textarea name="summary" required minLength={10}/></label></>}
      {tab==='workshops'&&<><label>Título<input name="title" minLength={3} required/></label>
       <label>Descripción<textarea name="description" minLength={10} required/></label>
-      <label>Facilitador<select name="teacherId" defaultValue="" required><option value="" disabled>Seleccionar docente</option>
+      <label>Facilitador<select disabled={peopleLoading} name="teacherId" defaultValue="" required><option value="" disabled>Seleccionar docente</option>
        {teachers.filter(x=>x.status==='active').map(x=><option key={x.id} value={x.id}>{x.employeeNumber} · {x.firstName} {x.lastName}</option>)}</select></label>
       <label>Inicio<input name="startsAt" type="datetime-local" required/></label><label>Fin<input name="endsAt" type="datetime-local" required/></label>
       <label>Cupo<input name="capacity" type="number" min={1} max={1000} defaultValue={25} required/></label></>}
