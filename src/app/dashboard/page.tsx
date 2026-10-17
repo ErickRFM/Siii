@@ -99,8 +99,6 @@ export default async function Dashboard() {
           <InstitutionModuleDirectory key={inst.institutionId} institutionId={inst.institutionId} institutionName={inst.institutionName}/>
         ))}
       </section>
-        ))}
-      </section>
       <footer className="sii-footer">SII · Sistema Institucional Integral <span>Administración académica segura · Experiencia móvil en Compañero</span></footer>
     </SiiAppShell>
   );
