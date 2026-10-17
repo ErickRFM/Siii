@@ -55,7 +55,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
           </Link>
         </nav>
         <div className="sii-sidebar-heading sii-sidebar-heading--secondary">GESTIÓN ACADÉMICA</div>
-        <div className="sii-nav" aria-label="Gestión académica">
+        <nav className="sii-nav" aria-label="Gestión académica">
           {institutionId && academicAvailable ? <Link href={`/dashboard/institutions/${institutionId}/academic`}
             className={active === 'academic' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}
             aria-current={active === 'academic' ? 'page' : undefined}
@@ -63,7 +63,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
               <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
           </Link> : !institutionId ? <span className="sii-nav-item sii-nav-item--muted"><span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico <span className="sii-nav-soon">Selecciona institución</span></span> : null}
           {institutionId&&modules.map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}><span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}</Link>)}
-        </div>
+        </nav>
         <div className="sii-sidebar-spacer"/>
         <div className="sii-sidebar-status"><span className="sii-sidebar-status-dot"/> Plataforma institucional · Acceso protegido</div>
         <div className="sii-sidebar-user">

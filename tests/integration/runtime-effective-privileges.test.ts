@@ -59,7 +59,7 @@ it('rejects a SET-only secondary role that can truncate audit',async()=>{
   const result=await GET();expect(result.status).toBe(503);expect(await result.json()).toHaveProperty('error.code','DATABASE_ROLE_UNSAFE');
  }finally{
   await module?.pool.end();process.env.DATABASE_URL=original;vi.resetModules();
-  await owner.query('DROP OWNED BY '+role);await owner.query('DROP ROLE '+role);await owner.query('DROP ROLE '+parent);await owner.end();
+  await owner.query('DROP OWNED BY '+role);await owner.query('DROP OWNED BY '+parent);await owner.query('DROP ROLE '+role);await owner.query('DROP ROLE '+parent);await owner.end();
  }
 });
 
