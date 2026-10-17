@@ -6,6 +6,8 @@ This increment adds source storage, a serializer and internal worker functions. 
 
 `enqueueAcademicSection(tx, scope)` takes the authorized academic mutation transaction, institution/section scope, request ID and an optional actor ID for human-originated work. It grants no actor authority. Future writers must pass the human actor and propagate enqueue failures so a mutation cannot commit without its required event.
 
+Caller precondition: authorization must already be checked and revalidated inside this transaction for the live actor, institution, permission, resource and source state, including the domain locking protocol. The helper does not authenticate a caller, authorize client-supplied scope, or recheck source lifecycle policy.
+
 A section row lock serializes enqueue calls. An atomic upsert increments the institution/section source version within the same transaction as the immutable event and audit. Versions are positive safe JSON integers; database overflow fails and rolls the transaction back. One SQL statement reads a coherent MVCC snapshot after the caller's mutation. All joins include the tenant. Future academic writers must participate in the same transaction and locking protocol when this foundation is connected.
 
 The payload follows `siii.academic_section_snapshot.v1`. It uses real subject/term metadata, current active assigned teachers, the complete enrollment history and persisted dated occurrences. Open sections may have an empty teacher list. Credits are integers from 0 through 30. Terms have no artificial duration maximum. There are no invented identities or truncated arrays: more than 500 teachers/enrollments, 3000 occurrences or a 1 MiB complete UTF-8 envelope fails explicitly.
@@ -20,7 +22,11 @@ The dedicated `SIII_ACADEMIC_OUTBOX_KEYS` JSON keyring and `SIII_ACADEMIC_OUTBOX
 
 Workers claim a bounded batch of 1–100 events with `SKIP LOCKED`, a 60-second lease and a fresh token. Transport runs after the claim transaction commits, with a 30-second abortable budget. Every completion uses event/state/token/unexpired-lease CAS. Lost leases cannot complete or resurrect another worker's work. Retries use exponential backoff and stop after eight attempts. Key/body failures use fixed safe codes. Source changes after enqueue do not alter the frozen body; every retry preserves the exact UTF-8 bytes required by receiver inbox deduplication.
 
+A future worker entrypoint must first await `assertApplicationRole()` from `src/infrastructure/database`, following `worker/invitations.ts` and `worker/password-resets.ts`, and fail closed before calling delivery if the database login is unsafe. `deliverAcademicEvents()` is an internal function over the global database handle and does not run that role assertion itself. No production worker entrypoint is supplied or certified by this increment.
+
 There is no built-in HTTP or signing adapter. An injected transport may report `accepted` only for an authenticated HTTP202 receipt. This means received, not target `APPLIED`. Receipt reconciliation, fresh per-attempt signing headers, academic writer integration, source revocation propagation and mobile API consumption remain separate required work before production activation.
+
+Future source lifecycle integration must enqueue versioned delete tombstones for affected sections when an institution is disabled; it must not publish a fresh readable upsert snapshot for a disabled institution. This requirement includes transaction/audit coupling and reconciliation of previously queued/accepted events. The current foundation is not connected to these lifecycle writers and must remain disabled until that flow is implemented and exercised.
 
 ## Migration and verification
 
