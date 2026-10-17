@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type {Route} from 'next';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
@@ -20,6 +20,14 @@ export default function SiiAppShell({
 }
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:Active;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
   const { data } = useInstitutionCapabilities();
   const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
   const activeModule=modules.find(module=>module.id===active);
