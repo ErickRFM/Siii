@@ -72,6 +72,10 @@ Interfaces reales: seguridad, catálogos, roles, invitaciones, usuarios y recupe
 
 El reporte FULL_INTEGRATION_PROGRESS.md separa integración en main, despliegue y validación productiva. No se introducen permisos nuevos en el cliente ni se altera la política MFA.
 
+| ID | Operación | Actor y alcance | Persistencia y auditoría | Evidencia | Estado |
+|---|---|---|---|---|---|
+| OP-029 | PATCH registry/students o registry/teachers, kind=profile | academic.manage institucional; origen y autoridad revalidados | Bloqueo tenant+id, expected antes de escribir,409 contra pérdida de cambios; sólo nombre/apellidos/correo, auditoría antes/después en TX; identificadores y cuentas conservados | registry-profile-http.test.ts:8casos, consolidado API308 y16casosProduction; consolidated-modules.spec.ts: error/red/conflicto/foco/axe/recarga/logout-login; árbol final767unit/57UI | PROBADO LOCALMENTE, CI/PUBLICACIÓN PENDIENTES |
+
 PR35 quedó integrado en `main` mediante `06166d90936fc939334a71ba600ec118c58b2586` con head revisado `4d87d61f83fa95b7869a7e0981a88f52a525804b`: 765 pruebas unitarias, 300 de integración y 54 de Chromium aprobadas; build/typecheck/lint correctos, audit 0 y Verify SIS SUCCESS en las ejecuciones `39073966596` y `39073970270`. La recuperación del mismo ámbito tras un error conserva el borrador; un ámbito confirmado distinto invalida guía, tabla y selector. Evidencia en `academic-initial-setup.spec.ts`, `permission-scopes.spec.ts` y `catalog-access-key.test.ts`.
 
 ## Secciones paginadas — incremento separado
