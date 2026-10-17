@@ -2,7 +2,8 @@ import {personScheduleConflict} from '@/modules/scheduling/person-conflict';
 import {domainTransaction,withDomainErrors,DomainConflict} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest,NextResponse } from 'next/server';
-import { eq,and,desc,sql } from 'drizzle-orm';
+import { eq,and,desc,sql,getTableColumns } from 'drizzle-orm';
+import {parsePage,cursorTimestamp,cursorPredicate,pageEnvelope} from '@/shared/http/pagination';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
 import { academicSections,institutionalStudents,sectionEnrollments,gradePublications,securityAuditLog } from '../../../../../../../db/schema';
@@ -18,9 +19,14 @@ export const GET=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  const id=await valid(ctx);if(!id)return jsonError('INVALID_INSTITUTION',404);
  if(!await authorizeInstitution(id,'academic.manage'))return jsonError('FORBIDDEN',403);
  const sectionId=req.nextUrl.searchParams.get('sectionId');
- if(sectionId&&!z.uuid().safeParse(sectionId).success)return jsonError('VALIDATION_ERROR',422);
- const data=await db.select().from(sectionEnrollments).where(and(eq(sectionEnrollments.institutionId,id),...(sectionId?[eq(sectionEnrollments.sectionId,sectionId)]:[]))).orderBy(desc(sectionEnrollments.createdAt)).limit(200);
- return NextResponse.json({data,truncated:data.length===200},{headers});
+ if(req.nextUrl.searchParams.getAll('sectionId').length>1||(sectionId!==null&&!z.uuid().safeParse(sectionId).success))return jsonError('VALIDATION_ERROR',422);
+ const scope=id+':enrollments:section='+(sectionId??'*'),pageUrl=req.nextUrl.clone();pageUrl.searchParams.delete('sectionId');
+ const page=parsePage(new NextRequest(pageUrl),scope);if(!page)return jsonError('INVALID_PAGINATION',422);
+ const rows=await db.select({...getTableColumns(sectionEnrollments),cursorAt:cursorTimestamp(sectionEnrollments.createdAt)}).from(sectionEnrollments)
+  .where(and(eq(sectionEnrollments.institutionId,id),...(sectionId?[eq(sectionEnrollments.sectionId,sectionId)]:[]),cursorPredicate(page,sectionEnrollments.createdAt,sectionEnrollments.id)))
+  .orderBy(desc(sectionEnrollments.createdAt),desc(sectionEnrollments.id)).limit(page.limit+1);
+ const result=pageEnvelope(rows,page,scope);
+ return NextResponse.json({data:result.visible.map(({cursorAt,...row})=>{void cursorAt;return row}),page:result.page},{headers});
 });
 export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
