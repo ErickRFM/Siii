@@ -1,7 +1,8 @@
 import {domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest, NextResponse } from 'next/server';
-import { eq,and,desc } from 'drizzle-orm';
+import { eq,and,desc,getTableColumns } from 'drizzle-orm';
+import {parsePage,cursorTimestamp,cursorPredicate,pageEnvelope} from '@/shared/http/pagination';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
 import { academicSections,academicTerms,academicCourses,securityAuditLog } from '../../../../../../../db/schema';
@@ -13,11 +14,16 @@ type Ctx={params:Promise<{institutionId:string}>};
 const headers={'Cache-Control':'no-store'};
 async function valid(ctx:Ctx){const {institutionId}=await ctx.params;return z.uuid().safeParse(institutionId).success?institutionId:null;}
 function error(e:unknown){const x=e as {code?:string;cause?:{code?:string}};const c=x.code??x.cause?.code;if(c==='23505')return jsonError('DUPLICATE_SECTION',409);if(c==='23503'||c==='23514')return jsonError('INVALID_REFERENCE',422);throw e;}
-export const GET=withDomainErrors(async (_req:NextRequest,ctx:Ctx)=>{
+export const GET=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  const id=await valid(ctx);if(!id)return jsonError('INVALID_INSTITUTION',404);
  if(!await authorizeInstitution(id,'academic.manage'))return jsonError('FORBIDDEN',403);
- const data=await db.select().from(academicSections).where(eq(academicSections.institutionId,id)).orderBy(desc(academicSections.createdAt)).limit(200);
- return NextResponse.json({data,truncated:data.length===200},{headers});
+ const scope=id+':sections',page=parsePage(req,scope);
+ if(!page)return jsonError('INVALID_PAGINATION',422);
+ const rows=await db.select({...getTableColumns(academicSections),cursorAt:cursorTimestamp(academicSections.createdAt)}).from(academicSections)
+  .where(and(eq(academicSections.institutionId,id),cursorPredicate(page,academicSections.createdAt,academicSections.id)))
+  .orderBy(desc(academicSections.createdAt),desc(academicSections.id)).limit(page.limit+1);
+ const result=pageEnvelope(rows,page,scope);
+ return NextResponse.json({data:result.visible.map(({cursorAt,...row})=>{void cursorAt;return row}),page:result.page},{headers});
 });
 export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);

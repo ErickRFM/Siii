@@ -62,7 +62,6 @@ export default function AcademicOperations({institutionId}:{institutionId:string
         <td>{row.capacity}</td><td>{row.status}</td><td><button disabled={busy||row.status!=='open'} type="button" onClick={()=>void revoke('sections',row)}>Cerrar</button></td>
        </tr>)}</tbody></table></div>
      {!sections.length&&<p>No hay secciones. Registra la primera con periodo y materia activos.</p>}
-     {sections.length>=200&&<p>Solo se muestran los primeros 200 registros.</p>}
     </section>
     <aside className="sii-panel sii-catalog-create"><h3>Nueva sección</h3><form className="sii-catalog-form" onSubmit={e=>void submit(e,'sections')}>
      <label>Periodo<select name="termId" required defaultValue=""><option value="" disabled>Selecciona periodo</option>{option(terms.filter(x=>x.status==='active'),'term')}</select></label>
