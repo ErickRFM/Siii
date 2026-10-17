@@ -5,6 +5,7 @@ import { getIdentity } from '@/shared/auth/session';
 import SiiAppShell from '@/components/sii-app-shell';
 import PasswordChange from '../password-change';
 import MfaSecurity from '@/components/mfa-security';
+import { safeSecurityReturn } from '@/shared/auth/security-return';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
   const user = await getIdentity();
   if (!user) redirect('/login');
   const {returnTo}=await searchParams;
-  const safeReturn=returnTo&&/^\/dashboard\/institutions\/[0-9a-f-]{36}(?:\/(?:academic|roles|invitations|users|admin))?$/.test(returnTo)?returnTo:null;
+  const safeReturn = safeSecurityReturn(returnTo);
   return (
     <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="security">
       <div className="sii-page-eyebrow">CENTRO PERSONAL <span className="sii-page-eyebrow-line"/></div>

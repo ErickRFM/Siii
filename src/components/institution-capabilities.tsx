@@ -22,21 +22,44 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
   const [revision, setRevision] = useState(0);
   const refresh = useCallback(() => setRevision(value => value + 1), []);
   useEffect(() => {
-    if (!institutionId) return;
-    const controller = new AbortController();
-    setData(null); setLoading(true); setError('');
-    void (async () => {
+    if (!institutionId) { setData(null); setLoading(false); setError(''); return; }
+    let active: AbortController | null = null;
+    async function load(background = false) {
+      // Focus and visibility can fire together. Keep one request and preserve open forms
+      // while revalidating; an error removes the previous permission projection.
+      if (background && active) return;
+      active?.abort();
+      const controller = new AbortController();
+      active = controller;
+      if (!background) { setData(null); setLoading(true); setError(''); }
       try {
         const response = await fetch(`/api/v1/institutions/${institutionId}/capabilities`, { credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
         if (!response.ok) throw new Error(response.status === 401 ? 'Tu sesión venció. Vuelve a iniciar sesión.' : response.status === 403 ? 'No tienes acceso vigente a esta institución.' : 'No se pudieron consultar tus permisos. Vuelve a intentar.');
         const body = await response.json() as { data: InstitutionCapabilities };
         if (body.data?.institutionId !== institutionId || !Array.isArray(body.data.capabilities) || !Array.isArray(body.data.scopedCapabilities) || !Array.isArray(body.data.grants) || !body.data.assurance) throw new Error('No se pudieron consultar tus permisos. Vuelve a intentar.');
-        if (!controller.signal.aborted) setData(body.data);
+        if (!controller.signal.aborted) { setData(body.data); setError(''); }
       } catch (cause) {
-        if (!controller.signal.aborted) setError(cause instanceof TypeError ? 'Sin conexión. Comprueba tu conexión y vuelve a consultar tus permisos.' : cause instanceof Error ? cause.message : 'No se pudieron consultar tus permisos.');
-      } finally { if (!controller.signal.aborted) setLoading(false); }
-    })();
-    return () => controller.abort();
+        if (!controller.signal.aborted) {
+          setData(null);
+          setError(cause instanceof TypeError ? 'Sin conexión. Comprueba tu conexión y vuelve a consultar tus permisos.' : cause instanceof Error ? cause.message : 'No se pudieron consultar tus permisos.');
+        }
+      } finally {
+        if (active === controller) active = null;
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+    const visible = () => { if (document.visibilityState === 'visible') void load(true); };
+    const online = () => { void load(true); };
+    void load();
+    window.addEventListener('focus', visible);
+    window.addEventListener('online', online);
+    document.addEventListener('visibilitychange', visible);
+    return () => {
+      active?.abort();
+      window.removeEventListener('focus', visible);
+      window.removeEventListener('online', online);
+      document.removeEventListener('visibilitychange', visible);
+    };
   }, [institutionId, revision]);
   return <Context.Provider value={{ data, loading, error, refresh }}>{children}</Context.Provider>;
 }
