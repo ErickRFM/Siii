@@ -15,9 +15,21 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
  const [search,setSearch]=useState('');
  const [nextCursor,setNextCursor]=useState<string|null>(null);
  const [history,setHistory]=useState<Array<string|null>>([null]);
+ const [editing,setEditing]=useState<RecordRow|null>(null);
+ const editInput=useRef<HTMLInputElement|null>(null);
+ const editButtons=useRef(new Map<string,HTMLButtonElement>());
+ const returnFocusId=useRef<string|null>(null);
+ const searchInput=useRef<HTMLInputElement|null>(null);
  const activeRequest=useRef<AbortController|null>(null);
  const currentCursor=history[history.length-1];
  const base=`/api/v1/institutions/${institutionId}`;
+ useEffect(()=>{
+  if(editing){editInput.current?.focus();return}
+  if(!loading&&!saving&&returnFocusId.current){
+   const button=editButtons.current.get(returnFocusId.current);
+   (button??searchInput.current)?.focus();returnFocusId.current=null;
+  }
+ },[editing,loading,saving]);
  const refresh=useCallback(async(resource:Kind,cursor:string|null=null)=>{
   activeRequest.current?.abort();const controller=new AbortController();activeRequest.current=controller;
   setLoading(true);setError('');
@@ -34,7 +46,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
  },[base]);
  useEffect(()=>{setHistory([null]);setNextCursor(null);void refresh(kind);return()=>activeRequest.current?.abort()},[kind,refresh]);
  async function page(direction:'previous'|'next'){
-  if(loading||saving)return;
+  if(loading||saving||editing)return;
   const destination=direction==='next'?nextCursor:history[history.length-2];
   if(destination===undefined||(direction==='next'&&!nextCursor))return;
   if(await refresh(kind,destination)){setHistory(previous=>direction==='next'?[...previous,destination]:previous.slice(0,-1));setSearch('')}
@@ -71,10 +83,23 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
    await refresh(kind,currentCursor);
   }catch{setError('No se pudo cambiar el estado del registro.')}finally{setSaving(false)}
  }
+ function cancelEdit(){setEditing(null);setError('')}
+ async function saveProfile(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();if(!editing||saving)return;
+  const values=new FormData(event.currentTarget),profile={firstName:String(values.get('firstName')??'').trim(),lastName:String(values.get('lastName')??'').trim(),institutionalEmail:String(values.get('institutionalEmail')??'').trim()||null};
+  const expected={firstName:editing.firstName,lastName:editing.lastName,institutionalEmail:editing.institutionalEmail??null};
+  setSaving(true);setError('');setNotice('');
+  try{
+   const response=await fetch(`${base}/registry/${kind}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'profile',id:editing.id,expected,profile})});
+   if(!response.ok){const body=await response.json().catch(()=>null) as {error?:{code?:string}}|null;throw Error(body?.error?.code??'UNAVAILABLE')}
+   setEditing(null);setNotice('Cambios guardados y auditados.');await refresh(kind,currentCursor);
+  }catch(error){setError(error instanceof Error&&error.message==='REGISTRY_PROFILE_CONFLICT'?'El expediente cambió desde que lo abriste. Conserva tu corrección antes de cancelar, actualiza el listado y vuelve a abrirlo.':'No se pudo guardar la corrección. Tu borrador sigue disponible; comprueba la conexión y vuelve a intentar.')}
+  finally{setSaving(false)}
+ }
  const filtered=rows.filter(r=>[r.firstName,r.lastName,r.enrollmentNumber,r.employeeNumber].join(' ').toLowerCase().includes(search.toLowerCase()));
  return <div className="sii-academic">
   <div className="sii-catalog-tabs" role="tablist" aria-label="Control escolar">
-   {(['students','teachers'] as Kind[]).map(k=><button type="button" role="tab" key={k} aria-selected={kind===k} disabled={saving||loading} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</button>)}
+   {(['students','teachers'] as Kind[]).map(k=><button type="button" role="tab" key={k} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</button>)}
   </div>
   <div className="sii-catalog-summary"><div><span className="sii-section-kicker">CONTROL ESCOLAR</span>
    <h2>{kind==='students'?'Expedientes de estudiantes':'Plantilla docente'}</h2><p>Registros institucionales oficiales. La creación de cuentas de acceso es independiente.</p></div>
@@ -84,8 +109,8 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   <div className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-table-panel" aria-label="Listado oficial">
     <div className="sii-catalog-toolbar"><label htmlFor="school-search">Buscar en esta página</label>
-     <input id="school-search" value={search} onChange={e=>setSearch(e.target.value)} type="search" placeholder="Matrícula, nombre o número de empleado"/>
-     <button type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving}>Actualizar</button></div>
+     <input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>
+     <button type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving||!!editing}>Actualizar</button></div>
     {loading?<div className="sii-empty" role="status">Cargando registros…</div>:filtered.length===0?<div className="sii-empty">No hay registros coincidentes.</div>:
      <div className="sii-catalog-scroll"><table className="sii-catalog-table">
       <thead><tr><th scope="col">Identificador</th><th scope="col">Persona</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
@@ -93,15 +118,25 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
        <td className="sii-catalog-code">{row.enrollmentNumber??row.employeeNumber}</td>
        <td><strong>{row.firstName} {row.lastName}</strong><small>{row.institutionalEmail??'Sin correo institucional'}</small></td>
        <td>{row.status}</td>
-       <td><button type="button" disabled={saving||!['active','inactive'].includes(row.status)} onClick={()=>void changeStatus(row)}>{row.status==='active'?'Desactivar':'Reactivar'}</button></td>
+       <td><button type="button" ref={node=>{if(node)editButtons.current.set(row.id,node);else editButtons.current.delete(row.id)}} disabled={saving||!!editing} onClick={()=>{returnFocusId.current=row.id;setEditing({...row});setError('');setNotice('')}}>Editar</button> <button type="button" disabled={saving||!!editing||!['active','inactive'].includes(row.status)} onClick={()=>void changeStatus(row)}>{row.status==='active'?'Desactivar':'Reactivar'}</button></td>
       </tr>)}</tbody></table></div>}
     <nav className="sii-catalog-pagination" aria-label="Paginación del registro">
-     <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving} onClick={()=>void page('previous')}>Página anterior</button>
+     <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!!editing} onClick={()=>void page('previous')}>Página anterior</button>
      <span aria-live="polite">Página {history.length}</span>
-     <button type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving} onClick={()=>void page('next')}>Siguiente página</button>
+     <button type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!!editing} onClick={()=>void page('next')}>Siguiente página</button>
     </nav>
    </section>
-   <aside className="sii-panel sii-catalog-create">
+   {editing?<section className="sii-panel sii-catalog-create" aria-label="Edición de expediente">
+    <span className="sii-section-kicker">CORRECCIÓN INSTITUCIONAL</span><h3>Editar {kind==='students'?'estudiante':'docente'} · {editing.enrollmentNumber??editing.employeeNumber}</h3>
+    <p>Corrige los datos del expediente. La cuenta de acceso, el identificador y las inscripciones se conservan.</p>
+    <form key={editing.id} className="sii-catalog-form" onSubmit={event=>void saveProfile(event)}>
+     <label>Nombre(s)<input ref={editInput} name="firstName" required minLength={2} maxLength={120} defaultValue={editing.firstName} disabled={saving}/></label>
+     <label>Apellidos<input name="lastName" required minLength={2} maxLength={120} defaultValue={editing.lastName} disabled={saving}/></label>
+     <label>Correo institucional (opcional)<input name="institutionalEmail" type="email" defaultValue={editing.institutionalEmail??''} disabled={saving}/></label>
+     <button className="sii-submit" type="submit" disabled={saving}>{saving?'Guardando…':'Guardar cambios'}</button>
+     <button type="button" className="sii-outline-button" disabled={saving} onClick={cancelEdit}>Cancelar edición</button>
+    </form>
+   </section>:<aside className="sii-panel sii-catalog-create">
     <span className="sii-section-kicker">ALTA INSTITUCIONAL</span><h3>Nuevo {kind==='students'?'estudiante':'docente'}</h3>
     <form className="sii-catalog-form" onSubmit={e=>void submit(e)}>
      <label>{kind==='students'?'Matrícula':'Número de empleado'}<input name="code" required minLength={2} maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_-]*"/></label>
@@ -111,7 +146,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
      {kind==='students'&&<label>Programa académico<select aria-label="Programa académico" name="programId" required defaultValue=""><option value="" disabled>Selecciona un programa</option>{programs.map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}</select></label>}
      <button className="sii-submit" type="submit" disabled={saving||(kind==='students'&&!programs.length)}>{saving?'Guardando…':'Guardar registro'}</button>
     </form>
-   </aside>
+   </aside>}
   </div>
  </div>
 }

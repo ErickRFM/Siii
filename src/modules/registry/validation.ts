@@ -3,6 +3,8 @@ const uuid = z.uuid();
 const name = z.string().trim().min(2).max(120);
 const code = z.string().trim().min(2).max(32).regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/).transform(s => s.toUpperCase());
 const email = z.union([z.email(),z.literal('')]).optional().transform(value => value || null);
+const profile=z.strictObject({firstName:name,lastName:name,institutionalEmail:z.union([z.email(),z.literal(''),z.null()]).transform(value=>value||null)});
+export const registryProfileUpdate=z.strictObject({kind:z.literal('profile'),id:uuid,expected:profile,profile});
 export const registryResource = z.enum(['students','teachers','sections','enrollments','assignments']);
 export const registryCreate = {
   students:z.strictObject({enrollmentNumber:code,programId:uuid,firstName:name,lastName:name,institutionalEmail:email}),

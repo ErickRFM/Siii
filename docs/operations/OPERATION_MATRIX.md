@@ -45,7 +45,7 @@ Las filas anteriores conservan evidencia de P0; los contratos actuales incorpora
 
 | ID | Operación / endpoint | Actor y alcance | Validación / transacción / auditoría | Evidencia | Estado |
 |---|---|---|---|---|---|
-| OP-015 | GET /api/v1/auth/mfa; POST subrutas enroll,verify,challenge,step-up,recovery/regenerate,revoke | Identidad propia; desafío restringido y factor real | Secretos cifrados, TOTP/recovery de un uso, anti-replay, lockout, sesiones/versiones y auditoría | mfa-security.test.ts y mfa-flows.spec.ts; P1_MFA_REPORT.md | IMPLEMENTED |
+| OP-015 | GET /api/v1/auth/mfa; POST subrutas enroll,verify,challenge,step-up,recovery/regenerate,revoke | Identidad propia; desafío restringido y factor real | Secretos cifrados, TOTP/recovery de un uso, anti-replay, lockout, sesiones/versiones y auditoría | mfa-security.test.ts, mfa-flows.spec.ts y mfa-enrollment-guidance.spec.ts; P1_MFA_REPORT.md y MFA_ENROLLMENT_GUIDANCE.md | IMPLEMENTED |
 | OP-016 | GET /api/v1/institutions/:id/capabilities y gestión de roles | Concesiones vigentes, jerarquía y ámbito | No permisos del cliente ni grants superiores/extendidos; último admin permanente; invalidación y auditoría | permission-scopes.test.ts y permission-scopes.spec.ts; P1_SCOPES_REPORT.md | IMPLEMENTED |
 | OP-017 | GET/POST /api/v1/institutions/:id/invitations; POST /:invitationId/resend y /revoke | invitations.manage institucional; MFA/step-up | Consentimiento, ámbito, TTL, tokenhash, cooldown/budget; autoridad revalidada y auditoría | invitations.test.ts e invitation-flows.spec.ts; P1_INVITATIONS_REPORT.md | IMPLEMENTED |
 | OP-018 | POST /api/v1/invitations/preview,/accept,/reject | Destinatario con bearer válido y prueba propia cuando corresponde | Una vez, consentimiento y cuenta propia; sin elevación o resurrección de baja; token fuera de history/Flight/storage | invitations.test.ts e invitation-flows.spec.ts | IMPLEMENTED |
@@ -71,6 +71,10 @@ Interfaces reales: seguridad, catálogos, roles, invitaciones, usuarios y recupe
 | Paginación UI y selectores completos de servicios | consolidated-modules.spec.ts:205alumnos/65docentes | PROBADO LOCALMENTE; INTEGRADO EN MAIN (PR35) |
 
 El reporte FULL_INTEGRATION_PROGRESS.md separa integración en main, despliegue y validación productiva. No se introducen permisos nuevos en el cliente ni se altera la política MFA.
+
+| ID | Operación | Actor y alcance | Persistencia y auditoría | Evidencia | Estado |
+|---|---|---|---|---|---|
+| OP-029 | PATCH registry/students o registry/teachers, kind=profile | academic.manage institucional; origen y autoridad revalidados | Bloqueo tenant+id, expected antes de escribir,409 contra pérdida de cambios; sólo nombre/apellidos/correo, auditoría antes/después en TX; identificadores y cuentas conservados | registry-profile-http.test.ts:8casos, consolidado API308 y16casosProduction; consolidated-modules.spec.ts: error/red/conflicto/foco/axe/recarga/logout-login; árbol final767unit/57UI | PROBADO LOCALMENTE, CI/PUBLICACIÓN PENDIENTES |
 
 PR35 quedó integrado en `main` mediante `06166d90936fc939334a71ba600ec118c58b2586` con head revisado `4d87d61f83fa95b7869a7e0981a88f52a525804b`: 765 pruebas unitarias, 300 de integración y 54 de Chromium aprobadas; build/typecheck/lint correctos, audit 0 y Verify SIS SUCCESS en las ejecuciones `39073966596` y `39073970270`. La recuperación del mismo ámbito tras un error conserva el borrador; un ámbito confirmado distinto invalida guía, tabla y selector. Evidencia en `academic-initial-setup.spec.ts`, `permission-scopes.spec.ts` y `catalog-access-key.test.ts`.
 

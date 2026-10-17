@@ -5,7 +5,8 @@ import {NodeCryptoPlugin} from '@otplib/plugin-crypto-node';
 import {digestRecoveryCode} from '../../src/shared/auth/mfa-primitives';
 
 export function fixtureCookie(response:Response,name='siii_session'){
- const value=response.headers.getSetCookie().find(value=>value.startsWith(name+'='))?.split(';')[0]??'';
+ const cookies=response.headers.getSetCookie(),names=name.startsWith('__Host-')?[name]:['__Host-'+name,name];
+ const value=names.map(candidate=>cookies.find(value=>value.startsWith(candidate+'='))).find(value=>value!==undefined)?.split(';')[0]??'';
  return value.split('=')[1]?value:'';
 }
 async function post(base:string,path:string,body:unknown,cookie:string){
