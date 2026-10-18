@@ -9,7 +9,7 @@ import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
-import {academicModuleLinks,allAcademicModuleLinks,type AcademicModule} from '@/shared/navigation/academic-modules';
+import {academicModuleLinks,allAcademicModuleLinks} from '@/shared/navigation/academic-modules';
 
 export default function SiiAppShell({firstName,fullName,defaultInstitutionId,children}:{
   firstName:string; fullName:string; defaultInstitutionId?:string; children:ReactNode;
