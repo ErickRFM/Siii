@@ -44,7 +44,7 @@ describe('transactional email provider boundary',()=>{
   const [url,init]=fetch.mock.calls[0];
   expect(url).toBe('https://api.resend.com/emails'); expect(init.redirect).toBe('error'); expect(init.signal).toBeInstanceOf(AbortSignal);
   expect(init.headers['Idempotency-Key']).toBe('siii-invitation-'+invitationId);
-  const body=JSON.parse(init.body); expect(body).toEqual({from:config.from,to:[email.to],reply_to:config.replyTo,subject:email.subject,text:email.text});
+  const body=JSON.parse(init.body); expect(body).toMatchObject({from:'Siii - Sistema Institucional Integral <'+config.from+'>',to:[email.to],reply_to:config.replyTo,subject:email.subject,text:email.text}); expect(body.html).toContain('SIII'); expect(body.html).toContain('Invitación institucional');
  });
  it.each([429,500,503])('classifies transient provider status %i without echoing its body',async status=>{
   vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('private provider error with credentials',{status})));
@@ -85,7 +85,7 @@ describe('outbox immutable provider routing',()=>{
   const frozen={from:'original@example.com',replyTo:'original-support@example.com'};
   expect(await sendFrozenTransactionalEmail(email,frozen,{...config,apiKey:'re_rotated_key',from:'changed@example.com',replyTo:'changed-support@example.com'})).toEqual({status:'accepted',messageId:invitationId});
   const [,init]=fetch.mock.calls[0]; const body=JSON.parse(init.body);
-  expect(body.from).toBe(frozen.from); expect(body.reply_to).toBe(frozen.replyTo); expect(init.headers.Authorization).toBe('Bearer re_rotated_key');
+  expect(body.from).toBe('Siii - Sistema Institucional Integral <'+frozen.from+'>'); expect(body.reply_to).toBe(frozen.replyTo); expect(init.headers.Authorization).toBe('Bearer re_rotated_key');
   expect(init.headers['Idempotency-Key']).toBe('siii-invitation-'+invitationId);
  });
  it('never falls back to environment routing when the frozen pair is invalid',async()=>{
