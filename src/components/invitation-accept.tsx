@@ -1,4 +1,5 @@
 'use client';
+import {useInstitutionConfirmation} from './sii-confirmation';
 
 import Link from 'next/link';
 import {useCallback,useEffect,useRef,useState,type FormEvent} from 'react';
@@ -31,6 +32,7 @@ async function post<T>(action:string,body:Record<string,unknown>,signal?:AbortSi
   return result as T;
 }
 export default function InvitationAccept(){
+ const {ask,confirmation}=useInstitutionConfirmation();
   // The bearer never enters rendered state, storage, a link, or a query string.
   const bearer=useRef<InvitationBearer|null>(null),readGeneration=useRef(0),feedback=useRef<HTMLParagraphElement>(null);
   const [preview,setPreview]=useState<Preview|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[offline,setOffline]=useState(false);
@@ -78,7 +80,7 @@ export default function InvitationAccept(){
       payload.mode=mode;
       if(mode==='new'&&form){const fields=new FormData(form),password=String(fields.get('password')??'');if(password!==String(fields.get('confirmPassword')??'')){setInvalidPassword(true);setError('Las contraseñas no coinciden. Corrige la confirmación y vuelve a intentar.');return;}
         payload.account={username:String(fields.get('username')??'').trim(),firstName:String(fields.get('firstName')??'').trim(),lastName:String(fields.get('lastName')??'').trim(),password};}
-    }else if(!window.confirm(`¿Rechazar la invitación de ${preview.institutionName}? El enlace dejará de estar disponible.`))return;
+    }else if(!await ask({title:'Rechazar invitación',description:`Se rechazará la invitación de ${preview.institutionName} y el enlace dejará de estar disponible.`,confirmLabel:'Rechazar invitación',destructive:true}))return;
     setBusy(true);
     try{
       const result=await post<{data:{state:'accepted'|'rejected';requiresLogin?:boolean}}>(action,payload);
@@ -88,7 +90,7 @@ export default function InvitationAccept(){
     }catch(cause){if(bearer.current===decisionBearer)setError(message(cause));}
     finally{setBusy(false);}
   }
-  return <main id="main-content" tabIndex={-1} className="sii-auth">
+  return <main id="main-content" tabIndex={-1} className="sii-auth">{confirmation}
     <section className="sii-auth-story" aria-label="Invitación institucional"><div className="sii-auth-story-top"><SiiBrand light/><span className="sii-story-tag">ACCESO INSTITUCIONAL</span></div><div className="sii-auth-story-content"><h1>Tu acceso <em>institucional,</em> con tu consentimiento.</h1><p>Revisa la institución, el perfil, el ámbito y la duración del acceso antes de decidir.</p></div></section>
     <section className="sii-auth-access" aria-label="Consentimiento de invitación"><div className="sii-auth-access-top"><span>INVITACIÓN SEGURA</span><SiiThemeToggle/></div><div className="sii-auth-form-wrap">
       <h2>Invitación institucional.</h2>

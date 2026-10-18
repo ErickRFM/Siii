@@ -146,8 +146,8 @@ test('role assignment requires real step-up and revokes the selected scoped gran
   await expect(grant).toContainText('Programa autorizado');
   await expect(grant).toContainText('2030');
   await accessible(page);
-  page.once('dialog', dialog => dialog.accept());
   await grant.getByRole('button', { name: 'Revocar concesión', exact: true }).click();
+  await page.getByRole('alertdialog').getByRole('button',{name:'Revocar perfil'}).click();
   await expect(page.getByRole('status').filter({ hasText: 'Concesión revocada' })).toBeVisible();
   await expect(grant).toHaveCount(0);
   expect((await sql.query("SELECT count(*)::int AS total FROM role_assignments WHERE membership_id=$1 AND role='guest' AND revoked_at IS NULL", [targetMembershipId])).rows[0].total).toBe(1);

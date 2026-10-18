@@ -1,4 +1,5 @@
 'use client';
+import {useInstitutionConfirmation} from './sii-confirmation';
 
 import Link from 'next/link';
 import type {Route} from 'next';
@@ -96,6 +97,7 @@ export function ManageableInstitutions() {
 }
 
 export default function InstitutionAdministration({initialInstitution, actions}: {initialInstitution: InstitutionAdminDTO; actions: Actions}) {
+ const {ask,confirmation}=useInstitutionConfirmation();
   const institutionId = initialInstitution.id;
   const base = `/api/v1/institutions/${institutionId}`;
   const returnTo = `/dashboard/institutions/${institutionId}/admin`;
@@ -130,7 +132,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
 
   async function reload() {
     if (saving || loading || !online) return;
-    if (dirty && !window.confirm('¿Recargar la configuración vigente y descartar el borrador local?')) return;
+    if (dirty && !await ask({title:'Descartar borrador institucional',description:'La configuración local no guardada se perderá al recuperar la versión vigente.',confirmLabel:'Descartar cambios',destructive:true})) return;
     controller.current?.abort();
     const nextController = new AbortController(); controller.current = nextController;
     setLoading(true); setError(''); setNotice('');
@@ -168,21 +170,21 @@ export default function InstitutionAdministration({initialInstitution, actions}:
       }
     } finally { if (alive.current) setSaving(false); }
   }
-  function saveSettings(event: FormEvent<HTMLFormElement>) {
+  async function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!actions.updateSettings || disabled) return;
-    if (!window.confirm(`¿Guardar la configuración de ${institution.name}? Motivo: ${reason.trim()}`)) return;
+    if (!await ask({title:'Guardar configuración institucional',description:`Se actualizará ${institution.name}. Motivo: ${reason.trim()}.`,confirmLabel:'Guardar configuración'})) return;
     void mutate('settings', {...draft, name: draft.name.trim(), shortName: draft.shortName?.trim() || null, code: draft.code.trim(), timezone: draft.timezone.trim(), reason: reason.trim()});
   }
-  function saveStatus(event: FormEvent<HTMLFormElement>) {
+  async function saveStatus(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!actions.changeStatus || disabled || !nextStatus || nextStatus === institution.status) return;
-    if (!window.confirm(`¿Cambiar ${institution.name} de ${statusLabels[institution.status]} a ${statusLabels[nextStatus]}? ${nextStatus === 'active' ? 'Se restablecerán las operaciones según los permisos vigentes. Las invitaciones revocadas no se restauran.' : 'Se bloquearán las operaciones ordinarias, se revocarán las invitaciones pendientes y se cancelarán sus entregas en cola.'} Motivo: ${statusReason.trim()}`)) return;
+    if (!await ask({title:'Cambiar estado institucional',description:`${institution.name}: ${statusLabels[institution.status]} → ${statusLabels[nextStatus]}. ${nextStatus==='active'?'Se restablecerán las operaciones según los permisos vigentes; las invitaciones revocadas no regresarán.':'Se bloquearán operaciones y se revocarán invitaciones pendientes.'} Motivo: ${statusReason.trim()}.`,confirmLabel:'Cambiar estado',destructive:nextStatus!=='active'})) return;
     void mutate('status', {status: nextStatus, reason: statusReason.trim()});
   }
   const businessAvailable = institution.status === 'active' && !blocked;
   const academicAvailable = ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasInstitutionCapability(capabilities, `${resource}.read`));
-  return <div className="sii-institution-admin">
+  return <div className="sii-institution-admin">{confirmation}
     {!online && <p role="status" className="sii-catalog-error">Sin conexión. Las operaciones están deshabilitadas; tu borrador se conserva.</p>}
     {error && <p id="institution-admin-error" role="alert" tabIndex={-1} ref={feedback} className="sii-catalog-error">{error}</p>}
     {notice && <p role="status" className="sii-catalog-notice">{notice}</p>}

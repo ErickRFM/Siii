@@ -1,10 +1,12 @@
 'use client';
+import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
-import { useCallback,useEffect,useRef,useState,type FormEvent } from 'react';
+import { useCallback,useEffect,useRef,useState,type FormEvent,type KeyboardEvent } from 'react';
 type Kind='students'|'teachers';
 type RecordRow={id:string;firstName:string;lastName:string;enrollmentNumber?:string;employeeNumber?:string;institutionalEmail?:string|null;status:string;programId?:string};
 type Program={id:string;code:string;name:string;status:string};
 export default function SchoolRegistry({institutionId}:{institutionId:string}){
+ const {ask,confirmation}=useInstitutionConfirmation();
  const [kind,setKind]=useState<Kind>('students');
  const [rows,setRows]=useState<RecordRow[]>([]);
  const [programs,setPrograms]=useState<Program[]>([]);
@@ -73,9 +75,17 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   }catch(e){setError('No se pudo guardar: '+(e instanceof Error?e.message:'ERROR'))}
   finally{setSaving(false)}
  }
+ function navigateTabs(event:KeyboardEvent<HTMLButtonElement>,current:Kind){
+  if(!['ArrowRight','ArrowLeft','Home','End'].includes(event.key))return;
+  event.preventDefault();if(saving||loading||editing)return;
+  const next:Kind=current==='students'?'teachers':'students';
+  const target=event.key==='Home'?'students':event.key==='End'?'teachers':next;
+  setKind(target);setSearch('');setError('');setNotice('');
+  event.currentTarget.parentElement?.querySelector<HTMLButtonElement>('#registry-tab-'+target)?.focus();
+ }
  async function changeStatus(row:RecordRow){
   const next=row.status==='active'?'inactive':'active';
-  if(!window.confirm(`¿Confirmas cambiar a ${next} este registro?`))return;
+  if(!await ask({title:'Cambiar estado del expediente',description:`El registro quedará ${next==='active'?'activo':'inactivo'} y la operación será auditada.`,confirmLabel:'Guardar estado',destructive:next!=='active'}))return;
   setSaving(true);setError('');
   try{
    const r=await fetch(`${base}/registry/${kind}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:row.id,status:next})});
@@ -98,15 +108,16 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
  }
  const filtered=rows.filter(r=>[r.firstName,r.lastName,r.enrollmentNumber,r.employeeNumber].join(' ').toLowerCase().includes(search.toLowerCase()));
  return <div className="sii-academic">
+ {confirmation}
   <div className="sii-catalog-tabs" role="tablist" aria-label="Control escolar">
-   {(['students','teachers'] as Kind[]).map(k=><button type="button" role="tab" key={k} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</button>)}
+   {(['students','teachers'] as Kind[]).map(k=><button type="button" role="tab" key={k} id={"registry-tab-"+k} aria-controls="registry-panel" tabIndex={kind===k?0:-1} onKeyDown={e=>navigateTabs(e,k)} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</button>)}
   </div>
   <div className="sii-catalog-summary"><div><span className="sii-section-kicker">CONTROL ESCOLAR</span>
    <h2>{kind==='students'?'Expedientes de estudiantes':'Plantilla docente'}</h2><p>Registros institucionales oficiales. La creación de cuentas de acceso es independiente.</p></div>
    <span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span></div>
   {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
-  <div className="sii-catalog-layout">
+  <div id="registry-panel" role="tabpanel" aria-labelledby={"registry-tab-"+kind} tabIndex={0} aria-busy={loading} className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-table-panel" aria-label="Listado oficial">
     <div className="sii-catalog-toolbar"><label htmlFor="school-search">Buscar en esta página</label>
      <input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>

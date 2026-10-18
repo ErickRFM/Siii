@@ -1,6 +1,24 @@
 'use client';
+/** Convert service error codes to clear UI feedback; server decisions are authoritative. */
+function userFacingError(code:string){
+ const messages:Record<string,string>={
+  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
+  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
+  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
+  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
+  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
+  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
+  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
+  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
+  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
+  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
+ };
+ return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
+}
+
+import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
-import { useCallback,useEffect,useState,type FormEvent } from 'react';
+import { useCallback,useEffect,useState,type FormEvent,type KeyboardEvent } from 'react';
 type Module='announcements'|'requests'|'workshops';
 type RecordRow={id:string;title?:string;body?:string;description?:string;summary?:string;requestType?:string;studentId?:string;teacherId?:string;status:string;startsAt?:string};
 type Person={id:string;firstName:string;lastName:string;enrollmentNumber?:string;employeeNumber?:string;status:string};
@@ -10,6 +28,7 @@ const tabs:{id:Module;label:string}[]=[
  {id:'workshops',label:'Talleres'},
 ];
 export default function UniversityServices({institutionId}:{institutionId:string}){
+ const {ask,confirmation}=useInstitutionConfirmation();
  const base=`/api/v1/institutions/${institutionId}`;
  const [tab,setTab]=useState<Module>('announcements'),[rows,setRows]=useState<RecordRow[]>([]);
  const [students,setStudents]=useState<Person[]>([]),[teachers,setTeachers]=useState<Person[]>([]);
@@ -41,12 +60,15 @@ export default function UniversityServices({institutionId}:{institutionId:string
    if(!response.ok){const info=await response.json().catch(()=>({error:{code:'UNKNOWN'}})) as {error?:{code?:string}};
     throw Error(info.error?.code??'OPERATION_DENIED')}
    setNotice('Operación guardada y auditada.');await fetchRows(tab);return true;
-  }catch(e){setError('Operación rechazada: '+(e instanceof Error?e.message:'ERROR'));return false}
+  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
   finally{setSaving(false)}
  }
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(saving)return;
   const form=e.currentTarget,v=new FormData(form);
+  if(tab==='workshops'&&new Date(String(v.get('endsAt'))).getTime()<=new Date(String(v.get('startsAt'))).getTime()){
+   setError('La fecha de finalización debe ser posterior al inicio del taller.');return;
+  }
   const payload=tab==='announcements'?{title:String(v.get('title')??''),body:String(v.get('body')??'')}
   :tab==='requests'?{studentId:String(v.get('studentId')??''),requestType:String(v.get('requestType')??''),summary:String(v.get('summary')??'')}
   :{title:String(v.get('title')??''),description:String(v.get('description')??''),
@@ -54,25 +76,33 @@ export default function UniversityServices({institutionId}:{institutionId:string
    endsAt:new Date(String(v.get('endsAt')??'')).toISOString(),capacity:Number(v.get('capacity'))};
   if(await execute(payload))form.reset();
  }
+ function navigateTabs(event:KeyboardEvent<HTMLButtonElement>,current:Module){
+  const keys=['ArrowRight','ArrowLeft','Home','End'];if(!keys.includes(event.key))return;
+  event.preventDefault();const index=tabs.findIndex(item=>item.id===current);
+  const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:event.key==='ArrowRight'?(index+1)%tabs.length:(index+tabs.length-1)%tabs.length;
+  const target=tabs[next].id;setTab(target);setError('');setNotice('');
+  event.currentTarget.parentElement?.querySelector<HTMLButtonElement>('#services-tab-'+target)?.focus();
+ }
  async function advance(row:RecordRow,status:string){
   let payload:Record<string,unknown>={id:row.id,status};
   if(tab==='requests'){
-   const reason=window.prompt(`Motivo para ${status} (obligatorio):`);
-   if(!reason||reason.trim().length<6)return;
+   const reason=await ask({title:'Registrar decisión de trámite',description:`Confirma el cambio a ${status}. La decisión quedará auditada.`,reasonLabel:'Motivo de la decisión',minReasonLength:6,confirmLabel:'Registrar decisión',destructive:status==='REJECTED'});
+   if(!reason)return;
    payload={...payload,decisionReason:reason.trim()};
-  }else if(!window.confirm(`¿Confirmas cambiar el estado a ${status}?`))return;
+  }else if(!await ask({title:'Cambiar estado del servicio',description:`Se aplicará el estado ${status} y quedará registrado.`,confirmLabel:'Aplicar cambio',destructive:status==='ARCHIVED'||status==='CANCELLED'}))return;
   await execute(payload,'PATCH');
  }
  return <div className="sii-academic">
+ {confirmation}
   <div className="sii-catalog-tabs" role="tablist" aria-label="Servicios universitarios">
-   {tabs.map(t=><button key={t.id} role="tab" type="button" aria-selected={tab===t.id}
+   {tabs.map(t=><button key={t.id} id={"services-tab-"+t.id} aria-controls="services-panel" role="tab" type="button" tabIndex={tab===t.id?0:-1} onKeyDown={e=>navigateTabs(e,t.id)} aria-selected={tab===t.id}
     className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
     onClick={()=>{setTab(t.id);setNotice('');setError('')}}>{t.label}</button>)}
   </div>
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
-  {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
+  {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading} onClick={()=>void fetchRows(tab)}>Reintentar consulta</button></div>}
   {peopleError&&<div role="alert"><p>{peopleError}</p><button type="button" className="sii-outline-button" onClick={()=>setPeopleRevision(value=>value+1)}>Reintentar personas</button></div>}
-  <div className="sii-catalog-layout">
+  <div id="services-panel" role="tabpanel" aria-labelledby={"services-tab-"+tab} tabIndex={0} aria-busy={loading} className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-table-panel">
     <h2>{tabs.find(t=>t.id===tab)?.label}</h2>
     {loading?<p role="status">Cargando datos institucionales…</p>:rows.length===0?<p>No hay registros en esta sección.</p>:
@@ -107,7 +137,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
        {teachers.filter(x=>x.status==='active').map(x=><option key={x.id} value={x.id}>{x.employeeNumber} · {x.firstName} {x.lastName}</option>)}</select></label>
       <label>Inicio<input name="startsAt" type="datetime-local" required/></label><label>Fin<input name="endsAt" type="datetime-local" required/></label>
       <label>Cupo<input name="capacity" type="number" min={1} max={1000} defaultValue={25} required/></label></>}
-     <button type="submit" className="sii-submit" disabled={saving||(tab==='requests'&&!students.length)||(tab==='workshops'&&!teachers.length)}>Crear borrador / solicitud</button>
+     <button type="submit" className="sii-submit" disabled={saving||(tab==='requests'&&!students.length)||(tab==='workshops'&&!teachers.length)}>{saving?"Guardando…":"Crear borrador / solicitud"}</button>
     </form></aside>
   </div>
  </div>;

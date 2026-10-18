@@ -69,9 +69,8 @@ test('settings persist with a reason, audit, version and preserved global identi
   await page.getByLabel('Nombre de la institución', {exact: true}).fill('Institución corregida QA');
   await page.getByLabel('Nombre corto', {exact: true}).fill('QA corregida');
   await page.getByLabel('Motivo de la configuración').fill('Corrección institucional sintética');
-  page.once('dialog', dialog => dialog.accept());
-  const saved = page.waitForResponse(response => response.url().endsWith(`/institutions/${institutionId}/settings`) && response.request().method() === 'PATCH');
-  await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();
+    const saved = page.waitForResponse(response => response.url().endsWith(`/institutions/${institutionId}/settings`) && response.request().method() === 'PATCH');
+  await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Guardar configuración'}).click();
   const response = await saved;
   expect(response.status()).toBe(200);
   expect((await response.json()).data).toMatchObject({id: institutionId, name: 'Institución corregida QA', version: 1});
@@ -93,15 +92,13 @@ test('a stale settings draft survives until an explicit reload and offline block
   const current = (await (await page.request.get(`/api/v1/institutions/${institutionId}/settings`)).json()).data;
   const response = await page.request.patch(`/api/v1/institutions/${institutionId}/settings`, {headers: origin(), data: {name: 'Edición concurrente', expectedVersion: current.version, reason: 'Otra edición sintética'}});
   expect(response.status()).toBe(200);
-  page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();
+    await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Guardar configuración'}).click();
   await expect(page.locator('#institution-admin-error')).toContainText('Otra persona modificó');
   await expect(page.locator('#institution-admin-error')).toBeFocused();
   await expect(page.getByLabel('Nombre de la institución', {exact: true})).toHaveValue('Mi borrador conservado');
   await expect(page.getByLabel('Motivo de la configuración')).toHaveValue('Mi motivo conservado');
   await expect(page.getByRole('button', {name: 'Guardar configuración', exact: true})).toBeDisabled();
-  page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button', {name: 'Recargar configuración vigente', exact: true}).click();
+    await page.getByRole('button', {name: 'Recargar configuración vigente', exact: true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Descartar cambios'}).click();
   await expect(page.getByLabel('Nombre de la institución', {exact: true})).toHaveValue('Edición concurrente');
   await page.context().setOffline(true);
   await expect(page.getByRole('button', {name: 'Guardar configuración', exact: true})).toBeDisabled();
@@ -114,8 +111,7 @@ test('inactive management remains scoped and restores the institution without bu
   for (const status of ['inactive', 'suspended', 'active']) {
     await page.getByLabel('Nuevo estado institucional').selectOption(status);
     await page.getByLabel('Motivo del cambio institucional').fill(`Decisión sintética ${status}`);
-    page.once('dialog', dialog => dialog.accept());
-    await page.getByRole('button', {name: 'Confirmar estado institucional', exact: true}).click();
+        await page.getByRole('button', {name: 'Confirmar estado institucional', exact: true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Cambiar estado'}).click();
     await expect(page.getByRole('status').filter({hasText: 'Estado institucional actualizado'})).toBeVisible();
     expect((await sql.query('SELECT status FROM institutions WHERE id=$1', [institutionId])).rows[0].status).toBe(status);
     if (status !== 'active') {
@@ -178,8 +174,7 @@ test('archived management is read-only and an authorization revocation disables 
   await page.getByLabel('Motivo de la configuración').fill('Intento sintético posterior a revocación');
   await sql.query('UPDATE role_assignments SET revoked_at=now() WHERE membership_id IN (SELECT m.id FROM institution_memberships m JOIN platform_users u ON u.id=m.user_id WHERE m.institution_id=$1 AND u.username=$2)', [institutionId, username]);
   const deniedWrite = page.waitForResponse(response => new URL(response.url()).pathname === `/api/v1/institutions/${institutionId}/settings` && response.request().method() === 'PATCH');
-  page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();
+    await page.getByRole('button', {name: 'Guardar configuración', exact: true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Guardar configuración'}).click();
   const denied = await deniedWrite;
   expect(denied.status()).toBe(403);
   expect((await denied.json()).error?.code).toBe('FORBIDDEN');

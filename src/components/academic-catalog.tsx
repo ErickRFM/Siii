@@ -1,4 +1,5 @@
 'use client';
+import {useInstitutionConfirmation} from './sii-confirmation';
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import type { CatalogResource } from '@/modules/academic/catalog-validation';
@@ -43,6 +44,7 @@ function getError(code?: string) {
   }
 }
 export default function AcademicCatalog({institutionId}:{institutionId:string}) {
+ const {ask,confirmation}=useInstitutionConfirmation();
   const {data:access,loading:permissionsLoading,error:permissionsError}=useInstitutionCapabilities();
   const availableTabs=tabs.filter(item=>hasAnyCapability(access,`${item.id}.read`));
   const accessReady=Boolean(access&&!access.restricted);
@@ -195,7 +197,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   async function setStatus(row:RecordRow) {
     if(row.status==='archived')return;
     const next=row.status==='active'?'archived':'active';
-    if(!window.confirm(`¿Confirmas cambiar este registro a ${statusLabels[next].toLowerCase()}? Los registros archivados no se reactivan.`))return;
+    if(!await ask({title:'Cambiar estado del catálogo',description:`El registro pasará a ${statusLabels[next].toLowerCase()}. Los registros archivados no pueden reactivarse.`,confirmLabel:'Confirmar cambio',destructive:next==='archived'}))return;
     await mutate('PATCH',{id:row.id,status:next});
   }
 
@@ -206,6 +208,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   if(!access||availableTabs.length===0)return <p className="sii-info-banner">No tienes acceso a catálogos académicos.</p>;
   return (
     <div className="sii-academic">
+ {confirmation}
       <AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
         {availableTabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}

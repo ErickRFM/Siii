@@ -1,4 +1,22 @@
 'use client';
+/** Convert service error codes to clear UI feedback; server decisions are authoritative. */
+function userFacingError(code:string){
+ const messages:Record<string,string>={
+  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
+  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
+  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
+  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
+  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
+  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
+  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
+  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
+  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
+  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
+ };
+ return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
+}
+
+import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
 import { useCallback,useEffect,useState,type FormEvent } from 'react';
 type Row={id:string;code?:string;name?:string;campusId?:string;building?:string;capacity?:number;sectionId?:string;roomId?:string;weekday?:number;startMinute?:number;endMinute?:number;status?:string;isActive?:boolean};
@@ -8,6 +26,7 @@ const minutes=(x:string)=>{const [h,m]=x.split(':').map(Number);return h*60+m};
 const clock=(m:number)=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 const initialWeek=()=>{const d=new Date(),day=d.getDay()||7;d.setDate(d.getDate()-(day-1));return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 export default function SchedulingStudio({institutionId}:{institutionId:string}){
+ const {ask,confirmation}=useInstitutionConfirmation();
  const base=`/api/v1/institutions/${institutionId}`;
  const [campuses,setCampuses]=useState<Row[]>([]),[rooms,setRooms]=useState<Row[]>([]),[sections,setSections]=useState<Row[]>([]),[patterns,setPatterns]=useState<Row[]>([]);
  const [week,setWeek]=useState(initialWeek),[occurrences,setOccurrences]=useState<Occ[]>([]);
@@ -35,7 +54,7 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
    const r=await fetch(`${base}/${path}`,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    if(!r.ok){const v=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};throw Error(v.error?.code??'REQUEST_FAILED')}
    setNotice('La operación quedó registrada.');await Promise.all([refresh(),loadWeek()]);return true;
-  }catch(e){setError('No se pudo completar: '+(e instanceof Error?e.message:'ERROR'));return false}
+  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
   finally{setSaving(false)}
  }
  async function addRoom(event:FormEvent<HTMLFormElement>){
@@ -49,14 +68,15 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
   if(ok)form.reset();
  }
  async function cancel(occ:Occ){
-  const reason=window.prompt('Motivo de cancelación institucional (obligatorio):');
-  if(!reason||reason.trim().length<6)return;
+  const reason=await ask({title:'Cancelar clase programada',description:'La cancelación se registrará en el historial. Indica el motivo para continuar.',reasonLabel:'Motivo de cancelación',minReasonLength:6,confirmLabel:'Cancelar ocurrencia',destructive:true});
+  if(!reason)return;
   await send('occurrences',{id:occ.id,state:'CANCELLED',reason:reason.trim()},'PATCH');
  }
  return <div className="sii-academic">
+ {confirmation}
   <div className="sii-catalog-summary"><div><span className="sii-section-kicker">COORDINACIÓN ACADÉMICA</span>
    <h2>Planificador semanal</h2><p>Conflictos de aula, docente y alumnos verificados antes de crear las ocurrencias.</p></div></div>
-  {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
+  {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading} onClick={()=>void Promise.all([refresh(),loadWeek()])}>Reintentar consulta</button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   <div className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-create"><h3>Añadir aula</h3>

@@ -34,7 +34,7 @@ async function create(page:Page,email:string,role='student',scoped=false){
  await page.getByLabel('Correo del destinatario').fill(email);
  if(scoped){await page.getByLabel('Ámbito',{exact:true}).selectOption('program');await page.getByLabel('Programa',{exact:true}).selectOption(programId);await expect(page.getByLabel('Perfil',{exact:true})).toBeEnabled();}
  await page.getByLabel('Perfil',{exact:true}).selectOption(role);
- const result=page.waitForResponse(response=>response.url().endsWith(`/institutions/${institutionId}/invitations`)&&response.request().method()==='POST');page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Crear invitación',exact:true}).click();const response=await result;expect(response.status()).toBe(201);const body=await response.json();expect(Object.keys(body.data)).not.toContain('token');expect(Object.keys(body.data)).not.toContain('invitationLink');return body.data.id as string;
+ const result=page.waitForResponse(response=>response.url().endsWith(`/institutions/${institutionId}/invitations`)&&response.request().method()==='POST');await page.getByRole('button',{name:'Crear invitación',exact:true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Crear invitación'}).click();const response=await result;expect(response.status()).toBe(201);const body=await response.json();expect(Object.keys(body.data)).not.toContain('token');expect(Object.keys(body.data)).not.toContain('invitationLink');return body.data.id as string;
 }
 async function mailLink(id:string){
  const delivery=(await sql.query('SELECT id,payload_encrypted FROM invitation_delivery_outbox WHERE invitation_id=$1 AND state=\'queued\' ORDER BY created_at DESC,id DESC LIMIT 1',[id])).rows[0];expect(Boolean(delivery)).toBe(true);
@@ -53,9 +53,9 @@ test('administration records honest delivery and rotates then revokes the real m
  await expect(row.getByRole('button',{name:'Reenviar invitación'})).toBeDisabled();
  await sql.query("UPDATE institution_invitations SET last_requested_at=now()-interval '61 seconds' WHERE id=$1",[id]);
  await page.getByRole('button',{name:'Actualizar invitaciones',exact:true}).click();await expect(row.getByRole('button',{name:'Reenviar invitación'})).toBeVisible();
- const resent=page.waitForResponse(response=>response.url().endsWith(`/${id}/resend`));page.once('dialog',dialog=>dialog.accept());await row.getByRole('button',{name:'Reenviar invitación'}).click();expect((await resent).status()).toBe(200);const rotated=await mailLink(id);expect(Boolean(rotated.token!==original.token)).toBe(true);
+ const resent=page.waitForResponse(response=>response.url().endsWith(`/${id}/resend`));await row.getByRole('button',{name:'Reenviar invitación'}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Confirmar reenvío'}).click();expect((await resent).status()).toBe(200);const rotated=await mailLink(id);expect(Boolean(rotated.token!==original.token)).toBe(true);
  const other=await recipient(browser);try{await other.page.goto(original.path);await expect(other.page.locator('#invitation-error')).toContainText('no está disponible');await other.page.goto(rotated.path);await expect(other.page.getByText('Programa: Programa invitado',{exact:true})).toBeVisible();}finally{await other.context.close();}
- page.once('dialog',dialog=>dialog.accept());await row.getByRole('button',{name:'Revocar invitación'}).click();await expect(row).toContainText('Revocada');await expect(row.getByRole('button',{name:'Reenviar invitación'})).toHaveCount(0);await axe(page);
+ await row.getByRole('button',{name:'Revocar invitación'}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Revocar invitación'}).click();await expect(row).toContainText('Revocada');await expect(row.getByRole('button',{name:'Reenviar invitación'})).toHaveCount(0);await axe(page);
 });
 
 test('new account acceptance requires consent, protects the fragment and permits only MFA onboarding',async({page,browser})=>{
@@ -70,7 +70,7 @@ test('new account acceptance requires consent, protects the fragment and permits
 
 test('recipient can reject with consent and reload cannot recover the consumed in-memory bearer',async({page,browser})=>{
  await administrator(page);const id=await create(page,`reject-${randomUUID().slice(0,8)}@example.test`),link=await mailLink(id),other=await recipient(browser);
- try{await other.page.goto(link.path);await expect(other.page.getByRole('button',{name:'Rechazar invitación'})).toBeDisabled();await other.page.locator('#invitation-consent').check();other.page.once('dialog',dialog=>dialog.accept());await other.page.getByRole('button',{name:'Rechazar invitación'}).click();await expect(other.page.getByRole('heading',{name:'Invitación rechazada.'})).toBeVisible();expect((await sql.query('SELECT state FROM institution_invitations WHERE id=$1',[id])).rows[0].state).toBe('rejected');await other.page.reload();await expect(other.page.locator('#invitation-error')).toContainText('Reabre el enlace original');await expect(other.page.getByRole('button',{name:'Aceptar invitación'})).toHaveCount(0);
+ try{await other.page.goto(link.path);await expect(other.page.getByRole('button',{name:'Rechazar invitación'})).toBeDisabled();await other.page.locator('#invitation-consent').check();await other.page.getByRole('button',{name:'Rechazar invitación'}).click();await other.page.getByRole('alertdialog').getByRole('button',{name:'Rechazar invitación'}).click();await expect(other.page.getByRole('heading',{name:'Invitación rechazada.'})).toBeVisible();expect((await sql.query('SELECT state FROM institution_invitations WHERE id=$1',[id])).rows[0].state).toBe('rejected');await other.page.reload();await expect(other.page.locator('#invitation-error')).toContainText('Reabre el enlace original');await expect(other.page.getByRole('button',{name:'Aceptar invitación'})).toHaveCount(0);
  }finally{await other.context.close();}
 });
 
@@ -133,7 +133,7 @@ test('a delayed manual refresh cannot replace the invitation opened afterwards',
   await expect(other.page.getByRole('status').filter({hasText:'La invitación y tu sesión se comprobarán nuevamente'})).toHaveCount(0);
   await expect(other.page.locator('#invitation-consent')).not.toBeChecked();await other.page.locator('#invitation-consent').check();
   const rejected=other.page.waitForRequest(request=>request.url().endsWith('/invitations/reject'));
-  other.page.once('dialog',dialog=>dialog.accept());await other.page.getByRole('button',{name:'Rechazar invitación',exact:true}).click();
+  await other.page.getByRole('button',{name:'Rechazar invitación',exact:true}).click();await other.page.getByRole('alertdialog').getByRole('button',{name:'Rechazar invitación'}).click();
   expect((await rejected).postDataJSON().invitationId).toBe(second);await expect(other.page.getByRole('heading',{name:'Invitación rechazada.'})).toBeVisible();
   const states=await sql.query('SELECT id,state FROM institution_invitations WHERE id=ANY($1::uuid[])',[[first,second]]);
   expect(states.rows.find(row=>row.id===first)?.state).toBe('pending');expect(states.rows.find(row=>row.id===second)?.state).toBe('rejected');

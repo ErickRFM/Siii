@@ -1,4 +1,22 @@
 'use client';
+/** Convert service error codes to clear UI feedback; server decisions are authoritative. */
+function userFacingError(code:string){
+ const messages:Record<string,string>={
+  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
+  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
+  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
+  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
+  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
+  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
+  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
+  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
+  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
+  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
+ };
+ return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
+}
+
+import {useInstitutionConfirmation} from './sii-confirmation';
 import {SecurityActionLink} from './institution-capabilities';
 import { useCallback,useEffect,useState,type FormEvent } from 'react';
 type Section={id:string;code:string;courseName:string;status:string};
@@ -9,6 +27,7 @@ type Publication={id:string;version:number;publishedAt:string};
 type Snapshot={components:Component[];scores:Score[];publications:Publication[];roster:Student[]};
 
 export default function TeacherGradebook({institutionId}:{institutionId:string}){
+ const {ask,confirmation}=useInstitutionConfirmation();
  const base=`/api/v1/institutions/${institutionId}/grading`;
  const [sections,setSections]=useState<Section[]>([]);
  const [sectionId,setSectionId]=useState('');
@@ -41,7 +60,7 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
    const r=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    if(!r.ok){const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};throw Error(info.error?.code??'REQUEST_FAILED')}
    setNotice('Operación guardada correctamente.');await refresh(sectionId);return true;
-  }catch(e){setError('No se pudo completar la operación: '+(e instanceof Error?e.message:'ERROR'));return false}
+  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
   finally{setSaving(false)}
  }
  async function addComponent(event:FormEvent<HTMLFormElement>){
@@ -59,15 +78,16 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
  }
  async function publish(){
   if(!snapshot||!sectionId||snapshot.publications.length||saving)return;
-  if(!window.confirm('¿Publicar el acta oficial? No podrás editar las notas después de publicarla.'))return;
+  if(!await ask({title:'Publicar acta oficial',description:'La publicación es definitiva. No podrás modificar notas sin una rectificación autorizada.',confirmLabel:'Publicar acta',destructive:true}))return;
   await command({kind:'publish',sectionId,operationId:crypto.randomUUID()});
  }
  const published=!!snapshot?.publications.length;
  const weight=snapshot?.components.reduce((sum,c)=>sum+c.weight,0)??0;
  return <div className="sii-academic">
+ {confirmation}
   <div className="sii-catalog-summary"><div><span className="sii-section-kicker">DOCENCIA · EVALUACIÓN</span>
    <h2>Libro de calificaciones</h2><p>Escala 0–10. Los componentes deben completar 100 % para emitir un acta.</p></div></div>
-  {error&&<p className="sii-catalog-error" role="alert">{error}</p>}
+  {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" onClick={()=>void refresh(sectionId)}>Reintentar consulta</button></div>}
   {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
   <section className="sii-panel sii-catalog-create">
    <label>Materia y grupo asignado<select value={sectionId} onChange={e=>setSectionId(e.target.value)} disabled={saving||loading}>
