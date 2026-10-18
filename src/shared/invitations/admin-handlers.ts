@@ -104,6 +104,8 @@ export function manageInvitation(operation:'revoke'|'resend'){
    await cancelQueued(tx,row.id,now);await audit(tx,{actorUserId:actor.identity.id,institutionId,action:'invitation.revoke',target:'invitation:'+row.id,requestId,details:{before:{state:'pending'},after:{state:'revoked'}}});
    return {data:invitationDto(updated,await deliveryState(tx,row.id))};
   });
-  return 'error'in result?jsonError(result.error!,result.status!):response(result.data);
+  if('error'in result)return jsonError(result.error!,result.status!);
+  if(operation==='resend')scheduleEmailDelivery('invitation');
+  return response(result.data);
  });
 }
