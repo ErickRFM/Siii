@@ -10,7 +10,7 @@ export function resolveDashboardLocation(pathname:string,defaultInstitutionId?:s
   if(segments[1]==='security')return {active:'security'};
   if(segments[1]==='institutions'&&segments[2]){
     const section=segments[3];
-    return {institutionId:segments[2],active:section&&SECTIONS.includes(section as DashboardActive)?section as DashboardActive:'institution'};
+    return {institutionId:segments[2],active:section==='admin'?'administration':section&&SECTIONS.includes(section as DashboardActive)?section as DashboardActive:'institution'};
   }
   return {active:'overview',institutionId:defaultInstitutionId};
 }

@@ -9,6 +9,9 @@ describe('persistent dashboard navigation',()=>{
     for(const section of ['academic','registry','operations','grading','scheduling','services','users','roles','invitations','administration'])
       expect(resolveDashboardLocation(`/dashboard/institutions/inst-a/${section}`,'inst-b')).toEqual({active:section,institutionId:'inst-a'});
   });
+  it('maps the admin URL to its visible administration tab',()=>{
+    expect(resolveDashboardLocation('/dashboard/institutions/inst-a/admin')).toEqual({active:'administration',institutionId:'inst-a'});
+  });
   it('separates institution switching and unknown routes',()=>{
     expect(resolveDashboardLocation('/dashboard/institutions/inst-b')).toEqual({active:'institution',institutionId:'inst-b'});
     expect(resolveDashboardLocation('/dashboard/institutions/inst-b/unknown')).toEqual({active:'institution',institutionId:'inst-b'});
