@@ -19,6 +19,7 @@ import {parsePage,pageEnvelope,cursorTimestamp,cursorPredicate} from '@/shared/h
 import {profileBody,lifecycleBody,lifecycleTransition,membershipFilters,escapeLike,reason} from './policy';
 import {projectUserHistory} from './history';
 import {issuePasswordReset} from '@/shared/password-reset/storage';
+import {scheduleEmailDelivery} from '@/infrastructure/email/after-delivery';
 type Ctx={params:Promise<{institutionId:string;membershipId?:string}>};
 type Member=typeof institutionMemberships.$inferSelect;
 type Actor=NonNullable<Awaited<ReturnType<typeof authorizeCapability>>>;
@@ -117,5 +118,5 @@ export const requestUserReset=withErrors(async(req:NextRequest,ctx:Ctx)=>{
   const [hint]=await tx.select().from(institutionMemberships).where(and(eq(institutionMemberships.id,p.membershipId!),eq(institutionMemberships.institutionId,p.institutionId)));if(!hint||hint.userId===actor.identity.id)return false;
   const current=await lockWriteCapability(tx,actor.identity,actor.access,'users.reset',{institutionId:p.institutionId,status:'active'},hint,true);if(!current||current.targetMember?.deletedAt||!canManageTarget(current.subject,await targetGrants(tx,hint.id,p.institutionId),p.institutionId,new Date()))return false;
   await issuePasswordReset(tx,hint.userId,context(req).requestId);await event(tx,actor.identity.id,current.targetMember!,'password-reset-request',input.data.reason,{},context(req).requestId);return true;
- });return result?ok({requested:true},202):jsonError('FORBIDDEN',403);
+ });if(result)scheduleEmailDelivery('password-reset');return result?ok({requested:true},202):jsonError('FORBIDDEN',403);
 });
