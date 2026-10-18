@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import SiiAppShell from '@/components/sii-app-shell';
+
 import { InstitutionOverview } from '@/components/institution-capabilities';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ export default async function InstitutionPage({ params }: PageProps) {
   if (!access) notFound();
 
   return (
-    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="institution" institutionId={institutionId}>
+    <>
       <div className="sii-page-eyebrow">CONTEXTO INSTITUCIONAL <span className="sii-page-eyebrow-line"/></div>
       <div className="sii-page-heading"><div><h1>{access.institutionName}<span className="sii-welcome-period">.</span></h1><p>Tu perfil y permisos vigentes en esta institución.</p></div>
         <Link href="/dashboard" className="sii-outline-button sii-back-link">← Mis instituciones</Link>
@@ -32,6 +32,6 @@ export default async function InstitutionPage({ params }: PageProps) {
           <Link href="/dashboard/security" className="sii-outline-button">Ver seguridad de cuenta →</Link>
         </aside>
       </div>
-    </SiiAppShell>
+    </>
   );
 }

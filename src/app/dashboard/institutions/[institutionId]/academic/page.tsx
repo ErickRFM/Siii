@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import SiiAppShell from '@/components/sii-app-shell';
+
 import AcademicCatalog from '@/components/academic-catalog';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ export default async function AcademicCatalogPage({ params }: PageProps) {
   const access = (await getInstitutionAccess(user.id)).find(item => item.institutionId === institutionId);
   if (!access) notFound();
   return (
-    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="academic" institutionId={institutionId}>
+    <>
       <div className="sii-page-eyebrow">GESTIÓN ACADÉMICA <span className="sii-page-eyebrow-line"/></div>
       <div className="sii-page-heading">
         <div><h1>Catálogo académico<span className="sii-welcome-period">.</span></h1>
@@ -23,6 +23,6 @@ export default async function AcademicCatalogPage({ params }: PageProps) {
         <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>
       </div>
       <AcademicCatalog institutionId={institutionId} />
-    </SiiAppShell>
+    </>
   );
 }

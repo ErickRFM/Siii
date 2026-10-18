@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import type {Route} from 'next';
+import {usePathname} from 'next/navigation';
+import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation/dashboard-location';
 import { useEffect, useState, type ReactNode } from 'react';
 import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
@@ -9,16 +11,18 @@ import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapa
 
 import {academicModuleLinks,allAcademicModuleLinks,type AcademicModule} from '@/shared/navigation/academic-modules';
 
-type Active = AcademicModule | 'overview' | 'security' | 'institution' | 'academic' | 'roles' | 'invitations' | 'users' | 'administration';
-
-export default function SiiAppShell({
-  firstName, fullName, active, institutionId, institutionAdministrationAvailable = false, children,
-}: {
-  firstName: string; fullName: string; active: Active; institutionId?: string; institutionAdministrationAvailable?: boolean; children: ReactNode;
-}) {
-  return <InstitutionCapabilitiesProvider institutionId={institutionId}><Shell firstName={firstName} fullName={fullName} active={active} institutionId={institutionId} institutionAdministrationAvailable={institutionAdministrationAvailable}>{children}</Shell></InstitutionCapabilitiesProvider>;
+export default function SiiAppShell({firstName,fullName,defaultInstitutionId,children}:{
+  firstName:string; fullName:string; defaultInstitutionId?:string; children:ReactNode;
+}){
+  // Shared dashboard layout keeps this sidebar mounted across module navigation.
+  const pathname=usePathname();
+  const {active,institutionId}=resolveDashboardLocation(pathname,defaultInstitutionId);
+  return <InstitutionCapabilitiesProvider key={institutionId??'personal'} institutionId={institutionId}>
+    <Shell firstName={firstName} fullName={fullName} active={active} institutionId={institutionId}
+      institutionAdministrationAvailable={active==='administration'}>{children}</Shell>
+  </InstitutionCapabilitiesProvider>;
 }
-function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:Active;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
+function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     if (!menuOpen) return;
@@ -28,9 +32,11 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [menuOpen]);
-  const { data } = useInstitutionCapabilities();
+  const {data,loading,error}=useInstitutionCapabilities();
+  const verifying=Boolean(institutionId && loading && !data);
+  const unavailableLabel=!institutionId?'Selecciona institución':verifying?'Verificando…':error?'No disponible':'Restringido';
   const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
-  const activeModule=modules.find(module=>module.id===active);
+  const activeModule=allAcademicModuleLinks.find(module=>module.id===active);
   const academicAvailable = ['programs','courses','curricula','terms','campuses'].some(resource => hasAnyCapability(data,`${resource}.read`));
   return (
     <div className="sii-app">
@@ -55,15 +61,15 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
           </Link>
         </nav>
         <div className="sii-sidebar-heading sii-sidebar-heading--secondary">GESTIÓN ACADÉMICA</div>
-        <nav className="sii-nav" aria-label="Gestión académica">
+        <nav className="sii-nav" aria-label="Gestión académica" aria-busy={verifying}>
           {institutionId && academicAvailable ? <Link href={`/dashboard/institutions/${institutionId}/academic`}
             className={active === 'academic' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}
             aria-current={active === 'academic' ? 'page' : undefined}
             onClick={() => setMenuOpen(false)}>
               <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
-          </Link> : <span className="sii-nav-item sii-nav-item--muted">
+          </Link> : <span className={verifying?"sii-nav-item sii-nav-item--muted sii-nav-item--loading":"sii-nav-item sii-nav-item--muted"}>
             <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
-            <span className="sii-nav-soon">{!institutionId ? 'Selecciona institución' : 'Restringido'}</span>
+            <span className="sii-nav-soon">{unavailableLabel}</span>
           </span>}
           {allAcademicModuleLinks.map(module => {
             const allowed=Boolean(institutionId && modules.some(item=>item.id===module.id));
@@ -71,9 +77,9 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
               className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'}
               aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}>
               <span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}
-            </Link> : <span key={module.id} className="sii-nav-item sii-nav-item--muted">
+            </Link> : <span key={module.id} className={verifying?"sii-nav-item sii-nav-item--muted sii-nav-item--loading":"sii-nav-item sii-nav-item--muted"}>
               <span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}
-              <span className="sii-nav-soon">{!institutionId ? 'Selecciona institución' : 'Restringido'}</span>
+              <span className="sii-nav-soon">{unavailableLabel}</span>
             </span>;
           })}
         </nav>

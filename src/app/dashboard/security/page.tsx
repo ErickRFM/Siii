@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type {Route} from 'next';
 import { redirect } from 'next/navigation';
 import { getIdentity } from '@/shared/auth/session';
-import SiiAppShell from '@/components/sii-app-shell';
+
 import PasswordChange from '../password-change';
 import MfaSecurity from '@/components/mfa-security';
 import { safeSecurityReturn } from '@/shared/auth/security-return';
@@ -15,7 +15,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
   const {returnTo}=await searchParams;
   const safeReturn = safeSecurityReturn(returnTo);
   return (
-    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="security">
+    <>
       <div className="sii-page-eyebrow">CENTRO PERSONAL <span className="sii-page-eyebrow-line"/></div>
       <div className="sii-page-heading"><div><h1>Cuenta y seguridad<span className="sii-welcome-period">.</span></h1><p>Gestiona tus credenciales y consulta el estado de tu cuenta.</p></div>
         <Link href="/dashboard" className="sii-outline-button sii-back-link">← Volver a inicio</Link>
@@ -40,6 +40,6 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
           <p className="sii-security-coming">El restablecimiento de contraseña conserva tu verificación de identidad y requiere iniciar sesión de nuevo.</p>
         </aside>
       </div>
-    </SiiAppShell>
+    </>
   );
 }
