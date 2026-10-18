@@ -122,9 +122,9 @@ test('retrying a transient program load restores curriculum creation',async({pag
 test('a rejected archive keeps valid catalog rows available',async({page})=>{
  const parent=(await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,$2,'Archive rejection fixture','ingenieria','presencial') RETURNING id",[institutionId,'ARCHIVE'+suffix])).rows[0];
  await sql.query("INSERT INTO curriculum_versions(institution_id,program_id,version) VALUES($1,$2,'active-plan')",[institutionId,parent.id]);
- await catalog(page);page.once('dialog',dialog=>dialog.accept());
+ await catalog(page);
  const row=page.locator('tbody tr').filter({hasText:'Archive rejection fixture'});
- await row.getByRole('button',{name:'Archivar'}).click();
+ await row.getByRole('button',{name:'Archivar'}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Confirmar cambio'}).click();
  await expect(page.locator('.sii-catalog-error[role=alert]')).toContainText('planes activos');
  await expect(row).toBeVisible();await expect(row.getByText('Activo',{exact:true})).toBeVisible();
  await axe(page);
