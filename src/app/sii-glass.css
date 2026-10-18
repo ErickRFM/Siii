@@ -1,0 +1,139 @@
+/* SII Matte Glass — incremental, scoped presentation layer.
+   All permissions, routing, and form semantics remain server-controlled. */
+:root {
+  --sii-glass-panel:rgba(255,255,255,.82);
+  --sii-glass-soft:rgba(255,255,255,.69);
+  --sii-glass-header:rgba(252,251,253,.88);
+  --sii-glass-edge:rgba(90,67,80,.10);
+  --sii-glass-depth:0 18px 42px rgba(50,31,54,.075),0 3px 12px rgba(50,31,54,.035);
+  --sii-glass-hover:0 24px 48px rgba(50,31,54,.11),0 5px 15px rgba(50,31,54,.05);
+}
+html[data-sii-theme="dark"] {
+  --sii-glass-panel:rgba(28,35,47,.88);
+  --sii-glass-soft:rgba(38,46,61,.82);
+  --sii-glass-header:rgba(20,25,36,.93);
+  --sii-glass-edge:rgba(190,187,204,.12);
+  --sii-glass-depth:0 18px 44px rgba(0,0,0,.22),0 4px 14px rgba(0,0,0,.1);
+  --sii-glass-hover:0 24px 52px rgba(0,0,0,.28),0 5px 17px rgba(0,0,0,.12);
+}
+/* Muted ambient light, not glowing bubbles or a new identity. */
+.sii-app {
+  background:
+    radial-gradient(ellipse 850px 570px at 92% 7%,rgba(151,52,89,.085),transparent 77%),
+    radial-gradient(ellipse 730px 560px at 6% 88%,rgba(120,111,160,.075),transparent 76%),
+    var(--sii-bg);
+}
+html[data-sii-theme="dark"] .sii-app {
+  background:
+    radial-gradient(ellipse 840px 600px at 93% 8%,rgba(147,60,100,.115),transparent 76%),
+    radial-gradient(ellipse 740px 530px at 12% 87%,rgba(78,87,139,.10),transparent 80%),
+    var(--sii-bg);
+}
+/* The sidebar stays recognisably institutional, with an understated matte finish. */
+.sii-app .sii-sidebar {
+  background:
+    radial-gradient(ellipse at 10% 0%,rgba(168,70,104,.19),transparent 55%),
+    linear-gradient(168deg,rgba(78,22,45,.98),rgba(46,15,31,.99) 57%,rgba(35,13,28,.99));
+  box-shadow:12px 0 40px rgba(40,14,30,.10);
+  border-right:1px solid rgba(255,255,255,.07);
+}
+html[data-sii-theme="dark"] .sii-app .sii-sidebar {
+  background:radial-gradient(ellipse at 8% 0%,rgba(113,37,67,.26),transparent 53%),
+    linear-gradient(170deg,#29121e,#130e18 76%);
+}
+.sii-app .sii-sidebar-status {
+  background:rgba(255,255,255,.055);
+  border-color:rgba(255,255,255,.07);
+}
+.sii-app a.sii-nav-item:hover {
+  background:rgba(255,255,255,.105);
+}
+.sii-app .sii-nav-item--active {
+  background:rgba(184,73,109,.46)!important;
+  box-shadow:inset 3px 0 rgba(253,203,220,.75),0 6px 18px rgba(20,6,17,.10);
+}
+.sii-app .sii-nav-item--muted{opacity:.82}
+/* Sticky frosted toolbar and high-opacity readable glass panels. */
+.sii-app .sii-topbar {
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:var(--sii-glass-header);
+  border-bottom-color:var(--sii-glass-edge);
+  -webkit-backdrop-filter:blur(18px) saturate(1.08);
+  backdrop-filter:blur(18px) saturate(1.08);
+}
+.sii-app :is(.sii-metric,.sii-panel,.sii-module-card) {
+  background:var(--sii-glass-panel);
+  border-color:var(--sii-glass-edge);
+  box-shadow:var(--sii-glass-depth);
+  -webkit-backdrop-filter:blur(12px) saturate(1.06);
+  backdrop-filter:blur(12px) saturate(1.06);
+}
+.sii-app .sii-access-panel {
+  background:linear-gradient(151deg,var(--sii-glass-panel) 54%,var(--sii-primary-soft));
+}
+.sii-app :is(.sii-institution-item,.sii-empty,.sii-outline-button,.sii-catalog-tabs,.sii-small-count,.sii-catalog-toolbar input) {
+  background:var(--sii-glass-soft);
+  border-color:var(--sii-glass-edge);
+}
+.sii-app :is(.sii-catalog-form input,.sii-catalog-form select,.sii-catalog-edit input,.sii-security-card .password-form input) {
+  background:var(--sii-glass-soft);
+  border-color:var(--sii-line);
+}
+.sii-app .sii-module-glyph,.sii-app .sii-security-shield {
+  background:var(--sii-primary-soft);
+}
+.sii-app .sii-metric-icon {
+  box-shadow:inset 0 0 0 1px rgba(65,45,58,.045);
+}
+.sii-app .sii-module-card,.sii-app .sii-metric,.sii-app a.sii-institution-item {
+  transition:transform .2s ease,box-shadow .2s ease,background-color .2s ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  .sii-app a.sii-module-card:hover,.sii-app a.sii-institution-item:hover {
+    transform:translateY(-2px);
+    box-shadow:var(--sii-glass-hover);
+  }
+}
+.sii-auth {
+  background:
+    radial-gradient(ellipse at 85% 12%,rgba(148,54,86,.065),transparent 55%),var(--sii-bg);
+}
+.sii-auth .sii-auth-access {
+  background:var(--sii-glass-header);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+}
+.sii-auth .sii-auth-role-notice {
+  background:var(--sii-glass-soft);
+  border-color:var(--sii-glass-edge);
+}
+/* Keep effects optional; readable solid backgrounds are the fallback. */
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))) {
+  .sii-app .sii-topbar{background:var(--sii-surface)}
+  .sii-app :is(.sii-metric,.sii-panel,.sii-module-card){background:var(--sii-surface)}
+  .sii-auth .sii-auth-access{background:var(--sii-surface)}
+}
+@media (prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+  .sii-app .sii-topbar,.sii-app :is(.sii-metric,.sii-panel,.sii-module-card),
+  .sii-auth .sii-auth-access {
+    background:var(--sii-surface);
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    border-color:var(--sii-line);
+    box-shadow:none;
+  }
+  .sii-app :is(.sii-institution-item,.sii-empty,.sii-outline-button,.sii-catalog-tabs,.sii-small-count) {
+    background:var(--sii-surface);
+    border-color:var(--sii-line);
+  }
+}
+@media (forced-colors:active) {
+  .sii-app,.sii-app .sii-sidebar{background:Canvas;color:CanvasText}
+  .sii-app .sii-nav-item--active{background:Highlight!important;color:HighlightText!important;box-shadow:none}
+  .sii-app :is(.sii-metric,.sii-panel,.sii-module-card){border:1px solid CanvasText}
+}
+@media (prefers-reduced-motion:reduce) {
+  .sii-app :is(.sii-module-card,.sii-metric,.sii-institution-item){transition:none!important;transform:none!important}
+}

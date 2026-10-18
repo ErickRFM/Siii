@@ -1,4 +1,5 @@
 'use client';
+import {useInstitutionConfirmation} from './sii-confirmation';
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { CapabilityState, hasInstitutionCapability, PROFILE_LABELS, SecurityActionLink, useInstitutionCapabilities, type InstitutionGrant, type InstitutionCapabilities } from './institution-capabilities';
@@ -27,6 +28,7 @@ function errorText(code?: string) {
   }
 }
 export default function InstitutionRoles({ institutionId }: { institutionId: string }) {
+ const {ask,confirmation}=useInstitutionConfirmation();
   const { data: access, loading: accessLoading, error: accessError, refresh } = useInstitutionCapabilities();
   const allowed = hasInstitutionCapability(access, 'roles.assign');
   const [members, setMembers] = useState<Member[]>([]);
@@ -121,12 +123,12 @@ export default function InstitutionRoles({ institutionId }: { institutionId: str
   }
   async function revoke(grant: InstitutionGrant,member:Member) {
     const parent=grant.scopeType==='institution'?'esta institución':(grant.scopeType==='program'?programs:campuses).find(row=>row.id===grant.scopeId)?.name??'el ámbito seleccionado';
-    if (!window.confirm(`¿Revocar el perfil ${PROFILE_LABELS[grant.role] ?? grant.role} de ${member.username} en ${parent}? El acceso se volverá a comprobar en el servidor.`)) return;
+    if (!await ask({title:'Revocar perfil institucional',description:`Se revocará ${PROFILE_LABELS[grant.role]??grant.role} de ${member.username} en ${parent}. La autorización se validará en el servidor.`,confirmLabel:'Revocar perfil',destructive:true})) return;
     await mutate('revoke', { grantId: grant.id });
   }
   if (accessLoading || accessError || access?.restricted) return <CapabilityState returnTo={returnTo}/>;
   if (!allowed) return <p className="sii-info-banner">No tienes permiso para administrar roles y ámbitos.</p>;
-  return <>
+  return <>{confirmation}
     {!online && <p className="sii-catalog-error" role="status">Sin conexión. Las concesiones pueden estar desactualizadas; las operaciones están deshabilitadas.</p>}
     {notice && <p className="sii-catalog-notice" role="status">{notice}</p>}
     {error && <p id="roles-error" className="sii-catalog-error" role="alert" tabIndex={-1} ref={errorRef}>{error}</p>}

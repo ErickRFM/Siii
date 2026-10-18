@@ -22,7 +22,53 @@
   .sii-app .sii-sidebar--open{visibility:visible;pointer-events:auto}
 }
 
+/* Incremental operational polish: same palette, tighter layout, consistent controls. */
+.sii-app .sii-catalog-layout,.sii-app .sii-catalog-table-panel,.sii-app .sii-panel{min-width:0}
+.sii-app .sii-catalog-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.sii-app .sii-catalog-table{border-collapse:separate;border-spacing:0}
+.sii-app .sii-catalog-table th{white-space:nowrap}
+.sii-app .sii-catalog-table tbody tr{transition:background-color .15s}
+.sii-app .sii-catalog-table tbody tr:hover{background:var(--sii-surface-soft)}
+.sii-app :is(.sii-catalog-form,.sii-catalog-toolbar) :is(input,select,textarea){min-width:0;max-width:100%}
+.sii-app .sii-catalog-form label{line-height:1.5}
+.sii-app .sii-catalog-pagination{flex-wrap:wrap;gap:12px}
+.sii-app .sii-catalog-pagination .sii-outline-button{margin:0}
+.sii-app .sii-catalog-actions button{min-height:40px}
+.sii-app .sii-submit:active:not(:disabled),.sii-app a.sii-outline-button:active{transform:translateY(1px)}
+.sii-app .sii-submit:disabled{opacity:.65;cursor:not-allowed}
+.sii-app .sii-catalog-tab{padding:10px 12px;text-align:center;line-height:1.4}
+.sii-app :is(.sii-catalog-notice,.sii-catalog-error){overflow-wrap:anywhere}
+@media(max-width:1200px){.sii-app .sii-catalog-layout{grid-template-columns:minmax(0,1fr)}.sii-app .sii-catalog-create{position:static}}
+@media(max-width:640px){.sii-app .sii-catalog-tabs{display:flex;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}.sii-app .sii-catalog-tab{flex:0 0 auto;min-width:120px}.sii-app .sii-catalog-pagination{justify-content:center}.sii-app .sii-catalog-table-panel{padding:14px}.sii-app .sii-catalog-summary{flex-wrap:wrap}}
+.sii-confirm-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(13,10,18,.68);display:grid;place-items:center;padding:20px;overflow-y:auto}
+.sii-confirm-dialog{width:min(100%,490px);max-height:calc(100dvh - 40px);overflow:auto;background:var(--sii-surface);color:var(--sii-text);border:1px solid var(--sii-line);border-radius:18px;padding:clamp(20px,3vw,30px);box-shadow:0 24px 70px rgba(0,0,0,.32)}
+.sii-confirm-heading h2{font-size:21px;line-height:1.3;margin:10px 0}
+.sii-confirm-heading p{font-size:13px;line-height:1.65;color:var(--sii-muted);margin:0 0 20px}
+.sii-confirm-reason{display:grid;gap:8px;font-size:12px;font-weight:700;color:var(--sii-text)}
+.sii-confirm-reason textarea{width:100%;min-height:100px;resize:vertical;font:inherit;padding:12px;border:1px solid var(--sii-line);border-radius:10px;background:var(--sii-surface-soft);color:var(--sii-text)}
+.sii-confirm-reason small{color:var(--sii-muted);font-size:11px}
+.sii-confirm-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:24px}
+.sii-confirm-actions .sii-outline-button{margin:0}
+.sii-confirm-submit{font:inherit;font-weight:750;font-size:12px;min-height:44px;border:0;border-radius:10px;padding:11px 17px;color:#fff;background:#8b213b;cursor:pointer}
+.sii-confirm-submit--destructive{background:#9a2646}
+.sii-confirm-submit:disabled{opacity:.6;cursor:not-allowed}
+.sii-confirm-submit:focus-visible{outline:3px solid var(--sii-primary);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.sii-app .sii-catalog-table tbody tr{transition:none!important}.sii-app .sii-submit:active:not(:disabled){transform:none!important}}
+
 /* AA contrast: explicit legible action text on matte surfaces in either theme. */
 .sii-app .sii-outline-button:not(:disabled){color:#66182f}
 html[data-sii-theme="dark"] .sii-app .sii-outline-button:not(:disabled){color:#ffd1dd}
 .sii-app .sii-outline-button:not(:disabled){opacity:1}
+
+/* Consistent, contrast-aware status surfaces across institutional modules. */
+.sii-app .sii-catalog-notice,.sii-app .sii-catalog-error{margin-block:12px 18px;padding:14px 16px;line-height:1.6}
+.sii-app :is(.sii-catalog-notice,.sii-catalog-error) p{margin:0}
+.sii-app :is(.sii-catalog-notice,.sii-catalog-error) .sii-outline-button{margin-top:10px}
+.sii-app .sii-empty{padding:clamp(22px,3vw,36px);line-height:1.65}
+html[data-sii-theme="dark"] .sii-app .sii-catalog-error{background:#3b1b2a;color:#ffd1db;border-color:#a64b67}
+html[data-sii-theme="dark"] .sii-app .sii-catalog-notice{background:#13382e;color:#a5f1d2;border-color:#347d62}
+html[data-sii-theme="dark"] .sii-app .sii-info-banner{background:#392b1c;color:#ffe8bf;border-color:#986f3d}
+.sii-app .sii-catalog-form button[type=submit]{min-height:44px}
+.sii-app .sii-catalog-form :is(input,select,textarea):disabled{cursor:not-allowed}
+.sii-app .sii-catalog-table td{overflow-wrap:anywhere}
+.sii-app .sii-catalog-table tbody tr:focus-within{background:var(--sii-surface-soft)}

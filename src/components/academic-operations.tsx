@@ -1,9 +1,28 @@
 'use client';
+/** Convert service error codes to clear UI feedback; server decisions are authoritative. */
+function userFacingError(code:string){
+ const messages:Record<string,string>={
+  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
+  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
+  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
+  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
+  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
+  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
+  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
+  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
+  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
+  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
+ };
+ return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
+}
+
+import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
 import { useCallback,useEffect,useState,type FormEvent } from 'react';
 type Row={id:string;institutionId:string;code?:string;name?:string;firstName?:string;lastName?:string;status:string;capacity?:number;enrollmentNumber?:string;employeeNumber?:string;sectionId?:string;studentId?:string;teacherId?:string};
 type Part='sections'|'enrollments'|'assignments';
 export default function AcademicOperations({institutionId}:{institutionId:string}){
+ const {ask,confirmation}=useInstitutionConfirmation();
  const base=`/api/v1/institutions/${institutionId}`;
  const [sections,setSections]=useState<Row[]>([]),[students,setStudents]=useState<Row[]>([]),[teachers,setTeachers]=useState<Row[]>([]);
  const [terms,setTerms]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[enrollments,setEnrollments]=useState<Row[]>([]),[assignments,setAssignments]=useState<Row[]>([]);
@@ -30,11 +49,11 @@ export default function AcademicOperations({institutionId}:{institutionId:string
    const r=await fetch(`${base}/${part}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    if(!r.ok){const json=await r.json().catch(()=>({error:{code:'SERVER_ERROR'}})) as {error?:{code?:string}};throw Error(json.error?.code??'SERVER_ERROR')}
    form.reset();setNotice('Operación realizada y auditada.');await refresh();
-  }catch(e){setError('No fue posible completar la operación: '+(e instanceof Error?e.message:'ERROR'))}
+  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'))}
   finally{setBusy(false)}
  }
  async function revoke(part:Part,row:Row){
-  if(!window.confirm('¿Confirmas la operación? Este cambio queda auditado.'))return;
+  if(!await ask({title:'Confirmar cambio académico',description:part==='sections'?'La sección se cerrará y quedará auditada.':'La inscripción o asignación se revocará y quedará auditada.',confirmLabel:'Aplicar cambio',destructive:true}))return;
   setBusy(true);setError('');
   const payload={id:row.id,status:part==='sections'?'closed':'withdrawn'};
   try{
@@ -47,10 +66,11 @@ export default function AcademicOperations({institutionId}:{institutionId:string
  const option=(records:Row[],type:'student'|'teacher'|'section'|'term'|'course')=>
   records.map(x=><option value={x.id} key={x.id}>{type==='student'?x.enrollmentNumber:type==='teacher'?x.employeeNumber:x.code} · {x.firstName?x.firstName+' '+x.lastName:x.name??'Sección'}</option>);
  return <div className="sii-academic">
+ {confirmation}
   <div className="sii-catalog-summary"><div><span className="sii-section-kicker">OPERACIÓN ACADÉMICA</span><h2>Oferta, grupos e inscripciones</h2>
    <p>Operaciones reales con validación de institución, cupos y asignaciones.</p></div>
    <button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar</button></div>
-  {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
+  {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar datos</button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   {loading?<div role="status" className="sii-panel">Consultando operaciones institucionales…</div>:<>
    <div className="sii-catalog-layout">
