@@ -170,13 +170,13 @@ export default function InstitutionAdministration({initialInstitution, actions}:
       }
     } finally { if (alive.current) setSaving(false); }
   }
-  function saveSettings(event: FormEvent<HTMLFormElement>) {
+  async function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!actions.updateSettings || disabled) return;
     if (!await ask({title:'Guardar configuración institucional',description:`Se actualizará ${institution.name}. Motivo: ${reason.trim()}.`,confirmLabel:'Guardar configuración'})) return;
     void mutate('settings', {...draft, name: draft.name.trim(), shortName: draft.shortName?.trim() || null, code: draft.code.trim(), timezone: draft.timezone.trim(), reason: reason.trim()});
   }
-  function saveStatus(event: FormEvent<HTMLFormElement>) {
+  async function saveStatus(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!actions.changeStatus || disabled || !nextStatus || nextStatus === institution.status) return;
     if (!await ask({title:'Cambiar estado institucional',description:`${institution.name}: ${statusLabels[institution.status]} → ${statusLabels[nextStatus]}. ${nextStatus==='active'?'Se restablecerán las operaciones según los permisos vigentes; las invitaciones revocadas no regresarán.':'Se bloquearán operaciones y se revocarán invitaciones pendientes.'} Motivo: ${statusReason.trim()}.`,confirmLabel:'Cambiar estado',destructive:nextStatus!=='active'})) return;
