@@ -70,7 +70,7 @@ test('new account acceptance requires consent, protects the fragment and permits
 
 test('recipient can reject with consent and reload cannot recover the consumed in-memory bearer',async({page,browser})=>{
  await administrator(page);const id=await create(page,`reject-${randomUUID().slice(0,8)}@example.test`),link=await mailLink(id),other=await recipient(browser);
- try{await other.page.goto(link.path);await expect(other.page.getByRole('button',{name:'Rechazar invitación'})).toBeDisabled();await other.page.locator('#invitation-consent').check();other.page.once('dialog',dialog=>dialog.accept());await other.page.getByRole('button',{name:'Rechazar invitación'}).click();await expect(other.page.getByRole('heading',{name:'Invitación rechazada.'})).toBeVisible();expect((await sql.query('SELECT state FROM institution_invitations WHERE id=$1',[id])).rows[0].state).toBe('rejected');await other.page.reload();await expect(other.page.locator('#invitation-error')).toContainText('Reabre el enlace original');await expect(other.page.getByRole('button',{name:'Aceptar invitación'})).toHaveCount(0);
+ try{await other.page.goto(link.path);await expect(other.page.getByRole('button',{name:'Rechazar invitación'})).toBeDisabled();await other.page.locator('#invitation-consent').check();await other.page.getByRole('button',{name:'Rechazar invitación'}).click();await other.page.getByRole('alertdialog').getByRole('button',{name:'Rechazar invitación'}).click();await expect(other.page.getByRole('heading',{name:'Invitación rechazada.'})).toBeVisible();expect((await sql.query('SELECT state FROM institution_invitations WHERE id=$1',[id])).rows[0].state).toBe('rejected');await other.page.reload();await expect(other.page.locator('#invitation-error')).toContainText('Reabre el enlace original');await expect(other.page.getByRole('button',{name:'Aceptar invitación'})).toHaveCount(0);
  }finally{await other.context.close();}
 });
 
@@ -133,7 +133,7 @@ test('a delayed manual refresh cannot replace the invitation opened afterwards',
   await expect(other.page.getByRole('status').filter({hasText:'La invitación y tu sesión se comprobarán nuevamente'})).toHaveCount(0);
   await expect(other.page.locator('#invitation-consent')).not.toBeChecked();await other.page.locator('#invitation-consent').check();
   const rejected=other.page.waitForRequest(request=>request.url().endsWith('/invitations/reject'));
-  other.page.once('dialog',dialog=>dialog.accept());await other.page.getByRole('button',{name:'Rechazar invitación',exact:true}).click();
+  await other.page.getByRole('button',{name:'Rechazar invitación',exact:true}).click();await other.page.getByRole('alertdialog').getByRole('button',{name:'Rechazar invitación'}).click();
   expect((await rejected).postDataJSON().invitationId).toBe(second);await expect(other.page.getByRole('heading',{name:'Invitación rechazada.'})).toBeVisible();
   const states=await sql.query('SELECT id,state FROM institution_invitations WHERE id=ANY($1::uuid[])',[[first,second]]);
   expect(states.rows.find(row=>row.id===first)?.state).toBe('pending');expect(states.rows.find(row=>row.id===second)?.state).toBe('rejected');

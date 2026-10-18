@@ -13,7 +13,7 @@ describe('institutional UX contracts',()=>{
   expect(dialog).toContain('role="alertdialog"');
   expect(dialog).toContain('aria-modal="true"');
   expect(dialog).toContain("event.key==='Escape'");
-  for(const m of ['academic-catalog','academic-operations','school-registry','scheduling-studio','teacher-gradebook','university-services','institution-roles','institution-invitations','institution-users']){
+  for(const m of ['academic-catalog','academic-operations','school-registry','scheduling-studio','teacher-gradebook','university-services','institution-roles','institution-invitations','institution-users','institution-admin','invitation-accept']){
     const source=read('src/components/'+m+'.tsx');
     expect(source).toContain('useInstitutionConfirmation');
     expect(source).not.toMatch(/window\.(?:prompt|confirm)\s*\(/);
