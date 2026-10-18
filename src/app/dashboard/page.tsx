@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 import { ROLE_LABELS, hasPermission } from '@/shared/auth/roles';
-import SiiAppShell from '@/components/sii-app-shell';
+
 import PasswordChange from './password-change';
 import {ManageableInstitutions} from '@/components/institution-admin';
 import InstitutionModuleDirectory from '@/components/institution-module-directory';
@@ -17,7 +17,7 @@ export default async function Dashboard() {
   const roleNames = [...new Set(institutions.flatMap(item => item.roles))].map(role => ROLE_LABELS[role]);
 
   return (
-    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} active="overview" institutionId={institutions.length === 1 ? institutions[0].institutionId : undefined}>
+    <>
       <div className="sii-page-eyebrow">CENTRO DE OPERACIONES <span className="sii-page-eyebrow-line"/></div>
       <div className="sii-page-heading">
         <div>
@@ -100,6 +100,6 @@ export default async function Dashboard() {
         ))}
       </section>
       <footer className="sii-footer">SII · Sistema Institucional Integral <span>Administración académica segura · Experiencia móvil en Compañero</span></footer>
-    </SiiAppShell>
+    </>
   );
 }
