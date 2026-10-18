@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type {Route} from 'next';
 import {usePathname} from 'next/navigation';
 import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation/dashboard-location';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { SiiBrand } from './sii-brand';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
@@ -24,13 +24,38 @@ export default function SiiAppShell({firstName,fullName,defaultInstitutionId,chi
 }
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!menuOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+    const sidebar = document.getElementById('sii-sidebar-mobile');
+    const trigger = menuTrigger.current;
+    // On small screens, keep keyboard focus in the open navigation.
+    if (window.matchMedia('(max-width: 840px)').matches) {
+      sidebar?.querySelector<HTMLAnchorElement>('a[href]')?.focus();
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab' || !window.matchMedia('(max-width: 840px)').matches) return;
+      const links = Array.from(sidebar?.querySelectorAll<HTMLAnchorElement>('a[href]') ?? []);
+      const first = links[0], last = links[links.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && (document.activeElement === first || !sidebar?.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !sidebar?.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      trigger?.focus();
+    };
   }, [menuOpen]);
   const {data,loading,error}=useInstitutionCapabilities();
   const verifying=Boolean(institutionId && loading && !data);
@@ -93,7 +118,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
       <div className="sii-main">
         <header className="sii-topbar">
           <div className="sii-topbar-start">
-            <button className="sii-menu-button" onClick={() => setMenuOpen(x => !x)} type="button" aria-expanded={menuOpen} aria-controls="sii-sidebar-mobile" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'}>☰</button>
+            <button ref={menuTrigger} className="sii-menu-button" onClick={() => setMenuOpen(x => !x)} type="button" aria-expanded={menuOpen} aria-controls="sii-sidebar-mobile" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'}>☰</button>
             <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {activeModule?activeModule.label:active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución'}</span>
           </div>
           <div className="sii-topbar-actions">

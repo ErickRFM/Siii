@@ -15,3 +15,9 @@
 @media(min-width:841px){.sii-app .sii-sidebar{position:sticky;top:0;height:100dvh;min-height:100dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}.sii-app .sii-sidebar-spacer{min-height:24px}}
 @media(max-width:600px){.sii-app .sii-page-heading>a{margin-top:12px}.sii-app .sii-page-heading h1{overflow-wrap:anywhere}.sii-app .sii-topbar-actions .sii-logout{min-height:44px}}
 @media(prefers-reduced-motion:reduce){.sii-app :is(.sii-nav-item,.sii-outline-button,.sii-module-card,.sii-institution-item){transition:none!important;transform:none!important}}
+
+/* Prevent closed off-canvas navigation from being reached by keyboard. */
+@media(max-width:840px){
+  .sii-app .sii-sidebar{visibility:hidden;pointer-events:none}
+  .sii-app .sii-sidebar--open{visibility:visible;pointer-events:auto}
+}

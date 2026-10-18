@@ -14,6 +14,8 @@ describe('institutional shell persistence contract',()=>{
     const shell=source('src/components/sii-app-shell.tsx');
     expect(shell).toContain("'Verificando…'");
     expect(shell).toContain('aria-busy={verifying}');
+    expect(shell).toContain('menuTrigger');
+    expect(shell).toContain("event.key !== 'Tab'");
     expect(shell).toContain('resolveDashboardLocation(pathname,defaultInstitutionId)');
   });
 });
