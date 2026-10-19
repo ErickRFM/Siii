@@ -47,6 +47,23 @@ async function mailLink(id:string){
 async function recipient(browser:Browser){const context=await browser.newContext({baseURL:test.info().project.use.baseURL});return {context,page:await context.newPage()};}
 async function axe(page:Page){const results=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();expect(results.violations.map(result=>({id:result.id,targets:result.nodes.map(node=>node.target)}))).toEqual([]);}
 
+test('inviter confirms fresh MFA within Invitations and keeps the same draft and session',async({page})=>{
+ await login(page,username,true);
+ await page.goto(`/dashboard/institutions/${institutionId}/invitations`);
+ await expect(page.getByRole('heading',{name:'Confirma tu identidad para invitar'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Crear invitación'})).toBeVisible();
+ await page.getByLabel('Contraseña actual',{exact:true}).fill(password);
+ await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();
+ await page.getByLabel('Código de recuperación',{exact:true}).fill(stepRecovery);
+ const verified=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/mfa/step-up')&&response.request().method()==='POST');
+ await page.getByRole('button',{name:'Confirmar identidad y continuar'}).click();
+ expect((await verified).status()).toBe(200);
+ await expect(page.getByRole('heading',{name:'Confirma tu identidad para invitar'})).toHaveCount(0);
+ await expect(page.getByText('Identidad confirmada. Ya puedes crear o administrar invitaciones durante cinco minutos.')).toBeVisible();
+ const id=await create(page,`inline-step-up-${randomUUID().slice(0,8)}@example.test`);
+ expect((await sql.query('SELECT id FROM institution_invitations WHERE id=$1',[id])).rowCount).toBe(1);
+});
+
 test('administration records honest delivery and rotates then revokes the real mail link',async({page,browser})=>{
  test.setTimeout(120000);await administrator(page);const email=`rotate-${randomUUID().slice(0,8)}@example.test`,id=await create(page,email,'coordinator',true),original=await mailLink(id);
  const row=page.locator('tbody tr').filter({hasText:email});await expect(row).toContainText(/Entrega pendiente|Pendiente de configurar correo/);await expect(row).toContainText('Programa invitado');
