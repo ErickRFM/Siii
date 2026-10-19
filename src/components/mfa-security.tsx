@@ -128,7 +128,7 @@ export default function MfaSecurity() {
       if (!Array.isArray(result.data?.recoveryCodes) || !result.data.recoveryCodes.length) throw new MfaRequestError('SERVICE_UNAVAILABLE');
       form.reset(); setEnrollmentCodeError(''); setCodes(result.data.recoveryCodes); setEnrollment(null);
       setNotice('Autenticador activado. Guarda tus códigos de recuperación.');
-      await refresh(); notifyAssuranceChanged(); router.refresh();
+      notifyAssuranceChanged(); await refresh(); router.refresh();
     }, { factor: 'mfa-enrollment-code' });
   }
   async function stepUp(event: FormEvent<HTMLFormElement>) {
@@ -141,7 +141,7 @@ export default function MfaSecurity() {
       if (!result.ok || !result.expiresAt) throw new MfaRequestError('SERVICE_UNAVAILABLE');
       form.reset(); setStatus(previous => previous ? { ...previous, stepUpExpiresAt: result.expiresAt } : null);
       setNotice('Identidad confirmada. Puedes gestionar tu autenticador durante cinco minutos.');
-      await refresh(); notifyAssuranceChanged(); router.refresh();
+      notifyAssuranceChanged(); await refresh(); router.refresh();
     }, { password: 'mfa-step-up-password', factor: 'mfa-step-up-factor' });
   }
   async function regenerate() {
@@ -157,7 +157,7 @@ export default function MfaSecurity() {
       const result = await request<{ ok: boolean }>('/revoke', {});
       if (!result.ok) throw new MfaRequestError('SERVICE_UNAVAILABLE');
       setEnrollment(null); setCodes([]); setNotice('Autenticador desactivado. Se cerraron tus sesiones en los otros dispositivos.');
-      await refresh(); notifyAssuranceChanged(); router.refresh();
+      notifyAssuranceChanged(); await refresh(); router.refresh();
     });
   }
 
