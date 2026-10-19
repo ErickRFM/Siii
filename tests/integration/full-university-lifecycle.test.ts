@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applicantRegisterSchema, applicantLoginSchema, admissionApplicationSchema, admissionDecisionSchema } from '@/modules/admissions/validation';
 import { feeTypeSchema, createOrderSchema, recordPaymentSchema } from '@/modules/financials/validation';
-import { generateInstitutionalEnrollmentNumber } from '@/modules/registry/enrollment-generator';
 
 describe('E2E Full University Lifecycle Contract Tests', () => {
   it('executes full student lifecycle validation chain from applicant to enrollment', () => {
