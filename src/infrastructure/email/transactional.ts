@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import {renderSiiiEmailHtml} from './templates';
 
 export type TransactionalEmail={to:string;subject:string;text:string;eventId:string};
 export type EmailConfiguration={apiKey?:string;from?:string;replyTo?:string};
@@ -28,7 +29,7 @@ export async function sendTransactionalEmail(input:TransactionalEmail,configurat
   const response=await fetch('https://api.resend.com/emails',{
    method:'POST',redirect:'error',signal:AbortSignal.timeout(10000),
    headers:{Authorization:'Bearer '+config.data.apiKey,'Content-Type':'application/json','Idempotency-Key':'siii-'+purpose+'-'+message.data.eventId},
-   body:JSON.stringify({from:config.data.from,to:[message.data.to],reply_to:config.data.replyTo,subject:message.data.subject,text:message.data.text}),
+   body:JSON.stringify({from:'Siii - Sistema Institucional Integral <'+config.data.from+'>',to:[message.data.to],reply_to:config.data.replyTo,subject:message.data.subject,text:message.data.text,html:renderSiiiEmailHtml(message.data,purpose)}),
   });
   if(response.status===429 || response.status>=500) return {status:'retryable',code:'EMAIL_PROVIDER_RETRY'};
   if(response.status===409){

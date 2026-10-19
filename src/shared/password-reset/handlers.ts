@@ -11,6 +11,7 @@ import {hashPassword} from '@/shared/auth/password';
 import {invalidatePrivileges} from '@/shared/auth/privilege-write';
 import {audit,context} from '@/shared/http/request-context';
 import {withErrors} from '@/shared/http/route-errors';
+import {scheduleEmailDelivery} from '@/infrastructure/email/after-delivery';
 import {issuePasswordReset,resetBudget,resetCandidate,resetUsable,cancelResetOutbox} from './storage';
 const proof=z.object({resetId:z.uuid(),token:z.string().regex(/^[A-Za-z0-9_-]{43}$/)}).strict();
 const requestBody=z.object({email:z.string().trim().toLowerCase().pipe(z.email().max(254))}).strict();
@@ -24,7 +25,7 @@ export const requestPasswordReset=withErrors(async(req:NextRequest)=>{
  const allowed=await ip(req),parsed=requestBody.safeParse(await req.json().catch(()=>null));if(!allowed||!parsed.success)return generic();
  const [hint]=await db.select({userId:accountEmailVerifications.userId}).from(accountEmailVerifications).where(eq(accountEmailVerifications.verifiedEmail,parsed.data.email));
  if(!hint){await db.transaction(tx=>resetBudget(tx,'password_reset_account',parsed.data.email,new Date()));return generic();}
- await db.transaction(async tx=>{await tx.select({id:platformUsers.id}).from(platformUsers).where(eq(platformUsers.id,hint.userId)).for('update');await issuePasswordReset(tx,hint.userId,context(req).requestId);});return generic();
+ const issued=await db.transaction(async tx=>{await tx.select({id:platformUsers.id}).from(platformUsers).where(eq(platformUsers.id,hint.userId)).for('update');return issuePasswordReset(tx,hint.userId,context(req).requestId);});if(issued)scheduleEmailDelivery('password-reset');return generic();
 });
 export const previewPasswordReset=withErrors(async(req:NextRequest)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);if(!await ip(req))return jsonError('RATE_LIMITED',429);
