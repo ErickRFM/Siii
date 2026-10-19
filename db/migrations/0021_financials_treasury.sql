@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS "financial_waivers" (
 	CONSTRAINT "financial_waivers_amount_check" CHECK ("discount_amount_cents" > 0)
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "financial_fee_types_id_institution_uidx" ON "financial_fee_types" USING btree ("id","institution_id");
+--> statement-breakpoint
 ALTER TABLE "financial_fee_types" ADD CONSTRAINT "financial_fee_types_institution_id_institutions_id_fk" FOREIGN KEY ("institution_id") REFERENCES "public"."institutions"("id") ON DELETE restrict ON UPDATE no action;
 --> statement-breakpoint
 ALTER TABLE "payment_orders" ADD CONSTRAINT "payment_orders_institution_id_institutions_id_fk" FOREIGN KEY ("institution_id") REFERENCES "public"."institutions"("id") ON DELETE restrict ON UPDATE no action;
@@ -84,8 +86,6 @@ ALTER TABLE "financial_waivers" ADD CONSTRAINT "financial_waivers_order_id_payme
 ALTER TABLE "financial_waivers" ADD CONSTRAINT "financial_waivers_authorized_by_platform_users_id_fk" FOREIGN KEY ("authorized_by") REFERENCES "public"."platform_users"("id") ON DELETE restrict ON UPDATE no action;
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "financial_fee_types_code_uidx" ON "financial_fee_types" USING btree ("institution_id","code");
---> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "financial_fee_types_id_institution_uidx" ON "financial_fee_types" USING btree ("id","institution_id");
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "payment_orders_number_uidx" ON "payment_orders" USING btree ("institution_id","order_number");
 --> statement-breakpoint
