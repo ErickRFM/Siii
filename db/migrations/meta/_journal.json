@@ -141,6 +141,13 @@
       "when": 1792364400000,
       "tag": "0019_admissions_system",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792450800000,
+      "tag": "0020_student_account_links",
+      "breakpoints": true
     }
   ]
 }
