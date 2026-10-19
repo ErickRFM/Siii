@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {notifyAssuranceChanged} from '@/shared/auth/assurance-events';
 
 type MfaStatus = { configured: boolean; pending: boolean; recoveryCodesRemaining: number; stepUpExpiresAt: string | null; requiredByRole:boolean };
 type Enrollment = { enrollmentId: string; secret: string; uri: string; expiresAt: string };
@@ -127,7 +128,7 @@ export default function MfaSecurity() {
       if (!Array.isArray(result.data?.recoveryCodes) || !result.data.recoveryCodes.length) throw new MfaRequestError('SERVICE_UNAVAILABLE');
       form.reset(); setEnrollmentCodeError(''); setCodes(result.data.recoveryCodes); setEnrollment(null);
       setNotice('Autenticador activado. Guarda tus códigos de recuperación.');
-      await refresh(); router.refresh();
+      await refresh(); notifyAssuranceChanged(); router.refresh();
     }, { factor: 'mfa-enrollment-code' });
   }
   async function stepUp(event: FormEvent<HTMLFormElement>) {
@@ -140,7 +141,7 @@ export default function MfaSecurity() {
       if (!result.ok || !result.expiresAt) throw new MfaRequestError('SERVICE_UNAVAILABLE');
       form.reset(); setStatus(previous => previous ? { ...previous, stepUpExpiresAt: result.expiresAt } : null);
       setNotice('Identidad confirmada. Puedes gestionar tu autenticador durante cinco minutos.');
-      await refresh(); router.refresh();
+      await refresh(); notifyAssuranceChanged(); router.refresh();
     }, { password: 'mfa-step-up-password', factor: 'mfa-step-up-factor' });
   }
   async function regenerate() {
@@ -156,7 +157,7 @@ export default function MfaSecurity() {
       const result = await request<{ ok: boolean }>('/revoke', {});
       if (!result.ok) throw new MfaRequestError('SERVICE_UNAVAILABLE');
       setEnrollment(null); setCodes([]); setNotice('Autenticador desactivado. Se cerraron tus sesiones en los otros dispositivos.');
-      await refresh(); router.refresh();
+      await refresh(); notifyAssuranceChanged(); router.refresh();
     });
   }
 
