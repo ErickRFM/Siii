@@ -64,6 +64,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ ins
       return NextResponse.json({ error: { code: 'INVALID_INPUT', message: 'Identificador de aspirante requerido' } }, { status: 400 });
     }
 
+    const [applicantProfile] = await db.select().from(applicantProfiles).where(eq(applicantProfiles.id, applicantId)).limit(1);
+    if (!applicantProfile) {
+      return NextResponse.json({ error: { code: 'APPLICANT_NOT_FOUND', message: 'Aspirante no registrado' } }, { status: 404 });
+    }
+
     const parseResult = admissionApplicationSchema.safeParse(applicationInput);
     if (!parseResult.success) {
       return NextResponse.json({ error: { code: 'INVALID_INPUT', message: 'Datos de solicitud de admisión no válidos', details: parseResult.error.flatten() } }, { status: 400 });

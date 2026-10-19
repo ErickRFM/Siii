@@ -58,7 +58,16 @@ export default function AdmissionsPortal({
       const body = await res.json();
       if (!res.ok) throw new Error(body.error?.message ?? 'Error en el registro');
 
-      setSuccess('Cuenta de aspirante creada exitosamente. Inicia sesión para continuar.');
+      // Auto-verify if token returned
+      if (body.data?.verificationToken) {
+        await fetch('/api/v1/admissions/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: body.data.verificationToken }),
+        });
+      }
+
+      setSuccess('Cuenta de aspirante registrada y verificada exitosamente. Inicia sesión para enviar tu solicitud.');
       setMode('login');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error en el registro');
