@@ -9,6 +9,22 @@ import { feeTypeSchema } from '@/modules/financials/validation';
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
   try {
+    const user = await getIdentity();
+    if (!user) {
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Sesión requerida' } }, { status: 401 });
+    }
+
+    const accessList = await getInstitutionAccess(user.id);
+    const access = accessList.find(a => a.institutionId === institutionId);
+    if (!access) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
+    }
+
+    const subject = { id: user.id, active: true, mustChangePassword: user.mustChangePassword, grants: access.grants };
+    if (!can(subject, 'institutions.read', { institutionId })) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente' } }, { status: 403 });
+    }
+
     const feeTypes = await db.select().from(financialFeeTypes)
       .where(eq(financialFeeTypes.institutionId, institutionId))
       .orderBy(desc(financialFeeTypes.createdAt));

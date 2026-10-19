@@ -14,6 +14,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Sesión requerida' } }, { status: 401 });
     }
 
+    const accessList = await getInstitutionAccess(user.id);
+    const access = accessList.find(a => a.institutionId === institutionId);
+    if (!access) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
+    }
+
+    const subject = { id: user.id, active: true, mustChangePassword: user.mustChangePassword, grants: access.grants };
+    if (!can(subject, 'institutions.read', { institutionId })) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente' } }, { status: 403 });
+    }
+
     const orders = await db.select({
       id: paymentOrders.id,
       orderNumber: paymentOrders.orderNumber,

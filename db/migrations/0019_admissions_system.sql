@@ -119,6 +119,6 @@ GRANT SELECT, INSERT, UPDATE ON "applicant_profiles" TO siii_app;
 --> statement-breakpoint
 GRANT SELECT, INSERT, UPDATE ON "admission_applications" TO siii_app;
 --> statement-breakpoint
-GRANT SELECT, INSERT, UPDATE, DELETE ON "admission_documents" TO siii_app;
+GRANT SELECT, INSERT, UPDATE ON "admission_documents" TO siii_app;
 --> statement-breakpoint
 GRANT SELECT, INSERT, UPDATE ON "admission_decisions" TO siii_app;

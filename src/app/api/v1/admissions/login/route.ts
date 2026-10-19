@@ -25,6 +25,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: { code: 'INVALID_CREDENTIALS', message: 'Correo o contraseña incorrectos' } }, { status: 401 });
     }
 
+    if (!profile.emailVerifiedAt) {
+      return NextResponse.json({ error: { code: 'EMAIL_NOT_VERIFIED', message: 'Debes verificar tu correo electrónico antes de iniciar sesión' } }, { status: 403 });
+    }
+
     return NextResponse.json({
       data: {
         applicant: {
