@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import argon2 from 'argon2';
 import crypto from 'node:crypto';
-import { db } from '@/infrastructure/database';
+import { db, assertApplicationRole } from '@/infrastructure/database';
 import { applicantProfiles } from '../../../../../../db/schema';
 import { applicantRegisterSchema } from '@/modules/admissions/validation';
 import { digestToken } from '@/shared/auth/session-write';
 
 export async function POST(request: Request) {
   try {
+    await assertApplicationRole();
     const json = await request.json();
     const parseResult = applicantRegisterSchema.safeParse(json);
     if (!parseResult.success) {
@@ -43,7 +44,8 @@ export async function POST(request: Request) {
         message: 'Registro de aspirante exitoso. Por favor verifica tu correo electrónico para activar tu cuenta.',
       },
     }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('Admissions register error:', error);
     return NextResponse.json({ error: { code: 'REGISTRATION_FAILED', message: 'No se pudo completar el registro de aspirante' } }, { status: 500 });
   }
 }

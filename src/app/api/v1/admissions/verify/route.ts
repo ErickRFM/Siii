@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { db } from '@/infrastructure/database';
+import { db, assertApplicationRole } from '@/infrastructure/database';
 import { applicantProfiles } from '../../../../../../db/schema';
 import { digestToken } from '@/shared/auth/session-write';
 
 export async function POST(request: Request) {
   try {
+    await assertApplicationRole();
     const json = await request.json();
     const { token } = json;
 
@@ -38,7 +39,8 @@ export async function POST(request: Request) {
         message: 'Correo electrónico verificado exitosamente. Ya puedes iniciar sesión.',
       },
     }, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error('Admissions verify error:', error);
     return NextResponse.json({ error: { code: 'VERIFICATION_FAILED', message: 'No se pudo verificar el correo electrónico' } }, { status: 500 });
   }
 }

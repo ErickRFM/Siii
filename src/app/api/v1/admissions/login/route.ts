@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import argon2 from 'argon2';
 import { eq } from 'drizzle-orm';
-import { db } from '@/infrastructure/database';
+import { db, assertApplicationRole } from '@/infrastructure/database';
 import { applicantProfiles } from '../../../../../../db/schema';
 import { applicantLoginSchema } from '@/modules/admissions/validation';
 
 export async function POST(request: Request) {
   try {
+    await assertApplicationRole();
     const json = await request.json();
     const parseResult = applicantLoginSchema.safeParse(json);
     if (!parseResult.success) {
@@ -41,7 +42,8 @@ export async function POST(request: Request) {
         },
       },
     }, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error('Admissions login error:', error);
     return NextResponse.json({ error: { code: 'LOGIN_FAILED', message: 'No se pudo iniciar sesión de aspirante' } }, { status: 500 });
   }
 }
