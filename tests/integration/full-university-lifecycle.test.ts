@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { applicantRegisterSchema, applicantLoginSchema, admissionApplicationSchema, admissionDecisionSchema } from '@/modules/admissions/validation';
 import { feeTypeSchema, createOrderSchema, recordPaymentSchema } from '@/modules/financials/validation';
 
-describe('E2E Full University Lifecycle Contract Tests', () => {
-  it('executes full student lifecycle validation chain from applicant to enrollment', () => {
+describe('University lifecycle schema contracts (not E2E)', () => {
+  it('validates example payloads without executing university workflows', () => {
     // 1. Applicant Registration
     const regResult = applicantRegisterSchema.safeParse({
       email: 'estudiante.e2e@universidad.edu.mx',
