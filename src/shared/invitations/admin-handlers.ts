@@ -15,6 +15,7 @@ import {storedGrant} from '@/shared/auth/institution-policy';
 import {institutionVisibility} from '@/shared/auth/read-access';
 import {audit,context} from '@/shared/http/request-context';
 import {withErrors} from '@/shared/http/route-errors';
+import {scheduleEmailDelivery} from '@/infrastructure/email/after-delivery';
 import {cursorPredicate,cursorTimestamp,pageEnvelope,parsePage} from '@/shared/http/pagination';
 import {createInvitationBody} from './validation';
 import {newInvitationToken,hashInvitationToken} from './token';
@@ -75,7 +76,9 @@ export const createInvitation=invitationErrors(async(req,ctx)=>{
   await audit(tx,{actorUserId:actor.identity.id,institutionId,action:'invitation.create',target:'invitation:'+id,requestId,details:{after:{id,role:row.role,...scope,expiresAt,grantExpiresAt}}});
   return {data:invitationDto(row,delivery,invitationActions(row,current.subject,current.access.grants,actor.identity.id))};
  });
- return 'error'in result?jsonError(result.error!,result.status!):response(result.data,201);
+ if('error'in result)return jsonError(result.error!,result.status!);
+ scheduleEmailDelivery('invitation');
+ return response(result.data,201);
 });
 export function manageInvitation(operation:'revoke'|'resend'){
  return invitationErrors(async(req,ctx)=>{
@@ -101,6 +104,8 @@ export function manageInvitation(operation:'revoke'|'resend'){
    await cancelQueued(tx,row.id,now);await audit(tx,{actorUserId:actor.identity.id,institutionId,action:'invitation.revoke',target:'invitation:'+row.id,requestId,details:{before:{state:'pending'},after:{state:'revoked'}}});
    return {data:invitationDto(updated,await deliveryState(tx,row.id))};
   });
-  return 'error'in result?jsonError(result.error!,result.status!):response(result.data);
+  if('error'in result)return jsonError(result.error!,result.status!);
+  if(operation==='resend')scheduleEmailDelivery('invitation');
+  return response(result.data);
  });
 }
