@@ -72,3 +72,38 @@ html[data-sii-theme="dark"] .sii-app .sii-info-banner{background:#392b1c;color:#
 .sii-app .sii-catalog-form :is(input,select,textarea):disabled{cursor:not-allowed}
 .sii-app .sii-catalog-table td{overflow-wrap:anywhere}
 .sii-app .sii-catalog-table tbody tr:focus-within{background:var(--sii-surface-soft)}
+
+/* UX01: mobile usability without replacing the current institutional shell. */
+@media (max-width: 840px) {
+  /* iOS Safari can zoom focused form controls when the effective font is below 16px. */
+  .sii-auth :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea),
+  .sii-app :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea),
+  .sii-confirm-dialog :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    font-size: 16px;
+  }
+
+  /* Keep the navigation usable above browser chrome and device cutouts. */
+  .sii-app .sii-sidebar {
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    overscroll-behavior-y: contain;
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+  .sii-app .sii-topbar {
+    padding-inline:
+      max(18px, env(safe-area-inset-left, 0px))
+      max(18px, env(safe-area-inset-right, 0px));
+  }
+  .sii-app .sii-page {
+    padding-inline:
+      max(17px, env(safe-area-inset-left, 0px))
+      max(17px, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(29px + env(safe-area-inset-bottom, 0px));
+  }
+  .sii-app .sii-scrim { touch-action: none; }
+  .sii-app :is(.sii-menu-button, .sii-nav-item) { min-height: 44px; }
+  .sii-app .sii-menu-button { min-width: 44px; align-items: center; justify-content: center; }
+  .sii-app :is(.sii-catalog-actions, .sii-catalog-pagination) button { min-height: 44px; }
+  .sii-confirm-actions button { min-height: 44px; }
+}

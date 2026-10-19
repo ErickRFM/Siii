@@ -27,12 +27,24 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
   const menuTrigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!menuOpen) return;
+    const mobileViewport = window.matchMedia('(max-width: 840px)');
+    // Never keep an off-canvas drawer open after switching to desktop.
+    if (!mobileViewport.matches) {
+      setMenuOpen(false);
+      return;
+    }
     const sidebar = document.getElementById('sii-sidebar-mobile');
     const trigger = menuTrigger.current;
-    // On small screens, keep keyboard focus in the open navigation.
-    if (window.matchMedia('(max-width: 840px)').matches) {
-      sidebar?.querySelector<HTMLAnchorElement>('a[href]')?.focus();
-    }
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    const onViewportChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) setMenuOpen(false);
+    };
+    mobileViewport.addEventListener('change', onViewportChange);
+    // Preserve the existing keyboard trap and return focus on dismissal.
+    sidebar?.querySelector<HTMLAnchorElement>('a[href]')?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -54,6 +66,9 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      mobileViewport.removeEventListener('change', onViewportChange);
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
       trigger?.focus();
     };
   }, [menuOpen]);
