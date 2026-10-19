@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import type {Route} from 'next';
 import {academicModuleLinks} from '@/shared/navigation/academic-modules';
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 export type InstitutionGrant = { id: string; role: string; scopeType: 'institution' | 'program' | 'campus'; scopeId: string | null; expiresAt: string | null };
 export type InstitutionCapabilities = {
@@ -20,9 +22,15 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
   const [loading, setLoading] = useState(Boolean(institutionId));
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
+  const pathname = usePathname();
+  const lastInstitution = useRef<string | undefined>(undefined);
   const refresh = useCallback(() => setRevision(value => value + 1), []);
   useEffect(() => {
-    if (!institutionId) { setData(null); setLoading(false); setError(''); return; }
+    if (!institutionId) { lastInstitution.current = undefined; setData(null); setLoading(false); setError(''); return; }
+    // Keep the existing sidebar during route changes and assurance renewal;
+    // only reset its projection when switching the actual institution.
+    const institutionChanged = lastInstitution.current !== institutionId;
+    lastInstitution.current = institutionId;
     let active: AbortController | null = null;
     async function load(background = false) {
       // Focus and visibility can fire together. Keep one request and preserve open forms
@@ -50,17 +58,20 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
     }
     const visible = () => { if (document.visibilityState === 'visible') void load(true); };
     const online = () => { void load(true); };
-    void load();
+    void load(!institutionChanged);
+    const assuranceChanged = () => { void load(true); };
+    window.addEventListener(ASSURANCE_CHANGED_EVENT, assuranceChanged);
     window.addEventListener('focus', visible);
     window.addEventListener('online', online);
     document.addEventListener('visibilitychange', visible);
     return () => {
       active?.abort();
+      window.removeEventListener(ASSURANCE_CHANGED_EVENT, assuranceChanged);
       window.removeEventListener('focus', visible);
       window.removeEventListener('online', online);
       document.removeEventListener('visibilitychange', visible);
     };
-  }, [institutionId, revision]);
+  }, [institutionId, revision, pathname]);
   return <Context.Provider value={{ data, loading, error, refresh }}>{children}</Context.Provider>;
 }
 export function useInstitutionCapabilities() { return useContext(Context); }
