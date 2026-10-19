@@ -7,7 +7,7 @@ const SECTIONS:readonly DashboardActive[]=['academic','registry','operations','g
 export function resolveDashboardLocation(pathname:string,defaultInstitutionId?:string):{active:DashboardActive;institutionId?:string}{
   const segments=pathname.split('/').filter(Boolean);
   if(segments[0]!=='dashboard')return {active:'overview'};
-  if(segments[1]==='security')return {active:'security'};
+  if(segments[1]==='security')return {active:'security',institutionId:defaultInstitutionId};
   if(segments[1]==='institutions'&&segments[2]){
     const section=segments[3];
     return {institutionId:segments[2],active:section==='admin'?'administration':section&&SECTIONS.includes(section as DashboardActive)?section as DashboardActive:'institution'};
