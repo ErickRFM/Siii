@@ -1,7 +1,8 @@
 import { pgTable, uuid, text, integer, timestamp, uniqueIndex, foreignKey, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { institutions, academicTerms } from './core';
+import { institutions, academicTerms, platformUsers } from './core';
 import { academicPrograms, academicCourses } from './academic';
+import { institutionMemberships } from './auth';
 
 const auditDates = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -38,6 +39,34 @@ export const institutionalTeachers = pgTable('institutional_teachers', {
   uniqueEmployee: uniqueIndex('institutional_teachers_employee_uidx').on(table.institutionId, table.employeeNumber),
   tenantKey: uniqueIndex('institutional_teachers_id_institution_uidx').on(table.id, table.institutionId),
   validStatus: check('teachers_status_check', sql`${table.status} IN ('active','inactive')`),
+}));
+
+export const studentAccountLinks = pgTable('student_account_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  institutionId: uuid('institution_id').notNull().references(() => institutions.id, { onDelete: 'restrict' }),
+  membershipId: uuid('membership_id').notNull().references(() => institutionMemberships.id, { onDelete: 'restrict' }),
+  studentId: uuid('student_id').notNull().references(() => institutionalStudents.id, { onDelete: 'restrict' }),
+  linkedBy: uuid('linked_by').references(() => platformUsers.id, { onDelete: 'set null' }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  ...auditDates,
+}, table => ({
+  uniqueActiveStudent: uniqueIndex('student_account_links_active_student_uidx').on(table.studentId).where(sql`${table.revokedAt} IS NULL`),
+  uniqueActiveMember: uniqueIndex('student_account_links_active_member_uidx').on(table.membershipId).where(sql`${table.revokedAt} IS NULL`),
+  scopedMembership: foreignKey({ columns: [table.membershipId, table.institutionId], foreignColumns: [institutionMemberships.id, institutionMemberships.institutionId], name: 'student_links_membership_tenant_fk' }),
+  scopedStudent: foreignKey({ columns: [table.studentId, table.institutionId], foreignColumns: [institutionalStudents.id, institutionalStudents.institutionId], name: 'student_links_student_tenant_fk' }),
+}));
+
+export const studentClaimRequests = pgTable('student_claim_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  institutionId: uuid('institution_id').notNull().references(() => institutions.id, { onDelete: 'restrict' }),
+  applicantUserId: uuid('applicant_user_id').notNull().references(() => platformUsers.id, { onDelete: 'restrict' }),
+  enrollmentNumber: text('enrollment_number').notNull(),
+  verificationStatus: text('verification_status').notNull().default('pending'),
+  reviewedBy: uuid('reviewed_by').references(() => platformUsers.id, { onDelete: 'set null' }),
+  rejectionReason: text('rejection_reason'),
+  ...auditDates,
+}, table => ({
+  validStatus: check('student_claim_requests_status_check', sql`${table.verificationStatus} IN ('pending','approved','rejected')`),
 }));
 
 export const academicSections = pgTable('academic_sections', {
