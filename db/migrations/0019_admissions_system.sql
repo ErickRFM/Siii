@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS "admission_decisions" (
 	CONSTRAINT "admission_decisions_decision_check" CHECK ("decision" IN ('admitted','rejected','waitlisted'))
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "admission_cycles_id_institution_uidx" ON "admission_cycles" USING btree ("id","institution_id");
+--> statement-breakpoint
 ALTER TABLE "admission_cycles" ADD CONSTRAINT "admission_cycles_institution_id_institutions_id_fk" FOREIGN KEY ("institution_id") REFERENCES "public"."institutions"("id") ON DELETE restrict ON UPDATE no action;
 --> statement-breakpoint
 ALTER TABLE "admission_applications" ADD CONSTRAINT "admission_applications_institution_id_institutions_id_fk" FOREIGN KEY ("institution_id") REFERENCES "public"."institutions"("id") ON DELETE restrict ON UPDATE no action;
@@ -96,8 +98,6 @@ ALTER TABLE "admission_decisions" ADD CONSTRAINT "admission_decisions_applicatio
 ALTER TABLE "admission_decisions" ADD CONSTRAINT "admission_decisions_decided_by_platform_users_id_fk" FOREIGN KEY ("decided_by") REFERENCES "public"."platform_users"("id") ON DELETE restrict ON UPDATE no action;
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "admission_cycles_institution_code_uidx" ON "admission_cycles" USING btree ("institution_id","code");
---> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "admission_cycles_id_institution_uidx" ON "admission_cycles" USING btree ("id","institution_id");
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "admission_applications_number_uidx" ON "admission_applications" USING btree ("institution_id","application_number");
 --> statement-breakpoint
