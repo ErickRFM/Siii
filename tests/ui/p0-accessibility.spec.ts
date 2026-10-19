@@ -129,3 +129,22 @@ test('a rejected archive keeps valid catalog rows available',async({page})=>{
  await expect(row).toBeVisible();await expect(row.getByText('Activo',{exact:true})).toBeVisible();
  await axe(page);
 });
+
+
+test('mobile drawer locks background scrolling and restores keyboard focus',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/login');
+ await expect(page.getByLabel('Usuario institucional')).toHaveCSS('font-size','16px');
+ await catalog(page);
+ const trigger=page.getByRole('button',{name:'Abrir navegación'});
+ await expect(trigger).toHaveCSS('min-height','44px');
+ await trigger.click();
+ await expect(page.locator('#sii-sidebar-mobile')).toBeVisible();
+ await expect(page.locator('html')).toHaveCSS('overflow','hidden');
+ await expect(page.locator('body')).toHaveCSS('overflow','hidden');
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#sii-sidebar-mobile')).toBeHidden();
+ await expect(page.locator('html')).not.toHaveCSS('overflow','hidden');
+ await expect(page.locator('body')).not.toHaveCSS('overflow','hidden');
+ await expect(trigger).toBeFocused();
+});
