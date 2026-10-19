@@ -10,3 +10,4 @@ export * from './schedule';
 export * from './services';
 export * from './academic-outbox';
 export * from './admissions';
+export * from './financials';

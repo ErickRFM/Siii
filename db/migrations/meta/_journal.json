@@ -148,6 +148,13 @@
       "when": 1792450800000,
       "tag": "0020_student_account_links",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792537200000,
+      "tag": "0021_financials_treasury",
+      "breakpoints": true
     }
   ]
 }
