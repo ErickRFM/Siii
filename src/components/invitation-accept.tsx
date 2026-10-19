@@ -36,7 +36,7 @@ export default function InvitationAccept(){
   // The bearer never enters rendered state, storage, a link, or a query string.
   const bearer=useRef<InvitationBearer|null>(null),readGeneration=useRef(0),feedback=useRef<HTMLParagraphElement>(null);
   const [preview,setPreview]=useState<Preview|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[offline,setOffline]=useState(false);
-  const [mode,setMode]=useState<'existing'|'new'>('existing'),[consent,setConsent]=useState(false),[terminal,setTerminal]=useState<'accepted'|'rejected'|null>(null),[invalidPassword,setInvalidPassword]=useState(false),[notice,setNotice]=useState('');
+  const [mode,setMode]=useState<'existing'|'new'>('new'),[consent,setConsent]=useState(false),[terminal,setTerminal]=useState<'accepted'|'rejected'|null>(null),[acceptedMode,setAcceptedMode]=useState<'existing'|'new'|null>(null),[invalidPassword,setInvalidPassword]=useState(false),[notice,setNotice]=useState('');
   const refresh=useCallback(async(signal?:AbortSignal)=>{
     const context=bearer.current,generation=++readGeneration.current;
     const current=()=>bearer.current===context&&readGeneration.current===generation&&!signal?.aborted;
@@ -60,7 +60,7 @@ export default function InvitationAccept(){
     const receive=()=>{
       const incoming=window.__siiiTakeInvitation?.();
       controller.abort();controller=new AbortController();
-      bearer.current=incoming??null;setTerminal(null);setPreview(null);setConsent(false);setMode('existing');setInvalidPassword(false);setNotice('');
+      bearer.current=incoming??null;setTerminal(null);setPreview(null);setConsent(false);setMode('new');setInvalidPassword(false);setNotice('');
       void refresh(controller.signal);
     };
     window.addEventListener('siii:invitation-fragment',receive);
@@ -86,7 +86,7 @@ export default function InvitationAccept(){
       const result=await post<{data:{state:'accepted'|'rejected';requiresLogin?:boolean}}>(action,payload);
       if(bearer.current!==decisionBearer)return;
       if(result.data.state!==(action==='accept'?'accepted':'rejected'))throw new InvitationError('SERVICE_UNAVAILABLE');
-      bearer.current=null;form?.reset();setPreview(null);setTerminal(result.data.state);setConsent(false);
+      bearer.current=null;form?.reset();setPreview(null);setAcceptedMode(action==='accept'?mode:null);setTerminal(result.data.state);setConsent(false);
     }catch(cause){if(bearer.current===decisionBearer)setError(message(cause));}
     finally{setBusy(false);}
   }
@@ -98,17 +98,16 @@ export default function InvitationAccept(){
       {offline&&<p className="sii-auth-error" role="status">Sin conexión. Reconéctate para consultar o decidir.</p>}
       {error&&<p id="invitation-error" className="sii-auth-error" role="alert" tabIndex={-1} ref={feedback}>{error}</p>}
       {notice&&<p role="status">{notice}</p>}
-      {terminal?<div role="status"><h3>{terminal==='accepted'?'Invitación aceptada.':'Invitación rechazada.'}</h3><p>{terminal==='accepted'?'El acceso institucional quedó registrado. Inicia sesión para continuar; configura tu autenticador si tu perfil lo requiere.':'La invitación se consumió. Contacta a la institución si necesitas una nueva.'}</p><Link className="sii-outline-button" href="/login">Ir al acceso institucional</Link></div>:<>
+      {terminal?<div role="status"><h3>{terminal==='accepted'?'Invitación aceptada.':'Invitación rechazada.'}</h3><p>{terminal==='accepted'?(acceptedMode==='new'?'Tu cuenta institucional quedó creada con el usuario y la contraseña que elegiste. Ahora inicia sesión para continuar. Tu matrícula y tu inscripción académica se gestionan por separado.':'El acceso quedó vinculado a tu cuenta existente. Inicia sesión para continuar; configura tu autenticador si el perfil lo requiere.'):'La invitación se consumió. Contacta a la institución si necesitas una nueva.'}</p><Link className="sii-outline-button" href="/login">Ir al acceso institucional</Link></div>:<>
         <button type="button" className="sii-outline-button" disabled={loading||busy||offline} onClick={refreshManually}>Actualizar invitación y sesión</button>
         {preview&&<>
           <dl><dt>Institución</dt><dd>{preview.institutionName}</dd><dt>Perfil</dt><dd>{PROFILE_LABELS[preview.role]??preview.role}</dd><dt>Ámbito</dt><dd>{preview.scopeType==='institution'?'Institución completa':`${preview.scopeType==='program'?'Programa':'Campus'}: ${preview.scopeName??'Ámbito asignado'}`}</dd><dt>Duración del acceso</dt><dd>{preview.grantExpiresAt?`Hasta ${new Date(preview.grantExpiresAt).toLocaleString('es-MX')}`:'Sin vencimiento'}</dd><dt>Caducidad de esta invitación</dt><dd>{new Date(preview.expiresAt).toLocaleString('es-MX')}</dd></dl>
-          <p id="invitation-session-help">Conserva esta página abierta. Inicia sesión y confirma tu identidad en otra pestaña; después vuelve aquí y actualiza. Si recargas esta página, reabre el enlace original del correo.</p>
-          <div><Link href="/login" target="_blank" rel="noopener noreferrer" className="sii-outline-button">Iniciar sesión en otra pestaña</Link>{' '}<Link href="/dashboard/security" target="_blank" rel="noopener noreferrer" className="sii-outline-button">Confirmar identidad en otra pestaña</Link></div>
           <form className="sii-catalog-form" onSubmit={event=>void decide('accept',event)} aria-describedby="invitation-session-help">
-            <label htmlFor="invitation-mode">Cuenta para aceptar</label><select id="invitation-mode" value={mode} onChange={event=>{setMode(event.target.value as 'existing'|'new');setInvalidPassword(false);setError('');}} disabled={busy||offline}><option value="existing">Usar mi cuenta existente</option><option value="new">Crear mi cuenta</option></select>
+            <label htmlFor="invitation-mode">Cuenta para aceptar</label><select id="invitation-mode" value={mode} onChange={event=>{setMode(event.target.value as 'existing'|'new');setInvalidPassword(false);setError('');}} disabled={busy||offline}><option value="new">Soy nuevo: crear mi cuenta</option><option value="existing">Ya tengo cuenta: vincular el acceso</option></select>
+            {mode==='new'?<p id="invitation-session-help" className="sii-info-banner">Primer acceso: Crea tu cuenta institucional y establece tu contraseña; no necesitas iniciar sesión antes. La matrícula y la inscripción académica se tramitan por separado.</p>:<div id="invitation-session-help" className="sii-info-banner"><p>Ya tienes cuenta Siii. Conserva esta invitación abierta, inicia sesión y confirma tu identidad en otra pestaña; vuelve aquí y actualiza la sesión antes de aceptar. Si recargas, reabre el enlace original del correo.</p><div><Link href="/login" target="_blank" rel="noopener noreferrer" className="sii-outline-button">Iniciar sesión en otra pestaña</Link>{' '}<Link href="/dashboard/security" target="_blank" rel="noopener noreferrer" className="sii-outline-button">Confirmar identidad en otra pestaña</Link></div></div> 
             {mode==='new'&&<><label htmlFor="invitation-first-name">Nombre</label><input id="invitation-first-name" name="firstName" autoComplete="given-name" required maxLength={120} disabled={busy||offline}/><label htmlFor="invitation-last-name">Apellidos</label><input id="invitation-last-name" name="lastName" autoComplete="family-name" required maxLength={120} disabled={busy||offline}/><label htmlFor="invitation-username">Nuevo usuario institucional</label><input id="invitation-username" name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} pattern="[A-Za-z0-9_.-]+" required minLength={3} maxLength={120} disabled={busy||offline} aria-describedby={error?'invitation-error':undefined}/><label htmlFor="invitation-password">Nueva contraseña</label><input id="invitation-password" name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={128} disabled={busy||offline} aria-invalid={invalidPassword} aria-describedby={error?'invitation-error':undefined}/><label htmlFor="invitation-confirm-password">Confirmar nueva contraseña</label><input id="invitation-confirm-password" name="confirmPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={128} disabled={busy||offline} aria-invalid={invalidPassword} aria-describedby={error?'invitation-error':undefined}/></>}
             <label htmlFor="invitation-consent" style={{display:'flex',alignItems:'flex-start'}}><input id="invitation-consent" type="checkbox" style={{width:24,minHeight:24,height:24,padding:0,flexShrink:0}} checked={consent} onChange={event=>setConsent(event.target.checked)} disabled={busy||offline} required/> Confirmo que revisé la institución, el perfil, el ámbito y la duración; autorizo registrar mi decisión.</label>
-            <button type="submit" className="sii-submit" disabled={!consent||loading||busy||offline}>{busy?'Registrando decisión…':'Aceptar invitación'}</button>
+            <button type="submit" className="sii-submit" disabled={!consent||loading||busy||offline}>{busy?'Registrando decisión…':mode==='new'?'Crear cuenta y aceptar invitación':'Vincular cuenta y aceptar invitación'}</button>
             <button type="button" className="sii-outline-button" disabled={!consent||loading||busy||offline} onClick={()=>void decide('reject')}>Rechazar invitación</button>
           </form>
         </>}
