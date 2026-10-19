@@ -1,5 +1,8 @@
 # Siii — Prompt maestro de implementación (v2)
 
+> **Referencia histórica, no estado actual (auditoría del 2026-10-19).**
+> Este documento partió de `feat/sis-foundation@7070a46` el 2026-10-13. **El desarrollo actual parte exclusivamente del `main` remoto**. Los módulos y PRs han evolucionado: revisar `AGENTS.md`, `docs/implementation/SIII_UX_V3_PROGRESS.md` y el árbol actual antes de cada fase. No volver a implementar funciones fusionadas basándose en las secciones antiguas de este archivo. Verificar CI, permisos y base de datos reales para cada resultado.
+
 Base auditada: `ErickRFM/Siii`, rama `feat/sis-foundation`, commit `7070a46` (2026-10-13).
 Destino sugerido en el repo: `docs/agent/MASTER_PROMPT.md`. Añade a `AGENTS.md`: "Antes de cualquier tarea lee `docs/agent/MASTER_PROMPT.md`".
 
