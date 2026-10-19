@@ -17,8 +17,14 @@ SIS universitario multitenant, backend institucional en Next.js/TypeScript + Dri
 - Cada fase: schema, migración, API, permisos, pruebas, UI accesible y documentación.
 - No hacer merge sin CI verde y revisión; no cambiar F2 en paralelo desde dos ramas sin reconciliación.
 
-## Estado de implementación
-F1/F2 con login y shell institucional. F3 empieza con 5 catálogos reales (programas, materias, planes, periodos y campus), pendiente de validación/productivización. Expedientes, grupos, horarios, calificaciones, pagos y resto de dominios aún pendientes. Ver README y docs/implementation/F3_ACADEMIC_CATALOG.md.
+## Rama de trabajo y estado verificable
+- Trunk **real**: `main`; antes de empezar, verificar el HEAD remoto y los PR abiertos. Nunca basarse en el SHA histórico de esta documentación.
+- La rama por defecto de GitHub aparece como `feat/sis-foundation` en la auditoría del 2026-10-19: **es una configuración pendiente de corregir en Settings**, no la rama desde la que deben partir nuevos cambios.
+- `docs/agent/MASTER_PROMPT.md` conserva contexto histórico (2026-10-13). Las afirmaciones de progreso antiguas no prevalecen sobre `main` ni las pruebas actuales.
+- Admisiones F01 (#50), vínculo de expediente F02 (#51), Caja F03 (#52), elegibilidad/matrícula F04 (#54), permisos posteriores a MFA (#53) y correcciones C00/C01 (#56) constaban integrados al revisar `main`. **Código fusionado no acredita disponibilidad productiva ni flujo completo E2E**.
+- PRs #40 (paginación), #48 (invitaciones) y #49 (roadmap) aparecían abiertos; comprobar su estado nuevamente y reconciliarlos, no duplicar.
+- UX/UI V3: ejecución por fases UX00–UX09 descrita en `docs/implementation/SIII_UX_V3_PROGRESS.md`. Cada componente debe mantener acciones, permisos, identidad institucional mate, estados y accesibilidad actuales.
+- La integración académica con Compañero permanece en un repositorio distinto; no inventar endpoints, credenciales ni sincronización completa.
 
 ## Comandos
 `npm ci`, `npm run db:migrate` (desarrollo), `npm run bootstrap:admin`, `npm run dev`, `npm run typecheck`, `npm run test`, `npm run test:integration`, `npm run build`.
