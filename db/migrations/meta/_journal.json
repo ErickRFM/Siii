@@ -134,6 +134,13 @@
       "when": 1792278000000,
       "tag": "0018_academic_section_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792364400000,
+      "tag": "0019_admissions_system",
+      "breakpoints": true
     }
   ]
 }
