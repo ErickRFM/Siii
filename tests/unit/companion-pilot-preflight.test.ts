@@ -18,7 +18,7 @@ const safeSecrets=()=>{
  };
 };
 const execute=(env:Record<string,string>,mode?:string)=>spawnSync(process.execPath,[runner,...(mode?[mode]:[])],{
- env:{PATH:process.env.PATH??'',...env},
+ env:{NODE_ENV:'test',PATH:process.env.PATH??'',...env},
  encoding:'utf8',
  timeout:5000,
 });
