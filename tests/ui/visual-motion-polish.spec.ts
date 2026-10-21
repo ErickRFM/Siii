@@ -14,9 +14,9 @@ for(const theme of ['light','dark'] as const){
   await expect(page.getByLabel('Usuario institucional')).toBeVisible();
   await expect(page.getByLabel('Contraseña',{exact:true})).toBeVisible();
   mkdirSync('.p0-local',{recursive:true});
-  await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-390.png',fullPage:true});
+  await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-390.png',fullPage:true,animations:'disabled'});
   await page.setViewportSize({width:1440,height:900});
-  await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-1440.png',fullPage:true});
+  await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-1440.png',fullPage:true,animations:'disabled'});
   await page.setViewportSize({width:390,height:844});
   const viewport=await page.evaluate(()=>({document:document.documentElement.scrollWidth,window:window.innerWidth}));
   expect(viewport.document).toBeLessThanOrEqual(viewport.window+1);
