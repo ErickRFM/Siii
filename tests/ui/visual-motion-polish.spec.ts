@@ -14,7 +14,7 @@ for(const theme of ['light','dark'] as const){
    const current=await page.locator('html').getAttribute('data-sii-theme');
    const label=await toggle.getAttribute('aria-label');
    return current+'|'+label;
-  }).toMatch(/^(light\\|Activar tema oscuro|dark\\|Activar tema claro)$/);
+  }).toMatch(/^(?:light[|]Activar tema oscuro|dark[|]Activar tema claro)$/);
   const current=await page.locator('html').getAttribute('data-sii-theme');
   if(current!==theme)await toggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
