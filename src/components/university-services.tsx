@@ -106,7 +106,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
    <section className="sii-panel sii-catalog-table-panel">
     <h2>{tabs.find(t=>t.id===tab)?.label}</h2>
     {loading?<p role="status">Cargando datos institucionales…</p>:rows.length===0?<p>No hay registros en esta sección.</p>:
-    <div className="sii-catalog-scroll" tabIndex={0} aria-label="Tabla de servicios, desplazamiento horizontal"><table className="sii-catalog-table">
+    <div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de servicios, desplazamiento horizontal"><table className="sii-catalog-table">
      <thead><tr><th>Información</th><th>Estado</th><th>Operación</th></tr></thead>
      <tbody>{rows.map(row=><tr key={row.id}>
       <td><strong>{row.title??row.summary??row.requestType}</strong><small>{row.description??row.body??''}</small></td>

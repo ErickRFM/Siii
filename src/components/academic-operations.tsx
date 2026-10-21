@@ -75,7 +75,7 @@ export default function AcademicOperations({institutionId}:{institutionId:string
   {loading?<div role="status" className="sii-panel">Consultando operaciones institucionales…</div>:<>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel">
-     <h3>Secciones abiertas y cerradas</h3><div className="sii-catalog-scroll" tabIndex={0} aria-label="Tabla de secciones, desplazamiento horizontal">
+     <h3>Secciones abiertas y cerradas</h3><div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de secciones, desplazamiento horizontal">
       <table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Periodo / materia</th><th>Cupo</th><th>Estado</th><th>Acción</th></tr></thead>
        <tbody>{sections.map(row=><tr key={row.id}><td>{row.code}</td>
         <td>{terms.find(t=>t.id===(row as Row & {termId?:string}).termId)?.name??'—'} · {courses.find(c=>c.id===(row as Row & {courseId?:string}).courseId)?.name??'—'}</td>

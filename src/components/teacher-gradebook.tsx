@@ -98,7 +98,7 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
   {loading?<p role="status">Consultando calificaciones…</p>:snapshot&&<>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel"><h3>Evaluaciones · {weight} % / 100 %</h3>
-     <div className="sii-catalog-scroll" tabIndex={0} aria-label="Tabla de calificaciones, desplazamiento horizontal" tabIndex={0} aria-label="Tabla de evaluación, desplazamiento horizontal"><table className="sii-catalog-table">
+     <div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de calificaciones, desplazamiento horizontal" tabIndex={0} aria-label="Tabla de evaluación, desplazamiento horizontal"><table className="sii-catalog-table">
       <thead><tr><th scope="col">Clave</th><th scope="col">Evaluación</th><th scope="col">Ponderación</th></tr></thead>
       <tbody>{snapshot.components.map(c=><tr key={c.id}><td>{c.code}</td><td>{c.title}</td><td>{c.weight} %</td></tr>)}</tbody></table></div>
      {published?<p role="status">Acta publicada. Los cambios requieren una rectificación autorizada.</p>:null}

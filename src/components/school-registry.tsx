@@ -123,7 +123,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
      <input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>
      <button type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving||!!editing}>Actualizar</button></div>
     {loading?<div className="sii-empty" role="status">Cargando registros…</div>:filtered.length===0?<div className="sii-empty">No hay registros coincidentes.</div>:
-     <div className="sii-catalog-scroll" tabIndex={0} aria-label="Tabla de expedientes, desplazamiento horizontal"><table className="sii-catalog-table">
+     <div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de expedientes, desplazamiento horizontal"><table className="sii-catalog-table">
       <thead><tr><th scope="col">Identificador</th><th scope="col">Persona</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
       <tbody>{filtered.map(row=><tr key={row.id}>
        <td className="sii-catalog-code">{row.enrollmentNumber??row.employeeNumber}</td>
