@@ -1,3 +1,4 @@
+import {queueCompanionSectionSnapshot} from '@/integrations/companion/outbox/write-hook';
 import {domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest,NextResponse } from 'next/server';
@@ -48,6 +49,7 @@ export const PATCH=withDomainErrors(async (req:NextRequest,c:Ctx)=>{
    state:parsed.data.state,reason:parsed.data.reason,updatedAt:new Date(),
   }).where(and(eq(classOccurrences.id,parsed.data.id),eq(classOccurrences.institutionId,id))).returning();
   await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId:id,actorUserId:access.identity.id,action:'schedule.occurrence.'+parsed.data.state.toLowerCase(),target:'occurrence:'+changed.id});
+  await queueCompanionSectionSnapshot(tx,{institutionId:id,sectionId:changed.sectionId,actorUserId:access.identity.id});
   return {data:changed,status:200} as const;
  });
  return 'error'in data && typeof data.error==='string'?jsonError(data.error,data.status):

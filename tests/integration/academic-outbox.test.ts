@@ -4,8 +4,9 @@ import pg from 'pg';
 import {APPLICATION_ROLE_QUERY,assertRoleInspection} from '@/infrastructure/database/role-policy';
 import {eq,sql} from 'drizzle-orm';
 import {db,pool} from '@/infrastructure/database';
-import {institutions,campuses,academicTerms,academicCourses,academicPrograms,academicSections,institutionalStudents,institutionalTeachers,sectionTeachers,sectionEnrollments,classrooms,schedulePatterns,classOccurrences} from '../../db/schema';
+import {institutions,campuses,academicTerms,academicCourses,academicPrograms,academicSections,institutionalStudents,institutionalTeachers,sectionTeachers,sectionEnrollments,classrooms,schedulePatterns,classOccurrences,people,platformUsers} from '../../db/schema';
 import {enqueueAcademicSection} from '@/integrations/companion/outbox/enqueue';
+import {queueCompanionSectionSnapshot} from '@/integrations/companion/outbox/write-hook';
 import {openAcademicBody} from '@/integrations/companion/outbox/seal';
 import {claimAcademicEvent,completeAcademicEvent,deliverAcademicEvents} from '@/integrations/companion/outbox/worker';
 import {readFileSync} from 'node:fs';
@@ -24,6 +25,24 @@ const enqueue=(scope:Awaited<ReturnType<typeof fixture>>)=>db.transaction(tx=>en
 async function frozen(eventId:string){const {rows}=await pool.query('SELECT * FROM academic_section_outbox WHERE event_id=$1',[eventId]);const row=rows[0];return {row,body:JSON.parse(openAcademicBody(row.body_encrypted,{eventId,institutionId:row.institution_id,sectionId:row.section_id}))}}
 describe('transactional academic outbox PostgreSQL',()=>{
  it('default disabled touches no new tables even with invalid scope/transport',async()=>{delete process.env.SIII_ACADEMIC_OUTBOX_ENABLED;expect(await enqueueAcademicSection({} as never,{} as never)).toEqual({status:'disabled'});expect(await deliverAcademicEvents({transport:async()=>{throw Error('must not call')}})).toMatchObject({disabled:true})});
+ it('mutation hook captures committed state and aborts atomically when an academic write fails',async()=>{
+  const scope=await fixture();
+  const [person]=await db.insert(people).values({firstName:'Synthetic',lastName:'Sender'}).returning();
+  const [actor]=await db.insert(platformUsers).values({personId:person.id,username:'outbox-'+randomUUID()}).returning();
+  await expect(db.transaction(async tx=>{
+   await tx.update(academicSections).set({code:'SHOULD-ROLLBACK'}).where(eq(academicSections.id,scope.sectionId));
+   await queueCompanionSectionSnapshot(tx,{institutionId:scope.institutionId,sectionId:scope.sectionId,actorUserId:actor.id});
+   throw Error('WRITE_ROLLBACK');
+  })).rejects.toThrow('WRITE_ROLLBACK');
+  expect((await pool.query('SELECT count(*)::int AS n FROM academic_section_outbox WHERE section_id=$1',[scope.sectionId])).rows[0].n).toBe(0);
+  await db.transaction(async tx=>{
+   await tx.update(academicSections).set({code:'COMMITTED-SECTION'}).where(eq(academicSections.id,scope.sectionId));
+   await queueCompanionSectionSnapshot(tx,{institutionId:scope.institutionId,sectionId:scope.sectionId,actorUserId:actor.id});
+  });
+  const {rows}=await pool.query('SELECT event_id FROM academic_section_outbox WHERE section_id=$1',[scope.sectionId]);
+  expect(rows).toHaveLength(1);
+  expect((await frozen(rows[0].event_id)).body.payload.sectionCode).toBe('COMMITTED-SECTION');
+ });
  it('freezes an empty real open section without inventing a teacher and preserves a long term/zero credits',async()=>{const scope=await fixture();const event=await enqueue(scope);expect(event.status).toBe('queued');if(event.status!=='queued')throw Error('missing');const {row,body}=await frozen(event.eventId);expect(row.body_encrypted).not.toContain('Synthetic');expect(body.payload).toMatchObject({sectionId:scope.sectionId,teachers:[],enrollments:[],occurrences:[],subject:{credits:0},term:{startsOn:'2025-01-01',endsOn:'2027-12-31'}});expect(body.sourceVersion).toBe(1)});
  it('serializes teacher, historical withdrawal plus reenrollment and persisted Saturday24:00 occurrence UUIDs',async()=>{
   const scope=await fixture();const refs=await db.transaction(async tx=>{

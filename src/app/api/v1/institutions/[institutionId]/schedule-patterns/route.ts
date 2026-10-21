@@ -1,3 +1,4 @@
+import {queueCompanionSectionSnapshot} from '@/integrations/companion/outbox/write-hook';
 import {domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest,NextResponse } from 'next/server';
@@ -74,6 +75,7 @@ export const POST=withDomainErrors(async (req:NextRequest,c:Ctx)=>{
    const [pattern]=await tx.insert(schedulePatterns).values({...p,institutionId:id}).returning();
    await tx.insert(classOccurrences).values(dates.map(onDate=>({institutionId:id,sectionId:p.sectionId,patternId:pattern.id,onDate})));
    await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId:id,actorUserId:auth.identity.id,action:'schedule.pattern.create',target:'pattern:'+pattern.id});
+   await queueCompanionSectionSnapshot(tx,{institutionId:id,sectionId:p.sectionId,actorUserId:auth.identity.id});
    return {data:{pattern,occurrenceCount:dates.length},status:201} as const;
   });
   return 'error' in outcome && typeof outcome.error==='string'
