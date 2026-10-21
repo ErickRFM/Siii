@@ -77,6 +77,41 @@ html[data-sii-theme="dark"] {
 .sii-app .sii-catalog-actions {gap:7px}
 .sii-app .sii-catalog-actions button {min-height:40px;border-radius:9px;padding:9px 11px}
 .sii-app .sii-catalog-actions button:focus-visible {outline-offset:2px}
+/* Public identity journeys reuse the refreshed access card too: password recovery,
+   password reset, and invitations are not part of the dashboard shell. */
+.sii-auth .sii-auth-form-wrap>.sii-catalog-form,
+.sii-auth .sii-auth-form-wrap .sii-catalog-form {width:100%;min-width:0;gap:14px;margin-block:20px}
+.sii-auth .sii-catalog-form label {display:grid;gap:7px;color:var(--sii-text);font-size:12px;font-weight:740;line-height:1.5}
+.sii-auth .sii-catalog-form :is(input:not([type=checkbox]),select,textarea) {
+  box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:48px;
+  border:1px solid var(--sii-line);border-radius:11px;
+  background:var(--sii-surface-soft);color:var(--sii-text);
+  font-size:14px;padding:12px 14px;line-height:1.5;
+}
+.sii-auth .sii-catalog-form :is(input,select,textarea):focus-visible {
+  border-color:var(--sii-primary);box-shadow:0 0 0 3px var(--sii-primary-soft);
+}
+.sii-auth .sii-catalog-form input[type=checkbox] {accent-color:var(--sii-primary-dark)}
+.sii-auth .sii-catalog-form :is(p,small) {font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+.sii-auth .sii-catalog-form .sii-submit {width:100%;min-height:50px;margin-top:8px}
+.sii-auth .sii-auth-form-wrap>.sii-outline-button,
+.sii-auth .sii-catalog-form>.sii-outline-button {
+  display:flex;width:100%;min-height:44px;margin-top:10px;line-height:1.4;
+}
+.sii-auth .sii-auth-form-wrap>dl {
+  display:grid;grid-template-columns:minmax(105px,.45fr) minmax(0,1fr);
+  gap:9px 14px;align-items:baseline;
+  margin:18px 0;padding:16px;border:1px solid var(--sii-v4-outline);
+  border-radius:12px;background:var(--sii-surface-soft);
+}
+.sii-auth .sii-auth-form-wrap>dl dt {font-size:12px;font-weight:750;color:var(--sii-muted)}
+.sii-auth .sii-auth-form-wrap>dl dd {margin:0;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.sii-auth .sii-auth-form-wrap>p[role=status] {line-height:1.65;font-size:13px}
+@media(max-width:600px) {
+ .sii-auth .sii-catalog-form :is(input:not([type=checkbox]),select,textarea) {font-size:16px}
+ .sii-auth .sii-auth-form-wrap>dl {grid-template-columns:minmax(0,1fr)}
+}
+
 /* Status areas and table pagination behave consistently in all modules. */
 .sii-app :is(.sii-catalog-error,.sii-catalog-notice,.sii-info-banner) {line-height:1.65;border-radius:12px;overflow-wrap:anywhere}
 .sii-app :is(.sii-catalog-error,.sii-catalog-notice) .sii-outline-button {margin-top:12px}
