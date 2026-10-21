@@ -13,7 +13,7 @@ html[data-sii-theme="dark"] {
   from {transform:translate3d(0,10px,0)}
   to {transform:translate3d(0,0,0)}
 }
-/* Animate position only; changing ancestor opacity temporarily breaks text contrast. */
+/* Animate position only and never tween surface colors: theme switches must preserve text contrast in every frame. */
 /* Login: a single composed surface, not an empty expanse around a form. */
 .sii-auth .sii-auth-access {
   background:radial-gradient(ellipse 75% 54% at 100% 100%,rgba(159,57,91,.085),transparent 75%),
@@ -52,7 +52,7 @@ html[data-sii-theme="dark"] {
 .sii-auth .sii-field-wrap input {
   border-radius:12px;
   background:var(--sii-surface-soft);
-  transition:border-color 180ms ease,background-color 180ms ease,box-shadow 180ms ease;
+  transition:border-color 180ms ease,box-shadow 180ms ease;
 }
 .sii-auth .sii-field-wrap:focus-within input {background:var(--sii-surface)}
 .sii-auth .sii-submit {
@@ -68,7 +68,7 @@ html[data-sii-theme="dark"] {
   margin-top:9px;
   min-height:44px;
   border-radius:11px;
-  transition:background-color 180ms ease,border-color 180ms ease,transform 180ms ease;
+  transition:border-color 180ms ease,transform 180ms ease;
 }
 .sii-auth .sii-auth-form .sii-outline-button:hover:not(:disabled){background:var(--sii-primary-soft)}
 .sii-auth .sii-auth-help {margin:19px 0 18px;line-height:1.85}
@@ -136,7 +136,7 @@ html[data-sii-theme="dark"] {
   background:var(--sii-primary-soft);color:var(--sii-primary);font-size:18px;
 }
 .sii-app .sii-institution-item {border-color:var(--sii-v4-outline);padding:18px}
-.sii-app .sii-access-panel .sii-access-feature {transition:background-color 180ms ease,border-color 180ms ease}
+.sii-app .sii-access-panel .sii-access-feature {transition:border-color 180ms ease}
 @media(hover:hover) and (pointer:fine){.sii-app .sii-access-panel .sii-access-feature:hover{background:var(--sii-primary-soft);border-color:var(--sii-v4-outline)}}
 .sii-app .sii-access-feature {width:100%;padding:13px 12px;gap:12px;margin-bottom:9px;border:1px solid var(--sii-v4-outline);background:var(--sii-surface-soft);border-radius:12px}
 .sii-app .sii-access-feature>span {margin-top:2px}
@@ -180,7 +180,7 @@ html[data-sii-theme="dark"] {
   min-height:47px;padding:12px;
   border:1px solid transparent;border-radius:11px;
   color:var(--sii-text);text-decoration:none;font-size:12px;font-weight:720;line-height:1.45;
-  transition:background-color 170ms ease,border-color 170ms ease,transform 170ms ease;
+  transition:border-color 170ms ease,transform 170ms ease;
 }
 .sii-app .sii-administration-links a span {
   flex:none;display:grid;place-items:center;width:29px;height:29px;
@@ -200,7 +200,7 @@ html[data-sii-theme="dark"] {
   border:1px solid var(--sii-line);border-radius:11px;
   background:var(--sii-surface-soft);color:var(--sii-text);
   padding:11px 13px;
-  transition:border-color 170ms ease,box-shadow 170ms ease,background-color 170ms ease;
+  transition:border-color 170ms ease,box-shadow 170ms ease;
 }
 .sii-app .sii-administration-card .sii-catalog-form :is(input,select,textarea):focus-visible {
   background:var(--sii-surface);border-color:var(--sii-primary);box-shadow:0 0 0 3px var(--sii-primary-soft);
