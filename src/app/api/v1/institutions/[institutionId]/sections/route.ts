@@ -1,3 +1,4 @@
+import {queueCompanionSectionSnapshot} from '@/integrations/companion/outbox/write-hook';
 import {domainTransaction,withDomainErrors} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
 import { NextRequest, NextResponse } from 'next/server';
@@ -38,6 +39,7 @@ export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
     if(!term||!course)return null;
     const [row]=await tx.insert(academicSections).values({...parsed.data,institutionId:id}).returning();
     await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:id,action:'section.create',target:'section:'+row.id});
+    await queueCompanionSectionSnapshot(tx,{institutionId:id,sectionId:row.id,actorUserId:access.identity.id});
     return row;
   });
   return data?NextResponse.json({data},{status:201,headers}):jsonError('COURSE_OR_TERM_UNAVAILABLE',422);
@@ -54,6 +56,7 @@ export const PATCH=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
    const [row]=await tx.update(academicSections).set({status:parsed.data.status,updatedAt:new Date()}).where(and(eq(academicSections.id,parsed.data.id),eq(academicSections.institutionId,id))).returning();
    if(!row)return null;
    await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:id,action:'section.status',target:'section:'+row.id});
+   await queueCompanionSectionSnapshot(tx,{institutionId:id,sectionId:row.id,actorUserId:access.identity.id});
    return row;
   });
   return data?NextResponse.json({data},{headers}):jsonError('NOT_FOUND',404);
