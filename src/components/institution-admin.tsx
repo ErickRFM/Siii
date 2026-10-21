@@ -84,7 +84,7 @@ export function ManageableInstitutions() {
   return <section className="sii-panel sii-administration-discovery" aria-label="Instituciones administrables" aria-busy={loading}>
     <div className="sii-panel-top"><div><span className="sii-section-kicker">ADMINISTRACIÓN AUTORIZADA</span><h2>Gestión institucional</h2><p>Configuración e historial de las instituciones que puedes administrar.</p></div></div>
     {!online && <p role="status">Sin conexión. Las operaciones están deshabilitadas.</p>}
-    {loading ? <p role="status">Consultando instituciones administrables…</p> : error ? <p role="alert" className="sii-catalog-error">{error}</p> : !rows.length ? <p>No hay instituciones administrables para esta consulta.</p> : <ul className="sii-administration-list">{rows.map(institution => <li key={institution.id}>
+    {loading ? <p role="status">Consultando instituciones administrables…</p> : error ? <div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" disabled={!online} onClick={() => setRevision(value => value + 1)}>Reintentar consulta</button></div> : !rows.length ? <p role="status">No hay instituciones administrables para esta consulta.</p> : <ul className="sii-administration-list">{rows.map(institution => <li key={institution.id}>
       <span className="sii-admin-institution-glyph" aria-hidden="true">▥</span><div><strong>{institution.name}</strong><small>{institution.code} · {statusLabels[institution.status]}</small></div>
       <Link href={`/dashboard/institutions/${institution.id}/admin` as Route} className="sii-outline-button" aria-label={`Administrar ${institution.name}`}>Administrar <span aria-hidden="true">→</span></Link>
     </li>)}</ul>}
