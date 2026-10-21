@@ -65,6 +65,7 @@ html[data-sii-theme="dark"] {
 .sii-app .sii-catalog-form :is(button[type="submit"],.sii-submit) {min-height:44px}
 /* Scrolling belongs to the table, never to the entire document width. */
 .sii-app .sii-catalog-scroll {max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border-radius:10px}
+.sii-app .sii-catalog-scroll:focus-visible {outline:3px solid var(--sii-primary);outline-offset:3px;scroll-margin-top:6rem}
 .sii-app .sii-catalog-table {border-collapse:separate;border-spacing:0}
 .sii-app .sii-catalog-table thead {background:var(--sii-surface-soft)}
 .sii-app .sii-catalog-table th {font-size:11px;line-height:1.45;padding:13px 14px;color:var(--sii-muted)}

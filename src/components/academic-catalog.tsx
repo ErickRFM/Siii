@@ -236,7 +236,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>
           :loadError?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
           :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canCreate?'Utiliza el formulario para agregar el primero.':'No hay datos disponibles dentro de tu ámbito en este catálogo.'}</p></div>
-          :<div className="sii-catalog-scroll"><table className="sii-catalog-table">
+          :<div className="sii-catalog-scroll" tabIndex={0} aria-label="Tabla del catálogo académico, desplazamiento horizontal"><table className="sii-catalog-table">
             <thead><tr><th scope="col">Clave / Versión</th><th scope="col">Nombre / Detalle</th><th scope="col">Estado</th>{canManage&&<th scope="col">Acciones</th>}</tr></thead>
             <tbody>{filtered.map(row=><tr key={row.id}>
               <td><span className="sii-catalog-code">{row.code??row.version??'—'}</span></td>

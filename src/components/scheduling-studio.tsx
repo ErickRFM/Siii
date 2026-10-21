@@ -101,7 +101,7 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
     </form></section>
   </div>
   <section className="sii-panel sii-catalog-table-panel"><h3>Patrones programados · {patterns.length}</h3>
-   <div className="sii-catalog-scroll"><table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Día</th><th>Horario</th><th>Aula</th></tr></thead>
+   <div className="sii-catalog-scroll" tabIndex={0} aria-label="Tabla de sesiones, desplazamiento horizontal" tabIndex={0} aria-label="Tabla de horarios, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Día</th><th>Horario</th><th>Aula</th></tr></thead>
     <tbody>{patterns.map(p=><tr key={p.id}><td>{sections.find(s=>s.id===p.sectionId)?.code??p.sectionId}</td>
      <td>{days[p.weekday??0]??'—'}</td><td>{clock(p.startMinute??0)}–{clock(p.endMinute??0)}</td>
      <td>{rooms.find(r=>r.id===p.roomId)?.code??p.roomId}</td></tr>)}</tbody></table></div>
