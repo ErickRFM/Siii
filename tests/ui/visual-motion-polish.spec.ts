@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {mkdirSync} from 'node:fs';
 
 for(const theme of ['light','dark'] as const){
  test('login visual polish preserves accessible form and motion preference: '+theme,async({page})=>{
@@ -12,6 +13,11 @@ for(const theme of ['light','dark'] as const){
   await expect(card).toBeVisible();
   await expect(page.getByLabel('Usuario institucional')).toBeVisible();
   await expect(page.getByLabel('Contraseña',{exact:true})).toBeVisible();
+  mkdirSync('.p0-local',{recursive:true});
+  await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-390.png',fullPage:true});
+  await page.setViewportSize({width:1440,height:900});
+  await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-1440.png',fullPage:true});
+  await page.setViewportSize({width:390,height:844});
   const viewport=await page.evaluate(()=>({document:document.documentElement.scrollWidth,window:window.innerWidth}));
   expect(viewport.document).toBeLessThanOrEqual(viewport.window+1);
   const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
