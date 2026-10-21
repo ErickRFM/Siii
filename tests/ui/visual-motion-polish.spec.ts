@@ -6,8 +6,17 @@ for(const theme of ['light','dark'] as const){
  test('login visual polish preserves accessible form and motion preference: '+theme,async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto('/login');
+  // Hydration updates the root theme and the toggle in separate commits.
+  // Wait until they agree; otherwise an initial SSR value can select a stale button label.
+  const toggle=page.locator('.sii-theme-toggle');
+  await expect(toggle).toBeVisible();
+  await expect.poll(async()=>{
+   const current=await page.locator('html').getAttribute('data-sii-theme');
+   const label=await toggle.getAttribute('aria-label');
+   return current+'|'+label;
+  }).toMatch(/^(?:light[|]Activar tema oscuro|dark[|]Activar tema claro)$/);
   const current=await page.locator('html').getAttribute('data-sii-theme');
-  if(current!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
+  if(current!==theme)await toggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
   const card=page.locator('.sii-auth-form-wrap');
   await expect(card).toBeVisible();
