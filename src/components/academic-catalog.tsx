@@ -1,4 +1,5 @@
 'use client';
+import SiiScrollRegion from './sii-scroll-region';
 import {useInstitutionConfirmation} from './sii-confirmation';
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
@@ -236,7 +237,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>
           :loadError?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
           :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canCreate?'Utiliza el formulario para agregar el primero.':'No hay datos disponibles dentro de tu ámbito en este catálogo.'}</p></div>
-          :<div className="sii-catalog-scroll"><table className="sii-catalog-table">
+          :<SiiScrollRegion label="Tabla del catálogo académico, desplazamiento horizontal"><table className="sii-catalog-table">
             <thead><tr><th scope="col">Clave / Versión</th><th scope="col">Nombre / Detalle</th><th scope="col">Estado</th>{canManage&&<th scope="col">Acciones</th>}</tr></thead>
             <tbody>{filtered.map(row=><tr key={row.id}>
               <td><span className="sii-catalog-code">{row.code??row.version??'—'}</span></td>
@@ -251,7 +252,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
                 <button type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</button>
               </div>:<span>{row.status==='archived'?'Archivado':'Solo consulta'}</span>}</td>}
             </tr>)}</tbody>
-          </table></div>}
+          </table></SiiScrollRegion>}
           <nav className="sii-catalog-pagination" aria-label="Paginación del catálogo">
             <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!online} onClick={()=>void page('previous')}>Página anterior</button>
             <span aria-live="polite">Página {history.length}</span>

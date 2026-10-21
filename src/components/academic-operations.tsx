@@ -1,4 +1,5 @@
 'use client';
+import SiiScrollRegion from './sii-scroll-region';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -75,12 +76,12 @@ export default function AcademicOperations({institutionId}:{institutionId:string
   {loading?<div role="status" className="sii-panel">Consultando operaciones institucionales…</div>:<>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel">
-     <h3>Secciones abiertas y cerradas</h3><div className="sii-catalog-scroll">
+     <h3>Secciones abiertas y cerradas</h3><SiiScrollRegion label="Tabla de secciones, desplazamiento horizontal">
       <table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Periodo / materia</th><th>Cupo</th><th>Estado</th><th>Acción</th></tr></thead>
        <tbody>{sections.map(row=><tr key={row.id}><td>{row.code}</td>
         <td>{terms.find(t=>t.id===(row as Row & {termId?:string}).termId)?.name??'—'} · {courses.find(c=>c.id===(row as Row & {courseId?:string}).courseId)?.name??'—'}</td>
         <td>{row.capacity}</td><td>{row.status}</td><td><button disabled={busy||row.status!=='open'} type="button" onClick={()=>void revoke('sections',row)}>Cerrar</button></td>
-       </tr>)}</tbody></table></div>
+       </tr>)}</tbody></table></SiiScrollRegion>
      {!sections.length&&<p>No hay secciones. Registra la primera con periodo y materia activos.</p>}
     </section>
     <aside className="sii-panel sii-catalog-create"><h3>Nueva sección</h3><form className="sii-catalog-form" onSubmit={e=>void submit(e,'sections')}>

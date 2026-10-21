@@ -109,3 +109,30 @@ test('registry profile editing preserves failed drafts, rejects stale changes an
  await page.getByRole('button',{name:'Salir',exact:true}).click();await page.waitForURL('**/login');await login(page);
  await page.getByRole('link',{name:'Estudiantes y docentes',exact:true}).first().click();await page.getByRole('tab',{name:'Docentes',exact:true}).click();await expect(page.getByRole('cell',{name:'Profesora Sintético',exact:false})).toBeVisible();
 });
+
+
+test('system-wide module shell stays coherent in both themes and narrow screens',async({page})=>{
+ test.setTimeout(240000);
+ await fixture('super_admin');await login(page);
+ const routes=['academic','registry','operations','scheduling','grading','services','users','roles','invitations','admin'];
+ for(const area of routes){
+  await page.goto('/dashboard/institutions/'+tenant+'/'+area);
+  await expect(page).toHaveURL(new RegExp('/'+area+'$'));
+  await expect(page.locator('main#main-content')).toBeVisible();
+  await expect(page.getByRole('heading',{level:1})).toBeVisible();
+  for(const theme of ['dark','light'] as const){
+   const current=await page.locator('html').getAttribute('data-sii-theme');
+   if(current!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
+   await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
+   await page.setViewportSize({width:390,height:844});
+   await expect(page.locator('main#main-content')).toBeVisible();
+   const extent=await page.evaluate(()=>({w:document.documentElement.scrollWidth,v:window.innerWidth}));
+   expect(extent.w,area+'/'+theme+' horizontal overflow').toBeLessThanOrEqual(extent.v+2);
+   await page.screenshot({path:'.p0-local/ux-matrix-all-'+area+'-'+theme+'-390.png',fullPage:true,animations:'disabled'});
+   const report=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
+   expect(report.violations.map(x=>({id:x.id,targets:x.nodes.map(n=>n.target)})),area+'/'+theme+' accessibility').toEqual([]);
+  }
+  await page.setViewportSize({width:1440,height:900});
+  await page.screenshot({path:'.p0-local/ux-matrix-all-'+area+'-light-1440.png',fullPage:true,animations:'disabled'});
+ }
+});

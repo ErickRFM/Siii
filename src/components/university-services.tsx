@@ -1,4 +1,5 @@
 'use client';
+import SiiScrollRegion from './sii-scroll-region';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -106,7 +107,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
    <section className="sii-panel sii-catalog-table-panel">
     <h2>{tabs.find(t=>t.id===tab)?.label}</h2>
     {loading?<p role="status">Cargando datos institucionales…</p>:rows.length===0?<p>No hay registros en esta sección.</p>:
-    <div className="sii-catalog-scroll"><table className="sii-catalog-table">
+    <SiiScrollRegion label="Tabla de servicios, desplazamiento horizontal"><table className="sii-catalog-table">
      <thead><tr><th>Información</th><th>Estado</th><th>Operación</th></tr></thead>
      <tbody>{rows.map(row=><tr key={row.id}>
       <td><strong>{row.title??row.summary??row.requestType}</strong><small>{row.description??row.body??''}</small></td>
@@ -120,7 +121,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
        {tab==='requests'&&row.status==='IN_REVIEW'&&<><button type="button" disabled={saving} onClick={()=>void advance(row,'APPROVED')}>Aprobar</button><button type="button" disabled={saving} onClick={()=>void advance(row,'REJECTED')}>Rechazar</button></>}
        {tab==='requests'&&['APPROVED','REJECTED'].includes(row.status)&&<button type="button" disabled={saving} onClick={()=>void advance(row,'CLOSED')}>Cerrar trámite</button>}
       </td>
-     </tr>)}</tbody></table></div>}
+     </tr>)}</tbody></table></SiiScrollRegion>}
     {rows.length>=200&&<p>Se muestran hasta 200 registros; la búsqueda y paginación del servidor están pendientes.</p>}
    </section>
    <aside className="sii-panel sii-catalog-create"><h3>Nuevo registro</h3>
