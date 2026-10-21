@@ -1,0 +1,240 @@
+/* SIII V4 — matte refinement. Visual-only: no auth, permission or routing changes. */
+:root {
+  --sii-v4-outline:rgba(124,71,96,.16);
+  --sii-v4-sheen:rgba(182,67,107,.045);
+  --sii-v4-elevation:0 18px 46px rgba(48,29,51,.075),0 2px 8px rgba(48,29,51,.04);
+}
+html[data-sii-theme="dark"] {
+  --sii-v4-outline:rgba(241,184,210,.14);
+  --sii-v4-sheen:rgba(231,104,152,.055);
+  --sii-v4-elevation:0 22px 52px rgba(0,0,0,.23),0 4px 12px rgba(0,0,0,.09);
+}
+@keyframes sii-v4-rise {
+  from {opacity:0;transform:translate3d(0,12px,0)}
+  to {opacity:1;transform:translate3d(0,0,0)}
+}
+/* Login: a single composed surface, not an empty expanse around a form. */
+.sii-auth .sii-auth-access {
+  background:radial-gradient(ellipse 75% 54% at 100% 100%,rgba(159,57,91,.085),transparent 75%),
+    radial-gradient(ellipse 72% 58% at 0% 5%,rgba(111,115,170,.055),transparent 76%),
+    var(--sii-surface);
+}
+.sii-auth .sii-auth-form-wrap {
+  position:relative;
+  width:min(100%,520px);
+  padding:clamp(26px,3.5vw,46px);
+  border:1px solid var(--sii-v4-outline);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(173,97,125,.045),transparent 60%),var(--sii-surface);
+  box-shadow:var(--sii-v4-elevation);
+  animation:sii-v4-rise 420ms cubic-bezier(.2,.7,.25,1) both;
+}
+.sii-auth .sii-auth-form-icon {
+  border:1px solid var(--sii-v4-outline);
+  box-shadow:0 9px 24px rgba(122,41,70,.10);
+  margin-bottom:20px;
+}
+.sii-auth .sii-auth-form-subtitle{margin-bottom:27px}
+.sii-auth .sii-auth-form-wrap h2 {letter-spacing:-.052em}
+.sii-auth .sii-auth-form #sii-factor-help {
+  margin:0 0 20px;
+  padding:16px 17px;
+  line-height:1.65;
+  border:1px solid var(--sii-v4-outline);
+  border-radius:12px;
+  background:var(--sii-surface-soft);
+  font-size:12px;
+  color:var(--sii-text);
+}
+.sii-auth .sii-field-wrap input {
+  border-radius:12px;
+  background:var(--sii-surface-soft);
+  transition:border-color 180ms ease,background-color 180ms ease,box-shadow 180ms ease;
+}
+.sii-auth .sii-field-wrap:focus-within input {background:var(--sii-surface)}
+.sii-auth .sii-submit {
+  width:100%;
+  position:relative;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 12px 25px rgba(133,35,65,.18);
+  transition:transform 180ms ease,filter 180ms ease,box-shadow 180ms ease;
+}
+.sii-auth .sii-submit:hover:not(:disabled){box-shadow:0 17px 28px rgba(133,35,65,.22)}
+.sii-auth .sii-auth-form .sii-outline-button {
+  width:100%;
+  margin-top:9px;
+  min-height:44px;
+  border-radius:11px;
+  transition:background-color 180ms ease,border-color 180ms ease,transform 180ms ease;
+}
+.sii-auth .sii-auth-form .sii-outline-button:hover:not(:disabled){background:var(--sii-primary-soft)}
+.sii-auth .sii-auth-help {margin:24px 0 25px;line-height:1.85}
+.sii-auth .sii-auth-help a {display:inline-block;color:var(--sii-primary);font-weight:750;text-underline-offset:3px;text-decoration:underline}
+.sii-auth .sii-auth-help a:hover {text-decoration-thickness:2px}
+.sii-auth .sii-auth-role-notice {border-color:var(--sii-v4-outline);padding:15px}
+.sii-auth .sii-auth-story {background:
+  radial-gradient(ellipse 85% 90% at 100% 85%,rgba(195,64,102,.40),transparent 72%),
+  radial-gradient(circle at 0 0,rgba(138,52,78,.32),transparent 58%),
+  linear-gradient(150deg,#4a1129 0%,#2b101e 60%,#48162d 100%)}
+.sii-auth .sii-story-features>div {max-width:420px;padding:4px 0;transition:transform 180ms ease}
+.sii-auth .sii-story-feature-icon {background:rgba(255,255,255,.075);border-radius:13px}
+@media(hover:hover) and (pointer:fine){
+  .sii-auth .sii-story-features>div:hover {transform:translateX(4px)}
+}
+/* Dashboard: hierarchy and tactility without changing the data represented. */
+.sii-app .sii-page-heading h1 {font-weight:790}
+.sii-app .sii-page-heading {margin-bottom:29px}
+.sii-app .sii-metric {
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  min-height:168px;
+  padding:23px;
+  border-color:var(--sii-v4-outline);
+  box-shadow:var(--sii-v4-elevation);
+  animation:sii-v4-rise 390ms cubic-bezier(.2,.7,.25,1) both;
+}
+.sii-app .sii-metric::after {
+  content:"";position:absolute;z-index:-1;inset:0;
+  background:radial-gradient(circle at 100% 0%,var(--sii-v4-sheen),transparent 63%);
+  pointer-events:none;
+}
+.sii-app .sii-metric:nth-child(2){animation-delay:55ms}
+.sii-app .sii-metric:nth-child(3){animation-delay:110ms}
+.sii-app .sii-metric:nth-child(1){border-top:2px solid rgba(162,55,89,.55)}
+.sii-app .sii-metric:nth-child(2){border-top:2px solid rgba(113,115,167,.46)}
+.sii-app .sii-metric:nth-child(3){border-top:2px solid rgba(52,155,117,.40)}
+.sii-app .sii-metric-icon {width:43px;height:43px;border-radius:13px;margin-bottom:17px}
+.sii-app .sii-metric-value {font-weight:810}
+.sii-app .sii-summary-grid .sii-metric {transition:transform 220ms ease,box-shadow 220ms ease,border-color 220ms ease}
+.sii-app .sii-administration-discovery,
+.sii-app .sii-institutions-panel,
+.sii-app .sii-access-panel {
+  border-color:var(--sii-v4-outline);
+  box-shadow:var(--sii-v4-elevation);
+}
+.sii-app .sii-administration-discovery .sii-panel-top {margin-bottom:13px}
+.sii-app .sii-administration-discovery .sii-administration-list {margin:16px 0}
+.sii-app .sii-administration-discovery .sii-catalog-pagination {margin-top:14px;padding-top:18px;border-top:1px solid var(--sii-line)}
+.sii-app .sii-administration-list li {
+  padding:17px 16px;
+  border:1px solid var(--sii-v4-outline);
+  border-radius:13px;
+  background:var(--sii-surface-soft);
+  margin-bottom:9px;
+}
+.sii-app .sii-administration-list li>div {flex:1}
+.sii-app .sii-administration-list small {color:var(--sii-muted)}
+.sii-app .sii-admin-institution-glyph {
+  width:41px;height:41px;flex:none;
+  border-radius:12px;display:grid;place-items:center;
+  background:var(--sii-primary-soft);color:var(--sii-primary);font-size:18px;
+}
+.sii-app .sii-institution-item {border-color:var(--sii-v4-outline);padding:18px}
+.sii-app .sii-access-feature {width:100%;padding:13px 12px;gap:12px;margin-bottom:9px;border:1px solid var(--sii-v4-outline);background:var(--sii-surface-soft);border-radius:12px}
+.sii-app .sii-access-feature>span {margin-top:2px}
+.sii-app .sii-nav-item {transition:background-color 180ms ease,color 180ms ease,transform 180ms ease,border-color 180ms ease}
+@media(hover:hover) and (pointer:fine){
+ .sii-app .sii-summary-grid .sii-metric:hover {transform:translateY(-3px);box-shadow:var(--sii-glass-hover)}
+ .sii-app .sii-nav-item:not(.sii-nav-item--active):hover {transform:translateX(2px)}
+}
+/* Institutional admin: restrained alert, useful links and consistent forms. */
+.sii-app .sii-institution-admin {gap:18px}
+.sii-app .sii-admin-security-banner {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+  margin:0;
+  padding:18px 21px;
+  border:1px solid #a97845;
+  border-left:3px solid #c18b53;
+  border-radius:14px;
+}
+.sii-app .sii-admin-security-banner .sii-admin-security-copy {flex:1;min-width:200px}
+.sii-app .sii-admin-security-banner .sii-admin-security-copy strong {font-size:13px;font-weight:800;color:inherit}
+.sii-app .sii-admin-security-banner .sii-admin-security-copy p {margin:4px 0 0;line-height:1.6}
+.sii-app .sii-admin-security-banner .sii-outline-button {margin:0;min-height:44px}
+.sii-app .sii-administration-summary {
+  position:relative;
+  align-items:center;
+  border-color:var(--sii-v4-outline);
+  background:linear-gradient(120deg,var(--sii-glass-panel),var(--sii-glass-panel) 74%,var(--sii-primary-soft));
+}
+.sii-app .sii-admin-summary-label {display:block;font-size:10px;letter-spacing:.15em;font-weight:800;color:var(--sii-primary);margin-bottom:8px}
+.sii-app .sii-administration-summary h2 {margin:0 0 10px;font-size:clamp(19px,2vw,24px)}
+.sii-app .sii-admin-summary-meta {font-size:12px;line-height:1.6}
+.sii-app .sii-admin-summary-meta strong {color:var(--sii-success);font-weight:800}
+.sii-app .sii-admin-summary-meta strong[data-status="suspended"],
+.sii-app .sii-admin-summary-meta strong[data-status="inactive"],
+.sii-app .sii-admin-summary-meta strong[data-status="archived"] {color:var(--sii-primary)}
+.sii-app .sii-admin-summary-date {font-size:11px;color:var(--sii-muted);margin-top:7px}
+.sii-app .sii-administration-summary .sii-outline-button {margin:0}
+.sii-app .sii-administration-links {gap:10px;padding:12px;border-color:var(--sii-v4-outline)}
+.sii-app .sii-administration-links a {
+  flex:1 1 175px;display:flex;align-items:center;gap:9px;
+  min-height:47px;padding:12px;
+  border:1px solid transparent;border-radius:11px;
+  color:var(--sii-text);text-decoration:none;font-size:12px;font-weight:720;line-height:1.45;
+  transition:background-color 170ms ease,border-color 170ms ease,transform 170ms ease;
+}
+.sii-app .sii-administration-links a span {
+  flex:none;display:grid;place-items:center;width:29px;height:29px;
+  border:1px solid var(--sii-v4-outline);border-radius:9px;
+  background:var(--sii-primary-soft);color:var(--sii-primary);font-size:17px;
+}
+.sii-app .sii-administration-links a:hover,
+.sii-app .sii-administration-links a:focus-visible {background:var(--sii-surface-soft);border-color:var(--sii-v4-outline)}
+.sii-app .sii-administration-grid {gap:18px;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}
+.sii-app .sii-administration-card {border-color:var(--sii-v4-outline)}
+.sii-app .sii-administration-grid>.sii-administration-card h2 {margin:0 0 11px;font-size:20px;letter-spacing:-.025em}
+.sii-app .sii-administration-grid>.sii-administration-card>p {margin-bottom:18px;line-height:1.6}
+.sii-app .sii-administration-card .sii-catalog-form {gap:7px}
+.sii-app .sii-administration-card .sii-catalog-form label {font-size:12px;margin-top:10px}
+.sii-app .sii-administration-card .sii-catalog-form :is(input,select,textarea) {
+  width:100%;min-height:44px;max-width:100%;
+  border:1px solid var(--sii-line);border-radius:11px;
+  background:var(--sii-surface-soft);color:var(--sii-text);
+  padding:11px 13px;
+  transition:border-color 170ms ease,box-shadow 170ms ease,background-color 170ms ease;
+}
+.sii-app .sii-administration-card .sii-catalog-form :is(input,select,textarea):focus-visible {
+  background:var(--sii-surface);border-color:var(--sii-primary);box-shadow:0 0 0 3px var(--sii-primary-soft);
+}
+.sii-app .sii-administration-card .sii-catalog-form .sii-submit {min-height:46px;margin-top:13px;padding-inline:20px;align-self:flex-start}
+.sii-app .sii-admin-security-banner,.sii-app .sii-administration-summary,.sii-app .sii-administration-links,.sii-app .sii-administration-grid>.sii-administration-card {
+  animation:sii-v4-rise 390ms cubic-bezier(.2,.7,.25,1) both;
+}
+.sii-app .sii-administration-summary {animation-delay:45ms}
+.sii-app .sii-administration-links {animation-delay:75ms}
+.sii-app .sii-administration-grid>.sii-administration-card:nth-child(1) {animation-delay:110ms}
+.sii-app .sii-administration-grid>.sii-administration-card:nth-child(2) {animation-delay:155ms}
+@media(max-width:900px) {
+ .sii-app .sii-administration-grid {grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:840px) {
+ .sii-auth .sii-auth-form-wrap {width:min(100%,560px);margin:24px auto;padding:clamp(20px,5vw,34px)}
+ .sii-auth .sii-auth-story-content {padding:38px 0 10px}
+ .sii-auth .sii-auth-access-footer {padding-bottom:12px}
+}
+@media(max-width:600px) {
+ .sii-auth .sii-auth-form-wrap {padding:24px 19px;border-radius:18px;margin:20px auto}
+ .sii-auth .sii-auth-form-wrap h2 {font-size:clamp(29px,8vw,36px)}
+ .sii-app .sii-metric {min-height:0;padding:20px}
+ .sii-app .sii-administration-discovery .sii-catalog-pagination {display:flex;gap:9px}
+ .sii-app .sii-administration-links {padding:10px;display:grid;grid-template-columns:minmax(0,1fr)}
+ .sii-app .sii-administration-links a {min-height:46px;width:100%}
+ .sii-app .sii-administration-summary {padding:19px}
+ .sii-app .sii-admin-security-banner {padding:15px}
+ .sii-app .sii-admin-security-banner .sii-outline-button {width:100%}
+}
+@media(prefers-reduced-motion:reduce) {
+ .sii-auth .sii-auth-form-wrap,.sii-app .sii-metric,.sii-app .sii-administration-summary,.sii-app .sii-admin-security-banner,.sii-app .sii-administration-links,.sii-app .sii-administration-card {animation:none!important;transition:none!important;transform:none!important}
+ .sii-auth .sii-story-features>div,.sii-app .sii-administration-links a {transition:none!important;transform:none!important}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+ .sii-auth .sii-auth-form-wrap {background:var(--sii-surface);box-shadow:none}
+ .sii-app .sii-administration-summary {background:var(--sii-surface)}
+ .sii-app .sii-metric {box-shadow:none}
+}
+@media(forced-colors:active) {
+ .sii-auth .sii-auth-form-wrap,.sii-app .sii-administration-links a {border:1px solid CanvasText}
+ .sii-app .sii-administration-summary {background:Canvas}
+}

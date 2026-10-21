@@ -85,7 +85,7 @@ export function ManageableInstitutions() {
     <div className="sii-panel-top"><div><span className="sii-section-kicker">ADMINISTRACIÓN AUTORIZADA</span><h2>Gestión institucional</h2><p>Configuración e historial de las instituciones que puedes administrar.</p></div></div>
     {!online && <p role="status">Sin conexión. Las operaciones están deshabilitadas.</p>}
     {loading ? <p role="status">Consultando instituciones administrables…</p> : error ? <p role="alert" className="sii-catalog-error">{error}</p> : !rows.length ? <p>No hay instituciones administrables para esta consulta.</p> : <ul className="sii-administration-list">{rows.map(institution => <li key={institution.id}>
-      <div><strong>{institution.name}</strong><small>{institution.code} · {statusLabels[institution.status]}</small></div>
+      <span className="sii-admin-institution-glyph" aria-hidden="true">▥</span><div><strong>{institution.name}</strong><small>{institution.code} · {statusLabels[institution.status]}</small></div>
       <Link href={`/dashboard/institutions/${institution.id}/admin` as Route} className="sii-outline-button" aria-label={`Administrar ${institution.name}`}>Administrar <span aria-hidden="true">→</span></Link>
     </li>)}</ul>}
     <nav className="sii-catalog-pagination" aria-label="Paginación de instituciones administrables">
@@ -188,17 +188,17 @@ export default function InstitutionAdministration({initialInstitution, actions}:
     {!online && <p role="status" className="sii-catalog-error">Sin conexión. Las operaciones están deshabilitadas; tu borrador se conserva.</p>}
     {error && <p id="institution-admin-error" role="alert" tabIndex={-1} ref={feedback} className="sii-catalog-error">{error}</p>}
     {notice && <p role="status" className="sii-catalog-notice">{notice}</p>}
-    {(needsSecurity || blocked || (!archived && !actions.updateSettings && !actions.changeStatus)) && <div className="sii-info-banner"><p>Revisa tu seguridad de cuenta y confirma tu identidad para volver a consultar las acciones disponibles.</p><SecurityActionLink returnTo={returnTo}/></div>}
+    {(needsSecurity || blocked || (!archived && !actions.updateSettings && !actions.changeStatus)) && <div className="sii-info-banner sii-admin-security-banner"><div className="sii-admin-security-copy"><strong>Revisa tu seguridad de cuenta</strong><p>Confirma tu identidad para volver a consultar las acciones disponibles.</p></div><SecurityActionLink returnTo={returnTo}/></div>}
     <section className="sii-panel sii-administration-summary" aria-label="Contexto de administración">
-      <div><h2>{institution.name}</h2><p>{institution.code} · <strong>{statusLabels[institution.status]}</strong> · Versión {institution.version}</p><p>Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
+      <div><span className="sii-admin-summary-label">CONTEXTO INSTITUCIONAL</span><h2>{institution.name}</h2><p className="sii-admin-summary-meta">{institution.code} · <strong data-status={institution.status}>{statusLabels[institution.status]}</strong> · Versión {institution.version}</p><p className="sii-admin-summary-date">Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
       <button type="button" className="sii-outline-button" disabled={saving || loading || !online} onClick={() => void reload()}>Recargar configuración vigente</button>
       {archived ? <p>Esta institución está archivada. Su configuración y estado son de solo lectura.</p> : !businessAvailable ? <p>La administración se limita a configuración, estado e historial. Las operaciones institucionales ordinarias permanecen bloqueadas.</p> : null}
     </section>
     {businessAvailable && <nav className="sii-panel sii-administration-links" aria-label="Áreas administrativas">
-      {academicAvailable && <Link href={`/dashboard/institutions/${institutionId}/academic`}>Campus, programas, periodos, planes y materias</Link>}
-      {hasInstitutionCapability(capabilities, 'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`}>Usuarios y membresías</Link>}
-      {hasInstitutionCapability(capabilities, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`}>Roles y permisos por ámbito</Link>}
-      {hasInstitutionCapability(capabilities, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`}>Invitaciones y altas</Link>}
+      {academicAvailable && <Link href={`/dashboard/institutions/${institutionId}/academic`}><span aria-hidden="true">▥</span>Campus, programas, periodos, planes y materias</Link>}
+      {hasInstitutionCapability(capabilities, 'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`}><span aria-hidden="true">♙</span>Usuarios y membresías</Link>}
+      {hasInstitutionCapability(capabilities, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`}><span aria-hidden="true">◇</span>Roles y permisos por ámbito</Link>}
+      {hasInstitutionCapability(capabilities, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`}><span aria-hidden="true">✉</span>Invitaciones y altas</Link>}
     </nav>}
     <div className="sii-administration-grid" aria-busy={loading || saving}>
       <section className="sii-panel sii-administration-card"><h2 ref={settingsHeading} tabIndex={-1}>Configuración institucional</h2>
