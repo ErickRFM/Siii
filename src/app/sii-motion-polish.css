@@ -27,7 +27,7 @@ html[data-sii-theme="dark"] {
   border-radius:24px;
   background:linear-gradient(145deg,rgba(173,97,125,.045),transparent 60%),var(--sii-surface);
   box-shadow:var(--sii-v4-elevation);
-  animation:sii-v4-rise 420ms cubic-bezier(.2,.7,.25,1) both;
+  animation:sii-v4-rise 420ms cubic-bezier(.2,.7,.25,1) backwards;
 }
 .sii-auth .sii-auth-form-icon {
   border:1px solid var(--sii-v4-outline);
@@ -84,6 +84,8 @@ html[data-sii-theme="dark"] {
 /* Dashboard: hierarchy and tactility without changing the data represented. */
 .sii-app .sii-page-heading h1 {font-weight:790}
 .sii-app .sii-page-heading {margin-bottom:29px}
+.sii-app .sii-page-eyebrow,.sii-app .sii-page-heading {animation:sii-v4-rise 350ms cubic-bezier(.2,.7,.25,1) backwards}
+.sii-app .sii-page-heading {animation-delay:35ms}
 .sii-app .sii-metric {
   position:relative;
   overflow:hidden;
@@ -92,7 +94,7 @@ html[data-sii-theme="dark"] {
   padding:23px;
   border-color:var(--sii-v4-outline);
   box-shadow:var(--sii-v4-elevation);
-  animation:sii-v4-rise 390ms cubic-bezier(.2,.7,.25,1) both;
+  animation:sii-v4-rise 390ms cubic-bezier(.2,.7,.25,1) backwards;
 }
 .sii-app .sii-metric::after {
   content:"";position:absolute;z-index:-1;inset:0;
@@ -131,6 +133,8 @@ html[data-sii-theme="dark"] {
   background:var(--sii-primary-soft);color:var(--sii-primary);font-size:18px;
 }
 .sii-app .sii-institution-item {border-color:var(--sii-v4-outline);padding:18px}
+.sii-app .sii-access-panel .sii-access-feature {transition:background-color 180ms ease,border-color 180ms ease}
+@media(hover:hover) and (pointer:fine){.sii-app .sii-access-panel .sii-access-feature:hover{background:var(--sii-primary-soft);border-color:var(--sii-v4-outline)}}
 .sii-app .sii-access-feature {width:100%;padding:13px 12px;gap:12px;margin-bottom:9px;border:1px solid var(--sii-v4-outline);background:var(--sii-surface-soft);border-radius:12px}
 .sii-app .sii-access-feature>span {margin-top:2px}
 .sii-app .sii-nav-item {transition:background-color 180ms ease,color 180ms ease,transform 180ms ease,border-color 180ms ease}
@@ -200,7 +204,7 @@ html[data-sii-theme="dark"] {
 }
 .sii-app .sii-administration-card .sii-catalog-form .sii-submit {min-height:46px;margin-top:13px;padding-inline:20px;align-self:flex-start}
 .sii-app .sii-admin-security-banner,.sii-app .sii-administration-summary,.sii-app .sii-administration-links,.sii-app .sii-administration-grid>.sii-administration-card {
-  animation:sii-v4-rise 390ms cubic-bezier(.2,.7,.25,1) both;
+  animation:sii-v4-rise 390ms cubic-bezier(.2,.7,.25,1) backwards;
 }
 .sii-app .sii-administration-summary {animation-delay:45ms}
 .sii-app .sii-administration-links {animation-delay:75ms}
@@ -226,7 +230,7 @@ html[data-sii-theme="dark"] {
  .sii-app .sii-admin-security-banner .sii-outline-button {width:100%}
 }
 @media(prefers-reduced-motion:reduce) {
- .sii-auth .sii-auth-form-wrap,.sii-app .sii-metric,.sii-app .sii-administration-summary,.sii-app .sii-admin-security-banner,.sii-app .sii-administration-links,.sii-app .sii-administration-card {animation:none!important;transition:none!important;transform:none!important}
+ .sii-auth .sii-auth-form-wrap,.sii-app .sii-page-eyebrow,.sii-app .sii-page-heading,.sii-app .sii-metric,.sii-app .sii-administration-summary,.sii-app .sii-admin-security-banner,.sii-app .sii-administration-links,.sii-app .sii-administration-card {animation:none!important;transition:none!important;transform:none!important}
  .sii-auth .sii-story-features>div,.sii-app .sii-administration-links a {transition:none!important;transform:none!important}
 }
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more) {
