@@ -1,4 +1,5 @@
 'use client';
+import SiiScrollRegion from './sii-scroll-region';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -98,9 +99,9 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
   {loading?<p role="status">Consultando calificaciones…</p>:snapshot&&<>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel"><h3>Evaluaciones · {weight} % / 100 %</h3>
-     <div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de calificaciones, desplazamiento horizontal" tabIndex={0} aria-label="Tabla de evaluación, desplazamiento horizontal"><table className="sii-catalog-table">
+     <SiiScrollRegion label="Tabla de evaluación, desplazamiento horizontal"><table className="sii-catalog-table">
       <thead><tr><th scope="col">Clave</th><th scope="col">Evaluación</th><th scope="col">Ponderación</th></tr></thead>
-      <tbody>{snapshot.components.map(c=><tr key={c.id}><td>{c.code}</td><td>{c.title}</td><td>{c.weight} %</td></tr>)}</tbody></table></div>
+      <tbody>{snapshot.components.map(c=><tr key={c.id}><td>{c.code}</td><td>{c.title}</td><td>{c.weight} %</td></tr>)}</tbody></table></SiiScrollRegion>
      {published?<p role="status">Acta publicada. Los cambios requieren una rectificación autorizada.</p>:null}
     </section>
     {!published&&<aside className="sii-panel sii-catalog-create"><h3>Agregar evaluación</h3>
@@ -113,14 +114,14 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
    </div>
    <section className="sii-panel sii-catalog-table-panel"><h3>Captura por estudiante</h3>
     {!snapshot.roster.length?<p>No hay estudiantes inscritos en esta sección.</p>:
-    <div className="sii-catalog-scroll"><table className="sii-catalog-table"><thead><tr><th scope="col">Matrícula / alumno</th>
+    <SiiScrollRegion label="Tabla de calificaciones, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th scope="col">Matrícula / alumno</th>
      {snapshot.components.map(c=><th key={c.id} scope="col">{c.code} ({c.weight} %)</th>)}</tr></thead>
      <tbody>{snapshot.roster.map(student=><tr key={student.studentId}><td><strong>{student.enrollmentNumber}</strong><small>{student.firstName} {student.lastName}</small></td>
       {snapshot.components.map(c=>{const score=snapshot.scores.find(s=>s.studentId===student.studentId&&s.componentId===c.id);
        return <td key={c.id}>{published?<span>{score?(score.scoreHundredths/100).toFixed(2):'—'}</span>:
         <form onSubmit={e=>{e.preventDefault();const form=e.currentTarget;const v=new FormData(form);void saveScore(c.id,student.studentId,String(v.get('grade')??''))}}>
          <label>Nota<input aria-label={`${student.enrollmentNumber} · ${c.title}`} type="number" name="grade" min="0" max="10" step="0.01" defaultValue={score?(score.scoreHundredths/100).toFixed(2):''} required/></label>
-         <button type="submit" disabled={saving}>Guardar</button></form>}</td>})}</tr>)}</tbody></table></div>}
+         <button type="submit" disabled={saving}>Guardar</button></form>}</td>})}</tr>)}</tbody></table></SiiScrollRegion>}
    </section>
    <section className="sii-panel sii-catalog-create"><h3>Publicación oficial</h3><p>La publicación requiere verificación reciente de tu autenticador.</p><SecurityActionLink returnTo={`/dashboard/institutions/${institutionId}/grading`}/>
     <p>{published?'Acta emitida y registrada.':'Revisa ponderaciones, notas faltantes y listado de estudiantes antes de publicar.'}</p>

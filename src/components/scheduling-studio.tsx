@@ -1,4 +1,5 @@
 'use client';
+import SiiScrollRegion from './sii-scroll-region';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -101,18 +102,18 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
     </form></section>
   </div>
   <section className="sii-panel sii-catalog-table-panel"><h3>Patrones programados · {patterns.length}</h3>
-   <div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de sesiones, desplazamiento horizontal" tabIndex={0} aria-label="Tabla de horarios, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Día</th><th>Horario</th><th>Aula</th></tr></thead>
+   <SiiScrollRegion label="Tabla de horarios, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Día</th><th>Horario</th><th>Aula</th></tr></thead>
     <tbody>{patterns.map(p=><tr key={p.id}><td>{sections.find(s=>s.id===p.sectionId)?.code??p.sectionId}</td>
      <td>{days[p.weekday??0]??'—'}</td><td>{clock(p.startMinute??0)}–{clock(p.endMinute??0)}</td>
-     <td>{rooms.find(r=>r.id===p.roomId)?.code??p.roomId}</td></tr>)}</tbody></table></div>
+     <td>{rooms.find(r=>r.id===p.roomId)?.code??p.roomId}</td></tr>)}</tbody></table></SiiScrollRegion>
   </section>
   <section className="sii-panel sii-catalog-table-panel"><h3>Ocurrencias de una semana</h3>
    <label>Inicio de semana <input type="date" value={week} onChange={e=>setWeek(e.target.value)}/></label>
-   <div className="sii-catalog-scroll"><table className="sii-catalog-table"><thead><tr><th>Fecha</th><th>Materia / sección</th><th>Hora</th><th>Aula</th><th>Estado / acción</th></tr></thead>
+   <SiiScrollRegion label="Tabla de sesiones, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th>Fecha</th><th>Materia / sección</th><th>Hora</th><th>Aula</th><th>Estado / acción</th></tr></thead>
     <tbody>{occurrences.map(o=><tr key={o.id}><td>{o.date}</td><td>{o.courseName} · {o.sectionCode}</td>
      <td>{clock(o.startMinute)}–{clock(o.endMinute)}</td><td>{o.roomBuilding} · {o.roomCode}</td>
      <td>{o.state} {o.state!=='CANCELLED'&&<button type="button" disabled={saving} onClick={()=>void cancel(o)}>Cancelar</button>}</td>
-    </tr>)}</tbody></table></div>
+    </tr>)}</tbody></table></SiiScrollRegion>
    {!occurrences.length&&<p>Aún no hay clases programadas en este intervalo.</p>}
   </section>
  </div>;

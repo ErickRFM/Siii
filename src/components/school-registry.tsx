@@ -1,4 +1,5 @@
 'use client';
+import SiiScrollRegion from './sii-scroll-region';
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
 import { useCallback,useEffect,useRef,useState,type FormEvent,type KeyboardEvent } from 'react';
@@ -123,14 +124,14 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
      <input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>
      <button type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving||!!editing}>Actualizar</button></div>
     {loading?<div className="sii-empty" role="status">Cargando registros…</div>:filtered.length===0?<div className="sii-empty">No hay registros coincidentes.</div>:
-     <div className="sii-catalog-scroll" role="region" tabIndex={0} aria-label="Tabla de expedientes, desplazamiento horizontal"><table className="sii-catalog-table">
+     <SiiScrollRegion label="Tabla de expedientes, desplazamiento horizontal"><table className="sii-catalog-table">
       <thead><tr><th scope="col">Identificador</th><th scope="col">Persona</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
       <tbody>{filtered.map(row=><tr key={row.id}>
        <td className="sii-catalog-code">{row.enrollmentNumber??row.employeeNumber}</td>
        <td><strong>{row.firstName} {row.lastName}</strong><small>{row.institutionalEmail??'Sin correo institucional'}</small></td>
        <td>{row.status}</td>
        <td><button type="button" ref={node=>{if(node)editButtons.current.set(row.id,node);else editButtons.current.delete(row.id)}} disabled={saving||!!editing} onClick={()=>{returnFocusId.current=row.id;setEditing({...row});setError('');setNotice('')}}>Editar</button> <button type="button" disabled={saving||!!editing||!['active','inactive'].includes(row.status)} onClick={()=>void changeStatus(row)}>{row.status==='active'?'Desactivar':'Reactivar'}</button></td>
-      </tr>)}</tbody></table></div>}
+      </tr>)}</tbody></table></SiiScrollRegion>}
     <nav className="sii-catalog-pagination" aria-label="Paginación del registro">
      <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!!editing} onClick={()=>void page('previous')}>Página anterior</button>
      <span aria-live="polite">Página {history.length}</span>
