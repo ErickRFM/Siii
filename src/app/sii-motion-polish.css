@@ -10,9 +10,10 @@ html[data-sii-theme="dark"] {
   --sii-v4-elevation:0 22px 52px rgba(0,0,0,.23),0 4px 12px rgba(0,0,0,.09);
 }
 @keyframes sii-v4-rise {
-  from {opacity:0;transform:translate3d(0,12px,0)}
-  to {opacity:1;transform:translate3d(0,0,0)}
+  from {transform:translate3d(0,10px,0)}
+  to {transform:translate3d(0,0,0)}
 }
+/* Animate position only; changing ancestor opacity temporarily breaks text contrast. */
 /* Login: a single composed surface, not an empty expanse around a form. */
 .sii-auth .sii-auth-access {
   background:radial-gradient(ellipse 75% 54% at 100% 100%,rgba(159,57,91,.085),transparent 75%),
