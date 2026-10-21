@@ -4,7 +4,7 @@ import pg from 'pg';
 import {APPLICATION_ROLE_QUERY,assertRoleInspection} from '@/infrastructure/database/role-policy';
 import {eq,sql} from 'drizzle-orm';
 import {db,pool} from '@/infrastructure/database';
-import {institutions,campuses,academicTerms,academicCourses,academicPrograms,academicSections,institutionalStudents,institutionalTeachers,sectionTeachers,sectionEnrollments,classrooms,schedulePatterns,classOccurrences} from '../../db/schema';
+import {institutions,campuses,academicTerms,academicCourses,academicPrograms,academicSections,institutionalStudents,institutionalTeachers,sectionTeachers,sectionEnrollments,classrooms,schedulePatterns,classOccurrences,people,platformUsers} from '../../db/schema';
 import {enqueueAcademicSection} from '@/integrations/companion/outbox/enqueue';
 import {queueCompanionSectionSnapshot} from '@/integrations/companion/outbox/write-hook';
 import {openAcademicBody} from '@/integrations/companion/outbox/seal';
@@ -27,15 +27,17 @@ describe('transactional academic outbox PostgreSQL',()=>{
  it('default disabled touches no new tables even with invalid scope/transport',async()=>{delete process.env.SIII_ACADEMIC_OUTBOX_ENABLED;expect(await enqueueAcademicSection({} as never,{} as never)).toEqual({status:'disabled'});expect(await deliverAcademicEvents({transport:async()=>{throw Error('must not call')}})).toMatchObject({disabled:true})});
  it('mutation hook captures committed state and aborts atomically when an academic write fails',async()=>{
   const scope=await fixture();
+  const [person]=await db.insert(people).values({firstName:'Synthetic',lastName:'Sender'}).returning();
+  const [actor]=await db.insert(platformUsers).values({personId:person.id,username:'outbox-'+randomUUID()}).returning();
   await expect(db.transaction(async tx=>{
    await tx.update(academicSections).set({code:'SHOULD-ROLLBACK'}).where(eq(academicSections.id,scope.sectionId));
-   await queueCompanionSectionSnapshot(tx,{institutionId:scope.institutionId,sectionId:scope.sectionId,actorUserId:randomUUID()});
+   await queueCompanionSectionSnapshot(tx,{institutionId:scope.institutionId,sectionId:scope.sectionId,actorUserId:actor.id});
    throw Error('WRITE_ROLLBACK');
   })).rejects.toThrow('WRITE_ROLLBACK');
   expect((await pool.query('SELECT count(*)::int AS n FROM academic_section_outbox WHERE section_id=$1',[scope.sectionId])).rows[0].n).toBe(0);
   await db.transaction(async tx=>{
    await tx.update(academicSections).set({code:'COMMITTED-SECTION'}).where(eq(academicSections.id,scope.sectionId));
-   await queueCompanionSectionSnapshot(tx,{institutionId:scope.institutionId,sectionId:scope.sectionId,actorUserId:randomUUID()});
+   await queueCompanionSectionSnapshot(tx,{institutionId:scope.institutionId,sectionId:scope.sectionId,actorUserId:actor.id});
   });
   const {rows}=await pool.query('SELECT event_id FROM academic_section_outbox WHERE section_id=$1',[scope.sectionId]);
   expect(rows).toHaveLength(1);
