@@ -7,13 +7,13 @@ for(const path of ['/password/forgot','/password/reset','/invitations/accept'] a
    test.setTimeout(60000);
    await page.setViewportSize({width:390,height:844});
    await page.goto(path);
+   // Test the persisted preference after navigation; the regular login suite
+   // already exercises clicking the toggle. Avoid reading pre-hydration DOM state.
+   await page.evaluate(value=>localStorage.setItem('sii-theme',value),theme);
+   await page.reload();
    const themeToggle=page.locator('.sii-theme-toggle');
    await expect(themeToggle).toBeVisible();
-   // Wait for the client theme preference to hydrate before deciding to toggle.
-   const desiredLabel=theme==='dark'?'Activar tema claro':'Activar tema oscuro';
-   await expect(themeToggle).toHaveAttribute('aria-label',/Activar tema (claro|oscuro)/);
-   if(await themeToggle.getAttribute('aria-label')!==desiredLabel)await themeToggle.click();
-   await expect(themeToggle).toHaveAttribute('aria-label',desiredLabel);
+   await expect(themeToggle).toHaveAttribute('aria-label',theme==='dark'?'Activar tema claro':'Activar tema oscuro');
    await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
    await expect(page.locator('main#main-content')).toBeVisible();
    await expect(page.locator('.sii-auth-form-wrap')).toBeVisible();
