@@ -107,3 +107,11 @@ html[data-sii-theme="dark"] .sii-app .sii-info-banner{background:#392b1c;color:#
   .sii-app :is(.sii-catalog-actions, .sii-catalog-pagination) button { min-height: 44px; }
   .sii-confirm-actions button { min-height: 44px; }
 }
+
+/* Keep the catalog search usable at narrow widths instead of shrinking to an icon. */
+@media(max-width:600px){
+ .sii-app .sii-catalog-toolbar{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:10px}
+ .sii-app .sii-catalog-toolbar label,.sii-app .sii-catalog-toolbar input{width:100%;min-width:0}
+ .sii-app .sii-catalog-toolbar input{min-height:44px;font-size:16px}
+ .sii-app .sii-catalog-toolbar .sii-outline-button{justify-self:start}
+}

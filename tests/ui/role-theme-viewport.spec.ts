@@ -55,6 +55,13 @@ for(const role of roles){
    for(const width of [360,768,1440]){
     await page.setViewportSize({width,height:850});
     await expect(page.locator('main')).toBeVisible();
+    if(role==='student'&&width===360){
+      const field=page.locator('#catalog-search');
+      await expect(field).toBeVisible();
+      const bounds=await field.boundingBox();
+      expect(bounds?.width,'mobile catalog search must remain usable').toBeGreaterThanOrEqual(180);
+      expect(bounds?.x).toBeGreaterThanOrEqual(0);
+    }
     const dimensions=await page.evaluate(()=>({content:document.documentElement.scrollWidth,viewport:window.innerWidth}));
     expect(dimensions.content,role+' '+theme+' '+width+': horizontal viewport overflow').toBeLessThanOrEqual(dimensions.viewport+2);
     await page.screenshot({path:'.p0-local/ux-matrix-'+role+'-'+theme+'-'+width+'.png',fullPage:true});
