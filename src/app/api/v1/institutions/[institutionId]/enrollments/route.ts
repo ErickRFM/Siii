@@ -1,3 +1,4 @@
+import {queueCompanionSectionSnapshot} from '@/integrations/companion/outbox/write-hook';
 import {personScheduleConflict} from '@/modules/scheduling/person-conflict';
 import {domainTransaction,withDomainErrors,DomainConflict} from '@/modules/consolidation/domain-boundary';
 import {requestId} from '@/shared/http/request-context';
@@ -48,6 +49,7 @@ export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
     if(await personScheduleConflict(tx,id,section.id,student.id,'student'))throw new DomainConflict('SCHEDULE_CONFLICT');
     const [row]=await tx.insert(sectionEnrollments).values({...parsed.data,institutionId:id}).returning();
     await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:id,action:'enrollment.create',target:'enrollment:'+row.id});
+    await queueCompanionSectionSnapshot(tx,{institutionId:id,sectionId:row.sectionId,actorUserId:access.identity.id});
     return {data:row};
   });
   return 'data' in result?NextResponse.json({data:result.data},{status:201,headers}):jsonError(result.error,409);
@@ -65,6 +67,7 @@ export const PATCH=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
     const [row]=await tx.update(sectionEnrollments).set({status:'withdrawn',updatedAt:new Date()}).where(and(eq(sectionEnrollments.id,parsed.data.id),eq(sectionEnrollments.institutionId,id),eq(sectionEnrollments.status,'enrolled'))).returning();
     if(!row)return null;
     await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:id,action:'enrollment.withdraw',target:'enrollment:'+row.id});
+    await queueCompanionSectionSnapshot(tx,{institutionId:id,sectionId:row.sectionId,actorUserId:access.identity.id});
     return row;
   });
   return data?NextResponse.json({data},{headers}):jsonError('NOT_ENROLLED',409);
