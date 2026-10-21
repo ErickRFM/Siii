@@ -23,7 +23,7 @@ html[data-sii-theme="dark"] {
 .sii-auth .sii-auth-form-wrap {
   position:relative;
   width:min(100%,520px);
-  padding:clamp(26px,3.5vw,46px);
+  padding:clamp(26px,3.1vw,38px);
   border:1px solid var(--sii-v4-outline);
   border-radius:24px;
   background:linear-gradient(145deg,rgba(173,97,125,.045),transparent 60%),var(--sii-surface);
@@ -33,10 +33,12 @@ html[data-sii-theme="dark"] {
 .sii-auth .sii-auth-form-icon {
   border:1px solid var(--sii-v4-outline);
   box-shadow:0 9px 24px rgba(122,41,70,.10);
-  margin-bottom:20px;
+  margin-bottom:18px;
 }
-.sii-auth .sii-auth-form-subtitle{margin-bottom:27px}
+.sii-auth .sii-auth-form-subtitle{margin-bottom:24px}
 .sii-auth .sii-auth-form-wrap h2 {letter-spacing:-.052em}
+.sii-auth .sii-auth-access-footer {flex:none;margin-top:16px;padding-bottom:2px}
+.sii-auth .sii-auth-divider {margin-bottom:16px}
 .sii-auth .sii-auth-form #sii-factor-help {
   margin:0 0 20px;
   padding:16px 17px;
@@ -69,10 +71,10 @@ html[data-sii-theme="dark"] {
   transition:background-color 180ms ease,border-color 180ms ease,transform 180ms ease;
 }
 .sii-auth .sii-auth-form .sii-outline-button:hover:not(:disabled){background:var(--sii-primary-soft)}
-.sii-auth .sii-auth-help {margin:24px 0 25px;line-height:1.85}
+.sii-auth .sii-auth-help {margin:19px 0 18px;line-height:1.85}
 .sii-auth .sii-auth-help a {display:inline-block;color:var(--sii-primary);font-weight:750;text-underline-offset:3px;text-decoration:underline}
 .sii-auth .sii-auth-help a:hover {text-decoration-thickness:2px}
-.sii-auth .sii-auth-role-notice {border-color:var(--sii-v4-outline);padding:15px}
+.sii-auth .sii-auth-role-notice {border-color:var(--sii-v4-outline);padding:14px}
 .sii-auth .sii-auth-story {background:
   radial-gradient(ellipse 85% 90% at 100% 85%,rgba(195,64,102,.40),transparent 72%),
   radial-gradient(circle at 0 0,rgba(138,52,78,.32),transparent 58%),
