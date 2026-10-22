@@ -228,6 +228,46 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 .sii-auth .sii-field-wrap input{background:var(--sii-kit-elevated);border-radius:12px;border-color:var(--sii-kit-border-strong)}
 .sii-auth .sii-auth-role-notice{border-color:var(--sii-kit-border);border-radius:14px}
 .sii-auth .sii-auth-form-icon{border-radius:14px;border:1px solid var(--sii-kit-border-strong)}
+/* Applicant, invitation and auxiliary flows use the same kit treatment. */
+.sii-app :is(.sii-card,.sii-form-grid,.sii-field){min-width:0}
+.sii-app .sii-card {
+  border:1px solid var(--sii-kit-border);border-radius:16px;
+  background:var(--sii-kit-surface);box-shadow:var(--sii-kit-shadow);
+}
+.sii-app .sii-form-grid {gap:clamp(12px,1.6vw,20px)}
+.sii-app .sii-field{display:grid;gap:7px}
+.sii-app .sii-field label{font-weight:750;color:var(--sii-text);font-size:12px}
+.sii-app .sii-field :is(input,select,textarea){
+  width:100%;max-width:100%;min-height:44px;padding:11px 13px;
+  border-radius:11px;border:1px solid var(--sii-kit-border-strong);
+  background:var(--sii-kit-elevated);color:var(--sii-text);font-size:16px;
+}
+.sii-app .sii-primary-button {
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:44px;padding:10px 16px;border:1px solid rgba(255,255,255,.12);
+  border-radius:11px;background:var(--sii-kit-gradient);color:#fff;
+  font-weight:790;box-shadow:0 8px 18px rgba(139,33,65,.13);
+  transition:transform 180ms var(--sii-kit-ease),box-shadow 180ms ease;
+}
+.sii-app .sii-primary-button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 24px rgba(139,33,65,.19)}
+.sii-app .sii-notice {border-radius:13px}
+.sii-app .sii-confirm-backdrop{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.sii-app .sii-confirm-dialog{border:1px solid var(--sii-kit-border-strong);background:var(--sii-kit-elevated)}
+.sii-app .sii-confirm-dialog button{min-height:44px}
+.sii-app .sii-security-card,.sii-app .sii-administration-grid>.sii-administration-card{min-width:0}
+.sii-app .sii-panel-top h2,.sii-app .sii-catalog-summary h2{font-weight:820;letter-spacing:-.04em}
+.sii-app .sii-panel-top p{color:var(--sii-kit-muted)}
+.sii-app .sii-section-kicker{display:inline-block;margin-bottom:5px}
+.sii-app .sii-panel-top{gap:14px}
+.sii-app .sii-outline-button:focus-visible,.sii-app .sii-nav-item:focus-visible{
+  outline:3px solid #ffbacf;outline-offset:2px;
+}
+.sii-app .sii-nav{scrollbar-width:thin}
+.sii-app .sii-catalog-scroll{scrollbar-width:thin;scrollbar-color:var(--sii-kit-border-strong) transparent}
+@media(min-width:841px) and (hover:hover) and (pointer:fine){
+ .sii-app .sii-sidebar-collapse:focus-visible{outline:3px solid #ffd3e3;outline-offset:3px}
+}
+
 /* Quiet entrance and interaction motion borrowed from premium dashboard UI kits. */
 @keyframes sii-kit-appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes sii-kit-glow{from{opacity:.3;transform:translateX(-18%)}to{opacity:.85;transform:translateX(18%)}}
@@ -279,7 +319,9 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 }
 @media(prefers-reduced-motion:reduce){
   .sii-app,.sii-app *, .sii-auth,.sii-auth *{animation:none!important;transition:none!important;scroll-behavior:auto!important;transform:none!important}
-  /* Drawer translation is required for off-canvas navigation even without motion. */
+}
+@media(max-width:840px) and (prefers-reduced-motion:reduce){
+  /* Preserve the hidden drawer position while suppressing its transition. */
   .sii-app .sii-sidebar:not(.sii-sidebar--open){transform:translateX(-110%)!important}
 }
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
