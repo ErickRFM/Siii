@@ -40,3 +40,7 @@ La primera adaptación a `domainTransaction` pasó HTTP pero TypeScript detectó
 SEC-03/06 globales siguen abiertos: Admisiones y vínculos son otros escritores. No se ejecutó la suite completa de integración ni navegador para esta rama API; el CI completo corresponde a su futura publicación. No se afirma disponibilidad productiva, flujo universitario completo ni remediación del historial cruzado. Se conservan también las limitaciones existentes del folio aleatorio de órdenes y los listados sin paginación; este incremento no cambia esos contratos.
 
 La revisión independiente del coordinador y el CI del SHA publicado siguen siendo gates antes de merge. No hubo push, PR, merge ni operación productiva desde esta tarea.
+
+## Revisión independiente y correlación HTTP
+
+El coordinador comunicó revisión independiente favorable de `d3da6485`, sin hallazgos Critical/Important. Se resolvió la observación menor de cobertura: los dos positivos financieros ahora exigen que el `request_id` persistido coincida exactamente con `response.headers.get('x-request-id')`, además de validar el UUID. No se modificó producción. Repetición específica:22/22 HTTP aprobados en16.59s; lint y typecheck exit0. El CI del SHA publicado permanece pendiente; no se repitieron build/unitarias por este cambio exclusivo de prueba/documentación.

@@ -79,6 +79,7 @@ describe.sequential('financial HTTP writes retain MFA, tenant references and tra
    const event=(await sql.query('SELECT actor_user_id,institution_id,request_id,target,details FROM security_audit_log WHERE action=$1 AND institution_id=$2',[actions[kind],institution])).rows[0];
    expect(event).toMatchObject({actor_user_id:admin.id,institution_id:institution,target:(kind==='orders'?'payment_order:':'financial_fee_type:')+row.id});
    expect(event.request_id).toMatch(/^[0-9a-f-]{36}$/);
+   expect(event.request_id).toBe(response.headers.get('x-request-id'));
    expect(event.details).toEqual({after:kind==='orders'?{feeTypeId:fee,payerStudentId:student,payerUserId:null,totalAmountCents:15000,currency:'MXN',status:'pending'}:{code:row.code,defaultAmountCents:15000,currency:'MXN',status:'active'}});
   });
   it(kind+': rolls back the financial write if its audit cannot be persisted',async()=>{
