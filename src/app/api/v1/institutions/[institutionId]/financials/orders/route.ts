@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
-import { eq, desc } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { and, eq, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
-import { paymentOrders, financialFeeTypes, institutionalStudents } from '../../../../../../../../db/schema';
+import { paymentOrders, financialFeeTypes, institutionalStudents, institutionMemberships, securityAuditLog } from '../../../../../../../../db/schema';
 import { authorizeCapability, getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import { can } from '@/shared/auth/capabilities';
 import { createOrderSchema } from '@/modules/financials/validation';
+import { assertSameOrigin, jsonError } from '@/shared/auth/guards';
+import { withDomainErrors } from '@/modules/consolidation/domain-boundary';
+import { financialTransaction } from '@/modules/financials/write-transaction';
+import { requestId } from '@/shared/http/request-context';
 
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
@@ -40,8 +43,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
       enrollmentNumber: institutionalStudents.enrollmentNumber,
     })
     .from(paymentOrders)
-    .innerJoin(financialFeeTypes, eq(paymentOrders.feeTypeId, financialFeeTypes.id))
-    .leftJoin(institutionalStudents, eq(paymentOrders.payerStudentId, institutionalStudents.id))
+    .innerJoin(financialFeeTypes, and(eq(paymentOrders.feeTypeId, financialFeeTypes.id),eq(paymentOrders.institutionId,financialFeeTypes.institutionId)))
+    .leftJoin(institutionalStudents, and(eq(paymentOrders.payerStudentId, institutionalStudents.id),eq(paymentOrders.institutionId,institutionalStudents.institutionId)))
     .where(eq(paymentOrders.institutionId, institutionId))
     .orderBy(desc(paymentOrders.createdAt));
 
@@ -51,7 +54,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
   }
 }
 
-export async function POST(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
+export const POST=withDomainErrors(async (request: NextRequest, { params }: { params: Promise<{ institutionId: string }> })=>{
+  if (!assertSameOrigin(request)) return jsonError('INVALID_ORIGIN',403);
   const { institutionId } = await params;
   try {
     const user = await getIdentity();
@@ -59,18 +63,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ ins
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Sesión requerida' } }, { status: 401 });
     }
 
-    const accessList = await getInstitutionAccess(user.id);
-    const access = accessList.find(a => a.institutionId === institutionId);
+    const access = await authorizeCapability(institutionId,'institutions.manage');
     if (!access) {
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
     }
 
-    const subject = { id: user.id, active: true, mustChangePassword: user.mustChangePassword, grants: access.grants };
-    if (!can(subject, 'institutions.manage', { institutionId })) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente para generar órdenes de pago' } }, { status: 403 });
-    }
-
-    const json = await request.json();
+    const json:unknown = await request.json().catch(()=>null);
     const parseResult = createOrderSchema.safeParse(json);
     if (!parseResult.success) {
       return NextResponse.json({ error: { code: 'INVALID_INPUT', message: 'Datos de orden de pago no válidos', details: parseResult.error.flatten() } }, { status: 400 });
@@ -80,7 +78,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ ins
 
     const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    const [order] = await db.insert(paymentOrders).values({
+    const outcome=await financialTransaction(access,async tx=>{
+     const [fee]=await tx.select({id:financialFeeTypes.id}).from(financialFeeTypes).where(and(eq(financialFeeTypes.id,feeTypeId),eq(financialFeeTypes.institutionId,institutionId))).for('share');
+     if(!fee)return null;
+     if(payerStudentId){
+      const [student]=await tx.select({id:institutionalStudents.id}).from(institutionalStudents).where(and(eq(institutionalStudents.id,payerStudentId),eq(institutionalStudents.institutionId,institutionId))).for('share');
+      if(!student)return null;
+     }
+     if(payerUserId){
+      const [membership]=await tx.select({id:institutionMemberships.id}).from(institutionMemberships).where(and(eq(institutionMemberships.userId,payerUserId),eq(institutionMemberships.institutionId,institutionId))).for('share');
+      if(!membership)return null;
+     }
+     const [row] = await tx.insert(paymentOrders).values({
       institutionId,
       orderNumber,
       feeTypeId,
@@ -91,9 +100,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ ins
       status: 'pending',
       dueDate: dueDate ? new Date(dueDate) : null,
     }).returning();
+     await tx.insert(securityAuditLog).values({actorUserId:access.identity.id,institutionId,requestId:requestId(request.headers),action:'financial.order.create',target:'payment_order:'+row.id,details:{after:{feeTypeId,payerStudentId:row.payerStudentId,payerUserId:row.payerUserId,totalAmountCents,currency:row.currency,status:row.status}}});
+     return row;
+    });
+    if(!outcome.authorized)return jsonError('FORBIDDEN',403);
+    if(!outcome.data)return jsonError('INVALID_INPUT',400);
 
-    return NextResponse.json({ data: order }, { status: 201 });
+    return NextResponse.json({ data: outcome.data }, { status: 201 });
   } catch {
     return NextResponse.json({ error: { code: 'CREATE_FAILED', message: 'No se pudo generar la orden de pago' } }, { status: 500 });
   }
-}
+});
