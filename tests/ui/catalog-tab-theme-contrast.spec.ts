@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
 
@@ -46,6 +47,37 @@ for (const width of [1440, 390]) {
         return (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
       });
       expect(Math.min(...contrasts), JSON.stringify({samples, contrasts})).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+}
+
+for (const width of [1440, 390]) {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`institution monogram retains AA contrast during entry at ${width}px in ${theme}`, async ({page}) => {
+      await page.emulateMedia({reducedMotion: 'no-preference'});
+      await page.setViewportSize({width, height: 844});
+      await page.setContent(`<html lang="es-MX" data-sii-theme="${theme}"><head><title>SIII synthetic contrast</title><style>${styles}</style></head><body>
+        <div class="sii-app"><div class="sii-main"><main class="sii-page" id="main-content"><div class="sii-content-grid"><section class="sii-panel sii-institutions-panel"><div class="sii-institution-list">
+          <a class="sii-institution-item" href="/dashboard/institutions/synthetic"><span class="sii-institution-monogram">UM</span>
+          <span class="sii-institution-info"><strong>Institución sintética</strong><small>UM · Estudiante</small></span></a>
+        </div></section></div></main></div></div></body></html>`);
+      // Freeze an actual shipped CSS entry frame, rather than waiting for its
+      // final opacity and missing the failure observed by axe after real login.
+      const frame = await page.locator('.sii-institution-monogram').evaluate(element => {
+        const frames = [];
+        for (let ancestor: Element | null = element; ancestor; ancestor = ancestor.parentElement) {
+          const animations = ancestor.getAnimations();
+          for (const animation of animations) { animation.pause(); animation.currentTime = 43; }
+          if (animations.length) {
+            const style = getComputedStyle(ancestor);
+            frames.push({classes: ancestor.className, opacity: style.opacity, animation: style.animationName});
+          }
+        }
+        return frames;
+      });
+      expect(frame.length).toBeGreaterThan(0);
+      const audit = await new AxeBuilder({page}).include('.sii-institution-monogram').withRules(['color-contrast']).analyze();
+      expect(audit.violations.map(value => ({id: value.id, nodes: value.nodes.map(node => ({target: node.target, summary: node.failureSummary}))})), JSON.stringify(frame)).toEqual([]);
     });
   }
 }
