@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type {Route} from 'next';
 import {useRouter} from 'next/navigation';
-import {useEffect,useRef,useState,type KeyboardEvent as ReactKeyboardEvent} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {SiiNavIcon} from './sii-nav-icon';
 
 /** Client-only navigation projection, not an authorization boundary. */
@@ -28,29 +28,36 @@ export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
  useEffect(()=>{
   if(!open){setQuery('');return;}
   const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  const returnFocus=trigger.current;
   const oldBodyOverflow=document.body.style.overflow;
   document.body.style.overflow='hidden';
   input.current?.focus();
   return ()=>{
    document.body.style.overflow=oldBodyOverflow;
-   if(previous?.isConnected)previous.focus();else trigger.current?.focus();
+   if(previous?.isConnected)previous.focus();else returnFocus?.focus();
   };
  },[open]);
  const filtered=links.filter(link=>link.label.toLocaleLowerCase('es-MX').includes(query.trim().toLocaleLowerCase('es-MX')));
- const handleDialogKey=(event:ReactKeyboardEvent<HTMLDivElement>)=>{
-  if(event.key!=='Tab')return;
-  const focusable=Array.from(dialog.current?.querySelectorAll<HTMLElement>('input,button:not([disabled]),a[href]')??[]);
-  const first=focusable[0],last=focusable[focusable.length-1];
-  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
-  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
- };
+ useEffect(()=>{
+  if(!open)return;
+  const onTab=(event:KeyboardEvent)=>{
+   if(event.key!=='Tab')return;
+   const focusable=Array.from(dialog.current?.querySelectorAll<HTMLElement>('input,button:not([disabled]),a[href]')??[]);
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+  };
+  document.addEventListener('keydown',onTab);
+  return ()=>document.removeEventListener('keydown',onTab);
+ },[open]);
  return <>
   <button ref={trigger} type="button" className="sii-command-trigger" onClick={()=>setOpen(true)}
    aria-label="Buscar módulos" aria-haspopup="dialog" aria-expanded={open} aria-controls={open?"sii-quick-switch":undefined}>
    <SiiNavIcon name="search"/><span className="sii-command-trigger-label">Buscar módulo…</span><kbd>Ctrl K</kbd>
   </button>
-  {open&&<div className="sii-command-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false);}}>
-   <div ref={dialog} id="sii-quick-switch" className="sii-command-dialog" role="dialog" aria-modal="true" aria-labelledby="sii-command-heading" onKeyDown={handleDialogKey}>
+  {open&&<div className="sii-command-overlay">
+   <button type="button" className="sii-command-backdrop" onClick={()=>setOpen(false)} aria-label="Cerrar búsqueda"/>
+   <div ref={dialog} id="sii-quick-switch" className="sii-command-dialog" role="dialog" aria-modal="true" aria-labelledby="sii-command-heading">
     <h2 id="sii-command-heading">Ir a un módulo</h2>
     <div className="sii-command-search"><SiiNavIcon name="search"/><input ref={input} type="search" aria-label="Buscar secciones" placeholder="Busca una sección disponible…" value={query} onChange={e=>setQuery(e.target.value)}
        onKeyDown={e=>{
