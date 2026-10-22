@@ -125,3 +125,12 @@ Reconciliación C32 sobre main@2be56cd: las filas SEC-02 conservan su evidencia 
 | POST institutions/:id/admissions/applications/:applicationId/decision | Mismos controles; lectura/bloqueo por id+tenant; historial append y estado serializados; auditoría TX por transición | Misma suite: solicitud ajena404, revocación/expiración bajo espera, fallo de audit500 sin cambios, dos decisiones y dos audits | REVISADO LOCALMENTE; CI/INTEGRACIÓN PENDIENTES |
 
 SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni cambios de producción; ver [informe de escritores](../audits/SIII_ADMISSIONS_WRITE_AUTHORITY_2026-10-22.md).
+
+## SEC06 parcial — claim de estudiante (22 octubre2026)
+
+| Operación | Autoridad y prueba | Compatibilidad/evidencia | Estado |
+|---|---|---|---|
+| POST institutions/:id/student-links/claim, auto-link | institutions.read y membresía activa; domainTransaction común inicial/final con MFA privilegiado; actor/contacto/prueba/estudiante bajo locks; prueba real accountEmailVerifications del mismo usuario y triple correo actual coincidente |201 {link,autoApproved:true,message}; conflicto por estudiante o miembro409; student.link.auto_approved en misma TX, requestId correlacionado. student-claim-authority-http.test.ts: proof propia/foreign-tenant, rol/estado/MFA, carreras y rollback | LOCAL29HTTP; REVISIÓN/PRERREQUISITO/CI PENDIENTES; API PARCIAL |
+| Misma ruta, pending | Sin prueba o correos no coincidentes no establece vínculo; conserva solicitante derivado de sesión; misma autoridad y revalidación final |201 {claim,autoApproved:false,message}; student.claim.requested en TX; fallo de auditoría/revocación/caducidad sin fila persistida. Misma suite | LOCAL29HTTP; NO ACREDITA FLUJO DE REVISIÓN MANUAL |
+
+Evidencia y límites: [SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md](../audits/SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md). Composición privada935f2220; el helper y Admisiones no se editan en este incremento. Publicar solo tras integrar ese prerrequisito y reconciliar. student-links/me y seguridad integral del módulo permanecen fuera del alcance; sin cambios de schema/migraciones, sin sincronización ni operaciones productivas.
