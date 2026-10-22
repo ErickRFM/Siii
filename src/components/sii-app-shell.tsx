@@ -11,6 +11,7 @@ import SiiQuickSwitch, {type SiiQuickLink} from './sii-quick-switch';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
+import {GradebookDraftsProvider} from './teacher-gradebook-drafts';
 import {academicModuleLinks,allAcademicModuleLinks} from '@/shared/navigation/academic-modules';
 
 const COLLAPSED_KEY='siii:sidebar-collapsed';
@@ -24,16 +25,16 @@ function iconForModule(id:string):SiiNavIconName {
   }
 }
 
-export default function SiiAppShell({firstName,fullName,defaultInstitutionId,children}:{
-  firstName:string; fullName:string; defaultInstitutionId?:string; children:ReactNode;
+export default function SiiAppShell({actorId,firstName,fullName,defaultInstitutionId,children}:{
+  actorId:string; firstName:string; fullName:string; defaultInstitutionId?:string; children:ReactNode;
 }){
   // Shared dashboard layout keeps this sidebar mounted across module navigation.
   const pathname=usePathname();
   const {active,institutionId}=resolveDashboardLocation(pathname,defaultInstitutionId);
-  return <InstitutionCapabilitiesProvider key={institutionId??'personal'} institutionId={institutionId}>
+  return <GradebookDraftsProvider key={actorId} actorId={actorId}><InstitutionCapabilitiesProvider key={institutionId??'personal'} institutionId={institutionId}>
     <Shell firstName={firstName} fullName={fullName} active={active} institutionId={institutionId}
       institutionAdministrationAvailable={active==='administration'}>{children}</Shell>
-  </InstitutionCapabilitiesProvider>;
+  </InstitutionCapabilitiesProvider></GradebookDraftsProvider>;
 }
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
