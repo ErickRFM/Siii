@@ -188,3 +188,7 @@ Gate unitario NO aprobado: dos npmtest825/826 y archivo aislado4/5 por timeout50
 
 
 Actualización de cierre local INT-04A: coordinación completó control A main5cb826/826(13.45s) y control B en esta rama826/826(8.17s), mismo npmtest estándar/Node24.18.0/Vitest4.1.12, cincoflagsunset registrados y sin diff unit/config/migrador/lock. No hubo cambio de fuente entre fallos y B. Gate local actual aprobado; se conservan dos825/826, aislado4/5 y diagnóstico910ms, sin atribuir causa ni mejora. Lint/tipos/build0,39ONdev,39ON+39OFF producción, claves/CIcontrato0 y revisión independienteC/I/M0. Commit local autorizado; reconciliación con mainfc65 y CI/publicación pendientes. No se declara cerrada INT-04 global ni producción.
+
+## SEC-03 / SEC-06: alcance original integrado y verificado (22 octubre 2026)
+
+Estado actualizado: corregidos en codigo para las cuatro operaciones privilegiadas originales y la auditoria transaccional de orders/decision/claim. Revision independiente sin defecto abierto sobre 5cb49f75 y CI posterior de main fc65c149 verde (run 39862602189: 826 unitarias, 539 integracion, 121 UI y legacy 1). Evidencia por ruta, causa, prueba negativa y limites: [SIII_SEC03_SEC06_SCOPE_CLOSURE_2026-10-22.md](SIII_SEC03_SEC06_SCOPE_CLOSURE_2026-10-22.md). No se extiende el cierre a todos los escritores ni a RLS/despliegue productivo. Se conserva integro el inventario historico.
