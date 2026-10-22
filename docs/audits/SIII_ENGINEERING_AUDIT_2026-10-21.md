@@ -135,11 +135,6 @@ Merge normal local0834b352 sobre9dabfc9b, preservando todos los prefijos y77 lí
 
 Producto/tests/método de captura de85 y QAe927 intactos. Sin429 ni limpieza adicional de throttles. Falta traer los merge commits reales de89/88, comparar árbol y ejecutar CI remoto del SHA final antes de publicar; no se ha hecho push, edición de PR ni acción productiva desde esta preparación.
 
-### DEP-02 — Compatibilidad MFA/Axe, evidencia posterior al SHA publicado
-
-CI89@01a5956 conserva un87/88UI document-title y un SUCCESS826/485/88 del mismoSHA. La pérdida de título no se reprodujo localmente; sí la auditoría iniciada antes del commit real de metadata. Incremento TESTONLY en guidance espera respuestaRSC200 sinprefetch, retiro del title previo y título institucional exacto antes de Axe completo; sin modificarF2/producto ni excluir reglas. El candidato response.finished se descartó tras12/13locales (Chromium requestfailed/EOF no observable); no se presenta como gate aprobado. Validación final y límites Node24local/Node22CI en [seguimiento DEP-02](SIII_NEXT_SECURITY_PATCH_2026-10-22.md#seguimiento-dep-02--esperar-el-commit-de-metadata-antes-de-axe-22-octubre-2026). Se conserva íntegro el historial anterior; no es prueba de regresión de Next ni incidente productivo.
-
-
 ## UX-01 parcial — continuidad de capturas en navegación del shell (22 octubre2026)
 
 Se añade evidencia sin sustituir el historial anterior. El incremento local desde4ad4d326 mueve el Map original de capturas a un proveedor privado por actor antes del keytenant; preserva revisiones al usar Atrás/Adelante y Ctrl+K Enter. Restituye únicamente después de auth/me y secciones/snapshot reales; invalida/oculta al cambiar autoridad y conserva step-up válido. Logout/401/actor distinto purgan actor,403 contexto, generaciones descartan lecturas tardías. Guardado200 reconoce revisión exacta del proveedor original incluso tras navegar durantePOST/GET; edición posterior y logout/relogin no reciben ACK antiguo. beforeunload continúa fuera de grading y foco se restaura sin robar un control elegido. Sin roster/snapshot en shell ni storage durable, router/history patch, F2/backend/SQL/CSS.
