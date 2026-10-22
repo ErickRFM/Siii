@@ -7,6 +7,7 @@ import { ROLE_LABELS, hasPermission } from '@/shared/auth/roles';
 import PasswordChange from './password-change';
 import {ManageableInstitutions} from '@/components/institution-admin';
 import InstitutionModuleDirectory from '@/components/institution-module-directory';
+import {SiiPageIntro,SiiSectionHeader,SiiMetricTile,SiiStatusPill,SiiEmptyView} from '@/components/ui/sii-kit';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,14 +19,9 @@ export default async function Dashboard() {
 
   return (
     <>
-      <div className="sii-page-eyebrow">CENTRO DE OPERACIONES <span className="sii-page-eyebrow-line"/></div>
-      <div className="sii-page-heading">
-        <div>
-          <h1>Bienvenido, {user.firstName}<span className="sii-welcome-period">.</span></h1>
-          <p>Este es tu espacio institucional. Consulta tus accesos y las áreas disponibles.</p>
-        </div>
-        <span className="sii-badge sii-badge--live"><span className="sii-online-dot"/> Cuenta activa</span>
-      </div>
+      <SiiPageIntro hero eyebrow="CENTRO DE OPERACIONES" title={`Bienvenido, ${user.firstName}`}
+        description="Este es tu espacio institucional. Consulta tus accesos y las áreas disponibles."
+        actions={<SiiStatusPill live>Cuenta activa</SiiStatusPill>}/>
 
       {user.mustChangePassword && (
         <section className="sii-security-notice" role="alert" aria-label="Actualización obligatoria de contraseña">
@@ -35,34 +31,18 @@ export default async function Dashboard() {
       )}
 
       <section className="sii-summary-grid" aria-label="Resumen de tu acceso">
-        <article className="sii-metric">
-          <span className="sii-metric-icon sii-metric-icon--rose" aria-hidden="true">▥</span>
-          <span className="sii-metric-label">Instituciones asignadas</span>
-          <span className="sii-metric-value">{institutions.length}</span>
-          <span className="sii-metric-caption">Membresías con acceso vigente</span>
-        </article>
-        <article className="sii-metric">
-          <span className="sii-metric-icon sii-metric-icon--amber" aria-hidden="true">♙</span>
-          <span className="sii-metric-label">Perfiles autorizados</span>
-          <span className="sii-metric-value">{roleNames.length}</span>
-          <span className="sii-metric-caption">Roles distintos entre tus instituciones</span>
-        </article>
-        <article className="sii-metric">
-          <span className="sii-metric-icon sii-metric-icon--blue" aria-hidden="true">◇</span>
-          <span className="sii-metric-label">Seguridad de cuenta</span>
-          <span className="sii-metric-value sii-metric-value--text">{user.mustChangePassword ? 'Acción requerida' : 'Al día'}</span>
-          <Link href="/dashboard/security" className="sii-metric-link">Gestionar seguridad <span aria-hidden="true">↗</span></Link>
-        </article>
+        <SiiMetricTile label="Instituciones asignadas" value={institutions.length} caption="Membresías con acceso vigente" icon="institution" tone="rose"/>
+        <SiiMetricTile label="Perfiles autorizados" value={roleNames.length} caption="Roles distintos entre tus instituciones" icon="users" tone="amber"/>
+        <SiiMetricTile label="Seguridad de cuenta" value={user.mustChangePassword ? 'Acción requerida' : 'Al día'} icon="shield" tone="blue"
+          href="/dashboard/security" actionLabel="Gestionar seguridad"/>
       </section>
 
       <ManageableInstitutions/>
 
       <div className="sii-content-grid">
         <section className="sii-panel sii-institutions-panel">
-          <div className="sii-panel-top">
-            <div><span className="sii-section-kicker">TU RED UNIVERSITARIA</span><h2>Mis instituciones</h2><p>Accesos concedidos y permisos vigentes.</p></div>
-            <span className="sii-small-count">{institutions.length} {institutions.length === 1 ? 'institución' : 'instituciones'}</span>
-          </div>
+          <SiiSectionHeader eyebrow="TU RED UNIVERSITARIA" title="Mis instituciones" description="Accesos concedidos y permisos vigentes."
+            right={<span className="sii-small-count">{institutions.length} {institutions.length === 1 ? 'institución' : 'instituciones'}</span>}/>
           {institutions.length ? (
             <div className="sii-institution-list">
               {institutions.map(inst => (
@@ -76,7 +56,7 @@ export default async function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="sii-empty"><span aria-hidden="true">▥</span><strong>No tienes instituciones asignadas</strong><p>Un administrador debe concederte una membresía para poder acceder a los recursos académicos.</p></div>
+            <SiiEmptyView icon="institution" title="No tienes instituciones asignadas" description="Un administrador debe concederte una membresía para poder acceder a los recursos académicos."/>
           )}
         </section>
 
@@ -91,10 +71,9 @@ export default async function Dashboard() {
       </div>
 
       <section className="sii-modules-section">
-        <div className="sii-panel-top sii-panel-top--outside">
-          <div><span className="sii-section-kicker">ECOSISTEMA SII</span><h2>Módulos institucionales</h2><p>Selecciona tu institución para trabajar. Cada módulo verifica permisos y seguridad en el servidor.</p></div>
-          <span className="sii-badge sii-badge--muted">Acceso por institución</span>
-        </div>
+        <SiiSectionHeader outside eyebrow="ECOSISTEMA SII" title="Módulos institucionales"
+          description="Selecciona tu institución para trabajar. Cada módulo verifica permisos y seguridad en el servidor."
+          right={<SiiStatusPill>Acceso por institución</SiiStatusPill>}/>
         {institutions.length === 0 ? <p className="sii-empty">Aún no tienes una institución asignada.</p> : institutions.map(inst => (
           <InstitutionModuleDirectory key={inst.institutionId} institutionId={inst.institutionId} institutionName={inst.institutionName}/>
         ))}

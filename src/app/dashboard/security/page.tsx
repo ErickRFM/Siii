@@ -6,6 +6,8 @@ import { getIdentity } from '@/shared/auth/session';
 import PasswordChange from '../password-change';
 import MfaSecurity from '@/components/mfa-security';
 import { safeSecurityReturn } from '@/shared/auth/security-return';
+import {SiiPageIntro} from '@/components/ui/sii-kit';
+import {SiiNavIcon} from '@/components/sii-nav-icon';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +18,9 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
   const safeReturn = safeSecurityReturn(returnTo);
   return (
     <>
-      <div className="sii-page-eyebrow">CENTRO PERSONAL <span className="sii-page-eyebrow-line"/></div>
-      <div className="sii-page-heading"><div><h1>Cuenta y seguridad<span className="sii-welcome-period">.</span></h1><p>Gestiona tus credenciales y consulta el estado de tu cuenta.</p></div>
-        <Link href="/dashboard" className="sii-outline-button sii-back-link">← Volver a inicio</Link>
-      </div>
+      <SiiPageIntro eyebrow="CENTRO PERSONAL" title="Cuenta y seguridad"
+        description="Gestiona tus credenciales y consulta el estado de tu cuenta."
+        actions={<Link href="/dashboard" className="sii-outline-button sii-back-link">← Volver a inicio</Link>}/>
       {safeReturn&&<div className="sii-info-banner"><p>Configura tu autenticador o confirma tu identidad. Después vuelve a la institución y reintenta la operación; los permisos se comprobarán de nuevo.</p><Link href={safeReturn as Route} className="sii-outline-button">Volver y reintentar la operación</Link></div>}
       <div className="sii-security-layout">
         <div>
@@ -32,7 +33,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
         <MfaSecurity/>
         </div>
         <aside className="sii-panel sii-security-aside">
-          <span className="sii-security-shield" aria-hidden="true">◇</span>
+          <span className="sii-security-shield" aria-hidden="true"><SiiNavIcon name="shield"/></span>
           <h2>Información protegida</h2>
           <p>Las operaciones institucionales verifican permisos y membresías directamente en el servidor.</p>
           <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Tu usuario</strong><small>{user.username}</small></div></div>
