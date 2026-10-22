@@ -4,7 +4,7 @@ import { transactionalEmailSchema, type TransactionalEmail } from '../../infrast
 
 const keyId=z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
 const envelopeSchema=z.object({version:z.literal(1),keyId,iv:z.string().length(16),tag:z.string().length(22),ciphertext:z.string().min(1).max(700000)}).strict();
-type SealConfig={purpose:'invitation'|'password-reset';keys:string|undefined;activeKeyId?:string};
+type SealConfig={purpose:'invitation'|'password-reset'|'admissions';keys:string|undefined;activeKeyId?:string};
 function invalid():never {throw new Error('DELIVERY_INVALID');}
 function unavailable():never {throw new Error('DELIVERY_KEY_UNAVAILABLE');}
 function keyring(config:SealConfig):Record<string,Buffer> {

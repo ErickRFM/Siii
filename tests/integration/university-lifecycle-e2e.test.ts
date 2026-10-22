@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
+import {applicantMail} from '../support/applicant-mail';
 import { isolatedDatabaseUrl } from '../support/database-url';
 import { generateInstitutionalEnrollmentNumber } from '@/modules/registry/enrollment-generator';
 
@@ -36,10 +37,10 @@ describe.sequential('Real E2E University Lifecycle (HTTP + PostgreSQL)', () => {
       password,
       phone: '5551112233',
     });
-    expect(registerRes.status).toBe(201);
+    expect(registerRes.status).toBe(202);
     const regData = (await registerRes.json()).data;
-    expect(regData.email).toBe(email);
-    expect(regData.verificationToken).toBeDefined();
+    expect(regData.verificationToken).toBeUndefined();
+    const mail=await applicantMail(db,email);
 
     // Step 2: Assert unverified state in DB
     const dbBefore = await db.query('SELECT id, email_verified_at FROM applicant_profiles WHERE email=$1', [email]);
@@ -47,7 +48,7 @@ describe.sequential('Real E2E University Lifecycle (HTTP + PostgreSQL)', () => {
     expect(dbBefore.rows[0].email_verified_at).toBeNull();
 
     // Step 3: Verify email with token
-    const verifyRes = await post('/api/v1/admissions/verify', { token: regData.verificationToken });
+    const verifyRes = await post('/api/v1/admissions/verify', {id:mail.id,token:mail.token,newPassword:password});
     expect(verifyRes.status).toBe(200);
 
     // Step 4: Assert verified state in DB
@@ -58,7 +59,7 @@ describe.sequential('Real E2E University Lifecycle (HTTP + PostgreSQL)', () => {
     const loginRes = await post('/api/v1/admissions/login', { email, password });
     expect(loginRes.status).toBe(200);
     const loginData = (await loginRes.json()).data;
-    expect(loginData.applicant.id).toBe(regData.id);
+    expect(loginData.applicant.id).toBe(mail.id);
 
     // Step 6: Test atomic enrollment number generation
     const testInstitutionId = randomUUID();

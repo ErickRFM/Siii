@@ -3,6 +3,7 @@ export type P1Role = Role | 'guest' | 'control_escolar' | 'workshop_facilitator'
 
 /** Stable action identifiers, suitable for API capability disclosures. */
 export const CAPABILITIES = Object.freeze({
+  'admissions.manage': 'admissions.manage',
   'institutions.read': 'institutions.read', 'institutions.manage': 'institutions.manage',
   'users.read': 'users.read', 'users.create': 'users.create', 'users.update': 'users.update',
   'users.suspend': 'users.suspend', 'users.restore': 'users.restore', 'users.reset': 'users.reset',
@@ -31,7 +32,7 @@ export const ROLE_CAPABILITIES: Readonly<Record<P1Role, readonly Capability[]>> 
   teacher: readonlyCapabilities('institutions.read', ...CATALOG_READ, 'grades.read', 'grades.manage', 'grades.publish'),
   tutor: readonlyCapabilities('institutions.read', ...CATALOG_READ),
   coordinator: readonlyCapabilities('institutions.read', 'users.read', ...CATALOG_READ, ...CATALOG_MANAGE, 'groups.manage', 'enrollments.manage', 'grades.read'),
-  control_escolar: readonlyCapabilities('institutions.read', 'users.read', ...CATALOG_READ, 'enrollments.manage', 'grades.read'),
+  control_escolar: readonlyCapabilities('admissions.manage', 'institutions.read', 'users.read', ...CATALOG_READ, 'enrollments.manage', 'grades.read'),
   workshop_facilitator: readonlyCapabilities('institutions.read', ...CATALOG_READ, 'groups.manage', 'grades.read', 'grades.manage'),
   // Administrators must contain every capability they may delegate, including grade publication.
   admin: ALL_CAPABILITIES,
@@ -45,6 +46,7 @@ export type Resource = { institutionId: string; programId?: string; campusId?: s
 export type GrantScope = Pick<Grant, 'institutionId' | 'scopeType' | 'scopeId'>;
 
 const TENANT_WIDE = new Set<Capability>([
+  'admissions.manage',
   'institutions.manage', 'users.read', 'users.create', 'users.update', 'users.suspend', 'users.restore', 'users.reset',
   'memberships.manage', 'roles.assign', 'invitations.manage', 'audit.read', 'settings.manage', 'integrations.manage',
 ]);
