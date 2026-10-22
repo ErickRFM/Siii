@@ -66,8 +66,11 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
       if (!event.matches) setMenuOpen(false);
     };
     mobileViewport.addEventListener('change', onViewportChange);
-    // Preserve the existing keyboard trap and return focus on dismissal.
-    sidebar?.querySelector<HTMLAnchorElement>('a[href]')?.focus();
+    // Include all keyboard-operable sidebar controls, not only navigation links.
+    const focusableSelector = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
+    const focusables = () => Array.from(sidebar?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
+      .filter(element => element.getClientRects().length > 0 && element.getAttribute('aria-hidden') !== 'true');
+    focusables()[0]?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -75,8 +78,8 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
         return;
       }
       if (event.key !== 'Tab' || !window.matchMedia('(max-width: 840px)').matches) return;
-      const links = Array.from(sidebar?.querySelectorAll<HTMLAnchorElement>('a[href]') ?? []);
-      const first = links[0], last = links[links.length - 1];
+      const controls = focusables();
+      const first = controls[0], last = controls[controls.length - 1];
       if (!first || !last) return;
       if (event.shiftKey && (document.activeElement === first || !sidebar?.contains(document.activeElement))) {
         event.preventDefault();
