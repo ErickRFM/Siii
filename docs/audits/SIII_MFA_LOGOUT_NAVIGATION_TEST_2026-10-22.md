@@ -23,3 +23,7 @@ Worktree nuevo mfa-logout-navigation-test, rama test/mfa-logout-navigation-20261
 Comando final por cada base sintética: `npm run test:ui -- --config .p0-local/mfa-navigation.playwright.config.ts --output .p0-local/mfa-navigation-isolated-N-results`. Logs y traces finales `.p0-local/mfa-navigation-isolated-{1,2,3}*`; intentos anteriores bajo mfa-navigation-unit.log y mfa-navigation-ui.log. Los destinos originales siguen preservados, sin sobrescribir evidencia fallida.
 
 CI global del SHA publicado, reconciliación con la reparación de main e integración siguen pendientes. La repetición controlada no prueba ausencia universal de flakiness ni corrige el contraste de #87. Sin migraciones productivas, envío real de correo, cambios F2 o sincronización.
+
+## Composición con main después de #87
+
+Merge normal de main@a1c6e8c en31cb110f, sin modificar el guard MFA revisado. Se preservó el prefijo completo de la auditoría al resolver su único conflicto de anexos. En una cuarta base nueva siii_mfa_navigation_composed_test, migrada0000–0024, el mismo archivo real aprobó4/4 (1.2min, incluido build31páginas); lint/typecheck exit0 y826/826unitarios (56archivos,6.92s). Logs mfa-navigation-composed-{migrate,lint,types,unit,ui}. No se cuentan los intentos fallidos anteriores como aprobados. La ejecución remota del nuevo SHA sigue pendiente.
