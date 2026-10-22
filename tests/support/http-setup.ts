@@ -46,7 +46,16 @@ export default async function setup(){
  const started=Date.now();
  while(Date.now()-started<60000){
   if(child.exitCode!==null){await stop();throw new Error('HTTP_TEST_SERVER_EXITED');}
-  try{const response=await fetch('http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107)+'/api/health');if(response.ok&&response.headers.get('x-siii-test-instance')===instance)return stop;}catch{}
+  let ownServer=false;
+  try{const response=await fetch('http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107)+'/api/health');ownServer=response.ok&&response.headers.get('x-siii-test-instance')===instance;}catch{}
+  if(ownServer){
+   // Compile the identity route inside the unchanged startup deadline.
+   const remaining=60000-(Date.now()-started);if(remaining<=0)break;
+   let readyStatus:number|undefined;
+   try{const ready=await fetch('http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107)+'/api/v1/admissions/register',{method:'POST',headers:{origin:'http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107),'content-type':'application/json'},body:'{}',signal:AbortSignal.timeout(remaining)});readyStatus=ready.status;}catch{}
+   if(readyStatus!==422){await stop();throw new Error('HTTP_TEST_ADMISSIONS_NOT_READY');}
+   return stop;
+  }
   await new Promise(resolve=>setTimeout(resolve,300));
  }
  await stop();throw new Error('HTTP_TEST_SERVER_TIMEOUT');

@@ -119,4 +119,19 @@ describe.sequential('C32 real HTTP, mailbox proof, session ownership and Postgre
   expect((await sql.query('SELECT count(*)::int n FROM admission_applications WHERE institution_id=$1',[o.institution])).rows[0].n).toBe(0);
  });
 
+ it('rolls back the application if its applicant session expires while waiting for a cycle lock',async()=>{
+  const o=await offer(),body={cycleId:o.cycle,programId:o.program};expect((await post(o.path,body)).status).toBe(401);
+  const applicant=(await sql.query("INSERT INTO applicant_profiles(email,first_name,last_name,password_hash,email_verified_at,mailbox_verified_at) VALUES($1,'Expiry','Fixture','not-used-for-login',now(),now()) RETURNING id",['expiry-'+randomUUID()+'@example.test'])).rows[0].id;
+  const raw=randomBytes(32).toString('base64url'),hash=createHash('sha256').update('SIII:applicant:v1\0'+raw).digest('hex');
+  const session=(await sql.query("INSERT INTO applicant_sessions(applicant_id,token_hash,created_at,expires_at) VALUES($1,$2,now()-interval '1 hour',clock_timestamp()+interval '5 seconds') RETURNING expires_at",[applicant,hash])).rows[0];
+  const gate=new pg.Client({connectionString:isolatedDatabaseUrl()});await gate.connect();await gate.query('BEGIN');await gate.query('SELECT id FROM admission_cycles WHERE id=$1 FOR UPDATE',[o.cycle]);
+  const pending=post(o.path,body,(process.env.SIII_HTTP_TEST_PRODUCTION==='1'?'__Host-siii_applicant_session=':'siii_applicant_session=')+raw);let waiting=false;
+  try{
+   const until=Date.now()+4000;while(Date.now()<until){waiting=(await sql.query("SELECT EXISTS(SELECT FROM pg_stat_activity WHERE datname=current_database() AND application_name='siii-app' AND wait_event_type='Lock' AND query LIKE '%admission_cycles%') blocked")).rows[0].blocked;if(waiting)break;await new Promise(resolve=>setTimeout(resolve,25));}expect(waiting).toBe(true);
+   await sql.query('SELECT pg_sleep(greatest(0,extract(epoch FROM ($1::timestamptz-clock_timestamp())))+0.1)',[session.expires_at]);await gate.query('COMMIT');expect((await pending).status).toBe(401);
+   expect((await sql.query('SELECT count(*)::int n FROM admission_applications WHERE institution_id=$1',[o.institution])).rows[0].n).toBe(0);expect((await sql.query('SELECT application_sequence FROM admission_cycles WHERE id=$1',[o.cycle])).rows[0].application_sequence).toBe(0);
+   expect((await sql.query("SELECT count(*)::int n FROM security_audit_log WHERE institution_id=$1 AND action='admissions.application.submitted'",[o.institution])).rows[0].n).toBe(0);
+  }finally{await gate.query('ROLLBACK');await gate.end();await pending;}
+ });
+
 });

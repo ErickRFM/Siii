@@ -65,7 +65,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: synthetic-ux-matrix
-          path: .p0-local/ux-matrix-*.png
+          path: |
+            .p0-local/ux-matrix-*.png
+            .p0-local/c32-admissions-*.png
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 3

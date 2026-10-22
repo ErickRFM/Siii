@@ -114,16 +114,21 @@ export const loginApplicant=withErrors(async(req:NextRequest)=>{
  const response=applicantOk({applicant:applicantData(profile)});
  response.cookies.set(APPLICANT_COOKIE,raw,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'strict',path:'/',maxAge:sessionTTL/1000});return response;
 });
+class ApplicantSessionExpired extends Error {}
 /** Profile → session lock order matches login/revocation. A write holds both until commit. */
 export async function withApplicant<T>(req:NextRequest,work:(tx:Transaction,profile:typeof applicantProfiles.$inferSelect,session:typeof applicantSessions.$inferSelect)=>Promise<T>){
  const raw=req.cookies.get(APPLICANT_COOKIE)?.value;if(!raw||!tokenSchema.safeParse(raw).success)return null;
  const [hint]=await db.select().from(applicantSessions).where(eq(applicantSessions.tokenHash,tokenHash(raw)));if(!hint)return null;
- return db.transaction(async tx=>{
+ try{return await db.transaction(async tx=>{
   const [profile]=await tx.select().from(applicantProfiles).where(eq(applicantProfiles.id,hint.applicantId)).for('share');
   const [session]=await tx.select().from(applicantSessions).where(eq(applicantSessions.id,hint.id)).for('update');
   if(!profile?.mailboxVerifiedAt||!session||session.revokedAt||session.expiresAt<=new Date()||session.tokenHash!==tokenHash(raw))return null;
-  return work(tx,profile,session);
- });
+  const result=await work(tx,profile,session);
+  // Time can advance while waiting for catalog locks or transactional audit.
+  // Throwing here rolls back writes and folio allocation; returning null would commit them.
+  if(session.expiresAt<=new Date())throw new ApplicantSessionExpired();
+  return result;
+ });}catch(error){if(error instanceof ApplicantSessionExpired)return null;throw error;}
 }
 export const currentApplicant=withErrors(async(req:NextRequest)=>{
  const data=await withApplicant(req,async(_tx,profile)=>applicantData(profile));return data?applicantOk({applicant:data}):jsonError('UNAUTHORIZED',401);
