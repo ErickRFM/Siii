@@ -360,3 +360,56 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 @keyframes sii-kit-fade{from{opacity:0}to{opacity:1}}
 @media(max-width:1050px){.sii-command-trigger kbd{display:none}.sii-command-trigger-label{display:none}.sii-command-trigger{width:42px;justify-content:center}}
 @media(max-width:600px){.sii-command-overlay{padding:65px 10px 10px}.sii-command-dialog{max-height:75dvh}.sii-command-trigger{min-width:42px}}
+
+
+/* WCAG AA legibility guardrails across the inherited institutional modules.
+   Explicit opaque pairs prevent legacy theme/hover/opacity rules from reducing
+   the contrast of secondary actions and ancillary content. */
+:root{
+  --sii-kit-control-ink:#392435;
+  --sii-kit-control-bg:#fff;
+  --sii-kit-control-disabled-bg:#eee8ed;
+  --sii-kit-control-muted-ink:#493c49;
+}
+html[data-sii-theme="dark"]{
+  --sii-kit-control-ink:#fff5fa;
+  --sii-kit-control-bg:#272331;
+  --sii-kit-control-disabled-bg:#33303f;
+  --sii-kit-control-muted-ink:#efe0ec;
+}
+.sii-app .sii-outline-button,
+.sii-app .sii-outline-button:not(:disabled),
+.sii-app a.sii-outline-button{
+  color:var(--sii-kit-control-ink);
+  background:var(--sii-kit-control-bg);
+  border-color:var(--sii-kit-border-strong);
+  opacity:1;
+}
+.sii-app .sii-outline-button:hover:not(:disabled),
+.sii-app a.sii-outline-button:hover{
+  color:var(--sii-kit-control-ink);
+  background:var(--sii-primary-soft);
+  border-color:var(--sii-kit-accent-strong);
+}
+.sii-app .sii-outline-button:disabled{
+  opacity:1;
+  color:var(--sii-kit-control-muted-ink);
+  background:var(--sii-kit-control-disabled-bg);
+  cursor:not-allowed;
+}
+.sii-app :is(.sii-access-feature small,.sii-badge--muted,.sii-metric-caption,.sii-small-count){
+  color:var(--sii-text);
+}
+.sii-app :is(.sii-badge--muted,.sii-small-count){
+  background:var(--sii-kit-control-bg);
+  border-color:var(--sii-kit-border-strong);
+}
+.sii-app :is(.sii-catalog-form,.sii-security-card,.sii-users) textarea{
+  color:var(--sii-text);
+  background:var(--sii-kit-control-bg);
+}
+.sii-app :is(.sii-catalog-form,.sii-security-card,.sii-users) textarea:disabled{
+  opacity:1;
+  color:var(--sii-kit-control-muted-ink);
+  background:var(--sii-kit-control-disabled-bg);
+}
