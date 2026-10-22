@@ -132,11 +132,7 @@ describe.sequential('financial HTTP writes retain MFA, tenant references and tra
   await sql.query("UPDATE institutional_students SET status='graduated' WHERE id=$1",[student]);
   const response=await post('orders',{...orderBody(),payerUserId:admin.id});expect(response.status).toBe(201);expect((await response.json()).data.payerUserId).toBe(admin.id);
  });
- it('orders: never joins a historical cross-tenant payer to another institution student names or enrollment',async()=>{
-  // Existing single-column FK permits this legacy corrupt row until the later DB constraint migration.
-  const id=(await sql.query("INSERT INTO payment_orders(institution_id,fee_type_id,payer_student_id,order_number,total_amount_cents) VALUES($1,$2,$3,$4,15000) RETURNING id",[institution,fee,foreignStudent,'LEGACY-'+randomUUID()])).rows[0].id;
-  const response=await fetch(base+path('orders'),{headers:{cookie:admin.cookie}});expect(response.status).toBe(200);
-  const row=(await response.json()).data.find((value:{id:string})=>value.id===id);
-  expect(row).toMatchObject({id,studentFirstName:null,studentLastName:null,enrollmentNumber:null});
+ it('orders: database rejects a foreign payer even when an administrative writer bypasses the API',async()=>{
+  await expect(sql.query("INSERT INTO payment_orders(institution_id,fee_type_id,payer_student_id,order_number,total_amount_cents) VALUES($1,$2,$3,$4,15000)",[institution,fee,foreignStudent,'CROSS-'+randomUUID()])).rejects.toMatchObject({code:'23503',constraint:'orders_payer_student_tenant_fk'});
  });
 });

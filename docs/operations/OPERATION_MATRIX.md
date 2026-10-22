@@ -145,3 +145,31 @@ SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni
 | Misma ruta, pending | Sin prueba o correos no coincidentes no establece vínculo; conserva solicitante derivado de sesión; misma autoridad y revalidación final |201 {claim,autoApproved:false,message}; student.claim.requested en TX; fallo de auditoría/revocación/caducidad sin fila persistida. Misma suite | LOCAL29HTTP; NO ACREDITA FLUJO DE REVISIÓN MANUAL |
 
 Evidencia y límites: [SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md](../audits/SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md). Composición privada935f2220; el helper y Admisiones no se editan en este incremento. Publicar solo tras integrar ese prerrequisito y reconciliar. student-links/me y seguridad integral del módulo permanecen fuera del alcance; sin cambios de schema/migraciones, sin sincronización ni operaciones productivas.
+
+## SEC-04 — pagadores financieros en DB (22 octubre 2026)
+
+Actualización sobre main809c526d (PR82/83/84 integrados). Conserva las secciones históricas y sus estados al redactarse. Autoridad API/proyecciones no cambian;0025 añade integridad. CI de esta rama pendiente; sin despliegue productivo.
+
+| Operación | Defensa/contrato | Evidencia | Estado |
+|---|---|---|---|
+| INSERT/UPDATE payment_orders, incluido POST financials/orders | FK alumno+tenant y usuario+membresía+tenant; nulls/ambos payers permitidos; cruces/inexistentes23503 en DB; API conserva400 uniforme y demás contratos | financial-tenant-constraints.test.ts36DB; financial-write-authority-http.test.ts22HTTP dentro de144 conjuntos | LOCAL VERIFICADO DB+HTTP; CI PENDIENTE |
+| DELETE alumno/membresía referidos por órdenes | SET NULL sólo payer correspondiente; institución/importes/otro payer conservados; FK escalares/ciclo global preservados | Misma suite36: delete/nulls/global-user restriction | LOCAL VERIFICADO; CI PENDIENTE |
+| GET financials/orders sobre histórico baseline24 | JOIN por tenant conserva proyección y campos ajenos null;0025 rechaza ese histórico sin modificarlo | tests/legacy/financial-payer-http.test.ts1/1; test:financial-legacy y gate CI explícito postUI | LOCAL VERIFICADO; CI LEGACY PENDIENTE |
+| Migrar fresh o poblada24→25, canonical/supabase-v1 | PG>=15, lock_timeout5s/orden fijo, fail-closed; DDL+índices+ledger atómicos; sin backfill/NOT VALID confirmado | DB36 +19 migrador/perfil; catálogo confdelsetcols/convalidated; fresh/populated/rollback/idempotencia | LOCAL VERIFICADO; RELEASE PENDIENTE |
+| db:preflight | SELECT/counts sin PII; PRE prepara sin certificar FK; POST verifica ledger/hash, padres inmediatos y forma exacta FK | Negativos drift/DEFERRABLE; salida VERIFIED_0025 con0/0 inválidas | LOCAL VERIFICADO; CI PENDIENTE |
+
+[Reporte, comandos y límites](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Hueco DB financiero SEC-04 verificado localmente; SEC-03/06 globales y puertas productivas mantienen su alcance pendiente. Sin F2/UI ni reescritura de manifest/hashes históricos.
+
+### Evidencia incremental SEC-04 sobre maina1c6e8c (22 octubre 2026)
+
+Merge normal516f374f preserva los contratos y filas anteriores;0025/journal/manifest sin cambios. Repetición local:36DB+108HTTP=144/144, legacy24 adicional1/1,826unitarias y lint/tipos/build0; preflight POST_0025/VERIFIED_0025 con0/0 inválidas, FK validadas y hash exacto. La mención114HTTP del apéndice histórico de auditoría se aclara a108 conforme al desglose22+27+30+29. Las operaciones SEC-04 siguen LOCAL VERIFICADO, CI DE RAMA/RELEASE PENDIENTES; delta MFA/logout pendiente de reconciliar. [Evidencia incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md).
+
+
+### SEC-04 — composición preparatoria PR88/89 (22 octubre 2026)
+
+Sobre merge local68f07622, Next15.5.28 y guard MFA/logout de0834b352: mismos contratos/FK y estados anteriores;144/144 (36DB+108HTTP), legacy1/1,826unitarias, lint/tipos/build/preflight0. SQL/ledger/migrador intactos,19managed conservan evidencia previa. Estado PREPARATORIO LOCAL VERIFICADO; PR88/89 revisados todavía NO acreditados en main, CI financiero/release pendientes. La prueba UI MFA no se cuenta como ejecutada por este incremento. [Reporte incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). SIN PUSH.
+
+
+### SEC-04 — composición main4614 (22 octubre 2026)
+
+162/162 pruebas locales conjuntas=36DB+126HTTP y legacy24 separado1/1 sobre fuentes financieras idénticas al merge364fec8; preflight sintéticoVERIFIED_0025,0/0 inválidas y ledger/hash válidos. Gate legacy ubicado después de test:ui en job ui de PR99; verify conserva lint/tipos/unitarias/integración/build/audit. [Reporte incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Pendiente CI exacto publicado y proceso productivo aprobado.
