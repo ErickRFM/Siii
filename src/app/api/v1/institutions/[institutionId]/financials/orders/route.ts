@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
 import { paymentOrders, financialFeeTypes, institutionalStudents } from '../../../../../../../../db/schema';
-import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
+import { authorizeCapability, getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 import { can } from '@/shared/auth/capabilities';
 import { createOrderSchema } from '@/modules/financials/validation';
 
@@ -20,8 +20,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
     }
 
-    const subject = { id: user.id, active: true, mustChangePassword: user.mustChangePassword, grants: access.grants };
-    if (!can(subject, 'institutions.read', { institutionId })) {
+    // Institutional membership alone does not authorize reading other people's finances.
+    if (!await authorizeCapability(institutionId, 'institutions.manage')) {
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente' } }, { status: 403 });
     }
 
