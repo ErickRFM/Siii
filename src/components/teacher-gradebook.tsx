@@ -1,5 +1,6 @@
 'use client';
 import SiiScrollRegion from './sii-scroll-region';
+import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -86,8 +87,8 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
  const weight=snapshot?.components.reduce((sum,c)=>sum+c.weight,0)??0;
  return <div className="sii-academic">
  {confirmation}
-  <div className="sii-catalog-summary"><div><span className="sii-section-kicker">DOCENCIA · EVALUACIÓN</span>
-   <h2>Libro de calificaciones</h2><p>Escala 0–10. Los componentes deben completar 100 % para emitir un acta.</p></div></div>
+  <SiiSectionHeader workspace eyebrow="DOCENCIA · EVALUACIÓN" title="Libro de calificaciones"
+    description="Escala 0–10. Los componentes deben completar 100 % para emitir un acta."/>
   {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" onClick={()=>void refresh(sectionId)}>Reintentar consulta</button></div>}
   {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
   <section className="sii-panel sii-catalog-create">

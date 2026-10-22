@@ -40,3 +40,14 @@
 @media(max-width:600px){.sii-kit-page-heading{align-items:start}.sii-kit-section-header{flex-wrap:wrap}.sii-kit-skeleton{padding:14px}}
 @media(prefers-reduced-motion:reduce){.sii-kit-skeleton-block{animation:none}.sii-kit-metric .sii-metric-link>span{transition:none}}
 @media(prefers-contrast:more){.sii-kit-module-card,.sii-kit-metric,.sii-kit-empty{border-color:var(--sii-text)}}
+
+/* Workspace-level heading is shared across real academic modules. */
+.sii-app .sii-kit-section-header.sii-catalog-summary{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(12px,2vw,22px);
+  margin:0 0 20px;padding:8px 0 4px;background:transparent;border:0;box-shadow:none;backdrop-filter:none;
+}
+.sii-app .sii-kit-section-header.sii-catalog-summary h2{margin:5px 0 8px;font-size:clamp(22px,2vw,29px)}
+.sii-app .sii-kit-section-header.sii-catalog-summary .sii-outline-button{align-self:start;margin:0}
+.sii-app .sii-academic>.sii-kit-skeleton{margin-bottom:16px}
+.sii-app .sii-academic>.sii-kit-section-header{animation:sii-kit-appear 310ms var(--sii-kit-ease) both}
+@media(max-width:600px){.sii-app .sii-kit-section-header.sii-catalog-summary{flex-wrap:wrap;align-items:start}}

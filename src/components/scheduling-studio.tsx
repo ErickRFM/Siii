@@ -1,5 +1,6 @@
 'use client';
 import SiiScrollRegion from './sii-scroll-region';
+import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -75,8 +76,8 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
  }
  return <div className="sii-academic">
  {confirmation}
-  <div className="sii-catalog-summary"><div><span className="sii-section-kicker">COORDINACIÓN ACADÉMICA</span>
-   <h2>Planificador semanal</h2><p>Conflictos de aula, docente y alumnos verificados antes de crear las ocurrencias.</p></div></div>
+  <SiiSectionHeader workspace eyebrow="COORDINACIÓN ACADÉMICA" title="Planificador semanal"
+    description="Conflictos de aula, docente y alumnos verificados antes de crear las ocurrencias."/>
   {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading} onClick={()=>void Promise.all([refresh(),loadWeek()])}>Reintentar consulta</button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   <div className="sii-catalog-layout">
