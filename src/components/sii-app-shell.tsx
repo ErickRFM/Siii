@@ -7,6 +7,7 @@ import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { SiiBrand, SiiMark } from './sii-brand';
 import { SiiNavIcon, type SiiNavIconName } from './sii-nav-icon';
+import SiiQuickSwitch, {type SiiQuickLink} from './sii-quick-switch';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
@@ -99,6 +100,23 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
   const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
   const activeModule=allAcademicModuleLinks.find(module=>module.id===active);
   const academicAvailable = ['programs','courses','curricula','terms','campuses'].some(resource => hasAnyCapability(data,`${resource}.read`));
+  const quickLinks:SiiQuickLink[]=[
+    {id:'overview',label:'Inicio',href:'/dashboard',group:'Plataforma'},
+    {id:'security',label:'Cuenta y seguridad',href:'/dashboard/security',group:'Plataforma'}
+  ];
+  if(institutionId){
+    const base='/dashboard/institutions/'+institutionId;
+    if(institutionAdministrationAvailable||hasInstitutionCapability(data,'institutions.manage'))
+      quickLinks.push({id:'administration',label:'Administración institucional',href:base+'/admin',group:'Plataforma'});
+    if(hasInstitutionCapability(data,'users.read'))
+      quickLinks.push({id:'users',label:'Usuarios',href:base+'/users',group:'Plataforma'});
+    if(hasInstitutionCapability(data,'roles.assign'))
+      quickLinks.push({id:'roles',label:'Roles y ámbitos',href:base+'/roles',group:'Plataforma'});
+    if(hasInstitutionCapability(data,'invitations.manage'))
+      quickLinks.push({id:'invitations',label:'Invitaciones',href:base+'/invitations',group:'Plataforma'});
+    if(academicAvailable)quickLinks.push({id:'academic',label:'Catálogo académico',href:base+'/academic',group:'Gestión académica'});
+    for(const module of modules)quickLinks.push({id:module.id,label:module.label,href:base+'/'+module.id,group:'Gestión académica'});
+  }
   return (
     <div className={sidebarCollapsed ? 'sii-app sii-app--collapsed' : 'sii-app'}>
       {menuOpen && <button type="button" className="sii-scrim" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} />}
@@ -167,6 +185,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
             <span className="sii-breadcrumb">SII <span aria-hidden="true">/</span> {activeModule?activeModule.label:active === 'overview' ? 'Inicio' : active === 'security' ? 'Seguridad' : active === 'academic' ? 'Catálogo académico' : active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución'}</span>
           </div>
           <div className="sii-topbar-actions">
+            <SiiQuickSwitch links={quickLinks}/>
             <span className="sii-connection-label"><span className="sii-online-dot" /> Sesión autenticada</span>
             <SiiThemeToggle/>
             <span className="sii-avatar">{firstName.substring(0, 1).toLocaleUpperCase('es-MX')}</span>

@@ -172,3 +172,16 @@ test('premium desktop sidebar collapses, persists and mobile drawer stays access
  await page.keyboard.press('Escape');
  await expect(page.locator('#sii-sidebar-mobile')).toBeHidden();
 });
+
+test('quick switch searches only available module links and closes with Escape',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await catalog(page);
+ await page.keyboard.press('Control+k');
+ const dialog=page.getByRole('dialog',{name:'Ir a un módulo'});
+ await expect(dialog).toBeVisible();
+ await page.getByRole('searchbox',{name:'Buscar secciones'}).fill('seguridad');
+ await expect(dialog.getByRole('link',{name:'Cuenta y seguridad'})).toBeVisible();
+ await expect(dialog.getByRole('link',{name:'Administración institucional'})).toHaveCount(0);
+ await page.keyboard.press('Escape');
+ await expect(dialog).toHaveCount(0);
+});

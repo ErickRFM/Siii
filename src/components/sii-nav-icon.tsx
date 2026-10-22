@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 
 /** Compact SVG icon set. Presentational only: labels and authorization stay in SiiAppShell. */
-export type SiiNavIconName='home'|'institution'|'users'|'roles'|'mail'|'shield'|'book'|'registry'|'layers'|'grades'|'calendar'|'services';
+export type SiiNavIconName='home'|'institution'|'users'|'roles'|'mail'|'shield'|'book'|'registry'|'layers'|'grades'|'calendar'|'services'|'search';
 const illustrations:Record<SiiNavIconName,ReactNode>={
   home:<><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-8h6v8"/></>,
   institution:<><rect x="4" y="9" width="16" height="12" rx="1"/><path d="M2 9 12 3l10 6M9 21v-7h6v7M8 11h.01M16 11h.01"/></>,
@@ -14,6 +14,7 @@ const illustrations:Record<SiiNavIconName,ReactNode>={
   layers:<><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M7 2v4M17 2v4M3 10h18M7 14h4"/></>,
   grades:<><path d="m12 2 3 6 7 .9-5 5 .9 7.1L12 18l-5.9 3 .9-7.1-5-5 7-.9 3-6Z"/></>,
   calendar:<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 15h3"/></>,
+  search:<><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></>,
   services:<><path d="M4 21V5l8-3 8 3v16M2 21h20M8 8h.01M16 8h.01M8 12h.01M16 12h.01M10 21v-5h4v5"/></>,
 };
 export function SiiNavIcon({name}:{name:SiiNavIconName}){

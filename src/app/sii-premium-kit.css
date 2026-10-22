@@ -333,3 +333,28 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   .sii-app .sii-nav-item--active{background:Highlight!important;color:HighlightText!important;border:1px solid HighlightText!important}
   .sii-app .sii-nav-item,.sii-app .sii-sidebar-collapse,.sii-app .sii-catalog-tab{forced-color-adjust:auto}
 }
+
+/* Searchable command dialog (command palette pattern) */
+.sii-command-trigger{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--sii-kit-border);background:var(--sii-kit-elevated);color:var(--sii-kit-muted);border-radius:12px;min-height:42px;padding:8px 10px;font-size:12px;cursor:pointer;transition:border-color 170ms,box-shadow 170ms}
+.sii-command-trigger:hover{border-color:var(--sii-kit-border-strong);box-shadow:0 3px 12px var(--sii-kit-ring)}
+.sii-command-trigger .sii-nav-glyph{width:17px;height:17px}
+.sii-command-trigger kbd{font:700 10px/1.4 ui-monospace,monospace;border:1px solid var(--sii-kit-border-strong);border-radius:6px;padding:2px 6px;background:var(--sii-surface-soft);color:var(--sii-kit-muted)}
+.sii-command-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:clamp(60px,11vh,130px) 15px 20px;background:rgba(11,10,18,.64);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:sii-kit-fade 160ms ease both}
+.sii-command-dialog{width:min(100%,560px);max-height:min(680px,80dvh);display:flex;flex-direction:column;overflow:hidden;border-radius:19px;border:1px solid var(--sii-kit-border-strong);background:var(--sii-kit-elevated);color:var(--sii-text);box-shadow:0 35px 95px rgba(0,0,0,.32);animation:sii-kit-appear 240ms var(--sii-kit-ease) both}
+.sii-command-dialog h2{font-size:14px;font-weight:850;margin:0;padding:20px 22px 10px;letter-spacing:-.02em}
+.sii-command-search{display:flex;align-items:center;gap:11px;padding:10px 15px 15px;border-bottom:1px solid var(--sii-kit-border)}
+.sii-command-search .sii-nav-glyph{flex:none;width:20px;height:20px;color:var(--sii-kit-muted)}
+.sii-command-search input{flex:1;min-width:0;min-height:44px;padding:8px 2px;border:0;background:transparent;color:var(--sii-text);font:inherit;font-size:14px;outline:none}
+.sii-command-search input:focus-visible{outline:none;box-shadow:none}
+.sii-command-search button{border:1px solid var(--sii-kit-border-strong);border-radius:7px;padding:5px 8px;background:var(--sii-surface-soft);color:var(--sii-kit-muted);font:700 10px ui-monospace,monospace}
+.sii-command-results{min-height:90px;max-height:380px;overflow:auto;padding:11px 10px 17px;overscroll-behavior:contain}
+.sii-command-results h3{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--sii-kit-muted);padding:10px 13px 4px;margin:0}
+.sii-command-list{display:grid;gap:4px}
+.sii-command-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;min-height:44px;color:var(--sii-text);font-size:13px;font-weight:710;border-radius:10px;transition:background 170ms,color 170ms}
+.sii-command-link:hover,.sii-command-link:focus-visible{background:var(--sii-primary-soft);color:var(--sii-kit-accent);outline-offset:-2px}
+.sii-command-link span{color:var(--sii-kit-muted)}
+.sii-command-empty{margin:16px 12px;padding:20px 14px;color:var(--sii-kit-muted);text-align:center;border-radius:12px;background:var(--sii-surface-soft);font-size:13px}
+.sii-command-footer{padding:13px 20px;font-size:11px;color:var(--sii-kit-muted);border-top:1px solid var(--sii-kit-border);background:var(--sii-surface-soft)}
+@keyframes sii-kit-fade{from{opacity:0}to{opacity:1}}
+@media(max-width:1050px){.sii-command-trigger kbd{display:none}.sii-command-trigger-label{display:none}.sii-command-trigger{width:42px;justify-content:center}}
+@media(max-width:600px){.sii-command-overlay{padding:65px 10px 10px}.sii-command-dialog{max-height:75dvh}.sii-command-trigger{min-width:42px}}
