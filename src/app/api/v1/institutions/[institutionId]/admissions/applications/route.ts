@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
 import { admissionApplications, applicantProfiles, academicPrograms } from '../../../../../../../../db/schema';
-import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import { can } from '@/shared/auth/capabilities';
+import { authorizeCapability, getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 import { admissionApplicationSchema } from '@/modules/admissions/validation';
 
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
@@ -20,8 +19,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
     }
 
-    const subject = { id: user.id, active: true, mustChangePassword: user.mustChangePassword, grants: access.grants };
-    if (!can(subject, 'institutions.read', { institutionId })) {
+    // Applicant PII requires the same administrative authority as institutional management.
+    if (!await authorizeCapability(institutionId, 'institutions.manage')) {
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente' } }, { status: 403 });
     }
 

@@ -92,3 +92,12 @@ La validación de secciones usa su propia base sintética PostgreSQL local y el 
 | ID | Operación | Actor y alcance | Validación y transacción | Evidencia | Estado |
 |---|---|---|---|---|---|
 | OP-030 | enqueueAcademicSection(tx,scope) y worker académico interno | Backend; autoridad heredada de la futura transacción académica autorizada | Snapshot completo tenant/section, sourceVersion atómico, body cifrado congelado, audit TX, lease/retry/CAS; flag disabled por defecto | academic-outbox.test.ts unit/integration, migración0018 y perfil managed | FOUNDATION LOCAL; WRITERS/TRANSPORTE/RECONCILIACIÓN/API MÓVIL PENDIENTES |
+
+## Corrección SEC-02 — listados sensibles (21 octubre 2026)
+
+| Operación | Autoridad efectiva | Compatibilidad y alcance | Evidencia | Estado |
+|---|---|---|---|---|
+| GET /institutions/:id/admissions/applications y GET /institutions/:id/financials/orders | authorizeCapability('institutions.manage'), institución activa, membresía vigente y MFA privilegiado | Conserva rutas, 401/403, campos JSON y filas autorizadas; institutions.read no autoriza PII/deudas de terceros | sensitive-institutional-lists-http.test.ts: RED15/24 antes del arreglo, GREEN24/24 y27/27 tras ampliar cobertura; HTTP+PostgreSQL local sintético, también build producción | CORREGIDO LOCALMENTE; PR75 depende de PR79; CI PENDIENTE |
+| SSR /dashboard/institutions/:id/admissions | Misma capacidad administrativa antes de consultar/serializar | Redirige sin permiso; conserva tabla y formulario del administrador autorizado | Misma suite: alumno/guest/participante/docente pendiente/admin sin MFA no reciben PII | CORREGIDO LOCALMENTE; PR75 depende de PR79; CI PENDIENTE |
+
+Esta corrección no completa Admisiones/Caja. La sesión de aspirante, verificación real de correo, autorización y auditoría de escritores, integridad financiera cruzada y paginación siguen abiertos en `docs/audits/SIII_ENGINEERING_AUDIT_2026-10-21.md`. Sin migraciones ni cambios productivos.

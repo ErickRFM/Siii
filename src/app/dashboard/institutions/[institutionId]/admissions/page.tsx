@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
+import { authorizeCapability, getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 import SiiAppShell from '@/components/sii-app-shell';
 import AdmissionsPortal from '@/components/admissions-portal';
 import { db } from '@/infrastructure/database';
@@ -18,6 +18,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
   const accessList = await getInstitutionAccess(user.id);
   const access = accessList.find(a => a.institutionId === institutionId);
   if (!access) redirect('/dashboard');
+  if (!await authorizeCapability(institutionId, 'institutions.manage')) redirect('/dashboard');
 
   const programs = await db.select({
     id: academicPrograms.id,

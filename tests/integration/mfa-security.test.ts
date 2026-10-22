@@ -172,6 +172,9 @@ describe.sequential('real MFA HTTP security and transaction boundaries', () => {
     const institution = (await sql.query("INSERT INTO institutions(name,code) VALUES('Synthetic MFA write guard',$1) RETURNING id", ['MFA' + randomUUID().slice(0, 12)])).rows[0].id;
     const membership = (await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id', [institution, userId])).rows[0].id;
     await sql.query("INSERT INTO role_assignments(membership_id,role) VALUES($1,'admin')", [membership]);
+    // Establish route readiness before the bounded SQL-lock observation. Cold dev
+    // compilation must not consume the window intended to observe authorization.
+    expect((await request('/api/v1/institutions/' + institution + '/academic/courses')).status).toBe(200);
     const gate = new pg.Client({ connectionString: isolatedDatabaseUrl() }); await gate.connect(); await gate.query('BEGIN');
     let pending: Promise<Response> | undefined;
     const code = 'STALE' + randomUUID().slice(0, 8).toUpperCase();
