@@ -98,6 +98,14 @@ El incremento local de [claim de estudiante](SIII_STUDENT_CLAIM_AUTHORITY_2026-1
 
 Main809c526d tuvo CI39813643250 FAILURE por color-contrast en monograma institucional al completar recuperación con MFA (83/84UI). Se detuvieron otras integraciones. Causa reproducida: opacity0→1 de item y content-grid ancestrales;4negativos axe por frame→GREEN8con controles previos,15flujos UI reales y826unitarias/lint/tipos/build locales verdes. Revisión independiente detectó y cerró un arreglo incompleto; reparación final sólo cambia animation-name a desplazamiento existente. [Informe de causa y evidencia](SIII_DASHBOARD_ENTRY_CONTRAST_2026-10-22.md). CI del SHA publicado e integración pendientes; no se aplica excepción de cuota a este fallo ni se declara main estable.
 
+## Seguimiento DEP-02 — Next runtime (22 octubre 2026)
+
+Nuevo hallazgo independiente de DEP-01/PR79: `main@a1c6e8c4` fija Next15.5.27 y el audit del22-oct devuelve un paquete crítico con GHSA-2464-fhr4-w9xw (optimización de imágenes/SVG sobre Linux glibc) y GHSA-p3m5-59mp-jv5r (DoS con Server Actions). No se demuestra un incidente productivo ni se infiere exposición solo por instalar Next. La búsqueda focal no encontró imports `next/image` ni directivas `use server` en la app. Parche puntual exacto15.5.28, env/SWC alineados y Sharp0.35.5 conservado; no hay upgrade mayor, `audit fix`, cambio de gate ni mezcla de MFA/PR88. RED audit exit1 → GREEN exit0/cero; instalación reproducible, lint, tipos,826unitarias y build31/31 locales verdes. Revisión independiente sin hallazgos Critical/Important/Minor; CI del SHA publicado conserva su gate. [Informe DEP-02 y límites](SIII_NEXT_SECURITY_PATCH_2026-10-22.md). Este añadido conserva íntegra la instantánea y el historial anteriores.
+
+## QA — navegación real después de logout MFA (22 octubre2026)
+
+El job39815790688 de #86 reprodujo goto/login interrumpido por el303 del logout final del caso MFA. Incremento sólo de test registra espera de navegación antes de Salir y exige auth/me401 antes de reingresar; no cambia F2 ni relaja límites/aserciones. Tres suites aisladas4/4 cada una,826unitarias/lint/tipos/build verdes y revisión independiente sin hallazgos; los intentos de repetición con throttle compartido se documentan como fallidos. [Evidencia y límites](SIII_MFA_LOGOUT_NAVIGATION_TEST_2026-10-22.md). CI/reconciliación/integración pendientes; no se acredita main estable por este incremento.
+
 ## SEC-04 — integridad financiera local (22 octubre 2026)
 
 Se conserva íntegra la instantánea histórica y ambos apéndices anteriores. Rama reconciliada con main809c526d, que integra PR82/83/84; según coordinación,84 tuvo826unitarias/485integraciones/84UI y preview verdes, y postmerge39813643250 de main809c seguía pendiente al último informe. No acredita despliegue productivo.

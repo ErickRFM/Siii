@@ -103,7 +103,11 @@ test('real enrollment, cookie challenge, recovery consumption, step-up, renewal 
   await page.getByRole('button', { name: 'Ya guardé mis códigos; ocultarlos' }).click();
   await page.getByRole('button', { name: 'Desactivar autenticador y cerrar otros dispositivos', exact: true }).click();
   await expect(page.getByText('No tienes un autenticador activo.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Salir', exact: true }).click();
+  await Promise.all([
+    page.waitForURL('**/login'),
+    page.getByRole('button', { name: 'Salir', exact: true }).click(),
+  ]);
+  expect((await page.request.get('/api/v1/auth/me')).status()).toBe(401);
   await credentials(page);
   await expect(page).toHaveURL(/\/dashboard$/);
 });
