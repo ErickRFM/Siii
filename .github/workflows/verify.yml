@@ -102,7 +102,11 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Keyboard and accessibility flows
         run: npm run test:ui
-      # SEC-04: future test:financial-legacy belongs here, after UI teardown, with SIII_HTTP_TEST_PRODUCTION=1.
+      # UI teardown awaits its exact child; reuse that production bundle after port release.
+      - name: Financial legacy0024 HTTP and fail-closed migration
+        env:
+          SIII_HTTP_TEST_PRODUCTION: '1'
+        run: npm run test:financial-legacy
       - name: Synthetic UI failure diagnostics
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

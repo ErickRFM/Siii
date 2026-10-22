@@ -114,6 +114,30 @@ CI89@01a5956 conserva un87/88UI document-title y un SUCCESS826/485/88 del mismoS
 
 Main f34c76fe, árbol idéntico al PR88 revisado, terminó CANCELLED por límite oficial de25m en39838544494 pese826/485/88/build/audit aprobados. El intervalo Browser runtime fue711.133s frente a22.808s en PR88; los logs muestran descargas del mirror Azure, sobre imagen efectivaUbuntu24.04. Incremento acotado separa verify y ui sin dependencia, ambos25m/Node22/PG17/Ubuntu24.04 y DB/setup propios, conservando comandos, acciones SHA, todos los tests, with-deps y artefactos UI (matriz missing=error). Contrato YAML RED→GREEN,23 mutaciones negativas rechazadas y18 comandos bash-n aprobados; medición posterior y CI real pendientes. SEC-04 test:financial-legacy se reserva después de UI, con bundle/servidor cerrados y envproduction1; no se añade el comando ausente. [Reporte, matriz y límites](SIII_CI_VERIFICATION_JOBS_2026-10-22.md). Este anexo conserva íntegro el histórico y no acredita estabilidad productiva.
 
+## SEC-04 — integridad financiera local (22 octubre 2026)
+
+Se conserva íntegra la instantánea histórica y ambos apéndices anteriores. Rama reconciliada con main809c526d, que integra PR82/83/84; según coordinación,84 tuvo826unitarias/485integraciones/84UI y preview verdes, y postmerge39813643250 de main809c seguía pendiente al último informe. No acredita despliegue productivo.
+
+0025 añade FK compuestas de alumno/tenant y usuario/membresía/tenant, SET NULL sólo payer, índices hijos y preflight readonly PRE/POST0025; falla ante históricos inválidos sin borrar/null/backfill. [Reporte SEC-04](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md):36DB +114HTTP=144/144 conjuntos,19 migrador/perfil con ejecutor sin superusuario, legacy24 HTTP1/1 separado,826unitarias y lint/tipos/build/audit0. Preflight finalVERIFIED_0025,0/0 inválidas; revisión sin Critical/Important y Minor indimmediate resuelto/confirmado. Sólo ensayos locales sintéticos; la DB histórica financiera no se modificó.
+
+El hueco DB financiero de SEC-04 queda implementado y verificado localmente. CI de esta rama, release/ledger/backup/operación productiva y demás pendientes globales permanecen abiertos. CI incorpora un gate legacy24 explícito posterior al bundle UI, sin omitir ni duplicar descubrimiento; no se afirma todavía su ejecución remota.
+
+## SEC-04 — revalidación incremental tras PR87 (22 octubre 2026)
+
+Merge normal local516f374f reconcilia47f8ae82 con maina1c6e8c, preservando íntegros la historia y los dos apéndices.0025/journal/manifest y SQL histórico permanecen idénticos. Según coordinación, PR87 tuvo dos Actions826/485/88UI y preview verdes; postmerge39821829240 seguía en curso.
+
+Evidencia repetida: lint/tipos/build0,826unitarias;144/144 conjuntos=36DB+108HTTP y legacy24 separado1/1; preflight VERIFIED_0025,0/0 inválidas,26ledger/hashSQL exacto y harness restaurado. Aclaración del apéndice previo:114HTTP era error aritmético;22+27+30+29=108HTTP, y el total144 se mantiene. [Detalle incremental](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI propia y delta MFA/logout pendientes; sin publicación ni operación productiva.
+
+
+## SEC-04 — composición preparatoria PR88/89, NO main (22 octubre 2026)
+
+Merge normal local68f07622 integra0834b352 sobre f702: prueba MFA/logout revisada y Next15.5.28, todavía pendientes de integración real en main. npm ci/audit0, lint/tipos/build0 y826unitarias;144/144=36DB+108HTTP, legacy24 separado1/1. Preflight VERIFIED_0025,0/0 inválidas,26ledger y hash0025 intacto; migrador/preflight/SQL sin diff y19managed no repetidos. [Evidencia preparatoria](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Se conserva toda la historia; no sustituye CI89/88/main ni CI financiero. SIN PUSH ni operación productiva.
+
+
+## SEC-04 — base real main4614 y162 regresiones sintéticas (22 octubre 2026)
+
+La composición financiera preserva mainf34/PR88,mainbe9036/PR91 y main4614/PR99 mediante merges normales. Gates locales repetidos sobre364fec8: build31,162/162=36DB+126HTTP (incluye47claim/lectura),legacy24 separado1/1 y preflightVERIFIED_0025,0/0 inválidas,26ledger/hash intacto. La reconciliación74b8343c sólo modifica workflow/docs y conserva los dos jobs99 con el gate legado después del cierre UI. [Evidencia y límites](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI del SHA final y autorización de release continúan pendientes; ninguna migración productiva.
+
 
 ## UX-01 parcial — capturas del libro de calificaciones (22 octubre2026)
 
@@ -134,6 +158,7 @@ Queda integrar primero la prueba MFA/logout validada por separado, reconciliar s
 Merge normal local0834b352 sobre9dabfc9b, preservando todos los prefijos y77 líneas originales: únicamente incorpora la prueba revisada MFA/logout, el lock exacto Next15.5.28 y documentación entrante. NO acredita integración real de88/89 en main. npm ci375 paquetes/audit0, lint/tipos/build y23/23 focales (15 gradebook +8 contraste) aprobados sobre DB propia55439/HTTP3204. Primera unitaria825/826 por timeout de arranque de migration-safety durante el inicio del build; repetición completa sin solapamiento826/826 en8.29s, sin tocar límites/pruebas. [Evidencia preparatoria y límites](SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md).
 
 Producto/tests/método de captura de85 y QAe927 intactos. Sin429 ni limpieza adicional de throttles. Falta traer los merge commits reales de89/88, comparar árbol y ejecutar CI remoto del SHA final antes de publicar; no se ha hecho push, edición de PR ni acción productiva desde esta preparación.
+
 
 ## UX-01 parcial — continuidad de capturas en navegación del shell (22 octubre2026)
 

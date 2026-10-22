@@ -3,12 +3,14 @@
  * Run against staging before promoting a new academic schema to Supabase production.
  */
 import pg from 'pg';
+import {readFinancialPayerIntegrity} from '../db/financial-payer-preflight';
 import { readFile } from 'node:fs/promises';
 
 const required=[
  'institutions','campuses','academic_terms','people','platform_users',
  'institution_memberships','role_assignments','auth_sessions','security_audit_log',
  'academic_programs','academic_courses','curriculum_versions',
+ 'financial_fee_types','payment_orders','institutional_students',
 ];
 async function main(){
  if(!process.env.DATABASE_URL)throw Error('DATABASE_URL is required but never printed');
@@ -31,6 +33,8 @@ async function main(){
      AND grantee IN ('anon','authenticated','PUBLIC')
    ORDER BY table_name,grantee,privilege_type
   `,[required]);
+  const financialTenantIntegrity=await readFinancialPayerIntegrity(pool,actual,!!ledgers.rows[0]?.drizzle_ledger);
+
   const raw=JSON.parse(await readFile(new URL('../db/migrations/meta/_journal.json',import.meta.url),'utf8')) as {
    entries?:{idx:number;tag:string}[];
   };
@@ -43,12 +47,12 @@ async function main(){
    supabaseLedgerPresent:!!ledger?.supabase_ledger,
    drizzleLedgerPresent:!!ledger?.drizzle_ledger,
    mixedLedgerRequiresReconciliation:drift,
-   directApiGrants:grants.rows,
+   directApiGrants:grants.rows,financialTenantIntegrity,
    nextAction:drift?'Reconcile ledger in isolated staging; DO NOT run db:migrate on production':
     'Verify backup, staging rehearsal and deployment approval before migration',
   };
   process.stdout.write(JSON.stringify(report,null,2)+'\n');
-  if(missing.length||grants.rows.length||drift)process.exitCode=2;
+  if(missing.length||grants.rows.length||drift||financialTenantIntegrity.blocked)process.exitCode=2;
  }finally{await pool.end()}
 }
 main().catch((e:unknown)=>{console.error('Database preflight failed:',e instanceof Error?e.message:'unknown');process.exitCode=1});
