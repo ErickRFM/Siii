@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, uniqueIndex, foreignKey, check } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, uniqueIndex, index, foreignKey, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { institutions, platformUsers } from './core';
 import { institutionalStudents } from './registry';
@@ -37,6 +37,12 @@ export const paymentOrders = pgTable('payment_orders', {
   dueDate: timestamp('due_date', { withTimezone: true }),
   ...auditDates,
 }, table => ({
+  // SQL-only in0025: orders_payer_student_tenant_fk and orders_payer_user_tenant_fk
+  // enforce same-tenant payers with ON DELETE SET NULL (payer_*_id) only.
+  // Drizzle0.45.4 cannot express the column list; plain set null would also null
+  // institution_id. Keep scalar refs above; SQL/catalog tests own these composite FKs.
+  payerStudentTenant: index('payment_orders_payer_student_tenant_idx').on(table.payerStudentId, table.institutionId),
+  payerUserTenant: index('payment_orders_payer_user_tenant_idx').on(table.institutionId, table.payerUserId),
   uniqueOrderNumber: uniqueIndex('payment_orders_number_uidx').on(table.institutionId, table.orderNumber),
   scopedFeeType: foreignKey({ columns: [table.feeTypeId, table.institutionId], foreignColumns: [financialFeeTypes.id, financialFeeTypes.institutionId], name: 'orders_fee_type_tenant_fk' }),
   validStatus: check('payment_orders_status_check', sql`${table.status} IN ('pending','partially_paid','paid','cancelled','waived','refunded')`),

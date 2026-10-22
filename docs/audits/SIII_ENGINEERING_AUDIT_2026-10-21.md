@@ -93,3 +93,11 @@ Estado al reconciliar esta rama: PR80 quedó integrado en8b2bd2c6 y su CI postme
 ## Seguimiento acotado SEC06 — claim (22 octubre2026)
 
 El incremento local de [claim de estudiante](SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md) consume el helper común revisado935f2220 con institutions.read, sin modificar F2 ni Admisiones. Impide auto-vínculo basado solo en correo textual y hace atómicas ambas ramas con auditoría y revalidación final. Prueba positiva de buzón mediante aceptación real de invitación; RED21/29 y GREEN29/29 HTTP en base local sintética exclusiva. Lint y826unitarias aprobadas. No se promueve la composición privada a integración main ni se declara cerrado SEC06 global: claim/me, otros consumidores y puertas de operación siguen pendientes. Revisión independiente, prerrequisito integrado y CI del SHA final continúan siendo gates; no se ejecutaron escrituras productivas ni sincronización Compañero.
+
+## SEC-04 — integridad financiera local (22 octubre 2026)
+
+Se conserva íntegra la instantánea histórica y ambos apéndices anteriores. Rama reconciliada con main809c526d, que integra PR82/83/84; según coordinación,84 tuvo826unitarias/485integraciones/84UI y preview verdes, y postmerge39813643250 de main809c seguía pendiente al último informe. No acredita despliegue productivo.
+
+0025 añade FK compuestas de alumno/tenant y usuario/membresía/tenant, SET NULL sólo payer, índices hijos y preflight readonly PRE/POST0025; falla ante históricos inválidos sin borrar/null/backfill. [Reporte SEC-04](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md):36DB +114HTTP=144/144 conjuntos,19 migrador/perfil con ejecutor sin superusuario, legacy24 HTTP1/1 separado,826unitarias y lint/tipos/build/audit0. Preflight finalVERIFIED_0025,0/0 inválidas; revisión sin Critical/Important y Minor indimmediate resuelto/confirmado. Sólo ensayos locales sintéticos; la DB histórica financiera no se modificó.
+
+El hueco DB financiero de SEC-04 queda implementado y verificado localmente. CI de esta rama, release/ledger/backup/operación productiva y demás pendientes globales permanecen abiertos. CI incorpora un gate legacy24 explícito posterior al bundle UI, sin omitir ni duplicar descubrimiento; no se afirma todavía su ejecución remota.
