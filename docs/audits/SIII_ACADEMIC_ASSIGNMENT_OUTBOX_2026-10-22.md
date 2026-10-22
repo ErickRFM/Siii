@@ -63,3 +63,9 @@ Este productor no cubre cambios de perfil/estado docente, teacher-links ni otras
 ## Base integrada para revision
 
 Reconciliado por merge normal con main fc65c14982f97bd4a0a4bc28781f2f7c19e91bb0, cuyo CI posterior 39862602189 esta verde. No cambian las rutas, el harness ni las 39 pruebas respecto de 089062b32364f804d2f79f838f1ffe38dfea33b2; se conservan los 33 escenarios del libro y el gate financiero legacy. La verificacion remota del nuevo SHA sigue pendiente. Los fallos locales intermitentes del timeout del hijo de migration-safety y los controles posteriores 826/826 documentados arriba no acreditan que su causa haya sido corregida.
+
+## CI del primer SHA y reconciliacion con main real
+
+36d092f526b9f2162baec77df972c0902499381c completo ambos eventos: PR39865711677 (verify120127261486 / ui120127261797) y push39865702331 (verify120127231277 / ui120127231538), todos SUCCESS y Vercel SUCCESS. Logs leidos: ambos verify826/826 unitarias,578/578 integracion38archivos y39/39 ON focales,lint/typecheck/build/audit0; ambos UI121/121 mas legacy1/1. Son39casos ejecutados dos veces ON/OFF, no617escenarios distintos. UIpush instalo runtime en12m22s y completo121 en7.9m; no se modificaron plazos ni se omitieron gates.
+
+Durante la comprobacion final otra conversacion integro #95 en main6879adae361e797f0d707f8c2b8492299d7aceba. Se detuvo el merge de102 y se reconcilio por merge normal2de89a94: unicamente once lineas de sii-app-shell sobre fc65. La ruta,39tests,harness,workflow y consumidores de datos del productor permanecen identicos. Revision independiente del delta95 no encontro Critical/Important; conserva el proveedor persistente del libro. CIpostmain39867748828 y CI del nuevo HEAD de102 quedan pendientes; el verde anterior no se atribuye al nuevo SHA.

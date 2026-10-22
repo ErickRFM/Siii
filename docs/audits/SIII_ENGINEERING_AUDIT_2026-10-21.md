@@ -192,3 +192,7 @@ Actualización de cierre local INT-04A: coordinación completó control A main5c
 ## SEC-03 / SEC-06: alcance original integrado y verificado (22 octubre 2026)
 
 Estado actualizado: corregidos en codigo para las cuatro operaciones privilegiadas originales y la auditoria transaccional de orders/decision/claim. Revision independiente sin defecto abierto sobre 5cb49f75 y CI posterior de main fc65c149 verde (run 39862602189: 826 unitarias, 539 integracion, 121 UI y legacy 1). Evidencia por ruta, causa, prueba negativa y limites: [SIII_SEC03_SEC06_SCOPE_CLOSURE_2026-10-22.md](SIII_SEC03_SEC06_SCOPE_CLOSURE_2026-10-22.md). No se extiende el cierre a todos los escritores ni a RLS/despliegue productivo. Se conserva integro el inventario historico.
+
+## GitHub: trunk predeterminado corregido y protecciones verificadas (22 octubre 2026)
+
+Se cambio exclusivamente default_branch de feat/sis-foundation a main y se verifico por API; origin/HEAD local sincronizado. El HEAD no cambio por esa operacion y no se tocaron Vercel, reglas, secretos ni produccion. Proteccion clasica main devuelve404; consulta de reglas efectivas main devuelve[]. Ruleset activo Sii25429833 tiene include[]/exclude[], sin bypass, con deletion/non_fast_forward: no acredita exigencia efectiva de CI o revisiones en main. La configuracion de protecciones permanece pendiente; no se debilitaron reglas existentes. AGENTS actualiza solo este estado factual.
