@@ -1,5 +1,6 @@
 'use client';
 import SiiScrollRegion from './sii-scroll-region';
+import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -95,6 +96,8 @@ export default function UniversityServices({institutionId}:{institutionId:string
  }
  return <div className="sii-academic">
  {confirmation}
+  <SiiSectionHeader workspace eyebrow="SERVICIOS UNIVERSITARIOS" title="Gestión de servicios"
+    description="Avisos, trámites y talleres de tu institución con acceso controlado."/>
   <div className="sii-catalog-tabs" role="tablist" aria-label="Servicios universitarios">
    {tabs.map(t=><button key={t.id} id={"services-tab-"+t.id} aria-controls="services-panel" role="tab" type="button" tabIndex={tab===t.id?0:-1} onKeyDown={e=>navigateTabs(e,t.id)} aria-selected={tab===t.id}
     className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}

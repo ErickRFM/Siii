@@ -1,5 +1,6 @@
 'use client';
 import SiiScrollRegion from './sii-scroll-region';
+import {SiiSectionHeader} from './ui/sii-kit';
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
 import { useCallback,useEffect,useRef,useState,type FormEvent,type KeyboardEvent } from 'react';
@@ -113,9 +114,9 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   <div className="sii-catalog-tabs" role="tablist" aria-label="Control escolar">
    {(['students','teachers'] as Kind[]).map(k=><button type="button" role="tab" key={k} id={"registry-tab-"+k} aria-controls="registry-panel" tabIndex={kind===k?0:-1} onKeyDown={e=>navigateTabs(e,k)} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</button>)}
   </div>
-  <div className="sii-catalog-summary"><div><span className="sii-section-kicker">CONTROL ESCOLAR</span>
-   <h2>{kind==='students'?'Expedientes de estudiantes':'Plantilla docente'}</h2><p>Registros institucionales oficiales. La creación de cuentas de acceso es independiente.</p></div>
-   <span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span></div>
+  <SiiSectionHeader workspace eyebrow="CONTROL ESCOLAR" title={kind==='students'?'Expedientes de estudiantes':'Plantilla docente'}
+   description="Registros institucionales oficiales. La creación de cuentas de acceso es independiente."
+   right={<span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span>}/>
   {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   <div id="registry-panel" role="tabpanel" aria-labelledby={"registry-tab-"+kind} tabIndex={0} aria-busy={loading} className="sii-catalog-layout">

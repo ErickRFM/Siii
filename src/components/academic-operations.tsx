@@ -1,5 +1,6 @@
 'use client';
 import SiiScrollRegion from './sii-scroll-region';
+import {SiiSectionHeader,SiiSkeleton} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
 function userFacingError(code:string){
  const messages:Record<string,string>={
@@ -68,12 +69,12 @@ export default function AcademicOperations({institutionId}:{institutionId:string
   records.map(x=><option value={x.id} key={x.id}>{type==='student'?x.enrollmentNumber:type==='teacher'?x.employeeNumber:x.code} · {x.firstName?x.firstName+' '+x.lastName:x.name??'Sección'}</option>);
  return <div className="sii-academic">
  {confirmation}
-  <div className="sii-catalog-summary"><div><span className="sii-section-kicker">OPERACIÓN ACADÉMICA</span><h2>Oferta, grupos e inscripciones</h2>
-   <p>Operaciones reales con validación de institución, cupos y asignaciones.</p></div>
-   <button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar</button></div>
+  <SiiSectionHeader workspace eyebrow="OPERACIÓN ACADÉMICA" title="Oferta, grupos e inscripciones"
+   description="Operaciones reales con validación de institución, cupos y asignaciones."
+   right={<button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar</button>}/>
   {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar datos</button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
-  {loading?<div role="status" className="sii-panel">Consultando operaciones institucionales…</div>:<>
+  {loading?<SiiSkeleton label="Consultando operaciones institucionales"/>:<>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel">
      <h3>Secciones abiertas y cerradas</h3><SiiScrollRegion label="Tabla de secciones, desplazamiento horizontal">

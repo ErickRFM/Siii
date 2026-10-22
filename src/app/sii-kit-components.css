@@ -1,0 +1,125 @@
+/* SIII UI Kit components: stable, typed building blocks with institutional tokens. */
+.sii-kit-page-heading{padding:2px 0 3px}
+.sii-kit-page-heading>div{min-width:0}
+.sii-kit-page-heading h1{text-wrap:balance}
+.sii-kit-section-header{align-items:start}
+.sii-kit-section-header h2{margin-top:6px;letter-spacing:-.035em;font-weight:830}
+.sii-kit-section-header>div{min-width:0}
+.sii-kit-section-header p{max-width:72ch;line-height:1.6}
+.sii-kit-metric{position:relative;isolation:isolate;min-width:0;overflow:hidden}
+.sii-kit-metric::before{
+ content:"";pointer-events:none;position:absolute;width:160px;height:160px;right:-80px;top:-90px;
+ border-radius:50%;background:rgba(201,95,134,.07);filter:blur(16px);z-index:-1;
+}
+.sii-kit-metric .sii-nav-glyph{width:22px;height:22px}
+.sii-kit-metric .sii-metric-value{font-variant-numeric:tabular-nums}
+.sii-kit-metric .sii-metric-link{display:inline-flex;align-items:center;gap:8px;margin-top:auto}
+.sii-kit-metric .sii-metric-link>span{transition:transform 180ms ease}
+.sii-kit-metric .sii-metric-link:hover>span{transform:translate(2px,-2px)}
+.sii-kit-empty{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:28px}
+.sii-kit-empty strong{font-size:14px;font-weight:800;color:var(--sii-text)}
+.sii-kit-empty p{max-width:48ch;color:var(--sii-muted);margin:0;line-height:1.6}
+.sii-kit-empty-icon{width:49px;height:49px;display:grid;place-items:center;border-radius:14px;background:var(--sii-primary-soft);color:var(--sii-primary)}
+.sii-kit-empty-icon svg{width:23px;height:23px}
+.sii-kit-module-card{position:relative;isolation:isolate;overflow:hidden;border-radius:18px;min-width:0}
+.sii-kit-module-card::after{content:"";position:absolute;pointer-events:none;inset:auto -30px -70px 30%;height:150px;background:radial-gradient(ellipse at center,rgba(171,70,112,.09),transparent 75%);z-index:-1}
+.sii-kit-module-card h3{letter-spacing:-.025em;line-height:1.3}
+.sii-kit-module-card>p{max-width:48ch;line-height:1.65}
+.sii-kit-module-icon{display:grid;place-items:center;width:47px;height:47px;flex:none}
+.sii-kit-module-icon svg{width:23px;height:23px;fill:none}
+.sii-kit-module-card--disabled{opacity:1;border-style:dashed}
+.sii-kit-module-card--disabled:hover{transform:none!important;box-shadow:var(--sii-kit-shadow)!important;border-color:var(--sii-kit-border)!important}
+.sii-kit-module-card--disabled .sii-module-bottom{color:var(--sii-muted)}
+.sii-kit-skeleton{display:grid;gap:12px;padding:18px;border:1px solid var(--sii-kit-border);background:var(--sii-kit-surface);border-radius:16px;min-height:132px}
+.sii-kit-skeleton-block{display:block;height:15px;max-width:100%;background:linear-gradient(90deg,var(--sii-surface-soft) 0%,var(--sii-primary-soft) 48%,var(--sii-surface-soft) 100%);background-size:220% 100%;border-radius:6px;animation:sii-kit-shimmer 1.6s ease infinite}
+.sii-kit-skeleton-block:nth-child(1){width:38%}
+.sii-kit-skeleton-block:nth-child(2){width:78%}
+.sii-kit-skeleton-block:nth-child(3){width:59%}
+.sii-kit-skeleton-label{font-size:12px;color:var(--sii-muted)}
+@keyframes sii-kit-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@media(max-width:600px){.sii-kit-page-heading{align-items:start}.sii-kit-section-header{flex-wrap:wrap}.sii-kit-skeleton{padding:14px}}
+@media(prefers-reduced-motion:reduce){.sii-kit-skeleton-block{animation:none}.sii-kit-metric .sii-metric-link>span{transition:none}}
+@media(prefers-contrast:more){.sii-kit-module-card,.sii-kit-metric,.sii-kit-empty{border-color:var(--sii-text)}}
+
+/* Workspace-level heading is shared across real academic modules. */
+.sii-app .sii-kit-section-header.sii-catalog-summary{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(12px,2vw,22px);
+  margin:0 0 20px;padding:8px 0 4px;background:transparent;border:0;box-shadow:none;backdrop-filter:none;
+}
+.sii-app .sii-kit-section-header.sii-catalog-summary h2{margin:5px 0 8px;font-size:clamp(22px,2vw,29px)}
+.sii-app .sii-kit-section-header.sii-catalog-summary .sii-outline-button{align-self:start;margin:0}
+.sii-app .sii-academic>.sii-kit-skeleton{margin-bottom:16px}
+.sii-app .sii-academic>.sii-kit-section-header{animation:sii-kit-appear 310ms var(--sii-kit-ease) both}
+@media(max-width:600px){.sii-app .sii-kit-section-header.sii-catalog-summary{flex-wrap:wrap;align-items:start}}
+
+/* Polished data-grid patterns, consistently across registrar, gradebook and scheduling. */
+.sii-app .sii-catalog-table :is(th,td){padding-block:clamp(11px,1.2vw,15px)}
+.sii-app .sii-catalog-table thead th{position:sticky;top:0;z-index:1;background:var(--sii-surface-soft)}
+.sii-app .sii-catalog-table :is(th,td):first-child{padding-inline-start:16px}
+.sii-app .sii-catalog-table :is(th,td):last-child{padding-inline-end:16px}
+.sii-app .sii-catalog-table tbody tr:last-child td{border-bottom:0}
+.sii-app .sii-catalog-table tbody tr:focus-within{background:var(--sii-primary-soft)}
+.sii-app .sii-catalog-form{gap:clamp(13px,1.5vw,19px)}
+.sii-app .sii-catalog-form label{letter-spacing:.004em}
+.sii-app .sii-catalog-form :is(input,select,textarea):not(:disabled):hover{border-color:var(--sii-kit-accent)}
+.sii-app .sii-catalog-form :is(textarea){min-height:94px;resize:vertical}
+.sii-app .sii-catalog-form :is(input,select,textarea):disabled{opacity:.67;cursor:not-allowed}
+.sii-app .sii-catalog-pagination{font-size:12px;font-weight:650;color:var(--sii-muted)}
+.sii-app .sii-catalog-pagination button{min-height:44px}
+.sii-app .sii-catalog-table button{min-height:36px;min-width:50px;border-radius:9px;padding:6px 10px}
+.sii-app .sii-catalog-table button:not(:disabled):hover{border-color:var(--sii-kit-accent)}
+.sii-app .sii-catalog-notice,.sii-app .sii-catalog-error{line-height:1.6}
+.sii-app .sii-catalog-notice{border-left:3px solid var(--sii-success)}
+.sii-app .sii-catalog-error{border-left:3px solid #ac3852}
+.sii-app .sii-catalog-layout{margin-bottom:clamp(16px,2vw,24px)}
+@media(max-width:600px){
+  .sii-app .sii-catalog-table{min-width:470px}
+  .sii-app .sii-catalog-scroll{max-width:100%;overscroll-behavior-x:contain}
+  .sii-app .sii-catalog-pagination button{flex:1;min-width:125px}
+}
+
+/* Premium dashboard hero: branded, not an illustrated marketing banner. */
+.sii-app .sii-kit-page-heading--hero{
+  position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;
+  min-height:196px;margin:12px 0 25px;padding:clamp(24px,3.4vw,40px);
+  border-radius:22px;border:1px solid rgba(255,255,255,.12);
+  background:radial-gradient(circle at 93% 10%,rgba(230,142,174,.31),transparent 45%),
+             radial-gradient(circle at 25% 100%,rgba(162,61,111,.27),transparent 52%),
+             linear-gradient(122deg,#4c1831 0%,#62213d 55%,#3b182f 100%);
+  box-shadow:0 22px 52px rgba(79,27,51,.15),0 3px 12px rgba(79,27,51,.07);
+}
+.sii-app .sii-kit-page-heading--hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+  background-image:linear-gradient(rgba(255,255,255,.065) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.065) 1px,transparent 1px);
+  background-size:45px 45px;opacity:.30;
+  -webkit-mask-image:linear-gradient(95deg,transparent 20%,#000 100%);
+  mask-image:linear-gradient(95deg,transparent 20%,#000 100%);
+}
+.sii-app .sii-kit-page-heading--hero::after{
+  content:"";position:absolute;right:-85px;bottom:-165px;pointer-events:none;
+  width:360px;height:360px;border:1px solid rgba(255,221,232,.15);border-radius:50%;
+  box-shadow:0 0 0 62px rgba(255,221,232,.035),0 0 0 126px rgba(255,221,232,.02);z-index:-1;
+}
+.sii-app .sii-kit-page-heading--hero>div{flex:1;min-width:0}
+.sii-app .sii-kit-page-heading--hero h1{color:#fff;font-size:clamp(30px,3.4vw,49px);font-weight:860;letter-spacing:-.055em}
+.sii-app .sii-kit-page-heading--hero h1 .sii-welcome-period{color:#ffb3cb}
+.sii-app .sii-kit-page-heading--hero p{color:#f0dce4;font-size:13px;line-height:1.7;max-width:64ch}
+.sii-app .sii-kit-page-heading--hero .sii-badge--live{
+  color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 7px 22px rgba(20,9,18,.13);
+}
+html[data-sii-theme="dark"] .sii-app .sii-kit-page-heading--hero{
+  background:radial-gradient(ellipse at 95% 0%,rgba(180,88,131,.28),transparent 53%),linear-gradient(130deg,#321622,#451e36 64%,#2b172b);
+}
+@media(max-width:840px){
+ .sii-app .sii-kit-page-heading--hero{min-height:170px;gap:20px;padding:26px}
+}
+@media(max-width:600px){
+ .sii-app .sii-kit-page-heading--hero{min-height:0;display:block;padding:25px 21px 23px;border-radius:17px}
+ .sii-app .sii-kit-page-heading--hero p{font-size:12px}
+ .sii-app .sii-kit-page-heading--hero .sii-badge{margin-top:17px}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ .sii-app .sii-kit-page-heading--hero{background:#491729;box-shadow:none}
+}
