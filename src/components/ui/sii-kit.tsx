@@ -18,7 +18,7 @@ export function SiiPageIntro({eyebrow,title,description,actions}:{
 export function SiiSectionHeader({eyebrow,title,description,right,outside=false,workspace=false}:{
  eyebrow:string;title:string;description?:string;right?:ReactNode;outside?:boolean;workspace?:boolean;
 }){
- return <div className={'sii-panel-top sii-kit-section-header'+(outside?' sii-panel-top--outside':'')}>
+ return <div className={'sii-panel-top sii-kit-section-header'+(outside?' sii-panel-top--outside':'')+(workspace?' sii-catalog-summary':'')}>
    <div><span className="sii-section-kicker">{eyebrow}</span><h2>{title}</h2>{description&&<p>{description}</p>}</div>{right}
  </div>;
 }
