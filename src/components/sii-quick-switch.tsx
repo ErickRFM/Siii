@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type {Route} from 'next';
 import {useRouter} from 'next/navigation';
-import {useEffect,useRef,useState,type KeyboardEvent} from 'react';
+import {useEffect,useRef,useState,type KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {SiiNavIcon} from './sii-nav-icon';
 
 /** Client-only navigation projection, not an authorization boundary. */
@@ -16,7 +16,7 @@ export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
  const dialog=useRef<HTMLDivElement>(null);
  const trigger=useRef<HTMLButtonElement>(null);
  useEffect(()=>{
-  const onKey=(event:globalThis.KeyboardEvent)=>{
+  const onKey=(event:KeyboardEvent)=>{
    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){
     event.preventDefault();setOpen(value=>!value);
    }
@@ -37,7 +37,7 @@ export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
   };
  },[open]);
  const filtered=links.filter(link=>link.label.toLocaleLowerCase('es-MX').includes(query.trim().toLocaleLowerCase('es-MX')));
- const handleDialogKey=(event:KeyboardEvent<HTMLDivElement>)=>{
+ const handleDialogKey=(event:ReactKeyboardEvent<HTMLDivElement>)=>{
   if(event.key!=='Tab')return;
   const focusable=Array.from(dialog.current?.querySelectorAll<HTMLElement>('input,button:not([disabled]),a[href]')??[]);
   const first=focusable[0],last=focusable[focusable.length-1];
