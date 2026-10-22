@@ -145,4 +145,59 @@ describe.sequential('student claim authority through real HTTP, mailbox proof an
   const owner=await verifiedActor(),records=[await student(owner.email),await student(owner.email)],responses=await Promise.all(records.map(record=>claim(owner,record)));
   expect(responses.map(response=>response.status).sort()).toEqual([201,409]);expect((await sql.query('SELECT count(*)::int n FROM student_account_links WHERE membership_id=$1 AND revoked_at IS NULL',[owner.member])).rows[0].n).toBe(1);
  });
+
+ describe.sequential('current authority for the linked student read consumer',()=>{
+  const read=(owner?:Actor,tenant=unit,query='')=>fetch(base+'/api/v1/institutions/'+tenant+'/student-links/me'+query,{headers:{cookie:owner?.cookie??''},redirect:'manual'});
+  async function linked(options:Parameters<typeof actor>[0]={}){
+   const owner=await actor(options),record=await student(owner.email);
+   const link=(await sql.query('INSERT INTO student_account_links(institution_id,membership_id,student_id,linked_by) VALUES($1,$2,$3,$4) RETURNING id',[unit,owner.member,record.id,owner.id])).rows[0].id;
+   return {owner,record,link};
+  }
+  async function denied(response:Response,status=403,code='FORBIDDEN'){
+   expect(response.status).toBe(status);const body=await response.json();expect(body.error.code).toBe(code);expect(body).not.toHaveProperty('data');
+  }
+  it('preserves401 for no session and404 NO_MEMBERSHIP for an authenticated nonmember',async()=>{
+   await denied(await read(),401,'UNAUTHORIZED');await denied(await read(await actor({membership:false})),404,'NO_MEMBERSHIP');
+  });
+  it('preserves a non-MFA student response with no active link',async()=>{
+   const owner=await actor(),response=await read(owner);expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{membershipId:owner.member,studentRecord:null}});
+  });
+  it('preserves the exact own-record projection after genuine mailbox proof and claim',async()=>{
+   const owner=await verifiedActor(),record=await student(owner.email),created=await claim(owner,record);expect(created.status).toBe(201);const {link}= (await created.json()).data;
+   const response=await read(owner);expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{membershipId:owner.member,studentRecord:{linkId:link.id,studentId:record.id,enrollmentNumber:record.number,firstName:'Synthetic',lastName:'Claim student',institutionalEmail:owner.email,status:'active'}}});
+  });
+  it.each(['suspended-membership','deleted-membership','inactive-institution','mandatory-password','revoked-grant','expired-grant','missing-grant','admin-without-mfa','control-escolar-without-mfa'])('denies %s without private fields',async(kind)=>{
+   const {owner}=await linked({role:kind==='admin-without-mfa'?'admin':kind==='control-escolar-without-mfa'?'control_escolar':'student'});
+   if(kind==='suspended-membership')await sql.query("UPDATE institution_memberships SET status='suspended' WHERE id=$1",[owner.member]);
+   if(kind==='deleted-membership')await sql.query("UPDATE institution_memberships SET deleted_at=now(),status='suspended' WHERE id=$1",[owner.member]);
+   if(kind==='inactive-institution')await sql.query("UPDATE institutions SET status='inactive' WHERE id=$1",[unit]);
+   if(kind==='mandatory-password')await sql.query('UPDATE platform_users SET must_change_password=true WHERE id=$1',[owner.id]);
+   if(kind==='revoked-grant')await sql.query('UPDATE role_assignments SET revoked_at=now() WHERE membership_id=$1',[owner.member]);
+   if(kind==='expired-grant')await sql.query("UPDATE role_assignments SET expires_at=now()-interval '1 second' WHERE membership_id=$1",[owner.member]);
+   if(kind==='missing-grant')await sql.query('DELETE FROM role_assignments WHERE membership_id=$1',[owner.member]);
+   await denied(await read(owner));
+  });
+  it('retains privileged MFA and does not require a fresh critical step-up for reading',async()=>{
+   const {owner,record}=await linked({role:'admin',mfa:true});await sql.query('UPDATE auth_sessions SET step_up_at=NULL WHERE id=$1',[owner.session]);const response=await read(owner);expect(response.status).toBe(200);expect((await response.json()).data.studentRecord.studentId).toBe(record.id);
+  });
+  it('never selects another actor or tenant from user-controlled query parameters',async()=>{
+   const own=await linked(),other=await linked();const response=await read(own.owner,unit,'?membershipId='+other.owner.member+'&studentId='+other.record.id);expect(response.status).toBe(200);const body=await response.json();expect(body.data.studentRecord.studentId).toBe(own.record.id);expect(JSON.stringify(body)).not.toContain(other.record.number);
+   await denied(await read(own.owner,foreign),404,'NO_MEMBERSHIP');
+  });
+  it('returns null after link revocation and for a same-tenant member without a link',async()=>{
+   const {owner,link}=await linked();await sql.query('UPDATE student_account_links SET revoked_at=now() WHERE id=$1',[link]);for(const member of [owner,await actor()]){const response=await read(member);expect(response.status).toBe(200);expect((await response.json()).data.studentRecord).toBeNull();}
+  });
+  for(const kind of ['grant-revoked','membership-suspended','session-expired'] as const)it('rechecks '+kind+' after a real SQL relation wait',async()=>{
+   const {owner}=await linked();expect((await read(owner)).status).toBe(200);
+   const blocker=new pg.Client({connectionString:isolatedDatabaseUrl()});await blocker.connect();let pending:Promise<Response>|undefined;
+   try{
+    await blocker.query('BEGIN');const pid=(await blocker.query('SELECT pg_backend_pid() pid')).rows[0].pid;await blocker.query('LOCK TABLE student_account_links IN ACCESS EXCLUSIVE MODE');
+    pending=read(owner);expect(await waitBlocked(pid)).toBe(true);
+    if(kind==='grant-revoked')await sql.query('UPDATE role_assignments SET revoked_at=now() WHERE membership_id=$1',[owner.member]);
+    if(kind==='membership-suspended')await sql.query("UPDATE institution_memberships SET status='suspended' WHERE id=$1",[owner.member]);
+    if(kind==='session-expired')await sql.query("UPDATE auth_sessions SET expires_at=now()-interval '1 second' WHERE id=$1",[owner.session]);
+    await blocker.query('COMMIT');await denied(await pending);
+   }finally{await blocker.query('ROLLBACK');if(pending)await pending.catch(()=>undefined);await blocker.end();}
+  });
+ });
 });
