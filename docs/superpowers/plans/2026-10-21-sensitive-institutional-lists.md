@@ -39,7 +39,7 @@
 - [x] Crear fixtures sintéticas con dos instituciones, solicitudes y órdenes distinguibles; identidades y sesiones reales.
 - [x] Ejecutar negativos HTTP/SSR y observar 200 indebido antes del arreglo (15/24fallos; nueve controles pasan).
 - [x] Reutilizar autorización central antes de las consultas sensibles (GREEN24/24; cobertura ampliada27casos pasa dentro de integración completa).
-- [ ] Repetir pruebas dirigidas, integración completa, UI, lint, tipos, unitarias, build y preflight local.
-- [ ] Revisión independiente del diff y compatibilidad; commit convencional, push y PR independiente; sin merge mientras falte un gate.
+- [x] Ejecutar pruebas dirigidas, integración completa, UI, lint, tipos, unitarias, build y preflight local; resultados y límite de la primera corrida en `docs/audits/SIII_SEC02_EXECUTION_2026-10-21.md`.
+- [x] Revisión independiente del diff y compatibilidad; commits convencionales, push y PR75 en borrador; sin merge mientras falte un gate.
 
 **Ruling:** ejecutar autónomamente el incremento acotado dentro de la autorización explícita del usuario. Las fases restantes se mantienen como trabajo pendiente verificable, no como completadas.

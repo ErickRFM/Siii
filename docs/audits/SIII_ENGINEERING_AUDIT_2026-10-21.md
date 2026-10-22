@@ -63,3 +63,13 @@ Build baseline local fuera del sandbox: compilación13.1s, First Load JS compart
 Secuencia: SEC-02 (API+SSR) → identidad/verificación aspirante SEC-01/05 → escritores MFA/auditoría SEC-03/06 → integridad de referencias financieras SEC-04 → notas UX-01 → asincronía/CSS → revocación y reconciliación Companion → medición/paginación. Cada incremento necesita sus negativos y revisión independiente. No se declara completada ninguna fase integral ni el ciclo universitario E2E.
 
 La clasificación detallada de ramas está en `SIII_BRANCH_INVENTORY_2026-10-21.md`; la evidencia final del primer incremento se añadirá después de ejecutar las pruebas.
+
+## Cambio remoto observado durante QA
+
+Un nuevo fetch detectó `main@f75d488288af068fa0f20461598b7ddef934d545`, PR73. Añade el kit premium en18archivos, dos CSS y pruebas propias. Se comparó `git diff e494f651..f75d4882`: no toca los tres accesos de SEC-02 ni la autorización del servidor. Los cambios de grading, agenda y servicios son de encabezados/presentación: UX-01/02/03 y PERF-01 siguen vigentes; las nuevas hojas tampoco corrigen los campos públicos601–840px de UX-04. La deuda de CSS pasa de siete a nueve hojas globales importadas.
+
+La corrida local inicial está anclada a e494f651 más la corrección; no acredita la nueva capa visual. Actions de f75d4882 estaba QUEUED al consultarse (`39725976675`), así que no se afirma CI verde del nuevo main ni se hizo merge de esta corrección.
+
+**QA-02 P2 confirmado en el delta:** `tests/unit/premium-ui-kit.test.tsx` contiene cinco pruebas, pero `vitest.config.ts` solo incluye `tests/unit/**/*.test.ts`. `npm test -- tests/unit/premium-ui-kit.test.tsx` terminó con `No test files found`, exit1. Corregir descubrimiento y verificar las cinco pruebas realmente, dentro del incremento separado de herramientas. No contar esas pruebas como aprobadas por el CI previo.
+
+La rama de seguridad se reconcilió con f75d4882 mediante merge normal, sin conflictos. Build posterior aprobado: compartido103kB, admissions115kB y grading114kB. El aumento respecto a113/112kB pertenece al kit remoto; no es una optimización ni un coste atribuible a los guards. No hay benchmark de latencia comparable.
