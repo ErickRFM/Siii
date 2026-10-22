@@ -19,7 +19,8 @@
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "db:preflight": "tsx scripts/db-preflight.ts",
     "db:baseline": "tsx scripts/db-baseline.ts",
-    "test:ui": "playwright test"
+    "test:ui": "playwright test",
+    "pilot:db:gate": "tsx scripts/siii-pilot-db-gate.ts"
   },
   "dependencies": {
     "@otplib/plugin-crypto-node": "13.5.0",
