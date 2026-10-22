@@ -51,3 +51,29 @@
 .sii-app .sii-academic>.sii-kit-skeleton{margin-bottom:16px}
 .sii-app .sii-academic>.sii-kit-section-header{animation:sii-kit-appear 310ms var(--sii-kit-ease) both}
 @media(max-width:600px){.sii-app .sii-kit-section-header.sii-catalog-summary{flex-wrap:wrap;align-items:start}}
+
+/* Polished data-grid patterns, consistently across registrar, gradebook and scheduling. */
+.sii-app .sii-catalog-table :is(th,td){padding-block:clamp(11px,1.2vw,15px)}
+.sii-app .sii-catalog-table thead th{position:sticky;top:0;z-index:1;background:var(--sii-surface-soft)}
+.sii-app .sii-catalog-table :is(th,td):first-child{padding-inline-start:16px}
+.sii-app .sii-catalog-table :is(th,td):last-child{padding-inline-end:16px}
+.sii-app .sii-catalog-table tbody tr:last-child td{border-bottom:0}
+.sii-app .sii-catalog-table tbody tr:focus-within{background:var(--sii-primary-soft)}
+.sii-app .sii-catalog-form{gap:clamp(13px,1.5vw,19px)}
+.sii-app .sii-catalog-form label{letter-spacing:.004em}
+.sii-app .sii-catalog-form :is(input,select,textarea):not(:disabled):hover{border-color:var(--sii-kit-accent)}
+.sii-app .sii-catalog-form :is(textarea){min-height:94px;resize:vertical}
+.sii-app .sii-catalog-form :is(input,select,textarea):disabled{opacity:.67;cursor:not-allowed}
+.sii-app .sii-catalog-pagination{font-size:12px;font-weight:650;color:var(--sii-muted)}
+.sii-app .sii-catalog-pagination button{min-height:44px}
+.sii-app .sii-catalog-table button{min-height:36px;min-width:50px;border-radius:9px;padding:6px 10px}
+.sii-app .sii-catalog-table button:not(:disabled):hover{border-color:var(--sii-kit-accent)}
+.sii-app .sii-catalog-notice,.sii-app .sii-catalog-error{line-height:1.6}
+.sii-app .sii-catalog-notice{border-left:3px solid var(--sii-success)}
+.sii-app .sii-catalog-error{border-left:3px solid #ac3852}
+.sii-app .sii-catalog-layout{margin-bottom:clamp(16px,2vw,24px)}
+@media(max-width:600px){
+  .sii-app .sii-catalog-table{min-width:470px}
+  .sii-app .sii-catalog-scroll{max-width:100%;overscroll-behavior-x:contain}
+  .sii-app .sii-catalog-pagination button{flex:1;min-width:125px}
+}
