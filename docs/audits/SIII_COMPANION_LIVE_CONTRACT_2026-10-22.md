@@ -69,3 +69,10 @@ Invocación conjunta exacta de las tres clases:21/21 (1 sender real+9 proyecció
 El job futuro ahora exige las tres clases fijadas (1/9/11) y publica sus tres XML más el log. Se conservan35s/30s/45s/120s originales y timeout25min, sin reintentos. Verificador extraído del YAML exacto aceptó los XML reales y rechazó nueve mutaciones: contador skip, elemento skipped oculto con contadores0 y ausencia de XML, una por cada clase; restauración final GREEN. El job verify y controles superiores son estructuralmente idénticos a2bda70f4. YAML parseado; la ejecución Ubuntu/Node22 sigue pendiente.
 
 Composición local256ac95c incluye2bda70f4. GitHub integró externamente88 como f34c76fe con árbol idéntico; no se atribuye ese merge al coordinador. La base real deberá reconciliarse antes de publicar, incluyendo la reparación de particiónCI si se integra. Este añadido no habilita flags ni declara INT04/05 cerrados.
+
+
+## Composición con main4614 y CI separado (22 octubre2026)
+
+Merge normal d7f1b713 combina1f045c34 con main4614/PR99. Comparación estructural y revisión independiente: verify/ui y controles superiores idénticos a main, job companion-live-contract idéntico a1f045, CLI/guards sin cambio. El GET propio y sus pruebas entrantes coinciden con main. No se repitieron Gradle/Mongo ni suites por la composición de historial; se conserva la ejecución real conjunta21/21 (1contrato firmado+9proyección+11inbox), cero skips/errores/fallos y9negativos del validador XML documentados. El repositorio receptor permanece limpio y fijado a586ec206576349c9a0d96ce85c50bbb3cf0fb0b5.
+
+Revisión de composición sin Critical/Important/Minor y diff-check0. Auditoría de main íntegra como prefijo y secciones locales únicas conservadas. El nuevo job remoto todavía no se acredita ejecutado: deben aprobar verify,ui y companion-live-contract de todos los runs del SHA publicado antes del merge. No implica sincronización productiva, consumo móvil, cadena completa de revocaciones ni reconciliación operativa; INT04/05 continúan abiertos. Sin modificar Compañero, F2, schema ni flags.

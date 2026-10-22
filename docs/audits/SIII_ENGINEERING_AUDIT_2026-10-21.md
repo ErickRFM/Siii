@@ -123,3 +123,8 @@ Main f34c76fe, árbol idéntico al PR88 revisado, terminó CANCELLED por límite
 ## Contrato real y regresiones receptoras — evidencia incremental22octubre
 
 Sobre receptor fijo586ec206 intacto, se ejecutaron21/21 casos conjuntos (senderSIII real1+Mongo proyección9+Mongo inbox11), sin fallos/errores/skips. La lectura XML exacta y nueve negativos del gate evitan contar suites ausentes/omitidas como aprobadas. [Detalle y límites](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md#ampliación-verificada-regresiones-existentes-del-receptor). El nuevo jobCI permanece sin ejecutar/publicar; productores INT04, reconciliación operativa INT05 y consumo móvil siguen abiertos. Ninguna migración productiva ni flag habilitado.
+
+
+## INT — gate firmado real compuesto con main4614 (22 octubre2026)
+
+El merge local d7f1b713 preserva verify/ui de main99 y añade el job independiente Compañero previamente revisado sin modificarlo. Se conserva evidencia conjunta21/21 sobre Ktor/Mongo reales y9negativos XML; no se atribuye una nueva corrida a esta composición. CLI/guards y receptor fijado permanecen idénticos, auditoría histórica íntegra y revisión sin hallazgos. [Evidencia y límites](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md). CI remoto exacto pendiente; revocaciones fuente, consumo móvil, reconciliación y operación productiva siguen abiertos.
