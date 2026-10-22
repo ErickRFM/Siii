@@ -45,3 +45,29 @@ La instalación conserva avisos deprecados ya presentes de `@esbuild-kit/*` y ES
 No se ejecutaron PostgreSQL, migraciones ni pruebas HTTP/UI institucionales locales: este parche de dependencias se valida localmente con los gates anteriores y conserva los checks completos de integración y navegador en CI del SHA publicado. No se abrieron puertos ni se consultaron bases, secretos o entornos productivos. El build local no acredita despliegue ni disponibilidad productiva.
 
 Revisión independiente completada: sin hallazgos Critical, Important o Minor. Confirmó el diff de cuatro archivos, los diez paquetes resueltos, compatibilidad y evidencia RED/GREEN/unitarias/build; no repitió instalación/rebuild ni suites pesadas. Publicación, PR y merge quedan a cargo del coordinador; no se ejecutan desde este incremento. Orden de integración: proponer DEP-02 en un PR independiente e integrarlo primero si su revisión y CI del commit exacto están verdes. Después actualizar PR88 con ese prerrequisito y repetir sus gates; su corrección de navegación no es un prerrequisito de DEP-02. No se relaja audit.
+
+## Seguimiento DEP-02 — Esperar el commit de metadata antes de Axe (22 octubre 2026)
+
+PR89 publicó `01a595626f97a2b399892d03aeaf08bba80e5396`. Su [primera corrida CI39826467050](https://github.com/ErickRFM/Siii/actions/runs/39826467050) pasó 826 unitarias y 485 HTTP, pero terminó 87/88 UI: Axe detectó `document-title` ausente en el caso de guía MFA tras verificar200 y mostrar diez códigos. La [segunda corrida CI39826478550](https://github.com/ErickRFM/Siii/actions/runs/39826478550), del MISMO SHA, terminó SUCCESS con826/485/88. Ambos resultados se conservan. GitHub registra después el squash de89 en `main@7e2b867`; no se reabre ni se modifica el PR cerrado. Coordinación incorporará este incremento de pruebas a PR88 antes de publicar su nuevo SHA. La causa directa del título vacío en el primer CI NO se reprodujo; no se acredita una regresión de Next15.5.28 ni un bug de producto corregido por este cambio.
+
+La asunción incorrecta de espera sí se confirmó: el componente muestra los códigos y deja de estar ocupado antes de que termine el refresh RSC. El caso existente ahora captura el nodo title previo y arma la espera del GET RSC real de `/dashboard/security` antes de activar; excluye prefetch, exige200 y espera que el nodo anterior deje el DOM. Después exige exactamente `SII · Sistema Institucional Integral` y ejecuta el MISMO Axe completo WCAG2A/AA/2.1AA/2.2AA. El título no es un fallback: su ausencia, un título incorrecto o falta de commit siguen fallando. No hay retries, ampliación de timeout, supresión de reglas ni cambios en producto, metadata, autoridad, F2 o dependencias.
+
+Se descartó usar `response.finished()` como condición de commit: en la corrida normal sin rutas/preload, el servidor terminó la respuesta y Chromium reportó `net::ERR_ABORTED`; esa promesa no resolvió dentro de60s aunque el DOM sí se actualizó. El candidato EOF dio12/13UI y NO se cuenta como validación aprobada. La retención parcial de frames también alteró el comportamiento de finalización y se conserva sólo como diagnóstico descartado para este gate. La prueba final espera la actualización DOM observable, sin forzar un contrato de EOF que no se cumple en ese navegador.
+
+Negativo controlado sobre el caso original, con `route.fetch()` y `route.fulfill({response:real})` reteniendo1000ms la respuesta completa REAL: Axe inició a1792694345582 con metadata pendiente; entrega real6608, fin6615. El mismo ensayo con el caso actualizado pasó: entrega1792694370971, requestfinished0982, Axe1007 con metadata actualizada y título exacto. Se ejecuta el análisis Axe real también en el negativo; la aserción adicional comprueba la fase en que comenzó. No se inventa contenido ni autenticación. Ese retardo fijo sólo existe en el diagnóstico ignorado, no en el test versionado.
+
+Validación local de este incremento exclusivamente test/documentación, Node24.18.0/Next15.5.28 y Chromium, servidor original del harness en3208, base sintética NUEVA `siii_metadata_wait_test` con0000–0024 (25 migraciones), sin limpiar throttles. Se conserva el build de producción ya validado de01a; no se repiten unitarias826/integración485/build porque no cambia código ejecutable del producto. CI del futuro SHA integrado debe ejecutar sus gates completos bajo Node22; la evidencia local no sustituye ese resultado ni acredita E2E receptor/móvil o disponibilidad productiva.
+
+Evidencia ignorada: `.p0-local/metadata-diagnostic/` guarda `diagnosis.md`, `wait-validation.md`, configs/spec observador, logs RED/GREEN, timelines JSON, trazas y resultados. Ejecución desde el worktree next-security-patch con `SIII_DATABASE_ENV=test`, `DATABASE_URL`/`INTEGRATION_DATABASE_URL` apuntando sólo a PostgreSQL loopback55439/base citada y `SIII_TEST_PORT=3208`; el setup ignorado reutiliza `tests/support/http-setup.ts` y `server.mjs` originales en producción.
+
+| Gate de este incremento | Resultado |
+|---|---|
+| Diagnóstico controlado original, RSC completo real retenido | RED: Axe inició antes del commit de metadata; no reproduce título vacío |
+| Mismo diagnóstico con espera DOM actualizada | GREEN:1/1,10.0s; metadata/título actualizados antes de Axe |
+| Guidance normal, sin route/preload | GREEN:1/1,9.8s |
+| Guidance +4 MFA reales +8 contraste, sin route/preload/retries | GREEN:13/13,32.9s |
+| `npm run typecheck` | exit0, después del ajuste final |
+| `npm run lint` | exit0 |
+| `git diff --check` | exit0 |
+
+El puerto3208 quedó liberado; se conserva la base sintética para trazabilidad. Revisión independiente y commit local se reportan al coordinador; no se ejecuta push desde este incremento.

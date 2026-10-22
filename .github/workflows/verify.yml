@@ -65,6 +65,15 @@ jobs:
         env:
           SIII_HTTP_TEST_PRODUCTION: '1'
         run: npm run test:financial-legacy
+      - name: Synthetic UI failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: synthetic-ui-failure-diagnostics
+          path: .superpowers/sdd/2026-10-13-p0-hardening/ui-results
+          if-no-files-found: ignore
+          include-hidden-files: true
+          retention-days: 3
       - name: Synthetic UI viewport screenshots
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
