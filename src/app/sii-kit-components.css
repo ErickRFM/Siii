@@ -77,3 +77,49 @@
   .sii-app .sii-catalog-scroll{max-width:100%;overscroll-behavior-x:contain}
   .sii-app .sii-catalog-pagination button{flex:1;min-width:125px}
 }
+
+/* Premium dashboard hero: branded, not an illustrated marketing banner. */
+.sii-app .sii-kit-page-heading--hero{
+  position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;
+  min-height:196px;margin:12px 0 25px;padding:clamp(24px,3.4vw,40px);
+  border-radius:22px;border:1px solid rgba(255,255,255,.12);
+  background:radial-gradient(circle at 93% 10%,rgba(230,142,174,.31),transparent 45%),
+             radial-gradient(circle at 25% 100%,rgba(162,61,111,.27),transparent 52%),
+             linear-gradient(122deg,#4c1831 0%,#62213d 55%,#3b182f 100%);
+  box-shadow:0 22px 52px rgba(79,27,51,.15),0 3px 12px rgba(79,27,51,.07);
+}
+.sii-app .sii-kit-page-heading--hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+  background-image:linear-gradient(rgba(255,255,255,.065) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.065) 1px,transparent 1px);
+  background-size:45px 45px;opacity:.30;
+  -webkit-mask-image:linear-gradient(95deg,transparent 20%,#000 100%);
+  mask-image:linear-gradient(95deg,transparent 20%,#000 100%);
+}
+.sii-app .sii-kit-page-heading--hero::after{
+  content:"";position:absolute;right:-85px;bottom:-165px;pointer-events:none;
+  width:360px;height:360px;border:1px solid rgba(255,221,232,.15);border-radius:50%;
+  box-shadow:0 0 0 62px rgba(255,221,232,.035),0 0 0 126px rgba(255,221,232,.02);z-index:-1;
+}
+.sii-app .sii-kit-page-heading--hero>div{flex:1;min-width:0}
+.sii-app .sii-kit-page-heading--hero h1{color:#fff;font-size:clamp(30px,3.4vw,49px);font-weight:860;letter-spacing:-.055em}
+.sii-app .sii-kit-page-heading--hero h1 .sii-welcome-period{color:#ffb3cb}
+.sii-app .sii-kit-page-heading--hero p{color:#f0dce4;font-size:13px;line-height:1.7;max-width:64ch}
+.sii-app .sii-kit-page-heading--hero .sii-badge--live{
+  color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 7px 22px rgba(20,9,18,.13);
+}
+html[data-sii-theme="dark"] .sii-app .sii-kit-page-heading--hero{
+  background:radial-gradient(ellipse at 95% 0%,rgba(180,88,131,.28),transparent 53%),linear-gradient(130deg,#321622,#451e36 64%,#2b172b);
+}
+@media(max-width:840px){
+ .sii-app .sii-kit-page-heading--hero{min-height:170px;gap:20px;padding:26px}
+}
+@media(max-width:600px){
+ .sii-app .sii-kit-page-heading--hero{min-height:0;display:block;padding:25px 21px 23px;border-radius:17px}
+ .sii-app .sii-kit-page-heading--hero p{font-size:12px}
+ .sii-app .sii-kit-page-heading--hero .sii-badge{margin-top:17px}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ .sii-app .sii-kit-page-heading--hero{background:#491729;box-shadow:none}
+}

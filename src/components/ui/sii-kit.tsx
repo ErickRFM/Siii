@@ -4,12 +4,12 @@ import type {ReactNode} from 'react';
 import {SiiNavIcon,type SiiNavIconName} from '../sii-nav-icon';
 
 /** Reusable presentation primitives. Server and client compatible; no permission decisions. */
-export function SiiPageIntro({eyebrow,title,description,actions}:{
- eyebrow:string;title:string;description:string;actions?:ReactNode;
+export function SiiPageIntro({eyebrow,title,description,actions,hero=false}:{
+ eyebrow:string;title:string;description:string;actions?:ReactNode;hero?:boolean;
 }){
  return <>
    <div className="sii-page-eyebrow">{eyebrow}<span className="sii-page-eyebrow-line"/></div>
-   <div className="sii-page-heading sii-kit-page-heading"><div>
+   <div className={hero?'sii-page-heading sii-kit-page-heading sii-kit-page-heading--hero':'sii-page-heading sii-kit-page-heading'}><div>
      <h1>{title}<span className="sii-welcome-period">.</span></h1>
      <p>{description}</p>
    </div>{actions}</div>

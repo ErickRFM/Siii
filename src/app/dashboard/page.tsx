@@ -19,7 +19,7 @@ export default async function Dashboard() {
 
   return (
     <>
-      <SiiPageIntro eyebrow="CENTRO DE OPERACIONES" title={`Bienvenido, ${user.firstName}`}
+      <SiiPageIntro hero eyebrow="CENTRO DE OPERACIONES" title={`Bienvenido, ${user.firstName}`}
         description="Este es tu espacio institucional. Consulta tus accesos y las áreas disponibles."
         actions={<SiiStatusPill live>Cuenta activa</SiiStatusPill>}/>
 
