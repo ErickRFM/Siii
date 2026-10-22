@@ -159,3 +159,14 @@ Informe y RED preservado: [SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md](../audits/
 Reconciliación posterior de85 con maina1c6e8c4 (#87) por merge normal: producto y15 pruebas de calificaciones intactos frente040a3bc4; nueva validación826unitarias/lint/tipos/build y23/23 focales (15 UI reales +8 contraste). Se conservan filas, evidencia histórica y estado UX-01 PARCIAL. Pendientes integración de prueba MFA/logout separada y CI de la composición final; QAe927/fotografía scroll0 no se incorpora todavía. Sin cambio de endpoints, migraciones, producción ni push desde esta tarea.
 
 Composición LOCAL PREPARATORIA posterior: merge0834b352 (prueba revisada de88 +Next15.5.28/lock de89) sobre9dabfc9b, aún no declarada integrada en main. Instalación exacta/audit0, lint/tipos/build,826 unitarias tras repetición sin solapamiento y23/23 focales verdes. La primera unitaria tuvo1timeout de subproceso, registrado en el informe; no se relajaron límites. Producto/tests/método de captura de85 y QAe927 intactos; faltan merge commits reales y CI del SHA final. Sin push ni edición de PR.
+
+
+## UX-01 parcial — continuidad privada en navegación SPA (22 octubre2026)
+
+| Consumidor existente | Memoria/autoridad | Evidencia local | Estado |
+|---|---|---|---|
+| TeacherGradebook dentro del shell persistente | Map original por actor/institución/sección/estudiante/componente/revisión, fuera del keytenant; auth/me+secciones+snapshot reales antes de restaurar; no roster/snapshot en shell | Atrás/Adelante, Ctrl+K Enter, revisión nueva al volver, dos tenants y actor distinto,18 nuevos+15 previos:33/33UI | LOCAL REVISADO; RECONCILIACIÓN/CI PENDIENTES |
+| Guardado concurrente con salida/assurance |200 reconoce sólo revisión enviada en proveedor original, incluso durante GET posterior; contador no reutilizado; nunca aplica snapshot/notice tardío;401/logout purgan actor,403 contexto, lecturas revocadas no repueblan | SQL750 antes de entregar200 real, edición posterior, logout/relogin, GET retenido y403 fuera de vista, foco privado oculto durante auth | SIN CAMBIO SERVIDOR/F2/SCHEMA |
+| Salida desde otras vistas/revalidación | beforeunload global del proveedor; step-up válido invalida/oculta/revalida sin borrar; foco sólo tras GET vigente y sin robar control elegido |33UI,826unitarias,lint/tipos/build,2Axe poblados0 y revisión independiente sin pendientes | UX-01 PARCIAL; SIN PERSISTENCIA DURABLE |
+
+[Informe y evidencia RED/GREEN](../audits/SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). Se conserva toda la matriz anterior. Coste observado: FirstLoad grading115→118kB (compartido103kB estable) y auth/me adicional aun con memoria vacía/fuera del libro; no es optimización ni benchmark. No hay bloqueo universal de router ni detección de sesión/logout externo sin rechazo; no lector/zoom manual certificado. Base de85 reconciliada por92/94 según coordinación; no se publica PR duplicado. Sin backend, SQL, CSS, producción ni push/merge desde este incremento.

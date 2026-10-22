@@ -32,63 +32,57 @@ type Snapshot={components:Component[];scores:Score[];publications:Publication[];
 export default function TeacherGradebook({institutionId}:{institutionId:string}){
  const {ask,confirmation}=useInstitutionConfirmation();
  const base=`/api/v1/institutions/${institutionId}/grading`;
- const {drafts,writeDraft,readDraft,confirmDraft,clearDrafts,hasDrafts}=useGradebookDrafts(institutionId,ask);
+ const {drafts,writeDraft,readDraft,confirmDraft,clearDrafts,hasDrafts,retireActor,identityReady,identityChecking,identityError,revalidateIdentity,isCurrent,authorityEpoch,rememberSection,selectedSection,reconcileSections,restoreFocus}=useGradebookDrafts(institutionId,ask);
  const [sections,setSections]=useState<Section[]>([]);
  const [sectionQuery,setSectionQuery]=useState(0);
  const [sectionId,setSectionId]=useState('');
  const scope=gradebookScope(institutionId,sectionId);
- const [loaded,setLoaded]=useState<{scope:string;value:Snapshot}|null>(null);
- const snapshot=loaded?.scope===scope?loaded.value:null;
+ const [loaded,setLoaded]=useState<{scope:string;epoch:number;value:Snapshot}|null>(null);
+ const snapshot=identityReady&&loaded?.scope===scope&&loaded.epoch===authorityEpoch?loaded.value:null;
+ useEffect(()=>{if(snapshot)restoreFocus(scope,authorityEpoch);},[snapshot,scope,authorityEpoch,restoreFocus]);
  const loadedScope=useRef(''),activeScope=useRef(''),generation=useRef(0),request=useRef<AbortController|null>(null);
  const operation=useRef<'save'|'publish'|null>(null);
  const [loading,setLoading]=useState(true),[refreshing,setRefreshing]=useState(false),[saving,setSaving]=useState(false),[publishing,setPublishing]=useState(false);
  const [error,setError]=useState(''),[notice,setNotice]=useState('');
- const retirePrivate=useCallback(()=>{
+ const retirePrivate=useCallback((status=403)=>{
   generation.current++;request.current?.abort();loadedScope.current='';activeScope.current='';
-  setLoaded(null);setSections([]);clearDrafts();setLoading(false);setRefreshing(false);
- },[clearDrafts]);
+  setLoaded(null);setSections([]);if(status===401)retireActor();else clearDrafts();setLoading(false);setRefreshing(false);
+ },[clearDrafts,retireActor]);
  useEffect(()=>{
-  function logout(event:SubmitEvent){
-   const form=event.target;
-   if(form instanceof HTMLFormElement&&new URL(form.action,location.href).origin===location.origin&&new URL(form.action,location.href).pathname==='/api/v1/auth/logout')retirePrivate();
-  }
-  document.addEventListener('submit',logout,true);
-  return ()=>document.removeEventListener('submit',logout,true);
- },[retirePrivate]);
- useEffect(()=>{
+  if(!identityReady){setSections([]);setLoaded(null);setLoading(identityChecking);return;}
   const controller=new AbortController();
   setSections([]);setSectionId('');setLoaded(null);loadedScope.current='';setLoading(true);setError('');setNotice('');
   void fetch(`${base}/sections`,{signal:controller.signal,cache:'no-store'})
-   .then(async r=>{if(!r.ok){if((r.status===401||r.status===403)&&!controller.signal.aborted)retirePrivate();throw Error('NO_SECTION_ACCESS')}return r.json() as Promise<{data:Section[]}>})
-   .then(v=>{if(controller.signal.aborted)return;setSections(v.data);setSectionId(s=>s||v.data[0]?.id||'')})
+   .then(async r=>{if(!r.ok){if((r.status===401||r.status===403)&&!controller.signal.aborted)retirePrivate(r.status);throw Error('NO_SECTION_ACCESS')}return r.json() as Promise<{data:Section[]}>})
+   .then(v=>{if(controller.signal.aborted||!isCurrent(authorityEpoch))return;reconcileSections(institutionId,v.data.map(section=>section.id));setSections(v.data);setSectionId(s=>{const remembered=s||selectedSection(institutionId);return v.data.some(section=>section.id===remembered)?remembered!:v.data[0]?.id||''})})
    .catch(()=>{if(!controller.signal.aborted)setError('No fue posible consultar tus grupos docentes.')})
    .finally(()=>{if(!controller.signal.aborted)setLoading(false)});
   return ()=>controller.abort();
- },[base,retirePrivate,sectionQuery]);
+ },[base,retirePrivate,sectionQuery,identityReady,identityChecking,authorityEpoch,isCurrent,institutionId,reconcileSections,selectedSection]);
  const refresh=useCallback(async(id:string)=>{
   const target=gradebookScope(institutionId,id);
-  if(!id||activeScope.current!==target)return false;
+  if(!identityReady||!isCurrent(authorityEpoch)||!id||activeScope.current!==target)return false;
   request.current?.abort();const controller=new AbortController();request.current=controller;
   const version=++generation.current;
-  const current=()=>!controller.signal.aborted&&generation.current===version&&activeScope.current===target;
+  const current=()=>!controller.signal.aborted&&generation.current===version&&activeScope.current===target&&isCurrent(authorityEpoch);
   if(loadedScope.current!==target)setLoading(true);
   setRefreshing(true);setError('');
   try{
    const r=await fetch(`${base}?sectionId=${encodeURIComponent(id)}`,{signal:controller.signal,cache:'no-store'});
    if(!current())return false;
    if(!r.ok){
-    if(r.status===401||r.status===403){retirePrivate();setError(userFacingError(r.status===401?'UNAUTHENTICATED':'FORBIDDEN'));return false;}
+    if(r.status===401||r.status===403){retirePrivate(r.status);setError(userFacingError(r.status===401?'UNAUTHENTICATED':'FORBIDDEN'));return false;}
     throw Error('GRADEBOOK_FAILED');
    }
    const value=await r.json() as Snapshot;
    if(!current())return false;
-   loadedScope.current=target;setLoaded({scope:target,value});return true;
+   loadedScope.current=target;setLoaded({scope:target,epoch:authorityEpoch,value});return true;
   }catch{if(current())setError('No se pudo obtener el libro de calificaciones de esta sección.');return false;}
   finally{if(current()){setLoading(false);setRefreshing(false);}}
- },[base,institutionId,retirePrivate]);
+ },[base,institutionId,retirePrivate,identityReady,isCurrent,authorityEpoch]);
  useEffect(()=>{
   activeScope.current=scope;void refresh(sectionId);
-  return ()=>{request.current?.abort();};
+  return ()=>{request.current?.abort();activeScope.current='';};
  },[scope,sectionId,refresh]);
  async function changeSection(id:string){
   const previous=activeScope.current;
@@ -96,27 +90,34 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
   if(hasDrafts(previous)&&!await ask({title:'Cambiar de grupo con notas sin guardar',description:'Las capturas se conservarán en esta página, separadas por grupo. Aún no están guardadas en el servidor.',confirmLabel:'Cambiar de grupo'}))return;
   if(activeScope.current!==previous||operation.current)return;
   generation.current++;request.current?.abort();activeScope.current=gradebookScope(institutionId,id);
-  setSectionId(id);setError('');setNotice('');
+  rememberSection(institutionId,id);setSectionId(id);setError('');setNotice('');
  }
  async function command(payload:Record<string,unknown>,confirmed?:()=>void){
-  if(operation.current)return false;
+  if(operation.current||!identityReady||!isCurrent(authorityEpoch))return false;
   const target=scope;
   operation.current=payload.kind==='publish'?'publish':'save';
   setSaving(true);setPublishing(operation.current==='publish');setError('');setNotice('');
   try{
    const r=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-   if(activeScope.current!==target)return false;
-   if(!r.ok){
-    const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};
-    if(activeScope.current!==target)return false;
-    if(r.status===401||r.status===403){retirePrivate();setError(userFacingError(info.error?.code??(r.status===401?'UNAUTHENTICATED':'FORBIDDEN')));return false;}
-    throw Error(info.error?.code??'REQUEST_FAILED');
+   if(r.ok){
+    const refreshed=activeScope.current===target&&isCurrent(authorityEpoch)?await refresh(sectionId):false;
+    const current=activeScope.current===target&&isCurrent(authorityEpoch);
+    // Recognize only the sent revision in its original provider, even if the
+    // view changed during either wait. Never apply an old snapshot or notice.
+    if(refreshed||!current)confirmed?.();
+    if(refreshed&&current)setNotice('Operación guardada correctamente.');
+    return true;
    }
-   // Refresh first: keep the sent value visible until the authoritative snapshot arrives.
-   const refreshed=await refresh(sectionId);
-   if(activeScope.current!==target)return false;
-   if(refreshed){confirmed?.();setNotice('Operación guardada correctamente.');}
-   return true;
+   if(r.status===401||r.status===403){
+    const current=activeScope.current===target&&isCurrent(authorityEpoch);
+    retirePrivate(r.status);
+    if(current){const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};setError(userFacingError(info.error?.code??(r.status===401?'UNAUTHENTICATED':'FORBIDDEN')));}
+    return false;
+   }
+   if(activeScope.current!==target||!isCurrent(authorityEpoch))return false;
+   const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};
+   if(activeScope.current!==target||!isCurrent(authorityEpoch))return false;
+   throw Error(info.error?.code??'REQUEST_FAILED');
   }catch(e){if(activeScope.current===target)setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
   finally{operation.current=null;setSaving(false);setPublishing(false)}
  }
@@ -155,12 +156,12 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
  {confirmation}
   <SiiSectionHeader workspace eyebrow="DOCENCIA · EVALUACIÓN" title="Libro de calificaciones"
     description="Escala 0–10. Los componentes deben completar 100 % para emitir un acta."/>
-  {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" onClick={()=>{if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</button></div>}
+  {(error||identityError)&&<div className="sii-catalog-error" role="alert"><p>{error||identityError}</p><button type="button" className="sii-outline-button" onClick={()=>{if(!identityReady)void revalidateIdentity();else if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</button></div>}
   {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
   <section className="sii-panel sii-catalog-create">
-   <label>Materia y grupo asignado<select value={sectionId} onChange={e=>void changeSection(e.target.value)} disabled={saving||loading}>
+   <label>Materia y grupo asignado<select value={identityReady?sectionId:''} onChange={e=>void changeSection(e.target.value)} disabled={saving||loading}>
     {!sections.length&&<option value="">Sin secciones asignadas</option>}
-    {sections.map(s=><option key={s.id} value={s.id}>{s.courseName} · {s.code}</option>)}
+    {(identityReady?sections:[]).map(s=><option key={s.id} value={s.id}>{s.courseName} · {s.code}</option>)}
    </select></label>
   </section>
   {loading?<p role="status">Consultando calificaciones…</p>:snapshot&&<>
@@ -188,7 +189,7 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
       {snapshot.components.map(c=>{const score=snapshot.scores.find(s=>s.studentId===student.studentId&&s.componentId===c.id);
        return <td key={c.id}>{published?<span>{score?(score.scoreHundredths/100).toFixed(2):'—'}</span>:
         <form onSubmit={e=>{e.preventDefault();const form=e.currentTarget;const v=new FormData(form);void saveScore(c.id,student.studentId,String(v.get('grade')??''))}}>
-         <label>Nota<input aria-label={`${student.enrollmentNumber} · ${c.title}`} type="number" name="grade" min="0" max="10" step="0.01"
+         <label>Nota<input data-gradebook-cell={gradebookCell(scope,student.studentId,c.id)} aria-label={`${student.enrollmentNumber} · ${c.title}`} type="number" name="grade" min="0" max="10" step="0.01"
           value={drafts.get(gradebookCell(scope,student.studentId,c.id))?.raw??(score?(score.scoreHundredths/100).toFixed(2):'')}
           onChange={e=>{if(operation.current!=='publish')writeDraft(scope,student.studentId,c.id,`${student.enrollmentNumber} · ${c.title}`,e.target.value);}} disabled={publishing} required/></label>
          <button type="submit" disabled={saving}>Guardar</button></form>}</td>})}</tr>)}</tbody></table></SiiScrollRegion>}
