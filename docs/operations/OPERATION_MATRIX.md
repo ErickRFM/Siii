@@ -145,3 +145,13 @@ SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni
 | Misma ruta, pending | Sin prueba o correos no coincidentes no establece vínculo; conserva solicitante derivado de sesión; misma autoridad y revalidación final |201 {claim,autoApproved:false,message}; student.claim.requested en TX; fallo de auditoría/revocación/caducidad sin fila persistida. Misma suite | LOCAL29HTTP; NO ACREDITA FLUJO DE REVISIÓN MANUAL |
 
 Evidencia y límites: [SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md](../audits/SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md). Composición privada935f2220; el helper y Admisiones no se editan en este incremento. Publicar solo tras integrar ese prerrequisito y reconciliar. student-links/me y seguridad integral del módulo permanecen fuera del alcance; sin cambios de schema/migraciones, sin sincronización ni operaciones productivas.
+
+## UX-01 parcial — capturas locales de calificaciones (22 octubre2026)
+
+| Operación existente / consumidor | Comportamiento local y autoridad | Evidencia | Estado |
+|---|---|---|---|
+| GET/POST institutions/:id/grading, TeacherGradebook | Capturas por institución/sección/alumno/componente/revisión; guarda una celda, conserva otra y edición posterior; refresh sin desmontar/foco; descarta respuestas por scope;401/403 retiran privados. Endpoints y autorización servidor intactos | gradebook-drafts.spec.ts,15UI reales sobre build producción3204/PG55439,826unitarias/lint/tipos/build | LOCAL REVISADO; CI DEL COMMIT PENDIENTE |
+| Publicación oficial y cambio concurrente de roster/acta | Bloqueo por captura pendiente y recheck tras ask; captura deshabilitada sólo durante POST de publicación; captura excluida visible y descarte explícito, sin editar acta ni guardar alumno retirado | Publicación/guardado bajo lock PG; segundo admin hace enrollment.withdraw real; audit y scores/finales comprobados | LOCAL REVISADO; SIN CAMBIO SERVIDOR |
+| Salida/cambio de sección, consumidor UI | Memoria separada tras lectura autorizada; confirmación local en links internos, beforeunload para recarga/cierre; logout retira privados; recuperación403 recarga grupos | Cancelar/confirmar link, recarga/cierre, dos secciones y GET bloqueado, logout401/grading403; capturas pobladas claro1440/oscuro390 y axe0 | UX-01 PARCIAL: SPA ATRÁS/ADELANTE/PROGRAMÁTICA Y QA MANUAL PENDIENTES |
+
+Informe y RED preservado: [SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md](../audits/SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md). Base reconciliada main809c526d (#84 integrado), revisión independiente sin Critical/Important pendientes. Sin CSS, F2, schema/migraciones, workflows ni disponibilidad productiva. No se certifica lector de pantalla/zoom manual ni se declara cerrado UX-01 global.
