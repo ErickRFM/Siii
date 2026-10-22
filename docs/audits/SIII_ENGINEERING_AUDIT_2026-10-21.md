@@ -137,3 +137,43 @@ Merge normal local68f07622 integra0834b352 sobre f702: prueba MFA/logout revisad
 ## SEC-04 — base real main4614 y162 regresiones sintéticas (22 octubre 2026)
 
 La composición financiera preserva mainf34/PR88,mainbe9036/PR91 y main4614/PR99 mediante merges normales. Gates locales repetidos sobre364fec8: build31,162/162=36DB+126HTTP (incluye47claim/lectura),legacy24 separado1/1 y preflightVERIFIED_0025,0/0 inválidas,26ledger/hash intacto. La reconciliación74b8343c sólo modifica workflow/docs y conserva los dos jobs99 con el gate legado después del cierre UI. [Evidencia y límites](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI del SHA final y autorización de release continúan pendientes; ninguna migración productiva.
+
+
+## UX-01 parcial — capturas del libro de calificaciones (22 octubre2026)
+
+Se conserva íntegro el histórico anterior, incluidas sus77 líneas originales y los apéndices SEC. Sobre main809c526d (#84 integrado), el incremento local conserva capturas por institución/sección/alumno/evaluación y revisión, refresca sin desmontar/foco, descarta respuestas tardías, retira privados ante401/403/logout y bloquea publicación pendiente. Capturas excluidas por acta externa o retiro de inscripción siguen visibles como locales con descarte confirmado; actas y autoridad servidor permanecen intactas. Tres RED originales y bordes de revisión reproducidos con navegador/endpoints/PG reales;15/15 UI focales de composición,826unitarias, lint/tipos/build y2axe poblados verdes. Segunda revisión independiente aprobada, sin Critical/Important pendientes; evidencia en [informe UX-01](SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md).
+
+UX-01 continúa PARCIAL: links internos y recarga/cierre con aviso, sin cobertura universal de Atrás/Adelante SPA o navegación programática; lector de pantalla/zoom manual no certificados. No cambian backend, F2, schema/migraciones, CSS/layout ni workflow. CI del commit local y publicación siguen pendientes; no se ha hecho push/PR/merge ni operación productiva desde este incremento.
+
+
+## Reconciliación local de85 con reparación87 — 22 octubre2026
+
+Se incorporó maina1c6e8c4 a040a3bc4 mediante merge normal, conservando77 líneas originales y ambas notas anteriores sin reescribirlas. Producto/hook/pruebas de85 intactos; la reparación de contraste y sus pruebas coinciden con main. Nueva evidencia local:826unitarias, lint/tipos/build y23/23 UI focales (15 flujos reales de calificaciones +8 contraste con movimiento/cuadro de entrada), PG sintético55439/HTTP3204. [Informe ampliado por append](SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md). Según coordinación,87 se integró con ambos Actions826/485/88UI y Vercel verdes; postmerge39821829240 seguía en curso al comunicarlo. No acredita CI del nuevo commit ni producción.
+
+Queda integrar primero la prueba MFA/logout validada por separado, reconciliar sus tests/docs y ejecutar CI final antes de publicar85. QAe927 y la normalización de capturas fullPage se mantienen para después; UX-01 sigue PARCIAL y no se altera su alcance. Sin push, PR nuevo, despliegue, migraciones ni operaciones productivas desde esta reconciliación.
+
+
+## Preparación LOCAL de85 con88/89 — 22 octubre2026
+
+Merge normal local0834b352 sobre9dabfc9b, preservando todos los prefijos y77 líneas originales: únicamente incorpora la prueba revisada MFA/logout, el lock exacto Next15.5.28 y documentación entrante. NO acredita integración real de88/89 en main. npm ci375 paquetes/audit0, lint/tipos/build y23/23 focales (15 gradebook +8 contraste) aprobados sobre DB propia55439/HTTP3204. Primera unitaria825/826 por timeout de arranque de migration-safety durante el inicio del build; repetición completa sin solapamiento826/826 en8.29s, sin tocar límites/pruebas. [Evidencia preparatoria y límites](SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md).
+
+Producto/tests/método de captura de85 y QAe927 intactos. Sin429 ni limpieza adicional de throttles. Falta traer los merge commits reales de89/88, comparar árbol y ejecutar CI remoto del SHA final antes de publicar; no se ha hecho push, edición de PR ni acción productiva desde esta preparación.
+
+
+## UX-01 parcial — continuidad de capturas en navegación del shell (22 octubre2026)
+
+Se añade evidencia sin sustituir el historial anterior. El incremento local desde4ad4d326 mueve el Map original de capturas a un proveedor privado por actor antes del keytenant; preserva revisiones al usar Atrás/Adelante y Ctrl+K Enter. Restituye únicamente después de auth/me y secciones/snapshot reales; invalida/oculta al cambiar autoridad y conserva step-up válido. Logout/401/actor distinto purgan actor,403 contexto, generaciones descartan lecturas tardías. Guardado200 reconoce revisión exacta del proveedor original incluso tras navegar durantePOST/GET; edición posterior y logout/relogin no reciben ACK antiguo. beforeunload continúa fuera de grading y foco se restaura sin robar un control elegido. Sin roster/snapshot en shell ni storage durable, router/history patch, F2/backend/SQL/CSS.
+
+RED funcional preservado para3rutas básicas,ACK durantePOST/GET/assurance, foco y403 tardío. GREEN final local33/33UI reales de producción en DB sintética propia55439/HTTP3210 (15regresiones+18nuevos),826unitarias,lint/tipos/buildNext15.5.28 y2Axe poblados0. Revisión independiente cerró ImportantACK; sin nuevos hallazgos funcionales, diffcheck0. Se conservan825/826 inicial por timeout5000ms,23/25 inicial e instrumentaciones fallidas sin atribuir causa no probada ni relajar plazos/throttle. [Informe puntual y límites](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md).
+
+UX-01 permanece PARCIAL y no acredita producción ni CI del incremento. El proveedor aumenta auth/me aun conMapvacío/fuera del libro; FirstLoad grading115→118kB, compartido103kB, sin promesa de rendimiento. No se certifica foco físico del sistema en headless, lector/zoom manual, sesión rotada ni logout externo sin rechazo. #85 fue sustituido funcionalmente en reconciliaciones92/94 según coordinación; esta rama no duplica ni publica esos PR y requiere reconciliación posterior por el coordinador. Sólo commit local autorizado; sin push/PR/merge ni operación productiva.
+
+
+## UX-01 — composición única PR94 con main4614 (22 octubre2026)
+
+Se comprobó igualdad de la base de #94 con4ad, se integró f85370f y main4614 mediante merges normales. Los cinco archivos de producto/UI permanecen idénticos al incremento33/33UI revisado; workflow idéntico a main. Toda evidencia histórica conservada. [Detalle de composición](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI exacto publicado y revisión siguen pendientes; no acredita persistencia, accesibilidad manual global ni fotografía premium del SHA futuro.
+
+
+## UX-01 — base financiera de main100 (22 octubre2026)
+
+El merge normal1db59f88 incorpora main5cb49f75 al mismo PR94; producto/UI idéntico al incremento33casos revisado y workflow financiero intacto. Se conserva el SUCCESS UI completo del SHA previo0ed como evidencia histórica, sin atribuirlo al nuevo SHA. Auditoría/OPmatrix mantienen prefijo main y evidencia única. [Composición y límites](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI final y main post100 siguen pendientes al preparar esta nota; sin migraciones en DB antigua/productiva.
