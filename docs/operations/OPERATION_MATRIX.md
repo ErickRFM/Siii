@@ -145,3 +145,11 @@ SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni
 | Misma ruta, pending | Sin prueba o correos no coincidentes no establece vínculo; conserva solicitante derivado de sesión; misma autoridad y revalidación final |201 {claim,autoApproved:false,message}; student.claim.requested en TX; fallo de auditoría/revocación/caducidad sin fila persistida. Misma suite | LOCAL29HTTP; NO ACREDITA FLUJO DE REVISIÓN MANUAL |
 
 Evidencia y límites: [SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md](../audits/SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md). Composición privada935f2220; el helper y Admisiones no se editan en este incremento. Publicar solo tras integrar ese prerrequisito y reconciliar. student-links/me y seguridad integral del módulo permanecen fuera del alcance; sin cambios de schema/migraciones, sin sincronización ni operaciones productivas.
+
+## SEC06 parcial — lectura propia de vínculo (22 octubre2026)
+
+| Operación | Autoridad y compatibilidad | Evidencia | Estado |
+|---|---|---|---|
+| GET institutions/:id/student-links/me | institutions.read + actor/membresía/tenant/estado y MFA privilegiado; SQL final institutionVisibility; vínculo no revocado y estudiante del mismo tenant; no-MFA estudiante conserva autoservicio |18 casos nuevos, RED12fallos/6controles→GREEN47claim/lectura; composición126HTTP en build producción,826unitarias/lint/tipos/build; revisión independiente sin hallazgos.401/404/200 preservados; autoridad perdida403 sin data | REVISADO LOCALMENTE; CI DEL SHA/INTEGRACIÓN PENDIENTES |
+
+[Informe acotado](../audits/SIII_STUDENT_LINK_READ_AUTHORITY_2026-10-22.md). PR84 ya integrado809c526d; sus notas previas se conservan como evidencia histórica. Sin cambio en claim/F2/schema/UI ni operaciones productivas.
