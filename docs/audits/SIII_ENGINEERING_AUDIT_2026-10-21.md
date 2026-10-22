@@ -113,3 +113,18 @@ CI89@01a5956 conserva un87/88UI document-title y un SUCCESS826/485/88 del mismoS
 ## CI — aislar el presupuesto de UI (22 octubre 2026)
 
 Main f34c76fe, árbol idéntico al PR88 revisado, terminó CANCELLED por límite oficial de25m en39838544494 pese826/485/88/build/audit aprobados. El intervalo Browser runtime fue711.133s frente a22.808s en PR88; los logs muestran descargas del mirror Azure, sobre imagen efectivaUbuntu24.04. Incremento acotado separa verify y ui sin dependencia, ambos25m/Node22/PG17/Ubuntu24.04 y DB/setup propios, conservando comandos, acciones SHA, todos los tests, with-deps y artefactos UI (matriz missing=error). Contrato YAML RED→GREEN,23 mutaciones negativas rechazadas y18 comandos bash-n aprobados; medición posterior y CI real pendientes. SEC-04 test:financial-legacy se reserva después de UI, con bundle/servidor cerrados y envproduction1; no se añade el comando ausente. [Reporte, matriz y límites](SIII_CI_VERIFICATION_JOBS_2026-10-22.md). Este anexo conserva íntegro el histórico y no acredita estabilidad productiva.
+
+
+## Seguimiento INT — contrato local firmado Siii/Compañero (22 octubre 2026)
+
+[Informe acotado del contrato real](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md): receptor Compañero586ec206 sin cambios, Mongo8.0.34 exclusivamente loopback y sender TypeScript productivo. TDD real:1fallo por CLI ausente →1aprobado/0fallos/0errores/0skips; seis HTTP202/200/401/200/401/401, receipt/hash único, proyección interna, aislamiento tenant y0cuentas nativas. Diez guards de child real y836unitarias aprobadas; lint/tipos/build/audit0 locales. Job CI independiente añadido, ejecución Ubuntu/Node22 pendiente de publicación; revisión independiente sin hallazgos. No acredita outbox operativo, revocaciones/tombstones, lector público ni móvil; no cambia flags, F2 o producción y no cierra INT-04/INT-05. Se conserva íntegro el historial anterior.
+
+
+## Contrato real y regresiones receptoras — evidencia incremental22octubre
+
+Sobre receptor fijo586ec206 intacto, se ejecutaron21/21 casos conjuntos (senderSIII real1+Mongo proyección9+Mongo inbox11), sin fallos/errores/skips. La lectura XML exacta y nueve negativos del gate evitan contar suites ausentes/omitidas como aprobadas. [Detalle y límites](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md#ampliación-verificada-regresiones-existentes-del-receptor). El nuevo jobCI permanece sin ejecutar/publicar; productores INT04, reconciliación operativa INT05 y consumo móvil siguen abiertos. Ninguna migración productiva ni flag habilitado.
+
+
+## INT — gate firmado real compuesto con main4614 (22 octubre2026)
+
+El merge local d7f1b713 preserva verify/ui de main99 y añade el job independiente Compañero previamente revisado sin modificarlo. Se conserva evidencia conjunta21/21 sobre Ktor/Mongo reales y9negativos XML; no se atribuye una nueva corrida a esta composición. CLI/guards y receptor fijado permanecen idénticos, auditoría histórica íntegra y revisión sin hallazgos. [Evidencia y límites](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md). CI remoto exacto pendiente; revocaciones fuente, consumo móvil, reconciliación y operación productiva siguen abiertos.
