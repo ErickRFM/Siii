@@ -80,3 +80,13 @@ Revisión independiente sin Critical/Important; Minor indimmediate resuelto con 
 No se ejecutó UI completa ni toda integración localmente; el gate remoto sigue obligatorio. CI nueva incluye legacy explícito, todavía pendiente de ejecutar para esta rama. Se ensayó PostgreSQL17; el mínimo15 se basa en SQL documentado, no en una matriz local de versiones.
 
 Antes de release real: preflight sin históricos inválidos, ledger/perfil/roles revisados, backup/restauración ensayada, ventana medida para locks/indexación/validación sobre volumen real, CI/revisión y aprobación de operación. Históricos inválidos requieren reconciliación humana separada. Fallo durante0025 revierte TX; reversa posterior requiere otra migración revisada que quite sólo estas FK/índices, sin borrar filas ni reescribir historia. Sin push, PR, merge ni acción productiva desde esta tarea.
+
+## Revalidación incremental sobre maina1c6e8c (22 octubre 2026)
+
+Merge normal local516f374fadbdab36284e10fffdd71840d3e850f9:47f8ae82 + maina1c6e8c4117a477c2d0d75f5233e7f96870a9f80, reparación de contraste PR87. Según coordinación, dos Actions de PR87 aprobaron826unitarias/485integraciones/88UI y preview; CI postmerge39821829240 seguía en curso al reconciliar. La auditoría de main quedó íntegra como prefijo y se conservó nuestro apéndice; OPmatrix no tuvo conflicto. Ninguna modificación de0025, journal, manifest ni SQL histórico respecto a47; igualdad byte a byte comprobada.
+
+Gates repetidos sobre esta composición: lint/typecheck exit0;826/826 unitarias en56 archivos (7.97s); build exit0, compilación8.8s y31/31 páginas. Integración conjunta144/144 en104.41s:36DB +108HTTP (22financieros+27SEC02+30Admisiones+29claim). Aclaración aritmética del apéndice histórico: donde dice36DB+114HTTP=144, el subtotal HTTP correcto es108; los144 y el desglose de la tabla anterior son correctos. El caso legacy24 es adicional:1/1 en4.82s, después del cierre del servidor global y con el mismo bundle producción3201. Los dos archivos fijos del harness se restauraron byte a byte;0 bases legacy remanentes.
+
+Destino verificado por SELECT: DB sintética propia siii_financial_fk_verified_test en127.0.0.1:55439;26 entradas. Migración idempotente y preflight exit0 POST_0025/VERIFIED_0025, inválidas0/0, claves padre inmediatas y ambas FK completamente validadas con columnas SET NULL exactas. SHA256 del SQL en disco/47/ledger:854d99883ca76d681d57be9befeebaa45156702a3bb0475ecc6a3885ba3a9da0. El ensayo previo19 migrador/perfil conserva su evidencia sobre SQL idéntico; no se cuenta como repetido en esta corrida.
+
+Sólo evidencia incremental local. CI de la rama y reconciliación posterior del delta de pruebas MFA/logout siguen pendientes. Sin push, PR ni operación productiva.

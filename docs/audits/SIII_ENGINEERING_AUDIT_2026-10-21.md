@@ -105,3 +105,9 @@ Se conserva íntegra la instantánea histórica y ambos apéndices anteriores. R
 0025 añade FK compuestas de alumno/tenant y usuario/membresía/tenant, SET NULL sólo payer, índices hijos y preflight readonly PRE/POST0025; falla ante históricos inválidos sin borrar/null/backfill. [Reporte SEC-04](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md):36DB +114HTTP=144/144 conjuntos,19 migrador/perfil con ejecutor sin superusuario, legacy24 HTTP1/1 separado,826unitarias y lint/tipos/build/audit0. Preflight finalVERIFIED_0025,0/0 inválidas; revisión sin Critical/Important y Minor indimmediate resuelto/confirmado. Sólo ensayos locales sintéticos; la DB histórica financiera no se modificó.
 
 El hueco DB financiero de SEC-04 queda implementado y verificado localmente. CI de esta rama, release/ledger/backup/operación productiva y demás pendientes globales permanecen abiertos. CI incorpora un gate legacy24 explícito posterior al bundle UI, sin omitir ni duplicar descubrimiento; no se afirma todavía su ejecución remota.
+
+## SEC-04 — revalidación incremental tras PR87 (22 octubre 2026)
+
+Merge normal local516f374f reconcilia47f8ae82 con maina1c6e8c, preservando íntegros la historia y los dos apéndices.0025/journal/manifest y SQL histórico permanecen idénticos. Según coordinación, PR87 tuvo dos Actions826/485/88UI y preview verdes; postmerge39821829240 seguía en curso.
+
+Evidencia repetida: lint/tipos/build0,826unitarias;144/144 conjuntos=36DB+108HTTP y legacy24 separado1/1; preflight VERIFIED_0025,0/0 inválidas,26ledger/hashSQL exacto y harness restaurado. Aclaración del apéndice previo:114HTTP era error aritmético;22+27+30+29=108HTTP, y el total144 se mantiene. [Detalle incremental](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI propia y delta MFA/logout pendientes; sin publicación ni operación productiva.

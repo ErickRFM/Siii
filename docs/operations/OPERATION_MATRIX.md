@@ -159,3 +159,7 @@ Actualización sobre main809c526d (PR82/83/84 integrados). Conserva las seccione
 | db:preflight | SELECT/counts sin PII; PRE prepara sin certificar FK; POST verifica ledger/hash, padres inmediatos y forma exacta FK | Negativos drift/DEFERRABLE; salida VERIFIED_0025 con0/0 inválidas | LOCAL VERIFICADO; CI PENDIENTE |
 
 [Reporte, comandos y límites](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Hueco DB financiero SEC-04 verificado localmente; SEC-03/06 globales y puertas productivas mantienen su alcance pendiente. Sin F2/UI ni reescritura de manifest/hashes históricos.
+
+### Evidencia incremental SEC-04 sobre maina1c6e8c (22 octubre 2026)
+
+Merge normal516f374f preserva los contratos y filas anteriores;0025/journal/manifest sin cambios. Repetición local:36DB+108HTTP=144/144, legacy24 adicional1/1,826unitarias y lint/tipos/build0; preflight POST_0025/VERIFIED_0025 con0/0 inválidas, FK validadas y hash exacto. La mención114HTTP del apéndice histórico de auditoría se aclara a108 conforme al desglose22+27+30+29. Las operaciones SEC-04 siguen LOCAL VERIFICADO, CI DE RAMA/RELEASE PENDIENTES; delta MFA/logout pendiente de reconciliar. [Evidencia incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md).
