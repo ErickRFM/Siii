@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     services:
       postgres:
@@ -56,10 +56,53 @@ jobs:
         run: npm run db:migrate
       - name: Handler and baseline integration tests
         run: npm run test:integration
+      - name: Production build
+        run: npm run build
+      - name: Dependency audit
+        run: npm audit
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: university_sis_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      SIII_DATABASE_ENV: test
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reproducible install
+        run: npm ci --ignore-scripts
+      - name: Rebuild required native packages
+        run: npm rebuild argon2 esbuild
+      - name: Lockfile integrity
+        run: git diff --exit-code -- package-lock.json
+      - name: Prepare isolated Supabase API-role fixtures
+        run: node --import tsx scripts/prepare-test-api-roles.ts
+      - name: Migrate disposable database
+        run: npm run db:migrate
       - name: Browser runtime
         run: npx playwright install --with-deps chromium
       - name: Keyboard and accessibility flows
         run: npm run test:ui
+      # SEC-04: future test:financial-legacy belongs here, after UI teardown, with SIII_HTTP_TEST_PRODUCTION=1.
       - name: Synthetic UI failure diagnostics
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -80,7 +123,3 @@ jobs:
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 3
-      - name: Production build
-        run: npm run build
-      - name: Dependency audit
-        run: npm audit
