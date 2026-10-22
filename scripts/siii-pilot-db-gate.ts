@@ -52,16 +52,16 @@ async function main() {
                    OR has_any_column_privilege('authenticated', c.oid, 'SELECT,INSERT,UPDATE,REFERENCES')
                END
                OR EXISTS (
-                 SELECT 1 FROM aclexplode(coalesce(c.relacl, acldefault('r', c.relowner))) grant
-                 WHERE grant.grantee = 0
-                   AND grant.privilege_type IN ('SELECT','INSERT','UPDATE','DELETE')
+                 SELECT 1 FROM aclexplode(coalesce(c.relacl, acldefault('r', c.relowner))) acl_entry
+                 WHERE acl_entry.grantee = 0
+                   AND acl_entry.privilege_type IN ('SELECT','INSERT','UPDATE','DELETE')
                )
                OR EXISTS (
                  SELECT 1 FROM pg_attribute attr
                  CROSS JOIN LATERAL aclexplode(attr.attacl) grant
                  WHERE attr.attrelid = c.oid AND attr.attnum > 0
                    AND grant.grantee = 0
-                   AND grant.privilege_type IN ('SELECT','INSERT','UPDATE','REFERENCES')
+                   AND acl_entry.privilege_type IN ('SELECT','INSERT','UPDATE','REFERENCES')
                )
              ) AS api_grants
       FROM pg_class c
