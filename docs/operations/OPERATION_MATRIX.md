@@ -168,3 +168,8 @@ Merge normal516f374f preserva los contratos y filas anteriores;0025/journal/mani
 ### SEC-04 — composición preparatoria PR88/89 (22 octubre 2026)
 
 Sobre merge local68f07622, Next15.5.28 y guard MFA/logout de0834b352: mismos contratos/FK y estados anteriores;144/144 (36DB+108HTTP), legacy1/1,826unitarias, lint/tipos/build/preflight0. SQL/ledger/migrador intactos,19managed conservan evidencia previa. Estado PREPARATORIO LOCAL VERIFICADO; PR88/89 revisados todavía NO acreditados en main, CI financiero/release pendientes. La prueba UI MFA no se cuenta como ejecutada por este incremento. [Reporte incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). SIN PUSH.
+
+
+### SEC-04 — composición main4614 (22 octubre 2026)
+
+162/162 pruebas locales conjuntas=36DB+126HTTP y legacy24 separado1/1 sobre fuentes financieras idénticas al merge364fec8; preflight sintéticoVERIFIED_0025,0/0 inválidas y ledger/hash válidos. Gate legacy ubicado después de test:ui en job ui de PR99; verify conserva lint/tipos/unitarias/integración/build/audit. [Reporte incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Pendiente CI exacto publicado y proceso productivo aprobado.

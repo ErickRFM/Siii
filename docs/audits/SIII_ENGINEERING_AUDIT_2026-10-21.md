@@ -132,3 +132,8 @@ Evidencia repetida: lint/tipos/build0,826unitarias;144/144 conjuntos=36DB+108HTT
 ## SEC-04 — composición preparatoria PR88/89, NO main (22 octubre 2026)
 
 Merge normal local68f07622 integra0834b352 sobre f702: prueba MFA/logout revisada y Next15.5.28, todavía pendientes de integración real en main. npm ci/audit0, lint/tipos/build0 y826unitarias;144/144=36DB+108HTTP, legacy24 separado1/1. Preflight VERIFIED_0025,0/0 inválidas,26ledger y hash0025 intacto; migrador/preflight/SQL sin diff y19managed no repetidos. [Evidencia preparatoria](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Se conserva toda la historia; no sustituye CI89/88/main ni CI financiero. SIN PUSH ni operación productiva.
+
+
+## SEC-04 — base real main4614 y162 regresiones sintéticas (22 octubre 2026)
+
+La composición financiera preserva mainf34/PR88,mainbe9036/PR91 y main4614/PR99 mediante merges normales. Gates locales repetidos sobre364fec8: build31,162/162=36DB+126HTTP (incluye47claim/lectura),legacy24 separado1/1 y preflightVERIFIED_0025,0/0 inválidas,26ledger/hash intacto. La reconciliación74b8343c sólo modifica workflow/docs y conserva los dos jobs99 con el gate legado después del cierre UI. [Evidencia y límites](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI del SHA final y autorización de release continúan pendientes; ninguna migración productiva.
