@@ -28,18 +28,25 @@ export default async function setup(){
  process.env.SIII_COMPANERO_INSTITUTION_ID ||= randomUUID();
  process.env.SIII_COMPANERO_TEST_TOKEN ||= randomBytes(32).toString('base64url');
  process.env.SIII_COMPANERO_TOKEN_SHA256 ||= createHash('sha256').update(process.env.SIII_COMPANERO_TEST_TOKEN).digest('hex');
+ process.env.SIII_APPLICANT_EMAIL_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
+ process.env.SIII_APPLICANT_EMAIL_ACTIVE_KEY_ID ||= 'fixture';
  process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
- const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,NODE_ENV:process.env.SIII_HTTP_TEST_PRODUCTION==='1'?'production':'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS,SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID,SIII_INVITATION_KEYS:process.env.SIII_INVITATION_KEYS,SIII_INVITATION_ACTIVE_KEY_ID:process.env.SIII_INVITATION_ACTIVE_KEY_ID,SIII_PASSWORD_RESET_KEYS:process.env.SIII_PASSWORD_RESET_KEYS,SIII_PASSWORD_RESET_ACTIVE_KEY_ID:process.env.SIII_PASSWORD_RESET_ACTIVE_KEY_ID,SIII_PUBLIC_ORIGIN:process.env.SIII_PUBLIC_ORIGIN,NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
+ const instance=randomUUID();
+ const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,SIII_TEST_INSTANCE:instance,NODE_ENV:process.env.SIII_HTTP_TEST_PRODUCTION==='1'?'production':'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS,SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID,SIII_INVITATION_KEYS:process.env.SIII_INVITATION_KEYS,SIII_INVITATION_ACTIVE_KEY_ID:process.env.SIII_INVITATION_ACTIVE_KEY_ID,SIII_PASSWORD_RESET_KEYS:process.env.SIII_PASSWORD_RESET_KEYS,SIII_PASSWORD_RESET_ACTIVE_KEY_ID:process.env.SIII_PASSWORD_RESET_ACTIVE_KEY_ID,SIII_PUBLIC_ORIGIN:process.env.SIII_PUBLIC_ORIGIN,NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
  closeSync(log);
  async function stop(){
+  // Await this exact child before releasing the port for another suite.
+  const exited=new Promise(resolve=>{if(child.exitCode!==null)resolve(null);else child.once('exit',resolve);});
   child.kill();
+  const forced=setTimeout(()=>child.kill('SIGKILL'),5000);
+  await exited;clearTimeout(forced);
   await admin.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename=$1',[role]);
   await admin.query('DROP ROLE "'+role+'"');await admin.end();
  }
  const started=Date.now();
  while(Date.now()-started<60000){
   if(child.exitCode!==null){await stop();throw new Error('HTTP_TEST_SERVER_EXITED');}
-  try{if((await fetch('http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107)+'/api/health')).ok)return stop;}catch{}
+  try{const response=await fetch('http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107)+'/api/health');if(response.ok&&response.headers.get('x-siii-test-instance')===instance)return stop;}catch{}
   await new Promise(resolve=>setTimeout(resolve,300));
  }
  await stop();throw new Error('HTTP_TEST_SERVER_TIMEOUT');

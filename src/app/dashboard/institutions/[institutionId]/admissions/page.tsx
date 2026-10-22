@@ -1,36 +1,18 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import SiiAppShell from '@/components/sii-app-shell';
-import AdmissionsPortal from '@/components/admissions-portal';
+import { authorizeCapability } from '@/shared/auth/session';
+import {institutionVisibility} from '@/shared/auth/read-access';
 import { db } from '@/infrastructure/database';
-import { academicPrograms, admissionCycles, admissionApplications, applicantProfiles } from '../../../../../../db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { academicPrograms, admissionApplications, applicantProfiles } from '../../../../../../db/schema';
+import { and, eq, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdmissionsPage({ params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
-  const user = await getIdentity();
-  if (!user) redirect('/login');
-  if (user.mustChangePassword) redirect('/dashboard/security');
-
-  const accessList = await getInstitutionAccess(user.id);
-  const access = accessList.find(a => a.institutionId === institutionId);
-  if (!access) redirect('/dashboard');
-
-  const programs = await db.select({
-    id: academicPrograms.id,
-    name: academicPrograms.name,
-    code: academicPrograms.code,
-  }).from(academicPrograms).where(eq(academicPrograms.institutionId, institutionId));
-
-  const cycles = await db.select({
-    id: admissionCycles.id,
-    name: admissionCycles.name,
-    code: admissionCycles.code,
-    status: admissionCycles.status,
-  }).from(admissionCycles).where(eq(admissionCycles.institutionId, institutionId)).orderBy(desc(admissionCycles.startDate));
+  const authorization = await authorizeCapability(institutionId,'admissions.manage');
+  if(!authorization) redirect('/dashboard');
+  const {access}=authorization;
 
   const applications = await db.select({
     id: admissionApplications.id,
@@ -45,11 +27,11 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
   .from(admissionApplications)
   .innerJoin(applicantProfiles, eq(admissionApplications.applicantId, applicantProfiles.id))
   .innerJoin(academicPrograms, eq(admissionApplications.programId, academicPrograms.id))
-  .where(eq(admissionApplications.institutionId, institutionId))
+  .where(and(eq(admissionApplications.institutionId, institutionId),institutionVisibility(authorization.subject,authorization.access,authorization.identity.sessionId,'admissions.manage')))
   .orderBy(desc(admissionApplications.createdAt));
 
   return (
-    <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`} defaultInstitutionId={institutionId}>
+    <>
       <div className="sii-page-eyebrow">CONTROL ESCOLAR Y ADMISIONES <span className="sii-page-eyebrow-line" /></div>
       <div className="sii-page-heading">
         <div>
@@ -93,12 +75,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
         </section>
       </div>
 
-      <AdmissionsPortal
-        institutionId={institutionId}
-        institutionName={access.institutionName}
-        programs={programs}
-        cycles={cycles}
-      />
-    </SiiAppShell>
+      <Link className="sii-outline-button" href={{pathname:`/admissions/${institutionId}`}}>Abrir portal público de aspirantes</Link>
+    </>
   );
 }

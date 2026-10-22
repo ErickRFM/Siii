@@ -2,17 +2,17 @@ import type {TransactionalEmail} from './transactional';
 
 /** HTML is derived only at the delivery boundary. Persisted, encrypted text and
  * idempotency payloads remain compatible with already queued messages. */
-export type MailPurpose='invitation'|'password-reset';
+export type MailPurpose='invitation'|'password-reset'|'admissions';
 const escapeHtml=(value:string)=>value.replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]!));
 const BRAND='Siii — Sistema Institucional Integral';
-const titleFor=(purpose:MailPurpose)=>purpose==='invitation'?'Invitación institucional':'Recuperación de contraseña';
-const actionFor=(purpose:MailPurpose)=>purpose==='invitation'?'Revisar invitación':'Restablecer contraseña';
+const titleFor=(purpose:MailPurpose)=>purpose==='admissions'?'Verificación de correo de aspirante':purpose==='invitation'?'Invitación institucional':'Recuperación de contraseña';
+const actionFor=(purpose:MailPurpose)=>purpose==='admissions'?'Verificar mi correo':purpose==='invitation'?'Revisar invitación':'Restablecer contraseña';
 function trustedActionUrl(message:TransactionalEmail,purpose:MailPurpose):string|null {
  const candidate=message.text.match(/https:\/\/[^\s<>"']+/)?.[0];
  if(!candidate)return null;
  try {
   const url=new URL(candidate);
-  const expected=purpose==='invitation'?'/invitations/accept':'/password/reset';
+  const expected=purpose==='admissions'?'/admissions/verify':purpose==='invitation'?'/invitations/accept':'/password/reset';
   const token=new URLSearchParams(url.hash.slice(1));
   if(url.protocol!=='https:'||url.username||url.password||url.pathname!==expected||url.search||token.get('id')===null||!/^[A-Za-z0-9_-]{43}$/.test(token.get('token')??''))return null;
   return url.toString();
@@ -27,13 +27,13 @@ function expiry(message:TransactionalEmail):string|null {
 /** All dynamic content is HTML-escaped. No scripts, remote fonts, tracking pixels or externally hosted logos. */
 export function renderSiiiEmailHtml(message:TransactionalEmail,purpose:MailPurpose):string {
  const invitation=purpose==='invitation',title=titleFor(purpose),url=trustedActionUrl(message,purpose),until=expiry(message);
- const messageText=invitation
+ const messageText=purpose==='admissions' ? 'Confirma que registraste esta cuenta de aspirante. Abre el enlace y escribe la contraseña que elegiste. Si no solicitaste el registro, ignora este correo.' : invitation
   ? 'Recibiste una invitación para participar en el Sistema Institucional Integral. Revisa el perfil y el ámbito antes de aceptar voluntariamente el acceso.'
   : 'Se solicitó restablecer la contraseña de tu cuenta institucional. Solo tú puedes confirmar esta solicitud y elegir una nueva contraseña.';
- const instruction=invitation
+ const instruction=purpose==='admissions' ? 'El enlace es personal, vence en 30 minutos y solo se puede utilizar una vez.' : invitation
   ? 'Antes de aceptar, confirma que reconoces la institución, el perfil y la duración del acceso.'
   : 'El enlace es personal y de un solo uso. Si tu cuenta tiene autenticación de dos factores, también se te solicitará verificarla.';
- const ignore=invitation?'Si no esperabas esta invitación, puedes ignorar este mensaje o rechazarla desde el enlace.':'Si no solicitaste el restablecimiento, ignora este mensaje. Tu contraseña actual no cambiará.';
+ const ignore=purpose==='admissions'?'No compartas este enlace ni tu contraseña.':invitation?'Si no esperabas esta invitación, puedes ignorar este mensaje o rechazarla desde el enlace.':'Si no solicitaste el restablecimiento, ignora este mensaje. Tu contraseña actual no cambiará.';
  const button=url?'<tr><td style="padding:26px 0 18px;text-align:left"><a href="'+escapeHtml(url)+'" style="display:inline-block;padding:15px 23px;border-radius:11px;background:#8d2143;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px">'+escapeHtml(actionFor(purpose))+' &rarr;</a></td></tr>':'';
  const fallback=url?'<tr><td style="padding:0 0 20px;font-size:12px;color:#626775;line-height:1.6">Si el botón no funciona, copia esta dirección en el navegador:<br><a href="'+escapeHtml(url)+'" style="color:#8d2143;overflow-wrap:anywhere;word-break:break-all">'+escapeHtml(url)+'</a></td></tr>':'';
  const expiration=until?'<tr><td style="padding:12px 16px;background:#f7f0f3;border-radius:10px;color:#702641;font-size:13px;line-height:1.6"><strong>Vigencia del enlace:</strong> '+escapeHtml(until)+'</td></tr>':'';

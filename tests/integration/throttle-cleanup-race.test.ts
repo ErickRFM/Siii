@@ -34,9 +34,12 @@ describe.sequential('authentication cleanup concurrency',()=>{
   const connectionString=JSON.parse(readFileSync('.superpowers/sdd/2026-10-13-p0-hardening/app-connection.json','utf8')).connectionString;
   let child:ReturnType<typeof spawn>|undefined;let completed:Promise<number|null>|undefined;
   try{
-   await gate.query('SELECT key FROM auth_throttle WHERE key=$1 FOR UPDATE',[key]);
-   child=spawn(process.execPath,['--import','tsx','worker/index.ts','--once'],{env:{...process.env,DATABASE_URL:connectionString},stdio:'ignore',windowsHide:true});
+   child=spawn(process.execPath,['--import','tsx','tests/support/cleanup-runner.ts'],{env:{...process.env,DATABASE_URL:connectionString},stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});
    completed=new Promise(resolve=>child!.once('exit',resolve));
+   // Exclude module/native-process startup from the unchanged 2.5s lock assertion.
+   await new Promise<void>((resolve,reject)=>{child!.once('message',()=>resolve());child!.once('exit',()=>reject(Error('CLEANUP_RUNNER_EXITED_BEFORE_READY')));child!.once('error',reject);});
+   await gate.query('SELECT key FROM auth_throttle WHERE key=$1 FOR UPDATE',[key]);
+   child.send('cleanup');
    expect(await Promise.race([completed,new Promise(resolve=>setTimeout(()=>resolve('blocked'),2500))])).toBe(0);
    expect((await sql.query('SELECT count(*)::int AS n FROM auth_throttle WHERE key=$1',[key])).rows[0].n).toBe(1);
   }finally{await gate.query('ROLLBACK');await gate.end();if(completed)await completed;}

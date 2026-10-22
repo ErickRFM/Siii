@@ -20,7 +20,7 @@ export function emailConfiguration():EmailConfiguration {
  * Provider acceptance is not delivery. The persistent outbox owns retries (same eventId, bounded below 24h).
  * Never return provider error bodies, request data, or thrown driver messages.
  */
-export async function sendTransactionalEmail(input:TransactionalEmail,configuration:EmailConfiguration=emailConfiguration(),purpose:'invitation'|'password-reset'='invitation'):Promise<EmailResult>{
+export async function sendTransactionalEmail(input:TransactionalEmail,configuration:EmailConfiguration=emailConfiguration(),purpose:'invitation'|'password-reset'|'admissions'='invitation'):Promise<EmailResult>{
  const message=transactionalEmailSchema.safeParse(input);
  if(!message.success) return {status:'failed',code:'EMAIL_MESSAGE_INVALID'};
  const config=configSchema.safeParse(configuration);
@@ -53,7 +53,7 @@ export function emailSenderSnapshot(configuration:EmailConfiguration=emailConfig
  return config.success?{from:config.data.from,replyTo:config.data.replyTo}:null;
 }
 /** Rotate the API credential independently; never alter a previously claimed event's provider payload. */
-export async function sendFrozenTransactionalEmail(input:TransactionalEmail,sender:FrozenEmailSender,configuration:EmailConfiguration=emailConfiguration(),purpose:'invitation'|'password-reset'='invitation'):Promise<EmailResult>{
+export async function sendFrozenTransactionalEmail(input:TransactionalEmail,sender:FrozenEmailSender,configuration:EmailConfiguration=emailConfiguration(),purpose:'invitation'|'password-reset'|'admissions'='invitation'):Promise<EmailResult>{
  const frozen=senderSchema.safeParse(sender);
  if(!frozen.success)return {status:'failed',code:'EMAIL_MESSAGE_INVALID'};
  return sendTransactionalEmail(input,{apiKey:configuration.apiKey,from:frozen.data.from,replyTo:frozen.data.replyTo},purpose);
