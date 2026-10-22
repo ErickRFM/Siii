@@ -37,3 +37,9 @@ El acceso administrativo usa la capacidad ya existente; capacidades específicas
 ## Riesgo y pendientes para el responsable
 
 La lectura general de institución deja de dar acceso a PII/deudas ajenas; clientes que dependían de ese acceso indebido reciben403. Administradores institucionales con MFA mantienen la proyección. No hay migración ni riesgo de transformación de datos. Permanecen P1 abiertos y el gate de dependencias; PR75 continúa en borrador y sin merge mientras haya checks pendientes/fallidos. Confirmar la matriz futura de operadores de Caja/Admisiones antes de delegar capacidades nuevas.
+
+## Composición con el prerrequisito de herramientas
+
+[PR79](https://github.com/ErickRFM/Siii/pull/79) actualiza Vitest4.1.12, descubre TSX y configura OXC. Se incorporó por merge normal a la rama de PR75 y será su base de revisión mientras se integra por separado: el diff de autorización no duplica el parche de tooling. Tras npm ci, las herramientas solas verificaron813/813 y audit0. El fallo de dependencias descrito arriba es la medición previa al parche; el gate que queda pendiente es CI del SHA compuesto. Ninguno de los dos PR está fusionado.
+
+Validación secuencial final de la composición: lint exit0; typecheck exit0;813/813 en53archivos; build exit0; nuevo HTTP/SSR contra ese build con Vitest4.1.12:27/27 en8.19s. Se conservan las limitaciones declaradas de la corrida completa inicial y del snapshot visual73/73; estos resultados dirigidos no los reemplazan por una certificación general de SIII.
