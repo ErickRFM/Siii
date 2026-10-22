@@ -137,3 +137,15 @@ Merge normal local68f07622 integra0834b352 sobre f702: prueba MFA/logout revisad
 ## SEC-04 — base real main4614 y162 regresiones sintéticas (22 octubre 2026)
 
 La composición financiera preserva mainf34/PR88,mainbe9036/PR91 y main4614/PR99 mediante merges normales. Gates locales repetidos sobre364fec8: build31,162/162=36DB+126HTTP (incluye47claim/lectura),legacy24 separado1/1 y preflightVERIFIED_0025,0/0 inválidas,26ledger/hash intacto. La reconciliación74b8343c sólo modifica workflow/docs y conserva los dos jobs99 con el gate legado después del cierre UI. [Evidencia y límites](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI del SHA final y autorización de release continúan pendientes; ninguna migración productiva.
+
+
+## INT-04A parcial — asignación y retiro docente producen snapshot (22 octubre2026)
+
+Se conserva íntegro el historial anterior. Incremento local desde main5cb49f75 agrega sólo enqueueAcademicSection existente a POST/PATCH assignments dentro de su domainTransaction y comparte requestId servidor entre audit de negocio/queued. Conserva autoridad inicial/final, MFA, tenant y contratos. Revocar genera upsert con docentes restantes o array vacío; no elimina grupo ni modifica receptor/helpers/schema/otros productores. SQL barriers con dos actores verifican versiones1/2 y payload de mayor versión igual estadofinal; final grant/session denegado revierte evento/contador/audits/mutación.
+
+RED funcional2/2 por eventos0vs1 y1vs2, seguido39/39ONdev y39/39ON+39/39OFF sobre build producción; lint/tipos/build0, ciclo real claves/restauración/startupfailure0 y contratoYAML0. CI añade sólo paso focalON después de integración estándarOFF, claves siempre nuevas en harness existente después de guard DB y restauradas en teardown/fallo. Revisión independiente de fuente sinCritical/Important/Minor. [Informe acotado y fallos conservados](SIII_ACADEMIC_ASSIGNMENT_OUTBOX_2026-10-22.md).
+
+Gate unitario NO aprobado: dos npmtest825/826 y archivo aislado4/5 por timeout5000ms del child migration-safety sin cambios; diagnóstico directo910ms/denegación correcta no sustituye npmtest. Coordinación hará control main5cb antes de decidir commit; sin más retries ni cambio de tiempos/prewarm/config. INT-04 siguePARCIAL: límites existentes pueden abortar un retiro ON, otros productores/revocaciones/transporte operativo/consumo móvil no se certifican. Sin flags fuera del proceso sintético, F2, Compañero, fuentes SQL, datos reales ni push/PR/merge/producción.
+
+
+Actualización de cierre local INT-04A: coordinación completó control A main5cb826/826(13.45s) y control B en esta rama826/826(8.17s), mismo npmtest estándar/Node24.18.0/Vitest4.1.12, cincoflagsunset registrados y sin diff unit/config/migrador/lock. No hubo cambio de fuente entre fallos y B. Gate local actual aprobado; se conservan dos825/826, aislado4/5 y diagnóstico910ms, sin atribuir causa ni mejora. Lint/tipos/build0,39ONdev,39ON+39OFF producción, claves/CIcontrato0 y revisión independienteC/I/M0. Commit local autorizado; reconciliación con mainfc65 y CI/publicación pendientes. No se declara cerrada INT-04 global ni producción.

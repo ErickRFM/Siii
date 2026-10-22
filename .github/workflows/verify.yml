@@ -56,6 +56,10 @@ jobs:
         run: npm run db:migrate
       - name: Handler and baseline integration tests
         run: npm run test:integration
+      - name: Academic assignment outbox enabled HTTP contracts
+        env:
+          SIII_ACADEMIC_OUTBOX_ENABLED: 'true'
+        run: npm run test:integration -- tests/integration/academic-assignment-outbox-http.test.ts
       - name: Production build
         run: npm run build
       - name: Dependency audit
