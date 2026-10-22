@@ -27,7 +27,7 @@ function expiry(message:TransactionalEmail):string|null {
 /** All dynamic content is HTML-escaped. No scripts, remote fonts, tracking pixels or externally hosted logos. */
 export function renderSiiiEmailHtml(message:TransactionalEmail,purpose:MailPurpose):string {
  const invitation=purpose==='invitation',title=titleFor(purpose),url=trustedActionUrl(message,purpose),until=expiry(message);
- const messageText=purpose==='admissions' ? 'Confirma que registraste esta cuenta de aspirante. Abre el enlace y escribe la contraseña que elegiste. Si no solicitaste el registro, ignora este correo.' : invitation
+ const messageText=purpose==='admissions' ? 'Confirma que registraste esta cuenta de aspirante. Abre el enlace y elige una nueva contraseña para tu cuenta. Si no solicitaste el registro, ignora este correo.' : invitation
   ? 'Recibiste una invitación para participar en el Sistema Institucional Integral. Revisa el perfil y el ámbito antes de aceptar voluntariamente el acceso.'
   : 'Se solicitó restablecer la contraseña de tu cuenta institucional. Solo tú puedes confirmar esta solicitud y elegir una nueva contraseña.';
  const instruction=purpose==='admissions' ? 'El enlace es personal, vence en 30 minutos y solo se puede utilizar una vez.' : invitation

@@ -48,7 +48,7 @@ describe.sequential('Real E2E University Lifecycle (HTTP + PostgreSQL)', () => {
     expect(dbBefore.rows[0].email_verified_at).toBeNull();
 
     // Step 3: Verify email with token
-    const verifyRes = await post('/api/v1/admissions/verify', {id:mail.id,token:mail.token,password});
+    const verifyRes = await post('/api/v1/admissions/verify', {id:mail.id,token:mail.token,newPassword:password});
     expect(verifyRes.status).toBe(200);
 
     // Step 4: Assert verified state in DB

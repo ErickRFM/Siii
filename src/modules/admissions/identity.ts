@@ -13,7 +13,7 @@ import {sealDelivery,openDelivery} from '@/shared/email/delivery-seal';
 import {invitationLink} from '@/shared/invitations/token';
 import {emailSenderSnapshot} from '@/infrastructure/email/transactional';
 import {scheduleEmailDelivery} from '@/infrastructure/email/after-delivery';
-import {applicantRegisterSchema,applicantLoginSchema} from './validation';
+import {applicantRegisterSchema,applicantLoginSchema,applicantResendSchema} from './validation';
 
 export const APPLICANT_COOKIE=process.env.NODE_ENV==='production'?'__Host-siii_applicant_session':'siii_applicant_session';
 export const verificationTTL=30*60000,sessionTTL=8*3600000;
@@ -25,7 +25,7 @@ export const applicantOk=(data:unknown,status=200)=>NextResponse.json({data},{st
 // Every browser mutation requires an explicit, same origin. No credential-in-URL fallback.
 export const applicantOrigin=(req:NextRequest)=>!!req.headers.get('origin')&&assertSameOrigin(req);
 const tokenSchema=z.string().regex(/^[A-Za-z0-9_-]{43}$/);
-const proofSchema=z.object({id:z.uuid(),token:tokenSchema,password:z.string().min(1).max(128)}).strict();
+const proofSchema=z.object({id:z.uuid(),token:tokenSchema,newPassword:z.string().min(12).max(128)}).strict();
 
 /** One row lock serializes each privacy-preserving rate budget. Keys never persist PII. */
 export async function applicantBudget(tx:Transaction,scope:'admissions_ip'|'admissions_account',value:string,window:number,limit:number){
@@ -45,7 +45,7 @@ async function budget(req:NextRequest,operation:string,email?:string){
 async function issueVerification(tx:Transaction,profile:typeof applicantProfiles.$inferSelect,requestId:string){
  const now=new Date(),expiresAt=new Date(now.getTime()+verificationTTL),token=randomBytes(32).toString('base64url'),eventId=randomUUID();
  const link=new URL(invitationLink(process.env.SIII_PUBLIC_ORIGIN??'',profile.id,token));link.pathname='/admissions/verify';
- const message={eventId,to:profile.email,subject:'Verifica tu correo de aspirante SIII',text:'Confirma que registraste esta cuenta de aspirante. Abre el enlace y escribe la contraseña que elegiste: '+link.toString()+'\nEl enlace vence: '+expiresAt.toISOString()+'. Si no solicitaste este registro, ignora el mensaje.'};
+ const message={eventId,to:profile.email,subject:'Verifica tu correo de aspirante SIII',text:'Confirma que registraste esta cuenta de aspirante. Abre el enlace y elige una nueva contraseña para tu cuenta: '+link.toString()+'\nEl enlace vence: '+expiresAt.toISOString()+'. Si no solicitaste este registro, ignora el mensaje.'};
  const payloadEncrypted=sealDelivery(message,eventId,profile.id,sealConfig()),hash=tokenHash(token),sender=emailSenderSnapshot();
  await tx.update(applicantProfiles).set({verificationTokenHash:hash,verificationExpiresAt:expiresAt,updatedAt:now}).where(eq(applicantProfiles.id,profile.id));
  await tx.update(applicantVerificationOutbox).set({state:'cancelled',leaseToken:null,leaseUntil:null,updatedAt:now}).where(and(eq(applicantVerificationOutbox.applicantId,profile.id),eq(applicantVerificationOutbox.state,'queued')));
@@ -57,7 +57,8 @@ export const registerApplicant=withErrors(async(req:NextRequest)=>{
  if(!applicantOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const input=applicantRegisterSchema.safeParse(await req.json().catch(()=>null));if(!input.success)return jsonError('INVALID_INPUT',422);
  if(!await budget(req,'mail',input.data.email))return requested();
- const passwordHash=await hashPassword(input.data.password);
+ // Registration cannot establish a credential before mailbox ownership is proven.
+ const passwordHash=await hashPassword(randomBytes(32).toString('base64url'));
  try{
   await db.transaction(async tx=>{
    const {password:_,...data}=input.data;void _;
@@ -69,13 +70,12 @@ export const registerApplicant=withErrors(async(req:NextRequest)=>{
 });
 export const resendApplicantVerification=withErrors(async(req:NextRequest)=>{
  if(!applicantOrigin(req))return jsonError('INVALID_ORIGIN',403);
- const input=applicantLoginSchema.safeParse(await req.json().catch(()=>null));if(!input.success)return jsonError('INVALID_INPUT',422);
+ const input=applicantResendSchema.safeParse(await req.json().catch(()=>null));if(!input.success)return jsonError('INVALID_INPUT',422);
  if(!await budget(req,'mail',input.data.email))return requested();
- const [hint]=await db.select().from(applicantProfiles).where(sql`lower(btrim(${applicantProfiles.email})) = ${input.data.email}`);
- const valid=await verifyPassword(hint?.passwordHash,input.data.password);
- try{if(hint&&valid)await db.transaction(async tx=>{
-  const [profile]=await tx.select().from(applicantProfiles).where(eq(applicantProfiles.id,hint.id)).for('update');
-  if(!profile.mailboxVerifiedAt&&profile.passwordHash===hint.passwordHash)await issueVerification(tx,profile,context(req).requestId);
+ try{await db.transaction(async tx=>{
+  const [profile]=await tx.select().from(applicantProfiles).where(sql`lower(btrim(${applicantProfiles.email})) = ${input.data.email}`).for('update');
+  // This only reclaims unproven registrations. A verified account requires its own recovery flow.
+  if(profile&&!profile.mailboxVerifiedAt)await issueVerification(tx,profile,context(req).requestId);
  });}catch(error){if(error instanceof Error&&['DELIVERY_KEY_UNAVAILABLE','INVALID_PUBLIC_ORIGIN'].includes(error.message))return jsonError('EMAIL_UNAVAILABLE',503);throw error;}
  scheduleEmailDelivery('admissions');return requested();
 });
@@ -84,15 +84,18 @@ export const verifyApplicant=withErrors(async(req:NextRequest)=>{
  const input=proofSchema.safeParse(await req.json().catch(()=>null));if(!input.success)return jsonError('VERIFICATION_UNAVAILABLE',400);
  if(!await budget(req,'proof',input.data.id))return jsonError('RATE_LIMITED',429);
  const [hint]=await db.select().from(applicantProfiles).where(eq(applicantProfiles.id,input.data.id));
- const valid=await verifyPassword(hint?.passwordHash,input.data.password);
+ const reused=await verifyPassword(hint?.passwordHash,input.data.newPassword),passwordHash=await hashPassword(input.data.newPassword);
  const verified=await db.transaction(async tx=>{
   const [profile]=await tx.select().from(applicantProfiles).where(eq(applicantProfiles.id,input.data.id)).for('update');
   const now=new Date();
-  if(!profile||!valid||profile.passwordHash!==hint?.passwordHash||profile.mailboxVerifiedAt||!profile.verificationExpiresAt||profile.verificationExpiresAt<=now||profile.verificationTokenHash!==tokenHash(input.data.token))return false;
-  await tx.update(applicantProfiles).set({emailVerifiedAt:now,mailboxVerifiedAt:now,verificationTokenHash:null,verificationExpiresAt:null,updatedAt:now}).where(eq(applicantProfiles.id,profile.id));
+  if(!profile||profile.passwordHash!==hint?.passwordHash||profile.mailboxVerifiedAt||!profile.verificationExpiresAt||profile.verificationExpiresAt<=now||profile.verificationTokenHash!==tokenHash(input.data.token))return 'invalid';
+  // Legacy registrations may have a password chosen by a third party. Never retain it.
+  if(reused)return 'reused';
+  await tx.update(applicantProfiles).set({passwordHash,emailVerifiedAt:now,mailboxVerifiedAt:now,verificationTokenHash:null,verificationExpiresAt:null,updatedAt:now}).where(eq(applicantProfiles.id,profile.id));
+  await tx.update(applicantSessions).set({revokedAt:now}).where(and(eq(applicantSessions.applicantId,profile.id),isNull(applicantSessions.revokedAt)));
   await tx.update(applicantVerificationOutbox).set({state:'cancelled',leaseToken:null,leaseUntil:null,updatedAt:now}).where(and(eq(applicantVerificationOutbox.applicantId,profile.id),eq(applicantVerificationOutbox.state,'queued')));
-  await audit(tx,{action:'admissions.email.verified',target:'applicant:'+profile.id,requestId:context(req).requestId});return true;
- });return verified?applicantOk({verified:true}):jsonError('VERIFICATION_UNAVAILABLE',400);
+  await audit(tx,{action:'admissions.email.verified',target:'applicant:'+profile.id,requestId:context(req).requestId});return 'verified';
+ });return verified==='verified'?applicantOk({verified:true}):jsonError(verified==='reused'?'PASSWORD_REUSE':'VERIFICATION_UNAVAILABLE',verified==='reused'?422:400);
 });
 export const loginApplicant=withErrors(async(req:NextRequest)=>{
  if(!applicantOrigin(req))return jsonError('INVALID_ORIGIN',403);

@@ -27,7 +27,7 @@ export default function AdmissionsPortal({
 
   const [sessionReady,setSessionReady]=useState(false);
   useEffect(()=>{let active=true;const controller=new AbortController();fetch('/api/v1/admissions/session',{cache:'no-store',signal:controller.signal}).then(async response=>response.ok?response.json():null).then(body=>{if(active&&body?.data?.applicant){setApplicant(body.data.applicant);setMode('application');}}).catch(()=>{if(active)setError('No se pudo comprobar la sesión. Revisa tu conexión e inicia sesión de nuevo.');}).finally(()=>{if(active)setSessionReady(true);});return()=>{active=false;controller.abort();};},[]);
-  async function resend(){setLoading(true);setError('');try{const response=await fetch('/api/v1/admissions/resend',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password})});if(!response.ok)throw Error('No se pudo solicitar el correo. Vuelve a intentar.');setPassword('');setSuccess('Si las credenciales son correctas y falta verificar el correo, recibirás un enlace nuevo.');}catch(cause){setError(cause instanceof Error?cause.message:'Sin conexión.');}finally{setLoading(false);}}
+  async function resend(){setLoading(true);setError('');try{const response=await fetch('/api/v1/admissions/resend',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email})});if(!response.ok)throw Error('No se pudo solicitar el correo. Vuelve a intentar.');setPassword('');setSuccess('Si falta verificar tu correo, recibirás un enlace para elegir tu contraseña.');}catch(cause){setError(cause instanceof Error?cause.message:'Sin conexión.');}finally{setLoading(false);}}
   async function logout(){setLoading(true);setError('');try{const response=await fetch('/api/v1/admissions/logout',{method:'POST'});if(!response.ok)throw Error('No se pudo cerrar la sesión. Vuelve a intentar.');setApplicant(null);setPassword('');setMode('login');setSubmittedApplicationNumber(null);setSuccess('Sesión cerrada.');}catch(cause){setError(cause instanceof Error?cause.message:'Sin conexión.');}finally{setLoading(false);}}
   // Form states
   const [email, setEmail] = useState('');
@@ -57,13 +57,13 @@ export default function AdmissionsPortal({
       const res = await fetch('/api/v1/admissions/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstName, lastName, password, phone, curp }),
+        body: JSON.stringify({ email, firstName, lastName, phone, curp }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error?.message ?? 'Error en el registro');
 
       setPassword('');
-      setSuccess('Si la cuenta puede verificarse, recibirás un correo. Abre el enlace para verificar tu correo antes de iniciar sesión.');
+      setSuccess('Si la cuenta puede verificarse, recibirás un correo. Abre el enlace para verificar tu correo y elegir tu contraseña. Si no llega, usa Reenviar verificación.');
       setMode('login');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error en el registro');
@@ -165,10 +165,6 @@ export default function AdmissionsPortal({
             <input id="reg-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
           </div>
           <div className="sii-field">
-            <label htmlFor="reg-password">Contraseña *</label>
-            <input id="reg-password" type="password" required minLength={12} maxLength={128} value={password} onChange={e => setPassword(e.target.value)} />
-          </div>
-          <div className="sii-field">
             <label htmlFor="reg-first-name">Nombre(s) *</label>
             <input id="reg-first-name" type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} />
           </div>
@@ -203,7 +199,7 @@ export default function AdmissionsPortal({
           <button type="submit" disabled={loading} className="sii-primary-button">
             {loading ? 'Ingresando...' : 'Iniciar sesión'}
           </button>
-          <button type="button" className="sii-outline-button" disabled={loading||!email||!password} onClick={resend}>Reenviar verificación</button>
+          <button type="button" className="sii-outline-button" disabled={loading||!email} onClick={resend}>Reenviar verificación</button>
         </form>
       )}
 

@@ -92,3 +92,16 @@ La validación de secciones usa su propia base sintética PostgreSQL local y el 
 | ID | Operación | Actor y alcance | Validación y transacción | Evidencia | Estado |
 |---|---|---|---|---|---|
 | OP-030 | enqueueAcademicSection(tx,scope) y worker académico interno | Backend; autoridad heredada de la futura transacción académica autorizada | Snapshot completo tenant/section, sourceVersion atómico, body cifrado congelado, audit TX, lease/retry/CAS; flag disabled por defecto | academic-outbox.test.ts unit/integration, migración0018 y perfil managed | FOUNDATION LOCAL; WRITERS/TRANSPORTE/RECONCILIACIÓN/API MÓVIL PENDIENTES |
+
+## C32 — identidad de aspirante (2026-10-22)
+
+| Operación | Actor y controles | Evidencia real | Estado |
+|---|---|---|---|
+| Registro y reenvío /api/v1/admissions/register, /resend | Público, Origin explícito y límites IP/cuenta; respuesta genérica; correo cifrado; reenvío sólo buzón sin prueba | applicant-registration-http.test.ts; admissions-security.spec.ts | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| Confirmación /api/v1/admissions/verify | Prueba de buzón de un uso/30min y contraseña nueva; rechazo de hash legacy; revocación de sesiones y auditoría TX; sin login automático | applicant-registration-http.test.ts: legacy, expiración, replay, rollback; admissions-security.spec.ts | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| Login, session y logout de aspirante | Sesión independiente con bearer hash, cookie HttpOnly/Secure/Strict, 8h, rotación y revocación; expiración tras esperas | applicant-registration-http.test.ts; admissions-security.spec.ts | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| POST institutions/:id/admissions/applications | Dueño derivado de sesión; rechaza applicantId; institución/catálogos vigentes; folio atómico e idempotencia; auditoría TX | applicant-registration-http.test.ts: suplantación, tenant, permisos, concurrencia, rollback | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| GET y SSR de Admisiones institucional | admissions.manage institucional + MFA; autorización final SQL por sesión/versión/grant/tenant; sin shell duplicado | applicant-registration-http.test.ts: guest, scoped, foreign, MFA y revocación durante SELECT | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| Worker de confirmación de aspirante | Runtime siii_app, payload cifrado/remitente congelado, leases e idempotencia; proveedor no verifica el buzón | applicant-registration-http.test.ts; worker/applicants.ts | IMPLEMENTED; CORREO REAL/SCHEDULER PENDIENTES |
+
+La evidencia sintética local/CI no acredita producción. Puertas de publicación y reconciliación C31: [informe C31/C32](../audits/SIII_C31_C32_2026-10-21.md).

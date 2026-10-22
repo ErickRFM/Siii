@@ -4,7 +4,8 @@ export const applicantRegisterSchema = z.object({
   email: z.string().trim().toLowerCase().email('Correo electrónico no válido').max(254),
   firstName: z.string().trim().min(2, 'Nombre requerido').max(100),
   lastName: z.string().trim().min(2, 'Apellido requerido').max(100),
-  password: z.string().min(12, 'La contraseña debe tener al menos 12 caracteres').max(128),
+  // Accepted for older clients, but never establishes an applicant credential.
+  password: z.string().min(12).max(128).optional(),
   phone: z.string().trim().max(40).optional(),
   curp: z.string().trim().toUpperCase().max(40).optional(),
 }).strict();
@@ -12,6 +13,11 @@ export const applicantRegisterSchema = z.object({
 export const applicantLoginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Correo electrónico no válido').max(254),
   password: z.string().min(1, 'Contraseña requerida').max(128),
+}).strict();
+
+export const applicantResendSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Correo electrónico no válido').max(254),
+  password: z.string().max(128).optional(), // Old clients may send it; mailbox proof is the authority.
 }).strict();
 
 export const admissionCycleSchema = z.object({
