@@ -22,7 +22,7 @@ export function SiiTabs({items,label,initialTab}:{items:SiiTab[];label:string;in
   document.getElementById(generatedId+'-tab-'+next.id)?.focus();
  }
  return <section className="sii-kit-tabs">
-   <div className="sii-catalog-tabs" role="tablist" aria-label={label} onKeyDown={handleKeyDown}>
+   <div className="sii-catalog-tabs" role="tablist" aria-label={label} tabIndex={0} onKeyDown={handleKeyDown}>
     {items.map(item=><button key={item.id} id={generatedId+'-tab-'+item.id}
       type="button" role="tab" aria-selected={item.id===active?.id}
       aria-controls={generatedId+'-panel-'+item.id} disabled={item.disabled}
