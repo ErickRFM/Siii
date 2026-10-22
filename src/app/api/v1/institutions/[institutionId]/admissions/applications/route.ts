@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server';
 import { and, eq, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
 import { admissionApplications, applicantProfiles, academicPrograms } from '../../../../../../../../db/schema';
-import { authorizeCapability } from '@/shared/auth/session';
+import { authorizeCapability, getIdentity } from '@/shared/auth/session';
 import {institutionVisibility} from '@/shared/auth/read-access';
 
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
   try {
+    if (!await getIdentity()) return NextResponse.json({error:{code:'UNAUTHORIZED',message:'Sesión requerida'}},{status:401,headers:{'Cache-Control':'no-store'}});
     const authorization=await authorizeCapability(institutionId, 'admissions.manage');
     if (!authorization) return NextResponse.json({error:{code:'FORBIDDEN'}},{status:403,headers:{'Cache-Control':'no-store'}});
 

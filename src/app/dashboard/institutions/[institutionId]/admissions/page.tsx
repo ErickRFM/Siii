@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { authorizeCapability } from '@/shared/auth/session';
+import { authorizeCapability, getIdentity } from '@/shared/auth/session';
 import {institutionVisibility} from '@/shared/auth/read-access';
 import { db } from '@/infrastructure/database';
 import { academicPrograms, admissionApplications, applicantProfiles } from '../../../../../../db/schema';
@@ -10,6 +10,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdmissionsPage({ params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
+  const user = await getIdentity();
+  if (!user) redirect('/login');
+  if (user.mustChangePassword) redirect('/dashboard/security');
   const authorization = await authorizeCapability(institutionId,'admissions.manage');
   if(!authorization) redirect('/dashboard');
   const {access}=authorization;

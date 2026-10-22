@@ -105,3 +105,14 @@ La validación de secciones usa su propia base sintética PostgreSQL local y el 
 | Worker de confirmación de aspirante | Runtime siii_app, payload cifrado/remitente congelado, leases e idempotencia; proveedor no verifica el buzón | applicant-registration-http.test.ts; worker/applicants.ts | IMPLEMENTED; CORREO REAL/SCHEDULER PENDIENTES |
 
 La evidencia sintética local/CI no acredita producción. Puertas de publicación y reconciliación C31: [informe C31/C32](../audits/SIII_C31_C32_2026-10-21.md).
+
+## Corrección SEC-02 — listados sensibles (21 octubre 2026)
+
+| Operación | Autoridad efectiva | Compatibilidad y alcance | Evidencia | Estado |
+|---|---|---|---|---|
+| GET /institutions/:id/admissions/applications y GET /institutions/:id/financials/orders | authorizeCapability('institutions.manage'), institución activa, membresía vigente y MFA privilegiado | Conserva rutas, 401/403, campos JSON y filas autorizadas; institutions.read no autoriza PII/deudas de terceros | sensitive-institutional-lists-http.test.ts: RED15/24 antes del arreglo, GREEN24/24 y27/27 tras ampliar cobertura; HTTP+PostgreSQL local sintético, también build producción | CORREGIDO LOCALMENTE; PR75 depende de PR79; CI PENDIENTE |
+| SSR /dashboard/institutions/:id/admissions | Misma capacidad administrativa antes de consultar/serializar | Redirige sin permiso; conserva tabla y formulario del administrador autorizado | Misma suite: alumno/guest/participante/docente pendiente/admin sin MFA no reciben PII | CORREGIDO LOCALMENTE; PR75 depende de PR79; CI PENDIENTE |
+
+Esta corrección no completa Admisiones/Caja. La sesión de aspirante, verificación real de correo, autorización y auditoría de escritores, integridad financiera cruzada y paginación siguen abiertos en `docs/audits/SIII_ENGINEERING_AUDIT_2026-10-21.md`. Sin migraciones ni cambios productivos.
+
+Reconciliación C32 sobre main@2be56cd: las filas SEC-02 conservan su evidencia histórica. Admisiones añade la capacidad específica admissions.manage para control_escolar/admin/super_admin, comprobación final SQL y sesión independiente de aspirante; Caja conserva la autoridad de SEC-02. Las pruebas de PR75 se mantienen sin desactivar.
