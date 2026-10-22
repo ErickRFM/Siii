@@ -116,3 +116,12 @@ La evidencia sintética local/CI no acredita producción. Puertas de publicació
 Esta corrección no completa Admisiones/Caja. La sesión de aspirante, verificación real de correo, autorización y auditoría de escritores, integridad financiera cruzada y paginación siguen abiertos en `docs/audits/SIII_ENGINEERING_AUDIT_2026-10-21.md`. Sin migraciones ni cambios productivos.
 
 Reconciliación C32 sobre main@2be56cd: las filas SEC-02 conservan su evidencia histórica. Admisiones añade la capacidad específica admissions.manage para control_escolar/admin/super_admin, comprobación final SQL y sesión independiente de aspirante; Caja conserva la autoridad de SEC-02. Las pruebas de PR75 se mantienen sin desactivar.
+
+## SEC-03/SEC-06 — escritores de admisiones (22 octubre 2026)
+
+| Operación | Autoridad y atomicidad | Evidencia | Estado |
+|---|---|---|---|
+| POST institutions/:id/admissions/cycles | admissions.manage institucional + MFA; origen; autorización inicial/final en domainTransaction; ciclo+audit(actor/tenant/recurso/requestId/antes-después) juntos | admissions-write-authority-http.test.ts: admin/Control Escolar, negativos y rollback;30/30 HTTP focales en build producción local3202 | REVISADO LOCALMENTE; CI/INTEGRACIÓN PENDIENTES |
+| POST institutions/:id/admissions/applications/:applicationId/decision | Mismos controles; lectura/bloqueo por id+tenant; historial append y estado serializados; auditoría TX por transición | Misma suite: solicitud ajena404, revocación/expiración bajo espera, fallo de audit500 sin cambios, dos decisiones y dos audits | REVISADO LOCALMENTE; CI/INTEGRACIÓN PENDIENTES |
+
+SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni cambios de producción; ver [informe de escritores](../audits/SIII_ADMISSIONS_WRITE_AUTHORITY_2026-10-22.md).

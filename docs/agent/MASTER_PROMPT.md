@@ -300,3 +300,7 @@ Cada fase: **Objetivo · Alcance · Entregables · Criterios de aceptación · F
 - No mezcles fases ni refactorices fuera del alcance.
 - No guardes secretos, claves ni URLs de pooler en Git.
 - No te declares "terminado" por compilar: termina cuando se cumple la sección 10.
+
+## Nota incremental — 22 octubre 2026
+
+SEC-03/SEC-06: PARCIAL. POST de convocatorias y dictámenes añade autoridad admissions.manage/MFA y auditoría en la transacción existente, con30 HTTP focales locales. Revisión independiente aprobada; CI e integración pendientes. Claim, finanzas y puertas productivas no se acreditan por este incremento. Ver `docs/audits/SIII_ADMISSIONS_WRITE_AUTHORITY_2026-10-22.md`. Se conserva el contexto histórico anterior.
