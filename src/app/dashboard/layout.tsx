@@ -10,6 +10,6 @@ export default async function DashboardLayout({children}:{children:React.ReactNo
   if(!user)redirect('/login');
   const institutions=await getInstitutionAccess(user.id);
   const defaultInstitutionId=institutions.length===1?institutions[0].institutionId:undefined;
-  return <SiiAppShell firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`}
+  return <SiiAppShell actorId={user.id} firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`}
     defaultInstitutionId={defaultInstitutionId}>{children}</SiiAppShell>;
 }

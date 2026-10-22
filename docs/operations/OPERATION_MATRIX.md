@@ -145,3 +145,28 @@ SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni
 | Misma ruta, pending | Sin prueba o correos no coincidentes no establece vínculo; conserva solicitante derivado de sesión; misma autoridad y revalidación final |201 {claim,autoApproved:false,message}; student.claim.requested en TX; fallo de auditoría/revocación/caducidad sin fila persistida. Misma suite | LOCAL29HTTP; NO ACREDITA FLUJO DE REVISIÓN MANUAL |
 
 Evidencia y límites: [SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md](../audits/SIII_STUDENT_CLAIM_AUTHORITY_2026-10-22.md). Composición privada935f2220; el helper y Admisiones no se editan en este incremento. Publicar solo tras integrar ese prerrequisito y reconciliar. student-links/me y seguridad integral del módulo permanecen fuera del alcance; sin cambios de schema/migraciones, sin sincronización ni operaciones productivas.
+
+## UX-01 parcial — capturas locales de calificaciones (22 octubre2026)
+
+| Operación existente / consumidor | Comportamiento local y autoridad | Evidencia | Estado |
+|---|---|---|---|
+| GET/POST institutions/:id/grading, TeacherGradebook | Capturas por institución/sección/alumno/componente/revisión; guarda una celda, conserva otra y edición posterior; refresh sin desmontar/foco; descarta respuestas por scope;401/403 retiran privados. Endpoints y autorización servidor intactos | gradebook-drafts.spec.ts,15UI reales sobre build producción3204/PG55439,826unitarias/lint/tipos/build | LOCAL REVISADO; CI DEL COMMIT PENDIENTE |
+| Publicación oficial y cambio concurrente de roster/acta | Bloqueo por captura pendiente y recheck tras ask; captura deshabilitada sólo durante POST de publicación; captura excluida visible y descarte explícito, sin editar acta ni guardar alumno retirado | Publicación/guardado bajo lock PG; segundo admin hace enrollment.withdraw real; audit y scores/finales comprobados | LOCAL REVISADO; SIN CAMBIO SERVIDOR |
+| Salida/cambio de sección, consumidor UI | Memoria separada tras lectura autorizada; confirmación local en links internos, beforeunload para recarga/cierre; logout retira privados; recuperación403 recarga grupos | Cancelar/confirmar link, recarga/cierre, dos secciones y GET bloqueado, logout401/grading403; capturas pobladas claro1440/oscuro390 y axe0 | UX-01 PARCIAL: SPA ATRÁS/ADELANTE/PROGRAMÁTICA Y QA MANUAL PENDIENTES |
+
+Informe y RED preservado: [SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md](../audits/SIII_GRADEBOOK_DRAFTS_REPRO_2026-10-22.md). Base reconciliada main809c526d (#84 integrado), revisión independiente sin Critical/Important pendientes. Sin CSS, F2, schema/migraciones, workflows ni disponibilidad productiva. No se certifica lector de pantalla/zoom manual ni se declara cerrado UX-01 global.
+
+Reconciliación posterior de85 con maina1c6e8c4 (#87) por merge normal: producto y15 pruebas de calificaciones intactos frente040a3bc4; nueva validación826unitarias/lint/tipos/build y23/23 focales (15 UI reales +8 contraste). Se conservan filas, evidencia histórica y estado UX-01 PARCIAL. Pendientes integración de prueba MFA/logout separada y CI de la composición final; QAe927/fotografía scroll0 no se incorpora todavía. Sin cambio de endpoints, migraciones, producción ni push desde esta tarea.
+
+Composición LOCAL PREPARATORIA posterior: merge0834b352 (prueba revisada de88 +Next15.5.28/lock de89) sobre9dabfc9b, aún no declarada integrada en main. Instalación exacta/audit0, lint/tipos/build,826 unitarias tras repetición sin solapamiento y23/23 focales verdes. La primera unitaria tuvo1timeout de subproceso, registrado en el informe; no se relajaron límites. Producto/tests/método de captura de85 y QAe927 intactos; faltan merge commits reales y CI del SHA final. Sin push ni edición de PR.
+
+
+## UX-01 parcial — continuidad privada en navegación SPA (22 octubre2026)
+
+| Consumidor existente | Memoria/autoridad | Evidencia local | Estado |
+|---|---|---|---|
+| TeacherGradebook dentro del shell persistente | Map original por actor/institución/sección/estudiante/componente/revisión, fuera del keytenant; auth/me+secciones+snapshot reales antes de restaurar; no roster/snapshot en shell | Atrás/Adelante, Ctrl+K Enter, revisión nueva al volver, dos tenants y actor distinto,18 nuevos+15 previos:33/33UI | LOCAL REVISADO; RECONCILIACIÓN/CI PENDIENTES |
+| Guardado concurrente con salida/assurance |200 reconoce sólo revisión enviada en proveedor original, incluso durante GET posterior; contador no reutilizado; nunca aplica snapshot/notice tardío;401/logout purgan actor,403 contexto, lecturas revocadas no repueblan | SQL750 antes de entregar200 real, edición posterior, logout/relogin, GET retenido y403 fuera de vista, foco privado oculto durante auth | SIN CAMBIO SERVIDOR/F2/SCHEMA |
+| Salida desde otras vistas/revalidación | beforeunload global del proveedor; step-up válido invalida/oculta/revalida sin borrar; foco sólo tras GET vigente y sin robar control elegido |33UI,826unitarias,lint/tipos/build,2Axe poblados0 y revisión independiente sin pendientes | UX-01 PARCIAL; SIN PERSISTENCIA DURABLE |
+
+[Informe y evidencia RED/GREEN](../audits/SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). Se conserva toda la matriz anterior. Coste observado: FirstLoad grading115→118kB (compartido103kB estable) y auth/me adicional aun con memoria vacía/fuera del libro; no es optimización ni benchmark. No hay bloqueo universal de router ni detección de sesión/logout externo sin rechazo; no lector/zoom manual certificado. Base de85 reconciliada por92/94 según coordinación; no se publica PR duplicado. Sin backend, SQL, CSS, producción ni push/merge desde este incremento.
