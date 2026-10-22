@@ -119,3 +119,8 @@ El hueco DB financiero de SEC-04 queda implementado y verificado localmente. CI 
 Merge normal local516f374f reconcilia47f8ae82 con maina1c6e8c, preservando íntegros la historia y los dos apéndices.0025/journal/manifest y SQL histórico permanecen idénticos. Según coordinación, PR87 tuvo dos Actions826/485/88UI y preview verdes; postmerge39821829240 seguía en curso.
 
 Evidencia repetida: lint/tipos/build0,826unitarias;144/144 conjuntos=36DB+108HTTP y legacy24 separado1/1; preflight VERIFIED_0025,0/0 inválidas,26ledger/hashSQL exacto y harness restaurado. Aclaración del apéndice previo:114HTTP era error aritmético;22+27+30+29=108HTTP, y el total144 se mantiene. [Detalle incremental](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). CI propia y delta MFA/logout pendientes; sin publicación ni operación productiva.
+
+
+## SEC-04 — composición preparatoria PR88/89, NO main (22 octubre 2026)
+
+Merge normal local68f07622 integra0834b352 sobre f702: prueba MFA/logout revisada y Next15.5.28, todavía pendientes de integración real en main. npm ci/audit0, lint/tipos/build0 y826unitarias;144/144=36DB+108HTTP, legacy24 separado1/1. Preflight VERIFIED_0025,0/0 inválidas,26ledger y hash0025 intacto; migrador/preflight/SQL sin diff y19managed no repetidos. [Evidencia preparatoria](SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). Se conserva toda la historia; no sustituye CI89/88/main ni CI financiero. SIN PUSH ni operación productiva.

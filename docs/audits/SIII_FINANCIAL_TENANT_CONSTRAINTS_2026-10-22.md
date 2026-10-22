@@ -90,3 +90,12 @@ Gates repetidos sobre esta composición: lint/typecheck exit0;826/826 unitarias 
 Destino verificado por SELECT: DB sintética propia siii_financial_fk_verified_test en127.0.0.1:55439;26 entradas. Migración idempotente y preflight exit0 POST_0025/VERIFIED_0025, inválidas0/0, claves padre inmediatas y ambas FK completamente validadas con columnas SET NULL exactas. SHA256 del SQL en disco/47/ledger:854d99883ca76d681d57be9befeebaa45156702a3bb0475ecc6a3885ba3a9da0. El ensayo previo19 migrador/perfil conserva su evidencia sobre SQL idéntico; no se cuenta como repetido en esta corrida.
 
 Sólo evidencia incremental local. CI de la rama y reconciliación posterior del delta de pruebas MFA/logout siguen pendientes. Sin push, PR ni operación productiva.
+
+
+## Composición preparatoria PR88/89, todavía NO main (22 octubre 2026)
+
+Merge normal local68f07622 integra0834b3525fcf30c632a08fc7e242a82fd0573b0e sobre f70283d7: guard de navegación MFA/logout de PR88, Next15.5.28 de PR89 y documentación. Son cambios revisados por coordinación, todavía no acreditados como integrados en main al preparar esta composición; CI89 estaba en curso y la publicación financiera permanece detenida. No se tocó la rama del coordinador. Se conservan ambos apéndices de auditoría; OPmatrix previa íntegra.
+
+npm ci instaló375 paquetes y reportó0 vulnerabilidades; lockfile equivalente al SHA recibido. Lint/typecheck exit0,826/826 unitarias en56 archivos (15.34s), build Next15.5.28 exit0, compilación21.6s y31/31 páginas. Bundle nuevo, ejecución secuencial en3201:144/144 conjuntos en178.09s=36DB+108HTTP (22financieros+27SEC02+30Admisiones+29claim); legacy24 separado1/1 en6.01s. Harness restaurado byte a byte y0 DB legacy remanentes. No se atribuye a estos gates una nueva corrida UI del guard MFA: su fuente coincide con0834b352 y su gate UI pertenece a la integración de PR88.
+
+Preflight local propio exit0 POST_0025/VERIFIED_0025, inválidas0/0 y26 entradas. Hash0025 de disco/47/ledger idéntico854d99883ca76d681d57be9befeebaa45156702a3bb0475ecc6a3885ba3a9da0. Sin diff en SQL/journal/manifest, migrador, preflight ni schema financiero respecto a f702;19 migrador/perfil conservan su evidencia anterior sobre fuentes idénticas y no se repitieron. El lockfile y tests/ui/mfa-flows.spec.ts son equivalentes a0834b352. Sólo se anexó este reporte incremental; integración real tras CI89/88 en main y CI financiero siguen pendientes. SIN PUSH ni operación productiva.

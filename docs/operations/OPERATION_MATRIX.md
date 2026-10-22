@@ -163,3 +163,8 @@ Actualización sobre main809c526d (PR82/83/84 integrados). Conserva las seccione
 ### Evidencia incremental SEC-04 sobre maina1c6e8c (22 octubre 2026)
 
 Merge normal516f374f preserva los contratos y filas anteriores;0025/journal/manifest sin cambios. Repetición local:36DB+108HTTP=144/144, legacy24 adicional1/1,826unitarias y lint/tipos/build0; preflight POST_0025/VERIFIED_0025 con0/0 inválidas, FK validadas y hash exacto. La mención114HTTP del apéndice histórico de auditoría se aclara a108 conforme al desglose22+27+30+29. Las operaciones SEC-04 siguen LOCAL VERIFICADO, CI DE RAMA/RELEASE PENDIENTES; delta MFA/logout pendiente de reconciliar. [Evidencia incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md).
+
+
+### SEC-04 — composición preparatoria PR88/89 (22 octubre 2026)
+
+Sobre merge local68f07622, Next15.5.28 y guard MFA/logout de0834b352: mismos contratos/FK y estados anteriores;144/144 (36DB+108HTTP), legacy1/1,826unitarias, lint/tipos/build/preflight0. SQL/ledger/migrador intactos,19managed conservan evidencia previa. Estado PREPARATORIO LOCAL VERIFICADO; PR88/89 revisados todavía NO acreditados en main, CI financiero/release pendientes. La prueba UI MFA no se cuenta como ejecutada por este incremento. [Reporte incremental](../audits/SIII_FINANCIAL_TENANT_CONSTRAINTS_2026-10-22.md). SIN PUSH.
