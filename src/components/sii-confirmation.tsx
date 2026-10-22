@@ -30,6 +30,10 @@ function ConfirmationDialog({request,onDecision}:{request:Request;onDecision:(an
   const elements=Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled),textarea:not(:disabled)')??[]);
   if(!elements.length)return;
   const first=elements[0],last=elements[elements.length-1];
+  // Keep keyboard focus inside the modal even when another surface steals it.
+  if(!panel.current?.contains(document.activeElement)){
+   event.preventDefault();(event.shiftKey?last:first).focus();return;
+  }
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
  }
