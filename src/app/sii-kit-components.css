@@ -27,7 +27,7 @@
 .sii-kit-module-card>p{max-width:48ch;line-height:1.65}
 .sii-kit-module-icon{display:grid;place-items:center;width:47px;height:47px;flex:none}
 .sii-kit-module-icon svg{width:23px;height:23px;fill:none}
-.sii-kit-module-card--disabled{opacity:.76}
+.sii-kit-module-card--disabled{opacity:1;border-style:dashed}
 .sii-kit-module-card--disabled:hover{transform:none!important;box-shadow:var(--sii-kit-shadow)!important;border-color:var(--sii-kit-border)!important}
 .sii-kit-module-card--disabled .sii-module-bottom{color:var(--sii-muted)}
 .sii-kit-skeleton{display:grid;gap:12px;padding:18px;border:1px solid var(--sii-kit-border);background:var(--sii-kit-surface);border-radius:16px;min-height:132px}
