@@ -277,6 +277,8 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 .sii-app .sii-summary-grid .sii-metric:nth-child(2){animation-delay:60ms}
 .sii-app .sii-summary-grid .sii-metric:nth-child(3){animation-delay:120ms}
 .sii-app :is(.sii-module-card,.sii-institution-item){animation:sii-kit-appear 430ms var(--sii-kit-ease) both}
+/* Keep institutional text readable during entry; ancestor opacity also fades its letters. */
+.sii-app .sii-page>.sii-content-grid,.sii-app .sii-institution-item{animation-name:sii-v4-rise}
 .sii-app .sii-module-card:nth-child(2),.sii-app .sii-institution-item:nth-child(2){animation-delay:45ms}
 .sii-app .sii-module-card:nth-child(3),.sii-app .sii-institution-item:nth-child(3){animation-delay:90ms}
 .sii-app .sii-module-card:nth-child(4){animation-delay:135ms}
