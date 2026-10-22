@@ -46,7 +46,7 @@ export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
  };
  return <>
   <button ref={trigger} type="button" className="sii-command-trigger" onClick={()=>setOpen(true)}
-   aria-label="Buscar módulos" aria-haspopup="dialog" aria-expanded={open} aria-controls="sii-quick-switch">
+   aria-label="Buscar módulos" aria-haspopup="dialog" aria-expanded={open} aria-controls={open?"sii-quick-switch":undefined}>
    <SiiNavIcon name="search"/><span className="sii-command-trigger-label">Buscar módulo…</span><kbd>Ctrl K</kbd>
   </button>
   {open&&<div className="sii-command-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false);}}>
