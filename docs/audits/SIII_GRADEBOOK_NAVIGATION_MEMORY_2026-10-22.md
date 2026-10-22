@@ -66,3 +66,10 @@ UX-01 permanece PARCIAL. Memoria se pierde al recargar/cerrar/desmontar dashboar
 El PR94 remoto3c7bc10f conserva exactamente los tres archivos base hook/libro/spec del padre4ad4d326 probado; se verificó igualdad byte a byte antes de resolver los commits equivalentes de #85/#92. El merge normal7bb136be integra f85370f sin reimplementar capturas; c4a452c7 incorpora main4614/PR99. Los cinco archivos de producto/UI (layout,shell,memoria,libro,spec) son exactamente los de f85370f que pasó33/33UI,826unitarias,lint/tipos/build y2Axe; el workflow es exactamente main4614. No se atribuye una repetición de esas suites a la composición de historial.
 
 Se conservaron íntegros el prefijo de auditoría de main y cada sección de la rama local; el reporte base de #94 es prefijo intacto del consolidado. La actualización corresponde al mismo PR94 mediante fast-forward de su rama pública, sin force-push ni PR paralelo. El CI completo del nuevo SHA publicado y revisión de composición son gates pendientes antes del merge; las capturas históricas no representan regresión visual premium del futuro main. Se mantienen los límites de memoria, consultas adicionales y +3kB FirstLoad documentados arriba.
+
+
+## Base financiera integrada5cb49f75 (22 octubre2026)
+
+Merge normal1db59f88 incorpora main5cb49f75/PR100 sobre0ed2966a, sin cambios a los cinco archivos de producto/UI frente a f85370f. Workflow y todos los archivos financieros,configuración y pruebas de0025 proceden del main ya revisado. La composición conserva el prefijo de auditoría/OPmatrix de main y todas las secciones únicas del libro; la copia idéntica DEP02 detectada en revisión se retiró en0ed2966a sin perder evidencia.
+
+El SHA0ed tuvo job UI120100265472 SUCCESS en la suite completa, antes de esta actualización de base; se conserva su log sin atribuirlo al nuevo SHA. El incremento sobre5cb exige de nuevo CI completo, incluidos contratos financieros y legado0024, y la revisión de composición. No se ejecutó0025 sobre la DB antigua del libro ni sobre producción.

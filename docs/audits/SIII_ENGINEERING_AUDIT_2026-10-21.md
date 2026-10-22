@@ -172,3 +172,8 @@ UX-01 permanece PARCIAL y no acredita producción ni CI del incremento. El prove
 ## UX-01 — composición única PR94 con main4614 (22 octubre2026)
 
 Se comprobó igualdad de la base de #94 con4ad, se integró f85370f y main4614 mediante merges normales. Los cinco archivos de producto/UI permanecen idénticos al incremento33/33UI revisado; workflow idéntico a main. Toda evidencia histórica conservada. [Detalle de composición](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI exacto publicado y revisión siguen pendientes; no acredita persistencia, accesibilidad manual global ni fotografía premium del SHA futuro.
+
+
+## UX-01 — base financiera de main100 (22 octubre2026)
+
+El merge normal1db59f88 incorpora main5cb49f75 al mismo PR94; producto/UI idéntico al incremento33casos revisado y workflow financiero intacto. Se conserva el SUCCESS UI completo del SHA previo0ed como evidencia histórica, sin atribuirlo al nuevo SHA. Auditoría/OPmatrix mantienen prefijo main y evidencia única. [Composición y límites](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI final y main post100 siguen pendientes al preparar esta nota; sin migraciones en DB antigua/productiva.
