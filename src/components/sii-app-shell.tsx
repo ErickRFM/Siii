@@ -5,11 +5,23 @@ import type {Route} from 'next';
 import {usePathname} from 'next/navigation';
 import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation/dashboard-location';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { SiiBrand } from './sii-brand';
+import { SiiBrand, SiiMark } from './sii-brand';
+import { SiiNavIcon, type SiiNavIconName } from './sii-nav-icon';
 import SiiThemeToggle from './sii-theme-toggle';
 import { InstitutionCapabilitiesProvider, useInstitutionCapabilities, hasAnyCapability, hasInstitutionCapability } from './institution-capabilities';
 
 import {academicModuleLinks,allAcademicModuleLinks} from '@/shared/navigation/academic-modules';
+
+const COLLAPSED_KEY='siii:sidebar-collapsed';
+function iconForModule(id:string):SiiNavIconName {
+  switch(id){
+    case 'registry': return 'registry';
+    case 'operations': return 'layers';
+    case 'grading': return 'grades';
+    case 'scheduling': return 'calendar';
+    default: return 'services';
+  }
+}
 
 export default function SiiAppShell({firstName,fullName,defaultInstitutionId,children}:{
   firstName:string; fullName:string; defaultInstitutionId?:string; children:ReactNode;
@@ -24,6 +36,15 @@ export default function SiiAppShell({firstName,fullName,defaultInstitutionId,chi
 }
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed,setSidebarCollapsed] = useState(false);
+  useEffect(()=>{
+    try { setSidebarCollapsed(window.localStorage.getItem(COLLAPSED_KEY)==='true'); } catch { /* Browsing without storage stays usable. */ }
+  },[]);
+  const toggleSidebar=()=>{
+    const next=!sidebarCollapsed;
+    setSidebarCollapsed(next);
+    try { window.localStorage.setItem(COLLAPSED_KEY,String(next)); } catch { /* Optional preference. */ }
+  };
   const menuTrigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!menuOpen) return;
@@ -79,46 +100,55 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
   const activeModule=allAcademicModuleLinks.find(module=>module.id===active);
   const academicAvailable = ['programs','courses','curricula','terms','campuses'].some(resource => hasAnyCapability(data,`${resource}.read`));
   return (
-    <div className="sii-app">
+    <div className={sidebarCollapsed ? 'sii-app sii-app--collapsed' : 'sii-app'}>
       {menuOpen && <button type="button" className="sii-scrim" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} />}
       <aside id="sii-sidebar-mobile" className={menuOpen ? 'sii-sidebar sii-sidebar--open' : 'sii-sidebar'} aria-label="Menú del sistema">
-        <div className="sii-sidebar-brand"><SiiBrand light /></div>
+        <div className="sii-sidebar-brand">
+          <SiiBrand light />
+          <Link href="/dashboard" className="sii-sidebar-brand-compact" aria-label="SII, ir al inicio institucional" title="Ir a inicio"><SiiMark compact /></Link>
+          <button type="button" className="sii-sidebar-collapse" onClick={toggleSidebar}
+            aria-label={sidebarCollapsed?'Expandir menú lateral':'Contraer menú lateral'}
+            aria-expanded={!sidebarCollapsed} aria-controls="sii-sidebar-mobile"
+            title={sidebarCollapsed?'Expandir menú':'Contraer menú'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m7-12-4 4 4 4"/></svg>
+          </button>
+        </div>
         <div className="sii-sidebar-heading">PLATAFORMA</div>
         <nav className="sii-nav" aria-label="Navegación institucional">
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)}
+          <Link href="/dashboard" title="Inicio" onClick={() => setMenuOpen(false)}
             aria-current={active === 'overview' ? 'page' : undefined}
             className={active === 'overview' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}>
-            <span className="sii-nav-glyph" aria-hidden="true">⌂</span> Inicio
+            <SiiNavIcon name="home" /> Inicio
           </Link>
-          {institutionId && (institutionAdministrationAvailable || hasInstitutionCapability(data,'institutions.manage')) && <Link href={`/dashboard/institutions/${institutionId}/admin` as Route} onClick={() => setMenuOpen(false)} className={active === 'administration' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'} aria-current={active === 'administration' ? 'page' : undefined}><span className="sii-nav-glyph" aria-hidden="true">⚙</span>Administración institucional</Link>}
-          {institutionId && hasInstitutionCapability(data,'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`} onClick={()=>setMenuOpen(false)} className={active==='users'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='users'?'page':undefined}><span className="sii-nav-glyph" aria-hidden="true">♙</span>Usuarios</Link>}
-          {institutionId && hasInstitutionCapability(data,'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} onClick={()=>setMenuOpen(false)} className={active==='roles'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='roles'?'page':undefined}><span className="sii-nav-glyph" aria-hidden="true">♙</span>Roles y ámbitos</Link>}
-          {institutionId && hasInstitutionCapability(data,'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} onClick={()=>setMenuOpen(false)} className={active==='invitations'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='invitations'?'page':undefined}><span className="sii-nav-glyph" aria-hidden="true">✉</span>Invitaciones</Link>}
-          <Link href="/dashboard/security" onClick={() => setMenuOpen(false)}
+          {institutionId && (institutionAdministrationAvailable || hasInstitutionCapability(data,'institutions.manage')) && <Link href={`/dashboard/institutions/${institutionId}/admin` as Route} title="Administración institucional" onClick={() => setMenuOpen(false)} className={active === 'administration' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'} aria-current={active === 'administration' ? 'page' : undefined}><SiiNavIcon name="institution" />Administración institucional</Link>}
+          {institutionId && hasInstitutionCapability(data,'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`} title="Usuarios" onClick={()=>setMenuOpen(false)} className={active==='users'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='users'?'page':undefined}><SiiNavIcon name="users" />Usuarios</Link>}
+          {institutionId && hasInstitutionCapability(data,'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} title="Roles y ámbitos" onClick={()=>setMenuOpen(false)} className={active==='roles'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='roles'?'page':undefined}><SiiNavIcon name="roles" />Roles y ámbitos</Link>}
+          {institutionId && hasInstitutionCapability(data,'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} title="Invitaciones" onClick={()=>setMenuOpen(false)} className={active==='invitations'?'sii-nav-item sii-nav-item--active':'sii-nav-item'} aria-current={active==='invitations'?'page':undefined}><SiiNavIcon name="mail" />Invitaciones</Link>}
+          <Link href="/dashboard/security" title="Cuenta y seguridad" onClick={() => setMenuOpen(false)}
             aria-current={active === 'security' ? 'page' : undefined}
             className={active === 'security' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}>
-            <span className="sii-nav-glyph" aria-hidden="true">♢</span> Cuenta y seguridad
+            <SiiNavIcon name="shield" /> Cuenta y seguridad
           </Link>
         </nav>
         <div className="sii-sidebar-heading sii-sidebar-heading--secondary">GESTIÓN ACADÉMICA</div>
         <nav className="sii-nav" aria-label="Gestión académica" aria-busy={verifying}>
-          {institutionId && academicAvailable ? <Link href={`/dashboard/institutions/${institutionId}/academic`}
+          {institutionId && academicAvailable ? <Link href={`/dashboard/institutions/${institutionId}/academic`} title="Catálogo académico"
             className={active === 'academic' ? 'sii-nav-item sii-nav-item--active' : 'sii-nav-item'}
             aria-current={active === 'academic' ? 'page' : undefined}
             onClick={() => setMenuOpen(false)}>
-              <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
+              <SiiNavIcon name="book" /> Catálogo académico
           </Link> : <span className={verifying?"sii-nav-item sii-nav-item--muted sii-nav-item--loading":"sii-nav-item sii-nav-item--muted"}>
-            <span className="sii-nav-glyph" aria-hidden="true">▦</span> Catálogo académico
+            <SiiNavIcon name="book" /> Catálogo académico
             <span className="sii-nav-soon">{unavailableLabel}</span>
           </span>}
           {allAcademicModuleLinks.map(module => {
             const allowed=Boolean(institutionId && modules.some(item=>item.id===module.id));
-            return allowed ? <Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route}
+            return allowed ? <Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} title={module.label}
               className={active===module.id?'sii-nav-item sii-nav-item--active':'sii-nav-item'}
               aria-current={active===module.id?'page':undefined} onClick={()=>setMenuOpen(false)}>
-              <span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}
+              <SiiNavIcon name={iconForModule(module.id)} />{module.label}
             </Link> : <span key={module.id} className={verifying?"sii-nav-item sii-nav-item--muted sii-nav-item--loading":"sii-nav-item sii-nav-item--muted"}>
-              <span className="sii-nav-glyph" aria-hidden="true">{module.glyph}</span>{module.label}
+              <SiiNavIcon name={iconForModule(module.id)} />{module.label}
               <span className="sii-nav-soon">{unavailableLabel}</span>
             </span>;
           })}
