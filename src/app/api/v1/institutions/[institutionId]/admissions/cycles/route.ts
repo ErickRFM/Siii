@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextResponse,type NextRequest } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
 import { admissionCycles } from '../../../../../../../../db/schema';
-import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import { can } from '@/shared/auth/capabilities';
+import { getIdentity, authorizeCapability } from '@/shared/auth/session';
 import { admissionCycleSchema } from '@/modules/admissions/validation';
+import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
+import {audit,requestId} from '@/shared/http/request-context';
+import {domainTransaction,withDomainErrors,DomainAccessDenied} from '@/modules/consolidation/domain-boundary';
 
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
@@ -19,26 +21,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
   }
 }
 
-export async function POST(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
+export const POST=withDomainErrors(async(request: NextRequest, { params }: { params: Promise<{ institutionId: string }> })=>{
   const { institutionId } = await params;
+  if(!assertSameOrigin(request))return jsonError('INVALID_ORIGIN',403);
   try {
     const user = await getIdentity();
     if (!user) {
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Sesión requerida' } }, { status: 401 });
     }
 
-    const accessList = await getInstitutionAccess(user.id);
-    const access = accessList.find(a => a.institutionId === institutionId);
+    const access = await authorizeCapability(institutionId,'admissions.manage');
     if (!access) {
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
     }
 
-    const subject = { id: user.id, active: true, mustChangePassword: user.mustChangePassword, grants: access.grants };
-    if (!can(subject, 'institutions.manage', { institutionId })) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente para gestionar convocatorias de admisión' } }, { status: 403 });
-    }
-
-    const json = await request.json();
+    const json = await request.json().catch(()=>null);
     const parseResult = admissionCycleSchema.safeParse(json);
     if (!parseResult.success) {
       return NextResponse.json({ error: { code: 'INVALID_INPUT', message: 'Datos de convocatoria no válidos', details: parseResult.error.flatten() } }, { status: 400 });
@@ -46,17 +43,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ ins
 
     const { code, name, startDate, endDate, status } = parseResult.data;
 
-    const [cycle] = await db.insert(admissionCycles).values({
+    const cycle=await domainTransaction(access,{capability:'admissions.manage'},async tx=>{
+     const [cycle] = await tx.insert(admissionCycles).values({
       institutionId,
       code,
       name,
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       status,
-    }).returning();
+     }).returning();
+     await audit(tx,{institutionId,actorUserId:access.identity.id,requestId:requestId(request.headers),action:'admissions.cycle.created',target:'admission_cycle:'+cycle.id,details:{before:null,after:cycle}});
+     return cycle;
+    });
 
     return NextResponse.json({ data: cycle }, { status: 201 });
-  } catch {
+  } catch(error) {
+    if(error instanceof DomainAccessDenied)throw error;
     return NextResponse.json({ error: { code: 'CYCLE_CREATE_FAILED', message: 'No se pudo crear la convocatoria de admisión' } }, { status: 500 });
   }
-}
+});

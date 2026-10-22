@@ -127,3 +127,12 @@ La sección SEC-02 anterior conserva su estado histórico. PR75 ya está integra
 
 Incremento local `d3da6485fe7be992e312f17759df10044f5da45d`:22/22 HTTP reales en PostgreSQL sintético local55439 y HTTP3201;813unitarias, lint/typecheck/build aprobados. Evidencia RED→GREEN y límites en [SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md](../audits/SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md). No cambia F2 ni schema/journal/migraciones. La futura FK requiere0025 después de0024 de PR80; SEC-03/06 globales y SEC-04 DB siguen abiertos. Sin push, merge ni operación productiva desde esta tarea.
 Reconciliación C32 sobre main@2be56cd: las filas SEC-02 conservan su evidencia histórica. Admisiones añade la capacidad específica admissions.manage para control_escolar/admin/super_admin, comprobación final SQL y sesión independiente de aspirante; Caja conserva la autoridad de SEC-02. Las pruebas de PR75 se mantienen sin desactivar.
+
+## SEC-03/SEC-06 — escritores de admisiones (22 octubre 2026)
+
+| Operación | Autoridad y atomicidad | Evidencia | Estado |
+|---|---|---|---|
+| POST institutions/:id/admissions/cycles | admissions.manage institucional + MFA; origen; autorización inicial/final en domainTransaction; ciclo+audit(actor/tenant/recurso/requestId/antes-después) juntos | admissions-write-authority-http.test.ts: admin/Control Escolar, negativos y rollback;30/30 HTTP focales en build producción local3202 | REVISADO LOCALMENTE; CI/INTEGRACIÓN PENDIENTES |
+| POST institutions/:id/admissions/applications/:applicationId/decision | Mismos controles; lectura/bloqueo por id+tenant; historial append y estado serializados; auditoría TX por transición | Misma suite: solicitud ajena404, revocación/expiración bajo espera, fallo de audit500 sin cambios, dos decisiones y dos audits | REVISADO LOCALMENTE; CI/INTEGRACIÓN PENDIENTES |
+
+SEC-03/SEC-06 permanecen PARCIALES fuera de estos escritores. Sin migraciones ni cambios de producción; ver [informe de escritores](../audits/SIII_ADMISSIONS_WRITE_AUTHORITY_2026-10-22.md).

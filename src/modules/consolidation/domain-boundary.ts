@@ -9,18 +9,25 @@ import {gradeScopeAllows} from '@/modules/grading/teaching-scope';
 import {jsonError} from '@/shared/auth/guards';
 import {logger} from '@/shared/logging';
 import {requestId} from '@/shared/http/request-context';
-class DomainAccessDenied extends Error {}
+import {can,type Capability} from '@/shared/auth/capabilities';
+export class DomainAccessDenied extends Error {}
 export class DomainConflict extends Error {}
 type Actor={identity:{id:string;sessionId:string};access:InstitutionAccess};
-type Options={permission?:Permission;grade?:{sectionId:string;capability:'grades.manage'|'grades.publish'}};
+type Options=
+ |{permission?:Permission;capability?:never;grade?:never}
+ |{permission?:never;capability:Extract<Capability,'admissions.manage'|'institutions.read'>;grade?:never}
+ |{permission?:never;capability?:never;grade:{sectionId:string;capability:'grades.manage'|'grades.publish'}};
 /** All domain writers serialize against institutional/user administration and revalidate before commit. */
 export async function domainTransaction<T>(actor:Actor,options:Options,work:(tx:Transaction)=>Promise<T>):Promise<T>{
+ // Do not route section-scoped/step-up capabilities through the institutional shortcut.
+ if([options.permission,options.capability,options.grade].filter(value=>value!==undefined).length>1
+  ||options.capability!==undefined&&!['admissions.manage','institutions.read'].includes(options.capability))throw new DomainAccessDenied();
  return db.transaction(async tx=>{
   async function check(){
    const critical=options.permission==='users.manage'||options.grade?.capability==='grades.publish';
    const current=await lockInstitutionContext(tx,actor.identity,actor.access,undefined,critical);
    if(!current)throw new DomainAccessDenied();
-   const allowed=options.grade?await gradeScopeAllows(tx,current,options.grade.sectionId,options.grade.capability):legacyAllows(current.subject,options.permission??'academic.manage',actor.access.institutionId,new Date());
+   const allowed=options.grade?await gradeScopeAllows(tx,current,options.grade.sectionId,options.grade.capability):options.capability?can(current.subject,options.capability,{institutionId:current.access.institutionId,status:'active'},current.now):legacyAllows(current.subject,options.permission??'academic.manage',actor.access.institutionId,new Date());
    if(!allowed)throw new DomainAccessDenied();
   }
   await check();const result=await work(tx);await check();return result;
