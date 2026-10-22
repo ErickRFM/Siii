@@ -6,8 +6,8 @@
   --sii-interaction-curve: cubic-bezier(.22, 1, .36, 1);
 }
 @keyframes sii-ui-enter {
-  from { opacity: 0; transform: translate3d(0, 7px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  from { transform: translate3d(0, 7px, 0); }
+  to { transform: translate3d(0, 0, 0); }
 }
 @media (prefers-reduced-motion: no-preference) {
   /* Animate the actual workspace; do not animate the whole shell on every navigation. */
