@@ -413,3 +413,21 @@ html[data-sii-theme="dark"]{
   color:var(--sii-kit-control-muted-ink);
   background:var(--sii-kit-control-disabled-bg);
 }
+
+/* Theme change is atomic for visual colors. Never interpolate dark text onto a
+   light/transparent intermediate surface (or vice versa): this makes WCAG AA
+   true for every frame, including immediately after a keyboard theme toggle.
+   Keep transforms, borders and elevation animations for the premium feel. */
+.sii-app :is(
+  .sii-outline-button,.sii-logout,.sii-theme-toggle,
+  .sii-badge,.sii-small-count,.sii-access-feature small,
+  .sii-catalog-form input,.sii-catalog-form select,.sii-catalog-form textarea,
+  .sii-catalog-toolbar input,.sii-catalog-edit input,
+  .sii-module-card,.sii-metric,.sii-panel,.sii-catalog-table-panel,.sii-catalog-create
+){
+  transition-property:transform,box-shadow,border-color;
+}
+.sii-app :is(.sii-outline-button,.sii-logout,.sii-badge,.sii-small-count,.sii-access-feature small,
+  .sii-catalog-form input,.sii-catalog-form select,.sii-catalog-form textarea){
+  transition-property:none;
+}
