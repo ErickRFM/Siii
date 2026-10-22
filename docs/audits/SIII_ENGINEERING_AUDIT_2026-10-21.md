@@ -76,11 +76,19 @@ La rama de seguridad se reconcilió con f75d4882 mediante merge normal, sin conf
 
 Actualización de publicación: PR79 corrige DEP-01 y QA-02 en una rama independiente; instalación reproducible y813unitarias verificadas, audit0. PR75 incorpora ese prerrequisito para su gate y mantiene separado el diff de autorización. La consulta reciente de abiertos también devuelve PR72 y PR76–78 (sidebar, movimiento y patrones UI), además del61 histórico. Se conservan sin merge y sin duplicar su alcance. Las cifras del inventario de ramas siguen siendo la instantánea inicial identificada por su SHA, no una afirmación sobre ramas creadas después.
 
+## Consolidación verificada — 22 octubre2026
+
+Actualización añadida sin reemplazar la instantánea histórica anterior. El coordinador verificó integración en orden PR79 → PR81 → PR75 y `main@2be56cd1647b0feecf6649628f1bf8381b928833` con [CI39734285341 SUCCESS](https://github.com/ErickRFM/Siii/actions/runs/39734285341). SEC-02, DEP-01 y QA-02 quedan resueltos en esa base integrada: CI de75 ejecutó813unitarias,387integraciones PostgreSQL y79UI, build y audit0; evidencia local del coordinador27HTTP/79UI y preflight. La excepción humana se limitó al preview Vercel de79/81 por cuota;75 tuvo todos los checks verdes, incluido Vercel. No implica despliegue ni disponibilidad productiva.
+
+El incremento financiero del [reporte específico](SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md) aporta defensa API parcial a SEC-03/04/06: dos escritores con MFA/revalidación/auditoría y JOIN por tenant, con22HTTP locales. No añade FK ni migración; la defensa DB de SEC-04 requiere una futura0025 después de0024 de PR80. Permanecen abiertos SEC-01/05 en80, SEC-03/04/06 globales, UX-01, integración Compañero y las puertas de operación/producción. Estos resultados no acreditan completar todas las funciones del sistema.
+
 ## Nota de reconciliación — 22 octubre 2026
 
 Se conserva íntegro el informe histórico anterior. Según la coordinación recibida, PR80 se integró en main8b2bd2c6 con el árbol de95f9252c; premerge39736372668/39736367431 SUCCESS (818 unitarias/404 PostgreSQL/84 UI), Vercel SUCCESS; postmerge39738330828 seguía pendiente al comunicarse. Esto no acredita disponibilidad productiva de SEC01/05: siguen las puertas de sender/scheduler, roles efectivos, ledger y publicación. PR82 finanzas a08c39f sobre8b2bd2c6 tenía67 HTTP/818 unitarias/build local verdes y revisión aprobada, con CI pendiente y cuota Vercel24h; no se afirma un merge de82.
 
 Incremento local SEC-03/SEC-06: sólo POST convocatorias/dictámenes, autoridad admissions.manage/MFA y auditoría TX,30 HTTP focales de producción local y826 unitarias tras corrección de revisión. Revisión independiente aprobada; estado PARCIAL, claim y demás escritores siguen pendientes. Evidencia, límites y CI pendiente del commit exacto: [informe de escritores de admisiones](SIII_ADMISSIONS_WRITE_AUTHORITY_2026-10-22.md). No hay acciones productivas ni cambios a migraciones/F2/UI.
+
+Estado al reconciliar esta rama: PR80 quedó integrado en8b2bd2c6 y su CI postmerge39738330828 terminó SUCCESS. PR82 quedó integrado en9b472c30 tras ambos Actions39738454424/39738449179 SUCCESS (818unitarias,426integraciones,84UI), revisión aprobada y excepción humana exclusivamente de cuota Vercel. Main9b472c30 coincide con el árbol probado a08c39f6; CI postmerge39741008118 pendiente al redactar. La defensa DB de SEC-04, claim y UX-01 continúan abiertos; no se ha modificado producción.
 
 ## Seguimiento acotado SEC06 — claim (22 octubre2026)
 

@@ -115,6 +115,17 @@ La evidencia sintética local/CI no acredita producción. Puertas de publicació
 
 Esta corrección no completa Admisiones/Caja. La sesión de aspirante, verificación real de correo, autorización y auditoría de escritores, integridad financiera cruzada y paginación siguen abiertos en `docs/audits/SIII_ENGINEERING_AUDIT_2026-10-21.md`. Sin migraciones ni cambios productivos.
 
+## Actualización22 octubre2026 — autoridad financiera API
+
+La sección SEC-02 anterior conserva su estado histórico. PR75 ya está integrado después de79→81 en `main@2be56cd1647b0feecf6649628f1bf8381b928833`, con [CI39734285341 SUCCESS](https://github.com/ErickRFM/Siii/actions/runs/39734285341). La corrección SEC-02 está integrada y verificada; esto no acredita disponibilidad productiva ni completar Admisiones/Caja.
+
+| Operación | Autoridad y transacción | Compatibilidad y evidencia | Estado |
+|---|---|---|---|
+| POST /api/v1/institutions/:id/financials/fee-types | `authorizeCapability('institutions.manage')`; `financialTransaction` reutiliza `lockWriteCapability` inicial y FINAL con MFA vigente; origen válido; auditoría `financial.fee_type.create` en la misma TX, con actor/tenant/recurso/requestId/after mínimo | Conserva201 `{data}`,401/403/400 y500 `CREATE_FAILED`; administrador con MFA sin step-up sigue autorizado. `financial-write-authority-http.test.ts`: éxito/auditoría, MFA/origen, rollback, revocación durante esperas y caducidad durante auditoría | LOCAL VERIFICADO; CI DE RAMA PENDIENTE; API PARCIAL |
+| POST /api/v1/institutions/:id/financials/orders | Mismo helper central de capacidades, comprobación inicial/FINAL y auditoría `financial.order.create` en TX; concepto/alumno del tenant y `payerUserId` con membresía de esa institución, bajo locks | Misma respuesta de éxito y permisos; referencias ajenas/inexistentes400 uniforme `INVALID_INPUT`. Alumno graduado permitido sin agregar elegibilidad académica. Misma suite: seis referencias, MFA, auditoría/rollback y revocación/caducidad concurrentes | LOCAL VERIFICADO; CI DE RAMA PENDIENTE; SEC-04 DB ABIERTO |
+| GET /api/v1/institutions/:id/financials/orders | Autoridad administrativa SEC-02 integrada; JOIN de concepto y alumno por ID+institución | Conserva campos/listado; fixture administrativa inserta fila histórica tenantA→alumnoB y verifica nombre/apellidos/matrícula null. No afirma rechazo de esa fila por la DB mientras falte FK compuesta | LOCAL VERIFICADO; CI DEL NUEVO JOIN PENDIENTE; SEC-04 DB ABIERTO |
+
+Incremento local `d3da6485fe7be992e312f17759df10044f5da45d`:22/22 HTTP reales en PostgreSQL sintético local55439 y HTTP3201;813unitarias, lint/typecheck/build aprobados. Evidencia RED→GREEN y límites en [SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md](../audits/SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md). No cambia F2 ni schema/journal/migraciones. La futura FK requiere0025 después de0024 de PR80; SEC-03/06 globales y SEC-04 DB siguen abiertos. Sin push, merge ni operación productiva desde esta tarea.
 Reconciliación C32 sobre main@2be56cd: las filas SEC-02 conservan su evidencia histórica. Admisiones añade la capacidad específica admissions.manage para control_escolar/admin/super_admin, comprobación final SQL y sesión independiente de aspirante; Caja conserva la autoridad de SEC-02. Las pruebas de PR75 se mantienen sin desactivar.
 
 ## SEC-03/SEC-06 — escritores de admisiones (22 octubre 2026)
