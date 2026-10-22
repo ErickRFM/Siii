@@ -12,6 +12,7 @@ import './sii-motion-polish.css';
 import './sii-system-coherence.css';
 import './sii-premium-kit.css';
 import './sii-kit-components.css';
+import './sii-interactions.css';
 export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'SII · Sistema Institucional Integral',description:'Plataforma institucional de gestión académica'};
 export default async function RootLayout({children}:{children:React.ReactNode}){
