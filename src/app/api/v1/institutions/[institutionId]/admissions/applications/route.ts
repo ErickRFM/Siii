@@ -1,28 +1,16 @@
 import { NextResponse } from 'next/server';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
 import { admissionApplications, applicantProfiles, academicPrograms } from '../../../../../../../../db/schema';
-import { authorizeCapability, getIdentity, getInstitutionAccess } from '@/shared/auth/session';
-import { admissionApplicationSchema } from '@/modules/admissions/validation';
+import { authorizeCapability, getIdentity } from '@/shared/auth/session';
+import {institutionVisibility} from '@/shared/auth/read-access';
 
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
   try {
-    const user = await getIdentity();
-    if (!user) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Sesión requerida' } }, { status: 401 });
-    }
-
-    const accessList = await getInstitutionAccess(user.id);
-    const access = accessList.find(a => a.institutionId === institutionId);
-    if (!access) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403 });
-    }
-
-    // Applicant PII requires the same administrative authority as institutional management.
-    if (!await authorizeCapability(institutionId, 'institutions.manage')) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Permiso insuficiente' } }, { status: 403 });
-    }
+    if (!await getIdentity()) return NextResponse.json({error:{code:'UNAUTHORIZED',message:'Sesión requerida'}},{status:401,headers:{'Cache-Control':'no-store'}});
+    const authorization=await authorizeCapability(institutionId, 'admissions.manage');
+    if (!authorization) return NextResponse.json({error:{code:'FORBIDDEN'}},{status:403,headers:{'Cache-Control':'no-store'}});
 
     const applications = await db.select({
       id: admissionApplications.id,
@@ -44,53 +32,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
     .from(admissionApplications)
     .innerJoin(applicantProfiles, eq(admissionApplications.applicantId, applicantProfiles.id))
     .innerJoin(academicPrograms, eq(admissionApplications.programId, academicPrograms.id))
-    .where(eq(admissionApplications.institutionId, institutionId))
+    .where(and(eq(admissionApplications.institutionId, institutionId),institutionVisibility(authorization.subject,authorization.access,authorization.identity.sessionId,'admissions.manage')))
     .orderBy(desc(admissionApplications.createdAt));
 
-    return NextResponse.json({ data: applications }, { status: 200 });
+    return NextResponse.json({ data: applications }, { status: 200,headers:{'Cache-Control':'no-store'} });
   } catch {
     return NextResponse.json({ error: { code: 'APPLICATIONS_FETCH_FAILED', message: 'No se pudieron consultar las solicitudes de admisión' } }, { status: 500 });
   }
 }
 
-export async function POST(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
-  const { institutionId } = await params;
-  try {
-    const json = await request.json();
-    const { applicantId, ...applicationInput } = json;
-
-    if (!applicantId) {
-      return NextResponse.json({ error: { code: 'INVALID_INPUT', message: 'Identificador de aspirante requerido' } }, { status: 400 });
-    }
-
-    const [applicantProfile] = await db.select().from(applicantProfiles).where(eq(applicantProfiles.id, applicantId)).limit(1);
-    if (!applicantProfile) {
-      return NextResponse.json({ error: { code: 'APPLICANT_NOT_FOUND', message: 'Aspirante no registrado' } }, { status: 404 });
-    }
-
-    const parseResult = admissionApplicationSchema.safeParse(applicationInput);
-    if (!parseResult.success) {
-      return NextResponse.json({ error: { code: 'INVALID_INPUT', message: 'Datos de solicitud de admisión no válidos', details: parseResult.error.flatten() } }, { status: 400 });
-    }
-
-    const { cycleId, programId, campusId, notes } = parseResult.data;
-
-    const applicationNumber = `ADM-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-
-    const [application] = await db.insert(admissionApplications).values({
-      institutionId,
-      cycleId,
-      applicantId,
-      programId,
-      campusId: campusId ?? null,
-      applicationNumber,
-      status: 'submitted',
-      submittedAt: new Date(),
-      notes: notes ?? null,
-    }).returning();
-
-    return NextResponse.json({ data: application }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: { code: 'APPLICATION_CREATE_FAILED', message: 'No se pudo crear la solicitud de admisión' } }, { status: 500 });
-  }
-}
+export {submitApplication as POST} from '@/modules/admissions/applications';

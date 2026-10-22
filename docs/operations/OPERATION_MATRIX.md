@@ -93,6 +93,19 @@ La validación de secciones usa su propia base sintética PostgreSQL local y el 
 |---|---|---|---|---|---|
 | OP-030 | enqueueAcademicSection(tx,scope) y worker académico interno | Backend; autoridad heredada de la futura transacción académica autorizada | Snapshot completo tenant/section, sourceVersion atómico, body cifrado congelado, audit TX, lease/retry/CAS; flag disabled por defecto | academic-outbox.test.ts unit/integration, migración0018 y perfil managed | FOUNDATION LOCAL; WRITERS/TRANSPORTE/RECONCILIACIÓN/API MÓVIL PENDIENTES |
 
+## C32 — identidad de aspirante (2026-10-22)
+
+| Operación | Actor y controles | Evidencia real | Estado |
+|---|---|---|---|
+| Registro y reenvío /api/v1/admissions/register, /resend | Público, Origin explícito y límites IP/cuenta; respuesta genérica; correo cifrado; reenvío sólo buzón sin prueba | applicant-registration-http.test.ts; admissions-security.spec.ts | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| Confirmación /api/v1/admissions/verify | Prueba de buzón de un uso/30min y contraseña nueva; rechazo de hash legacy; revocación de sesiones y auditoría TX; sin login automático | applicant-registration-http.test.ts: legacy, expiración, replay, rollback; admissions-security.spec.ts | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| Login, session y logout de aspirante | Sesión independiente con bearer hash, cookie HttpOnly/Secure/Strict, 8h, rotación y revocación; expiración tras esperas | applicant-registration-http.test.ts; admissions-security.spec.ts | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| POST institutions/:id/admissions/applications | Dueño derivado de sesión; rechaza applicantId; institución/catálogos vigentes; folio atómico e idempotencia; auditoría TX | applicant-registration-http.test.ts: suplantación, tenant, permisos, concurrencia, rollback | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| GET y SSR de Admisiones institucional | admissions.manage institucional + MFA; autorización final SQL por sesión/versión/grant/tenant; sin shell duplicado | applicant-registration-http.test.ts: guest, scoped, foreign, MFA y revocación durante SELECT | IMPLEMENTED; PUBLICACIÓN PENDIENTE |
+| Worker de confirmación de aspirante | Runtime siii_app, payload cifrado/remitente congelado, leases e idempotencia; proveedor no verifica el buzón | applicant-registration-http.test.ts; worker/applicants.ts | IMPLEMENTED; CORREO REAL/SCHEDULER PENDIENTES |
+
+La evidencia sintética local/CI no acredita producción. Puertas de publicación y reconciliación C31: [informe C31/C32](../audits/SIII_C31_C32_2026-10-21.md).
+
 ## Corrección SEC-02 — listados sensibles (21 octubre 2026)
 
 | Operación | Autoridad efectiva | Compatibilidad y alcance | Evidencia | Estado |
@@ -113,3 +126,4 @@ La sección SEC-02 anterior conserva su estado histórico. PR75 ya está integra
 | GET /api/v1/institutions/:id/financials/orders | Autoridad administrativa SEC-02 integrada; JOIN de concepto y alumno por ID+institución | Conserva campos/listado; fixture administrativa inserta fila histórica tenantA→alumnoB y verifica nombre/apellidos/matrícula null. No afirma rechazo de esa fila por la DB mientras falte FK compuesta | LOCAL VERIFICADO; CI DEL NUEVO JOIN PENDIENTE; SEC-04 DB ABIERTO |
 
 Incremento local `d3da6485fe7be992e312f17759df10044f5da45d`:22/22 HTTP reales en PostgreSQL sintético local55439 y HTTP3201;813unitarias, lint/typecheck/build aprobados. Evidencia RED→GREEN y límites en [SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md](../audits/SIII_FINANCIAL_WRITE_AUTHORITY_2026-10-22.md). No cambia F2 ni schema/journal/migraciones. La futura FK requiere0025 después de0024 de PR80; SEC-03/06 globales y SEC-04 DB siguen abiertos. Sin push, merge ni operación productiva desde esta tarea.
+Reconciliación C32 sobre main@2be56cd: las filas SEC-02 conservan su evidencia histórica. Admisiones añade la capacidad específica admissions.manage para control_escolar/admin/super_admin, comprobación final SQL y sesión independiente de aspirante; Caja conserva la autoridad de SEC-02. Las pruebas de PR75 se mantienen sin desactivar.
