@@ -43,13 +43,26 @@ async function main() {
              c.relforcerowsecurity AS rls_forced,
              (
                CASE WHEN to_regrole('anon') IS NULL THEN false
-                 ELSE has_any_column_privilege('anon', c.oid, 'SELECT,INSERT,UPDATE,DELETE')
+                 ELSE has_table_privilege('anon', c.oid, 'SELECT,INSERT,UPDATE,DELETE')
+                   OR has_any_column_privilege('anon', c.oid, 'SELECT,INSERT,UPDATE,REFERENCES')
                END
                OR
                CASE WHEN to_regrole('authenticated') IS NULL THEN false
-                 ELSE has_any_column_privilege('authenticated', c.oid, 'SELECT,INSERT,UPDATE,DELETE')
+                 ELSE has_table_privilege('authenticated', c.oid, 'SELECT,INSERT,UPDATE,DELETE')
+                   OR has_any_column_privilege('authenticated', c.oid, 'SELECT,INSERT,UPDATE,REFERENCES')
                END
-               OR has_any_column_privilege('PUBLIC', c.oid, 'SELECT,INSERT,UPDATE,DELETE')
+               OR EXISTS (
+                 SELECT 1 FROM aclexplode(coalesce(c.relacl, acldefault('r', c.relowner))) grant
+                 WHERE grant.grantee = 0
+                   AND grant.privilege_type IN ('SELECT','INSERT','UPDATE','DELETE')
+               )
+               OR EXISTS (
+                 SELECT 1 FROM pg_attribute attr
+                 CROSS JOIN LATERAL aclexplode(attr.attacl) grant
+                 WHERE attr.attrelid = c.oid AND attr.attnum > 0
+                   AND grant.grantee = 0
+                   AND grant.privilege_type IN ('SELECT','INSERT','UPDATE','REFERENCES')
+               )
              ) AS api_grants
       FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
