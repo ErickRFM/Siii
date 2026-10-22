@@ -147,3 +147,8 @@ Se añade evidencia sin sustituir el historial anterior. El incremento local des
 RED funcional preservado para3rutas básicas,ACK durantePOST/GET/assurance, foco y403 tardío. GREEN final local33/33UI reales de producción en DB sintética propia55439/HTTP3210 (15regresiones+18nuevos),826unitarias,lint/tipos/buildNext15.5.28 y2Axe poblados0. Revisión independiente cerró ImportantACK; sin nuevos hallazgos funcionales, diffcheck0. Se conservan825/826 inicial por timeout5000ms,23/25 inicial e instrumentaciones fallidas sin atribuir causa no probada ni relajar plazos/throttle. [Informe puntual y límites](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md).
 
 UX-01 permanece PARCIAL y no acredita producción ni CI del incremento. El proveedor aumenta auth/me aun conMapvacío/fuera del libro; FirstLoad grading115→118kB, compartido103kB, sin promesa de rendimiento. No se certifica foco físico del sistema en headless, lector/zoom manual, sesión rotada ni logout externo sin rechazo. #85 fue sustituido funcionalmente en reconciliaciones92/94 según coordinación; esta rama no duplica ni publica esos PR y requiere reconciliación posterior por el coordinador. Sólo commit local autorizado; sin push/PR/merge ni operación productiva.
+
+
+## UX-01 — composición única PR94 con main4614 (22 octubre2026)
+
+Se comprobó igualdad de la base de #94 con4ad, se integró f85370f y main4614 mediante merges normales. Los cinco archivos de producto/UI permanecen idénticos al incremento33/33UI revisado; workflow idéntico a main. Toda evidencia histórica conservada. [Detalle de composición](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI exacto publicado y revisión siguen pendientes; no acredita persistencia, accesibilidad manual global ni fotografía premium del SHA futuro.
