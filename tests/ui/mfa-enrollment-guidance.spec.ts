@@ -40,7 +40,13 @@ test('manual key fragments stay local, restart requires a password and six app d
  expect((await sql.query('SELECT consumed_at IS NOT NULL AS consumed FROM auth_mfa_enrollments WHERE id=$1',[enrollmentId])).rows[0].consumed).toBe(true);
  await code.fill(await generate({secret:replacement,algorithm:'sha1',digits:6,period:30,crypto:new NodeCryptoPlugin()}));
  const verified=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/mfa/verify')&&response.request().method()==='POST');
+ // Recovery codes appear before router.refresh commits the security metadata.
+ const previousTitle=await page.locator('head > title').elementHandle();
+ const securityRefresh=page.waitForResponse(response=>new URL(response.url()).pathname==='/dashboard/security'&&response.request().method()==='GET'&&response.request().headers()['rsc']==='1'&&!response.request().headers()['next-router-prefetch']);
  await page.getByRole('button',{name:'Activar autenticador',exact:true}).click();expect((await verified).status()).toBe(200);expect(verificationRequests).toBe(1);
  await expect(page.getByRole('region',{name:'Guarda estos códigos de recuperación'}).locator('code')).toHaveCount(10);await expect(page.getByLabel('Clave manual del autenticador')).toHaveCount(0);
+ const refreshed=await securityRefresh;expect(refreshed.status()).toBe(200);
+ await expect.poll(()=>previousTitle?.evaluate(title=>title.isConnected)).toBe(false);
+ await expect(page).toHaveTitle('SII · Sistema Institucional Integral');
  const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();expect(axe.violations).toEqual([]);
 });
