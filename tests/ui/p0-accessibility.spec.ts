@@ -148,3 +148,27 @@ test('mobile drawer locks background scrolling and restores keyboard focus',asyn
  await expect(page.locator('body')).not.toHaveCSS('overflow','hidden');
  await expect(trigger).toBeFocused();
 });
+
+test('premium desktop sidebar collapses, persists and mobile drawer stays accessible',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await catalog(page);
+ const app=page.locator('.sii-app');
+ const nav=page.getByRole('navigation',{name:'Navegación institucional'});
+ await expect(nav.getByRole('link',{name:'Inicio'})).toBeVisible();
+ const collapse=page.getByRole('button',{name:'Contraer menú lateral'});
+ await expect(collapse).toHaveAttribute('aria-expanded','true');
+ await collapse.click();
+ await expect(app).toHaveClass(/sii-app--collapsed/);
+ await expect(page.getByRole('button',{name:'Expandir menú lateral'})).toHaveAttribute('aria-expanded','false');
+ await expect(page.locator('.sii-nav-glyph').first()).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>localStorage.getItem('siii:sidebar-collapsed'))).toBe('true');
+ await page.reload();
+ await expect(app).toHaveClass(/sii-app--collapsed/);
+ await page.getByRole('button',{name:'Expandir menú lateral'}).click();
+ await expect(app).not.toHaveClass(/sii-app--collapsed/);
+ await page.setViewportSize({width:390,height:844});
+ await page.getByRole('button',{name:'Abrir navegación'}).click();
+ await expect(nav.getByRole('link',{name:'Inicio'})).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#sii-sidebar-mobile')).toBeHidden();
+});
