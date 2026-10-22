@@ -129,24 +129,30 @@ jobs:
         shell: bash
         run: |
           export COMPANION_PUSH_PROBE_NODE="$(command -v node)"
-          ./gradlew :services:api:test --tests 'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest' --rerun-tasks --no-build-cache --no-configuration-cache --no-parallel --max-workers=1 -Pkotlin.incremental=false -Pkotlin.compiler.execution.strategy=in-process --console=plain 2>&1 | tee "$GITHUB_WORKSPACE/.p0-local/companion-contract.log"
-      - name: Require exactly one live contract without skips
+          ./gradlew :services:api:test --tests 'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest' --tests 'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest' --rerun-tasks --no-build-cache --no-configuration-cache --no-parallel --max-workers=1 -Pkotlin.incremental=false -Pkotlin.compiler.execution.strategy=in-process --console=plain 2>&1 | tee "$GITHUB_WORKSPACE/.p0-local/companion-contract.log"
+      - name: Require live contract and receiver regressions without skips
         if: always()
         shell: bash
         run: |
-          python3 - .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest.xml <<'PY'
+          python3 - .p0-local/companion-contract/services/api/build/test-results/test <<'PY'
           import sys
+          from pathlib import Path
           import xml.etree.ElementTree as ET
-          suite = ET.parse(sys.argv[1]).getroot()
-          expected_name = 'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest'
-          counts = {key: int(suite.get(key, '-1')) for key in ('tests', 'failures', 'errors', 'skipped')}
-          expected = {'tests': 1, 'failures': 0, 'errors': 0, 'skipped': 0}
-          cases = suite.findall('testcase')
-          if suite.tag != 'testsuite' or suite.get('name') != expected_name or counts != expected:
-              raise SystemExit('Live contract must execute exactly once with no failures, errors, or skips')
-          if len(cases) != 1 or any(cases[0].find(tag) is not None for tag in ('skipped', 'failure', 'error')):
-              raise SystemExit('Live contract testcase did not complete successfully')
-          print('Live contract: tests=1 failures=0 errors=0 skipped=0')
+          expected_suites = {
+              'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest': 1,
+              'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest': 9,
+              'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest': 11,
+          }
+          for name, count in expected_suites.items():
+              suite = ET.parse(Path(sys.argv[1]) / ('TEST-' + name + '.xml')).getroot()
+              counts = {key: int(suite.get(key, '-1')) for key in ('tests', 'failures', 'errors', 'skipped')}
+              expected = {'tests': count, 'failures': 0, 'errors': 0, 'skipped': 0}
+              cases = suite.findall('testcase')
+              if suite.tag != 'testsuite' or suite.get('name') != name or counts != expected:
+                  raise SystemExit(name + ': unexpected counts or unsuccessful suite')
+              if len(cases) != count or any(case.find(tag) is not None for case in cases for tag in ('skipped', 'failure', 'error')):
+                  raise SystemExit(name + ': testcase did not complete successfully')
+              print(name + ': tests=' + str(count) + ' failures=0 errors=0 skipped=0')
           PY
       - name: Receiver sources remain fixed and clean
         if: always()
@@ -162,6 +168,8 @@ jobs:
           path: |
             .p0-local/companion-contract.log
             .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest.xml
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 3

@@ -113,3 +113,7 @@ CI89@01a5956 conserva un87/88UI document-title y un SUCCESS826/485/88 del mismoS
 ## Seguimiento INT — contrato local firmado Siii/Compañero (22 octubre 2026)
 
 [Informe acotado del contrato real](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md): receptor Compañero586ec206 sin cambios, Mongo8.0.34 exclusivamente loopback y sender TypeScript productivo. TDD real:1fallo por CLI ausente →1aprobado/0fallos/0errores/0skips; seis HTTP202/200/401/200/401/401, receipt/hash único, proyección interna, aislamiento tenant y0cuentas nativas. Diez guards de child real y836unitarias aprobadas; lint/tipos/build/audit0 locales. Job CI independiente añadido, ejecución Ubuntu/Node22 pendiente de publicación; revisión independiente sin hallazgos. No acredita outbox operativo, revocaciones/tombstones, lector público ni móvil; no cambia flags, F2 o producción y no cierra INT-04/INT-05. Se conserva íntegro el historial anterior.
+
+## Contrato real y regresiones receptoras — evidencia incremental22octubre
+
+Sobre receptor fijo586ec206 intacto, se ejecutaron21/21 casos conjuntos (senderSIII real1+Mongo proyección9+Mongo inbox11), sin fallos/errores/skips. La lectura XML exacta y nueve negativos del gate evitan contar suites ausentes/omitidas como aprobadas. [Detalle y límites](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md#ampliación-verificada-regresiones-existentes-del-receptor). El nuevo jobCI permanece sin ejecutar/publicar; productores INT04, reconciliación operativa INT05 y consumo móvil siguen abiertos. Ninguna migración productiva ni flag habilitado.
