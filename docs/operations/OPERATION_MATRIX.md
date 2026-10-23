@@ -199,3 +199,15 @@ Composición LOCAL PREPARATORIA posterior: merge0834b352 (prueba revisada de88 +
 | Salida desde otras vistas/revalidación | beforeunload global del proveedor; step-up válido invalida/oculta/revalida sin borrar; foco sólo tras GET vigente y sin robar control elegido |33UI,826unitarias,lint/tipos/build,2Axe poblados0 y revisión independiente sin pendientes | UX-01 PARCIAL; SIN PERSISTENCIA DURABLE |
 
 [Informe y evidencia RED/GREEN](../audits/SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). Se conserva toda la matriz anterior. Coste observado: FirstLoad grading115→118kB (compartido103kB estable) y auth/me adicional aun con memoria vacía/fuera del libro; no es optimización ni benchmark. No hay bloqueo universal de router ni detección de sesión/logout externo sin rechazo; no lector/zoom manual certificado. Base de85 reconciliada por92/94 según coordinación; no se publica PR duplicado. Sin backend, SQL, CSS, producción ni push/merge desde este incremento.
+
+## INT-04A parcial — productores de asignación docente (22 octubre2026)
+
+| Operación | Autoridad y evento | Evidencia local | Estado |
+|---|---|---|---|
+| POST institutions/:id/assignments |academic.manage/origen/MFA existente; domainTransaction inicial/final; fila+teacher.assign+enqueueAcademicSection/audit queued atómicos, requestId servidor compartido, scope SQL devuelto |RED201 sin evento;39ONdev y39ON+39OFF producción, negativos/rollback/carreras |LOCAL REVISADO; UNIT/CI/INTEGRACIÓN PENDIENTES |
+| PATCH misma ruta, retiro |mismos controles; upsert completo, excluye sólo docente revocado y permite teachers vacío sin borrar grupo; contador/snapshot bajo locks existentes |RED200 sin evento nuevo; dos retiros bajo barreraSQL, máximaversión igual estadofinal; revocación/caducidad final403 y rollback |INT-04 PARCIAL; SIN TRANSPORTE NI MÓVIL CERTIFICADOS |
+
+[Informe y límites](../audits/SIII_ACADEMIC_ASSIGNMENT_OUTBOX_2026-10-22.md). ON sólo en proceso sintético y nuevo pasoCI focal aprobado, después de integración estándarOFF/antesbuild; harness original genera claves nuevas/restaurables. No cambia otros productores, F2, Compañero, SQL/schema/flags productivos. Límites500docentes/500matrículas históricas/3000ocurrencias/1MiB abortan entero ON, incluido un retiro. Lint/tipos/build0 y revisión sinC/I/M; npmtest sigue825/826 por timeout5000ms del child sin diff, también4/5 aislado. Diagnóstico externo910ms no equivale al gate; control de main y commit pendientes de coordinación. Sin push/PR/merge ni operación productiva.
+
+
+Actualización de cierre local INT-04A: coordinación completó control A main5cb826/826(13.45s) y control B en esta rama826/826(8.17s), mismo npmtest estándar/Node24.18.0/Vitest4.1.12, cincoflagsunset registrados y sin diff unit/config/migrador/lock. No hubo cambio de fuente entre fallos y B. Gate local actual aprobado; se conservan dos825/826, aislado4/5 y diagnóstico910ms, sin atribuir causa ni mejora. Lint/tipos/build0,39ONdev,39ON+39OFF producción, claves/CIcontrato0 y revisión independienteC/I/M0. Commit local autorizado; reconciliación con mainfc65 y CI/publicación pendientes. No se declara cerrada INT-04 global ni producción.
