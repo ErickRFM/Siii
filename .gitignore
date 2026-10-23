@@ -10,3 +10,5 @@ coverage/
 
 /.p0-local/
 /.superpowers/
+/.artifacts/
+/.idea/
