@@ -177,3 +177,7 @@ Se comprobó igualdad de la base de #94 con4ad, se integró f85370f y main4614 m
 ## UX-01 — base financiera de main100 (22 octubre2026)
 
 El merge normal1db59f88 incorpora main5cb49f75 al mismo PR94; producto/UI idéntico al incremento33casos revisado y workflow financiero intacto. Se conserva el SUCCESS UI completo del SHA previo0ed como evidencia histórica, sin atribuirlo al nuevo SHA. Auditoría/OPmatrix mantienen prefijo main y evidencia única. [Composición y límites](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI final y main post100 siguen pendientes al preparar esta nota; sin migraciones en DB antigua/productiva.
+
+## Seguimiento INT — contrato real SIII/Compañero (22 octubre 2026)
+
+Reconciliado sobre main actual sin arrastrar historia divergente. El job aislado `companion-live-contract` ejecuta el sender TypeScript real contra el receptor Ktor fijado586ec206 y Mongo8.0.34 en loopback, y exige 21 casos (1 contrato firmado + 9 proyección + 11 inbox) sin fallos, errores ni skips. Los negativos XML rechazan suites ausentes u omitidas. No modifica flags, F2, datos ni el repositorio Compañero. Evidencia y límites en [informe del contrato](SIII_COMPANION_LIVE_CONTRACT_2026-10-22.md). CI remoto del SHA final pendiente; no acredita consumo Android/iOS, revocaciones fuente ni reconciliación operativa.
