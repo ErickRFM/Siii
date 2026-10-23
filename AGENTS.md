@@ -19,7 +19,7 @@ SIS universitario multitenant, backend institucional en Next.js/TypeScript + Dri
 
 ## Rama de trabajo y estado verificable
 - Trunk **real**: `main`; antes de empezar, verificar el HEAD remoto y los PR abiertos. Nunca basarse en el SHA histórico de esta documentación.
-- La rama por defecto de GitHub aparece como `feat/sis-foundation` en la auditoría del 2026-10-19: **es una configuración pendiente de corregir en Settings**, no la rama desde la que deben partir nuevos cambios.
+- Rama predeterminada de GitHub corregida a **main** y verificada el 2026-10-22; origin/HEAD local apunta a origin/main. La referencia a feat/sis-foundation en la auditoria del 2026-10-19 es historica. Verificar nuevamente el HEAD remoto y los PR antes de trabajar.
 - `docs/agent/MASTER_PROMPT.md` conserva contexto histórico (2026-10-13). Las afirmaciones de progreso antiguas no prevalecen sobre `main` ni las pruebas actuales.
 - Admisiones F01 (#50), vínculo de expediente F02 (#51), Caja F03 (#52), elegibilidad/matrícula F04 (#54), permisos posteriores a MFA (#53) y correcciones C00/C01 (#56) constaban integrados al revisar `main`. **Código fusionado no acredita disponibilidad productiva ni flujo completo E2E**.
 - PRs #40 (paginación), #48 (invitaciones) y #49 (roadmap) aparecían abiertos; comprobar su estado nuevamente y reconciliarlos, no duplicar.

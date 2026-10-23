@@ -177,3 +177,22 @@ Se comprobó igualdad de la base de #94 con4ad, se integró f85370f y main4614 m
 ## UX-01 — base financiera de main100 (22 octubre2026)
 
 El merge normal1db59f88 incorpora main5cb49f75 al mismo PR94; producto/UI idéntico al incremento33casos revisado y workflow financiero intacto. Se conserva el SUCCESS UI completo del SHA previo0ed como evidencia histórica, sin atribuirlo al nuevo SHA. Auditoría/OPmatrix mantienen prefijo main y evidencia única. [Composición y límites](SIII_GRADEBOOK_NAVIGATION_MEMORY_2026-10-22.md). CI final y main post100 siguen pendientes al preparar esta nota; sin migraciones en DB antigua/productiva.
+
+## INT-04A parcial — asignación y retiro docente producen snapshot (22 octubre2026)
+
+Se conserva íntegro el historial anterior. Incremento local desde main5cb49f75 agrega sólo enqueueAcademicSection existente a POST/PATCH assignments dentro de su domainTransaction y comparte requestId servidor entre audit de negocio/queued. Conserva autoridad inicial/final, MFA, tenant y contratos. Revocar genera upsert con docentes restantes o array vacío; no elimina grupo ni modifica receptor/helpers/schema/otros productores. SQL barriers con dos actores verifican versiones1/2 y payload de mayor versión igual estadofinal; final grant/session denegado revierte evento/contador/audits/mutación.
+
+RED funcional2/2 por eventos0vs1 y1vs2, seguido39/39ONdev y39/39ON+39/39OFF sobre build producción; lint/tipos/build0, ciclo real claves/restauración/startupfailure0 y contratoYAML0. CI añade sólo paso focalON después de integración estándarOFF, claves siempre nuevas en harness existente después de guard DB y restauradas en teardown/fallo. Revisión independiente de fuente sinCritical/Important/Minor. [Informe acotado y fallos conservados](SIII_ACADEMIC_ASSIGNMENT_OUTBOX_2026-10-22.md).
+
+Gate unitario NO aprobado: dos npmtest825/826 y archivo aislado4/5 por timeout5000ms del child migration-safety sin cambios; diagnóstico directo910ms/denegación correcta no sustituye npmtest. Coordinación hará control main5cb antes de decidir commit; sin más retries ni cambio de tiempos/prewarm/config. INT-04 siguePARCIAL: límites existentes pueden abortar un retiro ON, otros productores/revocaciones/transporte operativo/consumo móvil no se certifican. Sin flags fuera del proceso sintético, F2, Compañero, fuentes SQL, datos reales ni push/PR/merge/producción.
+
+
+Actualización de cierre local INT-04A: coordinación completó control A main5cb826/826(13.45s) y control B en esta rama826/826(8.17s), mismo npmtest estándar/Node24.18.0/Vitest4.1.12, cincoflagsunset registrados y sin diff unit/config/migrador/lock. No hubo cambio de fuente entre fallos y B. Gate local actual aprobado; se conservan dos825/826, aislado4/5 y diagnóstico910ms, sin atribuir causa ni mejora. Lint/tipos/build0,39ONdev,39ON+39OFF producción, claves/CIcontrato0 y revisión independienteC/I/M0. Commit local autorizado; reconciliación con mainfc65 y CI/publicación pendientes. No se declara cerrada INT-04 global ni producción.
+
+## SEC-03 / SEC-06: alcance original integrado y verificado (22 octubre 2026)
+
+Estado actualizado: corregidos en codigo para las cuatro operaciones privilegiadas originales y la auditoria transaccional de orders/decision/claim. Revision independiente sin defecto abierto sobre 5cb49f75 y CI posterior de main fc65c149 verde (run 39862602189: 826 unitarias, 539 integracion, 121 UI y legacy 1). Evidencia por ruta, causa, prueba negativa y limites: [SIII_SEC03_SEC06_SCOPE_CLOSURE_2026-10-22.md](SIII_SEC03_SEC06_SCOPE_CLOSURE_2026-10-22.md). No se extiende el cierre a todos los escritores ni a RLS/despliegue productivo. Se conserva integro el inventario historico.
+
+## GitHub: trunk predeterminado corregido y protecciones verificadas (22 octubre 2026)
+
+Se cambio exclusivamente default_branch de feat/sis-foundation a main y se verifico por API; origin/HEAD local sincronizado. El HEAD no cambio por esa operacion y no se tocaron Vercel, reglas, secretos ni produccion. Proteccion clasica main devuelve404; consulta de reglas efectivas main devuelve[]. Ruleset activo Sii25429833 tiene include[]/exclude[], sin bypass, con deletion/non_fast_forward: no acredita exigencia efectiva de CI o revisiones en main. La configuracion de protecciones permanece pendiente; no se debilitaron reglas existentes. AGENTS actualiza solo este estado factual.

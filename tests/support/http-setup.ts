@@ -31,10 +31,17 @@ export default async function setup(){
  process.env.SIII_APPLICANT_EMAIL_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
  process.env.SIII_APPLICANT_EMAIL_ACTIVE_KEY_ID ||= 'fixture';
  process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
+ const academicFixture=process.env.SIII_ACADEMIC_OUTBOX_ENABLED==='true';
+ const academicKeys=['SIII_ACADEMIC_OUTBOX_KEYS','SIII_ACADEMIC_OUTBOX_ACTIVE_KEY_ID'] as const;
+ const previousAcademicKeys=academicKeys.map(key=>[key,process.env[key]] as const);
+ function restoreAcademicKeys(){if(academicFixture)for(const[key,value]of previousAcademicKeys){if(value===undefined)delete process.env[key];else process.env[key]=value;}}
+ if(academicFixture){process.env.SIII_ACADEMIC_OUTBOX_KEYS=JSON.stringify({fixture:randomBytes(32).toString('base64')});process.env.SIII_ACADEMIC_OUTBOX_ACTIVE_KEY_ID='fixture';}
+ try{
  const instance=randomUUID();
  const child=spawn(process.execPath,['tests/support/server.mjs'],{env:{...process.env,SIII_TEST_INSTANCE:instance,NODE_ENV:process.env.SIII_HTTP_TEST_PRODUCTION==='1'?'production':'development',DATABASE_URL:appUrl.toString(),SIII_MFA_KEYS:process.env.SIII_MFA_KEYS,SIII_MFA_ACTIVE_KEY_ID:process.env.SIII_MFA_ACTIVE_KEY_ID,SIII_INVITATION_KEYS:process.env.SIII_INVITATION_KEYS,SIII_INVITATION_ACTIVE_KEY_ID:process.env.SIII_INVITATION_ACTIVE_KEY_ID,SIII_PASSWORD_RESET_KEYS:process.env.SIII_PASSWORD_RESET_KEYS,SIII_PASSWORD_RESET_ACTIVE_KEY_ID:process.env.SIII_PASSWORD_RESET_ACTIVE_KEY_ID,SIII_PUBLIC_ORIGIN:process.env.SIII_PUBLIC_ORIGIN,NEXT_TELEMETRY_DISABLED:'1'},stdio:['ignore',log,log],windowsHide:true});
  closeSync(log);
  async function stop(){
+  try{
   // Await this exact child before releasing the port for another suite.
   const exited=new Promise(resolve=>{if(child.exitCode!==null)resolve(null);else child.once('exit',resolve);});
   child.kill();
@@ -42,6 +49,7 @@ export default async function setup(){
   await exited;clearTimeout(forced);
   await admin.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename=$1',[role]);
   await admin.query('DROP ROLE "'+role+'"');await admin.end();
+  }finally{restoreAcademicKeys();}
  }
  const started=Date.now();
  while(Date.now()-started<60000){
@@ -59,4 +67,5 @@ export default async function setup(){
   await new Promise(resolve=>setTimeout(resolve,300));
  }
  await stop();throw new Error('HTTP_TEST_SERVER_TIMEOUT');
+ }catch(error){restoreAcademicKeys();throw error;}
 }
