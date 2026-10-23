@@ -1,0 +1,29 @@
+2026-10-19 20:23:01.909 CST [25692] LOG:  iniciando PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-10-19 20:23:01.918 CST [25692] LOG:  escuchando en la dirección IPv6 «::1», port 5433
+2026-10-19 20:23:01.918 CST [25692] LOG:  escuchando en la dirección IPv4 «127.0.0.1», port 5433
+2026-10-19 20:23:01.972 CST [3152] LOG:  el sistema de bases de datos fue apagado en 2026-10-19 20:22:46 CST
+2026-10-19 20:23:02.005 CST [25692] LOG:  el sistema de bases de datos está listo para aceptar conexiones
+2026-10-19 20:23:02.143 CST [25692] LOG:  proceso ayudante «logical replication launcher» (PID 19472) fue terminado por una excepción 0xC000013A
+2026-10-19 20:23:02.143 CST [25692] HINT:  Vea el archivo «ntstatus.h» para una descripción del valor hexadecimal.
+2026-10-19 20:23:02.144 CST [25692] LOG:  terminando todos los otros procesos de servidor activos
+2026-10-19 20:23:02.148 CST [25692] LOG:  se recibió petición de apagado rápido
+^C2026-10-19 20:23:42.410 CST [33392] LOG:  iniciando PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-10-19 20:23:42.414 CST [33392] LOG:  no se pudo traducir el nombre de host «'*'», servicio «5433» a dirección: Name or service not known
+2026-10-19 20:23:42.414 CST [33392] WARNING:  no se pudo crear el socket de escucha para «'*'»
+2026-10-19 20:23:42.414 CST [33392] FATAL:  no se pudo crear ningún socket TCP/IP
+2026-10-19 20:23:42.416 CST [33392] LOG:  el sistema de bases de datos está apagado
+2026-10-19 20:23:47.654 CST [47332] LOG:  iniciando PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-10-19 20:23:47.661 CST [47332] LOG:  escuchando en la dirección IPv6 «::1», port 5433
+2026-10-19 20:23:47.661 CST [47332] LOG:  escuchando en la dirección IPv4 «127.0.0.1», port 5433
+2026-10-19 20:23:47.714 CST [11500] LOG:  el sistema de bases de datos fue interrumpido; última vez en funcionamiento en 2026-10-19 20:23:01 CST
+2026-10-19 20:23:47.878 CST [11500] LOG:  el sistema de bases de datos no fue apagado apropiadamente; se está efectuando la recuperación automática
+2026-10-19 20:23:47.881 CST [11500] LOG:  largo de registro no válido en 0/1574428: se esperaba al menos 24, se obtuvo 0
+2026-10-19 20:23:47.881 CST [11500] LOG:  no se requiere redo
+2026-10-19 20:23:47.885 CST [38124] LOG:  empezando checkpoint: end-of-recovery immediate wait
+2026-10-19 20:23:47.893 CST [38124] LOG:  checkpoint completo: escritos 3 búfers (0.0%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=0.002 s, sync=0.001 s, total=0.011 s; archivos sincronizados=2, más largo=0.001 s, promedio=0.001 s; distancia=0 kB, estimación=0 kB; lsn=0/1574428, lsn de redo=0/1574428
+2026-10-19 20:23:47.934 CST [47332] LOG:  el sistema de bases de datos está listo para aceptar conexiones
+2026-10-19 20:23:47.991 CST [47332] LOG:  proceso ayudante «logical replication launcher» (PID 40900) fue terminado por una excepción 0xC000013A
+2026-10-19 20:23:47.991 CST [47332] HINT:  Vea el archivo «ntstatus.h» para una descripción del valor hexadecimal.
+2026-10-19 20:23:47.991 CST [47332] LOG:  terminando todos los otros procesos de servidor activos
+2026-10-19 20:23:47.996 CST [47332] LOG:  se recibió petición de apagado rápido
+^C
