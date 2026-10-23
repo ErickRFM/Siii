@@ -58,10 +58,10 @@ async function main() {
                )
                OR EXISTS (
                  SELECT 1 FROM pg_attribute attr
-                 CROSS JOIN LATERAL aclexplode(attr.attacl) grant
+                 CROSS JOIN LATERAL aclexplode(attr.attacl) column_acl
                  WHERE attr.attrelid = c.oid AND attr.attnum > 0
-                   AND grant.grantee = 0
-                   AND acl_entry.privilege_type IN ('SELECT','INSERT','UPDATE','REFERENCES')
+                   AND column_acl.grantee = 0
+                   AND column_acl.privilege_type IN ('SELECT','INSERT','UPDATE','REFERENCES')
                )
              ) AS api_grants
       FROM pg_class c
