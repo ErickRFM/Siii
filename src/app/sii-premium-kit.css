@@ -269,7 +269,8 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 }
 
 /* Quiet entrance and interaction motion borrowed from premium dashboard UI kits. */
-@keyframes sii-kit-appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* Keep text fully opaque throughout entry, including headings on fast routes. */
+@keyframes sii-kit-appear{from{transform:translateY(10px)}to{transform:translateY(0)}}
 @keyframes sii-kit-glow{from{opacity:.3;transform:translateX(-18%)}to{opacity:.85;transform:translateX(18%)}}
 .sii-app .sii-page> :is(.sii-page-eyebrow,.sii-page-heading,.sii-summary-grid,.sii-panel,.sii-content-grid,.sii-modules-section,.sii-academic,.sii-users,.sii-institution-admin){
   animation:sii-kit-appear 440ms var(--sii-kit-ease) both;

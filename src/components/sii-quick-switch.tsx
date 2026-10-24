@@ -4,75 +4,62 @@ import Link from 'next/link';
 import type {Route} from 'next';
 import {useRouter} from 'next/navigation';
 import {useEffect,useRef,useState} from 'react';
+import {Search} from 'lucide-react';
 import {SiiNavIcon} from './sii-nav-icon';
+import {Button} from '@/components/ui/button';
+import {Command,CommandEmpty,CommandGroup,CommandInput,CommandItem,CommandList} from '@/components/ui/command';
+import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle} from '@/components/ui/dialog';
 
 /** Client-only navigation projection, not an authorization boundary. */
 export type SiiQuickLink={id:string;label:string;href:string;group:'Plataforma'|'Gestión académica'};
 export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
  const [open,setOpen]=useState(false);
- const [query,setQuery]=useState('');
  const router=useRouter();
- const input=useRef<HTMLInputElement>(null);
- const dialog=useRef<HTMLDivElement>(null);
  const trigger=useRef<HTMLButtonElement>(null);
  useEffect(()=>{
   const onKey=(event:KeyboardEvent)=>{
    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){
     event.preventDefault();setOpen(value=>!value);
    }
-   if(event.key==='Escape')setOpen(false);
   };
   document.addEventListener('keydown',onKey);
   return ()=>document.removeEventListener('keydown',onKey);
  },[]);
  useEffect(()=>{
-  if(!open){setQuery('');return;}
-  const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
-  const returnFocus=trigger.current;
-  const oldBodyOverflow=document.body.style.overflow;
-  document.body.style.overflow='hidden';
-  input.current?.focus();
-  return ()=>{
-   document.body.style.overflow=oldBodyOverflow;
-   if(previous?.isConnected)previous.focus();else returnFocus?.focus();
-  };
- },[open]);
- const filtered=links.filter(link=>link.label.toLocaleLowerCase('es-MX').includes(query.trim().toLocaleLowerCase('es-MX')));
- useEffect(()=>{
   if(!open)return;
-  const onTab=(event:KeyboardEvent)=>{
-   if(event.key!=='Tab')return;
-   const focusable=Array.from(dialog.current?.querySelectorAll<HTMLElement>('input,button:not([disabled]),a[href]')??[]);
-   const first=focusable[0],last=focusable[focusable.length-1];
-   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
-   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
-  };
-  document.addEventListener('keydown',onTab);
-  return ()=>document.removeEventListener('keydown',onTab);
+  const frame=requestAnimationFrame(()=>document.querySelector<HTMLInputElement>('[cmdk-input]')?.focus());
+  return ()=>cancelAnimationFrame(frame);
  },[open]);
+ const go=(href:string)=>{setOpen(false);router.push(href as Route);};
  return <>
-  <button ref={trigger} type="button" className="sii-command-trigger" onClick={()=>setOpen(true)}
-   aria-label="Buscar módulos" aria-haspopup="dialog" aria-expanded={open} aria-controls={open?"sii-quick-switch":undefined}>
-   <SiiNavIcon name="search"/><span className="sii-command-trigger-label">Buscar módulo…</span><kbd>Ctrl K</kbd>
-  </button>
-  {open&&<div className="sii-command-overlay">
-   <button type="button" className="sii-command-backdrop" onClick={()=>setOpen(false)} aria-label="Cerrar búsqueda"/>
-   <div ref={dialog} id="sii-quick-switch" className="sii-command-dialog" role="dialog" aria-modal="true" aria-labelledby="sii-command-heading">
-    <h2 id="sii-command-heading">Ir a un módulo</h2>
-    <div className="sii-command-search"><SiiNavIcon name="search"/><input ref={input} type="search" aria-label="Buscar secciones" placeholder="Busca una sección disponible…" value={query} onChange={e=>setQuery(e.target.value)}
-       onKeyDown={e=>{
-        if(e.key==='ArrowDown'){e.preventDefault();dialog.current?.querySelector<HTMLAnchorElement>('.sii-command-link')?.focus();}
-        if(e.key==='Enter'&&filtered[0]){e.preventDefault();setOpen(false);router.push(filtered[0].href as Route);}
-       }}/><button type="button" aria-label="Cerrar buscador" onClick={()=>setOpen(false)}>Esc</button></div>
-    <div className="sii-command-results">
-     {filtered.length===0?<p className="sii-command-empty" role="status">No hay módulos disponibles con ese nombre.</p>:
-      (['Plataforma','Gestión académica'] as const).map(group=>{
-       const matches=filtered.filter(link=>link.group===group);
-       return matches.length?<section key={group}><h3>{group}</h3><div className="sii-command-list">{matches.map(link=><Link key={link.id} href={link.href as Route} className="sii-command-link" onClick={()=>setOpen(false)}>{link.label}<span aria-hidden="true">↗</span></Link>)}</div></section>:null;
+  <Button ref={trigger} type="button" variant="outline" onClick={()=>setOpen(true)}
+   aria-label="Buscar módulos" aria-haspopup="dialog" aria-expanded={open} aria-controls={open?'sii-quick-switch':undefined}
+   className="sii-command-trigger h-9 gap-2 border-border bg-card px-3 text-muted-foreground shadow-none">
+   <Search className="size-4"/><span className="sii-command-trigger-label hidden lg:inline">Buscar módulo…</span><kbd className="hidden rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] lg:inline">Ctrl K</kbd>
+  </Button>
+  <Dialog open={open} onOpenChange={setOpen}>
+   <DialogContent id="sii-quick-switch" onCloseAutoFocus={event=>{event.preventDefault();trigger.current?.focus();}} className="sii-ui gap-0 overflow-hidden p-0 sm:max-w-xl">
+    <DialogHeader className="border-b px-4 py-3">
+     <DialogTitle className="text-base">Ir a un módulo</DialogTitle>
+     <DialogDescription>Solo aparecen secciones habilitadas para tu acceso.</DialogDescription>
+    </DialogHeader>
+    <Command label="Buscar secciones" loop>
+     <CommandInput aria-label="Buscar secciones" placeholder="Busca una sección disponible…"/>
+     <CommandList className="max-h-[min(60vh,420px)]">
+      <CommandEmpty>No hay módulos disponibles con ese nombre.</CommandEmpty>
+      {(['Plataforma','Gestión académica'] as const).map(group=>{
+       const matches=links.filter(link=>link.group===group);
+       return matches.length?<CommandGroup key={group} heading={group}>
+        {matches.map(link=><CommandItem key={link.id} value={link.label} onSelect={()=>go(link.href)} className="gap-3 py-2.5">
+         <SiiNavIcon name={link.id==='overview'?'home':link.id==='security'?'shield':link.id==='users'?'users':link.id==='roles'?'roles':link.id==='invitations'?'mail':link.id==='academic'?'book':link.id==='administration'?'institution':'services'}/>
+         <Link href={link.href as Route} onClick={()=>setOpen(false)} className="flex-1">{link.label}</Link>
+         <span aria-hidden="true" className="text-muted-foreground">↗</span>
+        </CommandItem>)}
+       </CommandGroup>:null;
       })}
-    </div>
-    <div className="sii-command-footer">Solo aparecen secciones habilitadas para tu acceso.</div>
-   </div>
-  </div>}
+     </CommandList>
+    </Command>
+   </DialogContent>
+  </Dialog>
  </>;
 }

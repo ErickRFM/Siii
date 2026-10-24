@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {NativeSelect} from '@/components/ui/native-select';
+import {Textarea} from '@/components/ui/textarea';
+
 
 import { useEffect, useState } from 'react';
 
@@ -141,20 +146,20 @@ export default function AdmissionsPortal({
 
       {!applicant && (
         <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap:'wrap', gap: '0.5rem' }}>
-          <button
+          <Button variant="default"
             type="button"
             className={mode === 'register' ? 'sii-primary-button' : 'sii-outline-button'}
             onClick={() => { setMode('register'); setError(''); setSuccess(''); }}
           >
             Crear cuenta de aspirante
-          </button>
-          <button
+          </Button>
+          <Button variant="default"
             type="button"
             className={mode === 'login' ? 'sii-primary-button' : 'sii-outline-button'}
             onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
           >
             Iniciar sesión de aspirante
-          </button>
+          </Button>
         </div>
       )}
 
@@ -162,27 +167,27 @@ export default function AdmissionsPortal({
         <form onSubmit={handleRegister} className="sii-form-grid">
           <div className="sii-field">
             <label htmlFor="reg-email">Correo electrónico *</label>
-            <input id="reg-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            <Input id="reg-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
           </div>
           <div className="sii-field">
             <label htmlFor="reg-first-name">Nombre(s) *</label>
-            <input id="reg-first-name" type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} />
+            <Input id="reg-first-name" type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} />
           </div>
           <div className="sii-field">
             <label htmlFor="reg-last-name">Apellido(s) *</label>
-            <input id="reg-last-name" type="text" required value={lastName} onChange={e => setLastName(e.target.value)} />
+            <Input id="reg-last-name" type="text" required value={lastName} onChange={e => setLastName(e.target.value)} />
           </div>
           <div className="sii-field">
             <label htmlFor="reg-phone">Teléfono de contacto</label>
-            <input id="reg-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
+            <Input id="reg-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
           </div>
           <div className="sii-field">
             <label htmlFor="reg-curp">CURP / Identificación oficial</label>
-            <input id="reg-curp" type="text" value={curp} onChange={e => setCurp(e.target.value)} />
+            <Input id="reg-curp" type="text" value={curp} onChange={e => setCurp(e.target.value)} />
           </div>
-          <button type="submit" disabled={loading} className="sii-primary-button">
+          <Button variant="default" type="submit" disabled={loading} className="sii-primary-button">
             {loading ? 'Registrando...' : 'Registrarme como aspirante'}
-          </button>
+          </Button>
         </form>
       )}
 
@@ -190,23 +195,23 @@ export default function AdmissionsPortal({
         <form onSubmit={handleLogin} className="sii-form-grid">
           <div className="sii-field">
             <label htmlFor="login-email">Correo electrónico *</label>
-            <input id="login-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            <Input id="login-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
           </div>
           <div className="sii-field">
             <label htmlFor="login-password">Contraseña *</label>
-            <input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+            <Input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-          <button type="submit" disabled={loading} className="sii-primary-button">
+          <Button variant="default" type="submit" disabled={loading} className="sii-primary-button">
             {loading ? 'Ingresando...' : 'Iniciar sesión'}
-          </button>
-          <button type="button" className="sii-outline-button" disabled={loading||!email} onClick={resend}>Reenviar verificación</button>
+          </Button>
+          <Button variant="outline" type="button" className="sii-outline-button" disabled={loading||!email} onClick={resend}>Reenviar verificación</Button>
         </form>
       )}
 
       {cycles.length===0&&<p role="status">No hay convocatorias abiertas en este momento.</p>}
       {applicant && (
         <div>
-          <button type="button" className="sii-outline-button" onClick={logout} disabled={loading}>Cerrar sesión de aspirante</button>
+          <Button variant="outline" type="button" className="sii-outline-button" onClick={logout} disabled={loading}>Cerrar sesión de aspirante</Button>
           <div className="sii-info-banner" style={{ marginBottom: '1rem' }}>
             Aspirante autenticado(a): <strong>{applicant.firstName} {applicant.lastName}</strong> ({applicant.email})
           </div>
@@ -221,30 +226,30 @@ export default function AdmissionsPortal({
             <form onSubmit={handleSubmitApplication} className="sii-form-grid">
               <div className="sii-field">
                 <label htmlFor="app-cycle">Convocatoria de admisión *</label>
-                <select id="app-cycle" required value={selectedCycleId} onChange={e => setSelectedCycleId(e.target.value)}>
+                <NativeSelect id="app-cycle" required value={selectedCycleId} onChange={e => setSelectedCycleId(e.target.value)}>
                   {cycles.map(cycle => (
                     <option key={cycle.id} value={cycle.id}>{cycle.name} ({cycle.code})</option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
 
               <div className="sii-field">
                 <label htmlFor="app-program">Carrera / Programa académico *</label>
-                <select id="app-program" required value={selectedProgramId} onChange={e => setSelectedProgramId(e.target.value)}>
+                <NativeSelect id="app-program" required value={selectedProgramId} onChange={e => setSelectedProgramId(e.target.value)}>
                   {programs.map(prog => (
                     <option key={prog.id} value={prog.id}>{prog.name} ({prog.code})</option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
 
               <div className="sii-field">
                 <label htmlFor="app-notes">Comentarios o información adicional</label>
-                <textarea id="app-notes" rows={3} value={notes} onChange={e => setNotes(e.target.value)} />
+                <Textarea id="app-notes" rows={3} value={notes} onChange={e => setNotes(e.target.value)} />
               </div>
 
-              <button type="submit" disabled={loading||!selectedCycleId||!selectedProgramId} className="sii-primary-button">
+              <Button variant="default" type="submit" disabled={loading||!selectedCycleId||!selectedProgramId} className="sii-primary-button">
                 {loading ? 'Enviando...' : 'Enviar solicitud de admisión'}
-              </button>
+              </Button>
             </form>
           )}
         </div>

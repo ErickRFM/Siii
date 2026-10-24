@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
+import {NativeSelect} from '@/components/ui/native-select';
+
 import SiiScrollRegion from './sii-scroll-region';
 import {useInstitutionConfirmation} from './sii-confirmation';
 
@@ -212,9 +217,9 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
  {confirmation}
       <AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
-        {availableTabs.map(t=><button type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
+        {availableTabs.map(t=><Button variant="ghost" type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
           className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
-          onClick={()=>choose(t.id)}><span aria-hidden="true">{t.icon}</span>{t.label}</button>)}
+          onClick={()=>choose(t.id)}><span aria-hidden="true">{t.icon}</span>{t.label}</Button>)}
       </div>
       <div className="sii-catalog-summary">
         <div><span className="sii-section-kicker">CATÁLOGO INSTITUCIONAL</span><h2>{selected.label}</h2><p>{selected.description}</p></div>
@@ -230,33 +235,33 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
         <section className="sii-panel sii-catalog-table-panel" aria-label={`Listado de ${selected.label.toLowerCase()}`}>
           <div className="sii-catalog-toolbar">
             <label htmlFor="catalog-search">Buscar en esta página de {selected.label.toLowerCase()}</label>
-            <input id="catalog-search" type="search" value={search} onChange={e=>setSearch(e.target.value)}
+            <Input id="catalog-search" type="search" value={search} onChange={e=>setSearch(e.target.value)}
               placeholder="Nombre, clave o versión…"/>
-            <button type="button" className="sii-outline-button" onClick={()=>{setMutationError('');setNameError(false);if(tab==='curricula')setProgramsReload(value=>value+1);void load(tab,undefined,currentCursor);}} disabled={loading||saving||!online}>Actualizar</button>
+            <Button variant="outline" type="button" className="sii-outline-button" onClick={()=>{setMutationError('');setNameError(false);if(tab==='curricula')setProgramsReload(value=>value+1);void load(tab,undefined,currentCursor);}} disabled={loading||saving||!online}>Actualizar</Button>
           </div>
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>
           :loadError?<div className="sii-empty"><strong>Datos no disponibles.</strong><p>Corrige el problema indicado y vuelve a actualizar.</p></div>
           :filtered.length===0?<div className="sii-empty" role="status"><strong>{search?'No encontramos coincidencias.':'Aún no hay registros.'}</strong><p>{search?'Prueba con otra búsqueda.':canCreate?'Utiliza el formulario para agregar el primero.':'No hay datos disponibles dentro de tu ámbito en este catálogo.'}</p></div>
-          :<SiiScrollRegion label="Tabla del catálogo académico, desplazamiento horizontal"><table className="sii-catalog-table">
-            <thead><tr><th scope="col">Clave / Versión</th><th scope="col">Nombre / Detalle</th><th scope="col">Estado</th>{canManage&&<th scope="col">Acciones</th>}</tr></thead>
-            <tbody>{filtered.map(row=><tr key={row.id}>
-              <td><span className="sii-catalog-code">{row.code??row.version??'—'}</span></td>
-              <td>
-                {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><input id="catalog-edit-name" aria-invalid={nameError||undefined} aria-describedby={nameError?'catalog-mutation-error':undefined} value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><button type="button" disabled={saving||!online} onClick={()=>void saveName(row.id)}>Guardar</button><button type="button" onClick={()=>setEditing(null)}>Cancelar</button></div>
+          :<SiiScrollRegion label="Tabla del catálogo académico, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
+            <TableHeader><TableRow><TableHead scope="col">Clave / Versión</TableHead><TableHead scope="col">Nombre / Detalle</TableHead><TableHead scope="col">Estado</TableHead>{canManage&&<TableHead scope="col">Acciones</TableHead>}</TableRow></TableHeader>
+            <TableBody>{filtered.map(row=><TableRow key={row.id}>
+              <TableCell><span className="sii-catalog-code">{row.code??row.version??'—'}</span></TableCell>
+              <TableCell>
+                {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><Input id="catalog-edit-name" aria-invalid={nameError||undefined} aria-describedby={nameError?'catalog-mutation-error':undefined} value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><Button variant="outline" type="button" disabled={saving||!online} onClick={()=>void saveName(row.id)}>Guardar</Button><Button variant="outline" type="button" onClick={()=>setEditing(null)}>Cancelar</Button></div>
                 :<><strong>{row.name??(programs.find(p=>p.id===row.programId)?.name??'Plan de estudios')}</strong>
                   <small>{row.level?typeLabels[row.level]+' · '+typeLabels[row.modality??'']:row.credits!==undefined?`${row.credits} créditos`:row.startDate?`${String(row.startDate).slice(0,10)} — ${String(row.endDate).slice(0,10)}`:''}</small></>}
-              </td>
-              <td><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></td>
-              {canManage&&<td>{canManageRow(row)?<div className="sii-catalog-actions">
-                {tab!=='curricula'&&<button type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');setNameError(false);setMutationError('');}}>Editar</button>}
-                <button type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</button>
-              </div>:<span>{row.status==='archived'?'Archivado':'Solo consulta'}</span>}</td>}
-            </tr>)}</tbody>
-          </table></SiiScrollRegion>}
+              </TableCell>
+              <TableCell><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></TableCell>
+              {canManage&&<TableCell>{canManageRow(row)?<div className="sii-catalog-actions">
+                {tab!=='curricula'&&<Button variant="outline" type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');setNameError(false);setMutationError('');}}>Editar</Button>}
+                <Button variant="outline" type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</Button>
+              </div>:<span>{row.status==='archived'?'Archivado':'Solo consulta'}</span>}</TableCell>}
+            </TableRow>)}</TableBody>
+          </Table></SiiScrollRegion>}
           <nav className="sii-catalog-pagination" aria-label="Paginación del catálogo">
-            <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!online} onClick={()=>void page('previous')}>Página anterior</button>
+            <Button variant="outline" type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!online} onClick={()=>void page('previous')}>Página anterior</Button>
             <span aria-live="polite">Página {history.length}</span>
-            <button type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!online} onClick={()=>void page('next')}>Siguiente página</button>
+            <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!online} onClick={()=>void page('next')}>Siguiente página</Button>
           </nav>
         </section>
         {canCreate&&<aside className="sii-panel sii-catalog-create">
@@ -264,22 +269,22 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
           <p>Los cambios quedarán guardados y auditados en la institución actual.</p>
           <form key={scopeKey} className="sii-catalog-form" onSubmit={e=>void create(e)}>
             {tab==='curricula'?<>
-              <label>Programa académico<select name="programId" required defaultValue=""><option value="" disabled>Seleccionar programa</option>
+              <label>Programa académico<NativeSelect name="programId" required defaultValue=""><option value="" disabled>Seleccionar programa</option>
                 {programs.filter(p=>hasScopedCapability(access,'curricula.manage','program',p.id)).map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}
-              </select></label>
-              <label>Versión del plan<input name="version" placeholder="2026-A" minLength={2} maxLength={25} pattern="[a-zA-Z0-9][a-zA-Z0-9_-]*" required/></label>
+              </NativeSelect></label>
+              <label>Versión del plan<Input name="version" placeholder="2026-A" minLength={2} maxLength={25} pattern="[a-zA-Z0-9][a-zA-Z0-9_-]*" required/></label>
             </>:<>
-              <label>Clave<input name="code" placeholder={tab==='courses'?'MAT-101':tab==='programs'?'ING-SIS':'2026-A'} minLength={2} maxLength={25}
+              <label>Clave<Input name="code" placeholder={tab==='courses'?'MAT-101':tab==='programs'?'ING-SIS':'2026-A'} minLength={2} maxLength={25}
                 pattern="[a-zA-Z0-9][a-zA-Z0-9_-]*" required/></label>
-              <label>Nombre<input name="name" placeholder="Nombre oficial" minLength={3} maxLength={160} required/></label>
+              <label>Nombre<Input name="name" placeholder="Nombre oficial" minLength={3} maxLength={160} required/></label>
             </>}
             {tab==='programs'&&<>
-              <label>Nivel académico<select name="level" defaultValue="ingenieria" required><option value="ingenieria">Ingeniería</option><option value="licenciatura">Licenciatura</option><option value="tecnico_superior">Técnico Superior</option><option value="maestria">Maestría</option><option value="doctorado">Doctorado</option><option value="otro">Otro</option></select></label>
-              <label>Modalidad<select name="modality" defaultValue="presencial" required><option value="presencial">Presencial</option><option value="mixta">Mixta</option><option value="en_linea">En línea</option></select></label>
+              <label>Nivel académico<NativeSelect name="level" defaultValue="ingenieria" required><option value="ingenieria">Ingeniería</option><option value="licenciatura">Licenciatura</option><option value="tecnico_superior">Técnico Superior</option><option value="maestria">Maestría</option><option value="doctorado">Doctorado</option><option value="otro">Otro</option></NativeSelect></label>
+              <label>Modalidad<NativeSelect name="modality" defaultValue="presencial" required><option value="presencial">Presencial</option><option value="mixta">Mixta</option><option value="en_linea">En línea</option></NativeSelect></label>
             </>}
-            {tab==='courses'&&<label>Créditos<input type="number" name="credits" min={0} max={30} step={1} required defaultValue={6}/></label>}
-            {tab==='terms'&&<><label>Inicio del periodo<input name="startDate" type="date" required/></label><label>Fin del periodo<input name="endDate" type="date" required/></label></>}
-            <button className="sii-submit" type="submit" disabled={saving||!online||(tab==='curricula'&&programs.length===0)}>{saving?'Guardando…':'Guardar registro'} <span aria-hidden="true">→</span></button>
+            {tab==='courses'&&<label>Créditos<Input type="number" name="credits" min={0} max={30} step={1} required defaultValue={6}/></label>}
+            {tab==='terms'&&<><label>Inicio del periodo<Input name="startDate" type="date" required/></label><label>Fin del periodo<Input name="endDate" type="date" required/></label></>}
+            <Button variant="default" className="sii-submit" type="submit" disabled={saving||!online||(tab==='curricula'&&programs.length===0)}>{saving?'Guardando…':'Guardar registro'} <span aria-hidden="true">→</span></Button>
           </form>
         </aside>}
       </div>

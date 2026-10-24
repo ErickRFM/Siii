@@ -1,4 +1,6 @@
 'use client';
+import {Button} from '@/components/ui/button';
+
 
 import {useEffect,useState} from 'react';
 import type {CatalogResource} from '@/modules/academic/catalog-validation';
@@ -45,9 +47,9 @@ export default function AcademicSetupChecklist({institutionId,revision,onOpen,di
     return <li key={step.id} style={{flex:'1 1 160px'}}>
      <strong>{step.label}</strong>
      <p role="status">{canRead?labels[status]:'Sin permiso de consulta'}</p>
-     {canRead&&<><button type="button" className="sii-outline-button" disabled={disabled} onClick={()=>onOpen(step.id)}>Abrir {step.label}</button>
+     {canRead&&<><Button variant="outline" type="button" className="sii-outline-button" disabled={disabled} onClick={()=>onOpen(step.id)}>Abrir {step.label}</Button>
       <p>{hasAnyCapability(access,`${step.id}.manage`)?'Edición según permisos':'Solo consulta'}</p></>}
-     {canRead&&status==='error'&&<button type="button" className="sii-outline-button" disabled={disabled} onClick={()=>setRetry(value=>value+1)}>Reintentar {step.label}</button>}
+     {canRead&&status==='error'&&<Button variant="outline" type="button" className="sii-outline-button" disabled={disabled} onClick={()=>setRetry(value=>value+1)}>Reintentar {step.label}</Button>}
     </li>;
    })}
   </ol>

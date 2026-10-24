@@ -1,4 +1,7 @@
 'use client';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+
 import {type FormEvent,useRef,useState,useEffect} from 'react';
 import {useRouter} from 'next/navigation';
 export default function PasswordChange(){
@@ -25,10 +28,10 @@ export default function PasswordChange(){
   finally{setBusy(false);}
  }
  return <form onSubmit={submit} className="password-form" aria-describedby={notice?'password-feedback':undefined}>
-  <label htmlFor="current-password">Contraseña actual</label><input id="current-password" required type="password" autoComplete="current-password" name="currentPassword" maxLength={512} disabled={busy} aria-invalid={invalid==='current'} aria-describedby={invalid==='current'?'password-feedback':undefined}/>
-  <label htmlFor="new-password">Nueva contraseña</label><input id="new-password" required type="password" autoComplete="new-password" minLength={12} maxLength={128} name="newPassword" disabled={busy} aria-invalid={invalid==='new'} aria-describedby="password-help"/>
+  <label htmlFor="current-password">Contraseña actual</label><Input id="current-password" required type="password" autoComplete="current-password" name="currentPassword" maxLength={512} disabled={busy} aria-invalid={invalid==='current'} aria-describedby={invalid==='current'?'password-feedback':undefined}/>
+  <label htmlFor="new-password">Nueva contraseña</label><Input id="new-password" required type="password" autoComplete="new-password" minLength={12} maxLength={128} name="newPassword" disabled={busy} aria-invalid={invalid==='new'} aria-describedby="password-help"/>
   <p id="password-help">Usa entre 12 y 128 caracteres y una contraseña diferente a la actual.</p>
-  <button type="submit" disabled={busy} className="primary-button" aria-busy={busy}>{busy?'Actualizando…':'Actualizar contraseña'}</button>
+  <Button variant="default" type="submit" disabled={busy} className="primary-button" aria-busy={busy}>{busy?'Actualizando…':'Actualizar contraseña'}</Button>
   {notice&&<p id="password-feedback" ref={feedback} tabIndex={-1} role={error?'alert':'status'}>{notice}</p>}
  </form>;
 }

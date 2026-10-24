@@ -36,16 +36,16 @@ test('teacher navigation exposes only the assigned gradebook module',async({page
  await fixture('teacher');await login(page);await expect(page.getByRole('link',{name:'Calificaciones',exact:true}).first()).toBeVisible();await expect(page.getByRole('link',{name:'Estudiantes y docentes',exact:true})).toHaveCount(0);await expect(page.getByRole('link',{name:'Usuarios',exact:true})).toHaveCount(0);await page.getByRole('link',{name:'Calificaciones',exact:true}).first().click();await expect(page.getByRole('option',{name:'Sin secciones asignadas'})).toBeAttached();await expect(page.locator('main [role="alert"]')).toHaveCount(0);
 });
 
-test('module directory keeps all six areas visible for an authenticated guest without granting links',async({page})=>{
+test('module directory keeps integrated areas visible for an authenticated guest without granting links',async({page})=>{
  await fixture('guest');await login(page);await page.goto('/dashboard');
  const directory=page.getByRole('region',{name:'Módulos de QA consolidación'});
- await expect(directory.locator('.sii-module-card')).toHaveCount(6);
- for(const label of ['Catálogo académico','Estudiantes y docentes','Grupos e inscripciones','Calificaciones','Horarios y aulas','Servicios universitarios']){
+ await expect(directory.locator('.sii-module-card')).toHaveCount(7);
+ for(const label of ['Catálogo académico','Estudiantes y docentes','Grupos e inscripciones','Calificaciones','Horarios y aulas','Servicios universitarios','Admisiones']){
   await expect(directory.getByRole('heading',{name:label,exact:true})).toBeVisible();
   await expect(directory.getByRole('link',{name:new RegExp(label)})).toHaveCount(0);
  }
- await expect(directory.locator('article')).toHaveCount(6);
- await expect(directory.getByText('Sin permiso para este módulo',{exact:true})).toHaveCount(6);
+ await expect(directory.locator('article')).toHaveCount(7);
+ await expect(directory.getByText('Sin permiso para este módulo',{exact:true})).toHaveCount(7);
  await page.goto('/dashboard/institutions/'+tenant);
  const navigation=page.getByRole('navigation',{name:'Gestión académica',exact:true});
  await expect(navigation).toBeVisible();

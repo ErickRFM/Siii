@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
+import {NativeSelect} from '@/components/ui/native-select';
+import {Input} from '@/components/ui/input';
+
 import SiiScrollRegion from './sii-scroll-region';
 import {SiiSectionHeader,SiiSkeleton} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
@@ -71,42 +76,42 @@ export default function AcademicOperations({institutionId}:{institutionId:string
  {confirmation}
   <SiiSectionHeader workspace eyebrow="OPERACIÓN ACADÉMICA" title="Oferta, grupos e inscripciones"
    description="Operaciones reales con validación de institución, cupos y asignaciones."
-   right={<button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar</button>}/>
-  {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar datos</button></div>}
+   right={<Button variant="outline" type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar</Button>}/>
+  {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><Button variant="outline" type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar datos</Button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   {loading?<SiiSkeleton label="Consultando operaciones institucionales"/>:<>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel">
      <h3>Secciones abiertas y cerradas</h3><SiiScrollRegion label="Tabla de secciones, desplazamiento horizontal">
-      <table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Periodo / materia</th><th>Cupo</th><th>Estado</th><th>Acción</th></tr></thead>
-       <tbody>{sections.map(row=><tr key={row.id}><td>{row.code}</td>
-        <td>{terms.find(t=>t.id===(row as Row & {termId?:string}).termId)?.name??'—'} · {courses.find(c=>c.id===(row as Row & {courseId?:string}).courseId)?.name??'—'}</td>
-        <td>{row.capacity}</td><td>{row.status}</td><td><button disabled={busy||row.status!=='open'} type="button" onClick={()=>void revoke('sections',row)}>Cerrar</button></td>
-       </tr>)}</tbody></table></SiiScrollRegion>
+      <Table scrollable={false} className="sii-catalog-table"><TableHeader><TableRow><TableHead>Sección</TableHead><TableHead>Periodo / materia</TableHead><TableHead>Cupo</TableHead><TableHead>Estado</TableHead><TableHead>Acción</TableHead></TableRow></TableHeader>
+       <TableBody>{sections.map(row=><TableRow key={row.id}><TableCell>{row.code}</TableCell>
+        <TableCell>{terms.find(t=>t.id===(row as Row & {termId?:string}).termId)?.name??'—'} · {courses.find(c=>c.id===(row as Row & {courseId?:string}).courseId)?.name??'—'}</TableCell>
+        <TableCell>{row.capacity}</TableCell><TableCell>{row.status}</TableCell><TableCell><Button variant="outline" disabled={busy||row.status!=='open'} type="button" onClick={()=>void revoke('sections',row)}>Cerrar</Button></TableCell>
+       </TableRow>)}</TableBody></Table></SiiScrollRegion>
      {!sections.length&&<p>No hay secciones. Registra la primera con periodo y materia activos.</p>}
     </section>
     <aside className="sii-panel sii-catalog-create"><h3>Nueva sección</h3><form className="sii-catalog-form" onSubmit={e=>void submit(e,'sections')}>
-     <label>Periodo<select name="termId" required defaultValue=""><option value="" disabled>Selecciona periodo</option>{option(terms.filter(x=>x.status==='active'),'term')}</select></label>
-     <label>Materia<select name="courseId" required defaultValue=""><option value="" disabled>Selecciona materia</option>{option(courses.filter(x=>x.status==='active'),'course')}</select></label>
-     <label>Grupo / sección<input name="code" required minLength={2} maxLength={32} placeholder="9A"/></label>
-     <label>Cupo<input name="capacity" type="number" min="1" max="500" required defaultValue="30"/></label>
-     <button type="submit" className="sii-submit" disabled={busy||!terms.length||!courses.length}>Crear sección</button></form></aside>
+     <label>Periodo<NativeSelect name="termId" required defaultValue=""><option value="" disabled>Selecciona periodo</option>{option(terms.filter(x=>x.status==='active'),'term')}</NativeSelect></label>
+     <label>Materia<NativeSelect name="courseId" required defaultValue=""><option value="" disabled>Selecciona materia</option>{option(courses.filter(x=>x.status==='active'),'course')}</NativeSelect></label>
+     <label>Grupo / sección<Input name="code" required minLength={2} maxLength={32} placeholder="9A"/></label>
+     <label>Cupo<Input name="capacity" type="number" min="1" max="500" required defaultValue="30"/></label>
+     <Button variant="default" type="submit" className="sii-submit" disabled={busy||!terms.length||!courses.length}>Crear sección</Button></form></aside>
    </div>
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-create"><h3>Inscribir estudiante</h3>
      <form className="sii-catalog-form" onSubmit={e=>void submit(e,'enrollments')}>
-      <label>Estudiante<select name="studentId" required defaultValue=""><option value="" disabled>Selecciona alumno activo</option>{option(students.filter(x=>x.status==='active'),'student')}</select></label>
-      <label>Sección<select name="sectionId" required defaultValue=""><option value="" disabled>Selecciona sección</option>{option(activeSections,'section')}</select></label>
-      <button type="submit" className="sii-submit" disabled={busy||!students.length||!activeSections.length}>Confirmar inscripción</button>
+      <label>Estudiante<NativeSelect name="studentId" required defaultValue=""><option value="" disabled>Selecciona alumno activo</option>{option(students.filter(x=>x.status==='active'),'student')}</NativeSelect></label>
+      <label>Sección<NativeSelect name="sectionId" required defaultValue=""><option value="" disabled>Selecciona sección</option>{option(activeSections,'section')}</NativeSelect></label>
+      <Button variant="default" type="submit" className="sii-submit" disabled={busy||!students.length||!activeSections.length}>Confirmar inscripción</Button>
      </form><h4>Inscripciones</h4>{enrollments.map(x=><div key={x.id}><span>{students.find(s=>s.id===x.studentId)?.enrollmentNumber??'Alumno'} · {sections.find(s=>s.id===x.sectionId)?.code??'Sección'} — {x.status}</span>
-      {x.status==='enrolled'&&<button type="button" disabled={busy} onClick={()=>void revoke('enrollments',x)}>Retirar</button>}</div>)}</section>
+      {x.status==='enrolled'&&<Button variant="outline" type="button" disabled={busy} onClick={()=>void revoke('enrollments',x)}>Retirar</Button>}</div>)}</section>
     <section className="sii-panel sii-catalog-create"><h3>Asignar docente</h3>
      <form className="sii-catalog-form" onSubmit={e=>void submit(e,'assignments')}>
-      <label>Docente<select name="teacherId" required defaultValue=""><option value="" disabled>Selecciona docente activo</option>{option(teachers.filter(x=>x.status==='active'),'teacher')}</select></label>
-      <label>Sección<select name="sectionId" required defaultValue=""><option value="" disabled>Selecciona sección</option>{option(sections.filter(x=>x.status!=='archived'),'section')}</select></label>
-      <button type="submit" className="sii-submit" disabled={busy||!teachers.length||!sections.length}>Asignar</button>
+      <label>Docente<NativeSelect name="teacherId" required defaultValue=""><option value="" disabled>Selecciona docente activo</option>{option(teachers.filter(x=>x.status==='active'),'teacher')}</NativeSelect></label>
+      <label>Sección<NativeSelect name="sectionId" required defaultValue=""><option value="" disabled>Selecciona sección</option>{option(sections.filter(x=>x.status!=='archived'),'section')}</NativeSelect></label>
+      <Button variant="default" type="submit" className="sii-submit" disabled={busy||!teachers.length||!sections.length}>Asignar</Button>
      </form><h4>Asignaciones vigentes</h4>{assignments.map(x=><div key={x.id}><span>{teachers.find(t=>t.id===x.teacherId)?.employeeNumber??'Docente'} · {sections.find(s=>s.id===x.sectionId)?.code??'Sección'}</span>
-      <button type="button" disabled={busy} onClick={()=>void revoke('assignments',x)}>Revocar</button></div>)}</section>
+      <Button variant="outline" type="button" disabled={busy} onClick={()=>void revoke('assignments',x)}>Revocar</Button></div>)}</section>
    </div>
   </>}
  </div>;

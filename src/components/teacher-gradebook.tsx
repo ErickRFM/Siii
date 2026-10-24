@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {NativeSelect} from '@/components/ui/native-select';
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
+import {Input} from '@/components/ui/input';
+
 import SiiScrollRegion from './sii-scroll-region';
 import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
@@ -156,56 +161,56 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
  {confirmation}
   <SiiSectionHeader workspace eyebrow="DOCENCIA · EVALUACIÓN" title="Libro de calificaciones"
     description="Escala 0–10. Los componentes deben completar 100 % para emitir un acta."/>
-  {(error||identityError)&&<div className="sii-catalog-error" role="alert"><p>{error||identityError}</p><button type="button" className="sii-outline-button" onClick={()=>{if(!identityReady)void revalidateIdentity();else if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</button></div>}
+  {(error||identityError)&&<div className="sii-catalog-error" role="alert"><p>{error||identityError}</p><Button variant="outline" type="button" className="sii-outline-button" onClick={()=>{if(!identityReady)void revalidateIdentity();else if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</Button></div>}
   {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
   <section className="sii-panel sii-catalog-create">
-   <label>Materia y grupo asignado<select value={identityReady?sectionId:''} onChange={e=>void changeSection(e.target.value)} disabled={saving||loading}>
+   <label>Materia y grupo asignado<NativeSelect value={identityReady?sectionId:''} onChange={e=>void changeSection(e.target.value)} disabled={saving||loading}>
     {!sections.length&&<option value="">Sin secciones asignadas</option>}
     {(identityReady?sections:[]).map(s=><option key={s.id} value={s.id}>{s.courseName} · {s.code}</option>)}
-   </select></label>
+   </NativeSelect></label>
   </section>
   {loading?<p role="status">Consultando calificaciones…</p>:snapshot&&<>
    {refreshing&&<p role="status">Actualizando calificaciones…</p>}
    <div className="sii-catalog-layout">
     <section className="sii-panel sii-catalog-table-panel"><h3>Evaluaciones · {weight} % / 100 %</h3>
-     <SiiScrollRegion label="Tabla de evaluación, desplazamiento horizontal"><table className="sii-catalog-table">
-      <thead><tr><th scope="col">Clave</th><th scope="col">Evaluación</th><th scope="col">Ponderación</th></tr></thead>
-      <tbody>{snapshot.components.map(c=><tr key={c.id}><td>{c.code}</td><td>{c.title}</td><td>{c.weight} %</td></tr>)}</tbody></table></SiiScrollRegion>
+     <SiiScrollRegion label="Tabla de evaluación, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
+      <TableHeader><TableRow><TableHead scope="col">Clave</TableHead><TableHead scope="col">Evaluación</TableHead><TableHead scope="col">Ponderación</TableHead></TableRow></TableHeader>
+      <TableBody>{snapshot.components.map(c=><TableRow key={c.id}><TableCell>{c.code}</TableCell><TableCell>{c.title}</TableCell><TableCell>{c.weight} %</TableCell></TableRow>)}</TableBody></Table></SiiScrollRegion>
      {published?<p role="status">Acta publicada. Los cambios requieren una rectificación autorizada.</p>:null}
     </section>
     {!published&&<aside className="sii-panel sii-catalog-create"><h3>Agregar evaluación</h3>
      <form className="sii-catalog-form" onSubmit={e=>void addComponent(e)}>
-      <label>Clave<input name="code" minLength={2} maxLength={30} required placeholder="P1"/></label>
-      <label>Descripción<input name="title" minLength={3} required placeholder="Primer parcial"/></label>
-      <label>Ponderación (%)<input type="number" min={1} max={100-weight} name="weight" required/></label>
-      <button type="submit" className="sii-submit" disabled={saving||weight===100}>Guardar evaluación</button>
+      <label>Clave<Input name="code" minLength={2} maxLength={30} required placeholder="P1"/></label>
+      <label>Descripción<Input name="title" minLength={3} required placeholder="Primer parcial"/></label>
+      <label>Ponderación (%)<Input type="number" min={1} max={100-weight} name="weight" required/></label>
+      <Button variant="default" type="submit" className="sii-submit" disabled={saving||weight===100}>Guardar evaluación</Button>
      </form></aside>}
    </div>
    <section className="sii-panel sii-catalog-table-panel"><h3>Captura por estudiante</h3>
     {!snapshot.roster.length?<p>No hay estudiantes inscritos en esta sección.</p>:
-    <SiiScrollRegion label="Tabla de calificaciones, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th scope="col">Matrícula / alumno</th>
-     {snapshot.components.map(c=><th key={c.id} scope="col">{c.code} ({c.weight} %)</th>)}</tr></thead>
-     <tbody>{snapshot.roster.map(student=><tr key={student.studentId}><td><strong>{student.enrollmentNumber}</strong><small>{student.firstName} {student.lastName}</small></td>
+    <SiiScrollRegion label="Tabla de calificaciones, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table"><TableHeader><TableRow><TableHead scope="col">Matrícula / alumno</TableHead>
+     {snapshot.components.map(c=><TableHead key={c.id} scope="col">{c.code} ({c.weight} %)</TableHead>)}</TableRow></TableHeader>
+     <TableBody>{snapshot.roster.map(student=><TableRow key={student.studentId}><TableCell><strong>{student.enrollmentNumber}</strong><small>{student.firstName} {student.lastName}</small></TableCell>
       {snapshot.components.map(c=>{const score=snapshot.scores.find(s=>s.studentId===student.studentId&&s.componentId===c.id);
-       return <td key={c.id}>{published?<span>{score?(score.scoreHundredths/100).toFixed(2):'—'}</span>:
+       return <TableCell key={c.id}>{published?<span>{score?(score.scoreHundredths/100).toFixed(2):'—'}</span>:
         <form onSubmit={e=>{e.preventDefault();const form=e.currentTarget;const v=new FormData(form);void saveScore(c.id,student.studentId,String(v.get('grade')??''))}}>
-         <label>Nota<input data-gradebook-cell={gradebookCell(scope,student.studentId,c.id)} aria-label={`${student.enrollmentNumber} · ${c.title}`} type="number" name="grade" min="0" max="10" step="0.01"
+         <label>Nota<Input data-gradebook-cell={gradebookCell(scope,student.studentId,c.id)} aria-label={`${student.enrollmentNumber} · ${c.title}`} type="number" name="grade" min="0" max="10" step="0.01"
           value={drafts.get(gradebookCell(scope,student.studentId,c.id))?.raw??(score?(score.scoreHundredths/100).toFixed(2):'')}
           onChange={e=>{if(operation.current!=='publish')writeDraft(scope,student.studentId,c.id,`${student.enrollmentNumber} · ${c.title}`,e.target.value);}} disabled={publishing} required/></label>
-         <button type="submit" disabled={saving}>Guardar</button></form>}</td>})}</tr>)}</tbody></table></SiiScrollRegion>}
+         <Button variant="outline" type="submit" disabled={saving}>Guardar</Button></form>}</TableCell>})}</TableRow>)}</TableBody></Table></SiiScrollRegion>}
    </section>
    {excluded.length>0&&<section aria-label={published?'Captura local no incluida en el acta':'Captura local fuera del listado'} className="sii-panel">
     <h3>{published?'Captura local no incluida en el acta':'Captura local fuera del listado'}</h3>
     <p>Estas capturas locales no son notas oficiales. El listado o el acta cambió; se conservan para consulta o descarte explícito. No se pueden guardar desde aquí.</p>
     <ul>{excluded.map(d=>{const key=gradebookCell(scope,d.studentId,d.componentId);return <li key={key}>{d.label}: {d.raw||'(vacío)'}{' '}
-     <button type="button" className="sii-outline-button" aria-label={`Descartar captura ${d.label}`} onClick={()=>void discardDraft(key,d.revision)}>Descartar captura local</button></li>;})}</ul>
+     <Button variant="outline" type="button" className="sii-outline-button" aria-label={`Descartar captura ${d.label}`} onClick={()=>void discardDraft(key,d.revision)}>Descartar captura local</Button></li>;})}</ul>
    </section>}
    <section className="sii-panel sii-catalog-create"><h3>Publicación oficial</h3><p>La publicación requiere verificación reciente de tu autenticador.</p><SecurityActionLink returnTo={`/dashboard/institutions/${institutionId}/grading`}/>
     <p>{published?'Acta emitida y registrada.':'Revisa ponderaciones, notas faltantes y listado de estudiantes antes de publicar.'}</p>
     {!published&&pending.length>0&&<p role="status">Hay {pending.length} notas sin guardar en este grupo. Guárdalas antes de publicar.</p>}
     {published?<p role="status">Publicada el {new Date(snapshot.publications[0].publishedAt).toLocaleString('es-MX')}</p>:
-    <button className="sii-submit" type="button" disabled={saving||refreshing||pending.length>0||weight!==100||!snapshot.roster.length}
-     onClick={()=>void publish()}>Publicar acta oficial</button>}
+    <Button variant="default" className="sii-submit" type="button" disabled={saving||refreshing||pending.length>0||weight!==100||!snapshot.roster.length}
+     onClick={()=>void publish()}>Publicar acta oficial</Button>}
    </section>
   </>}
  </div>;

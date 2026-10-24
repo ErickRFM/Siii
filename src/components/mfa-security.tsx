@@ -1,4 +1,7 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
@@ -169,13 +172,13 @@ export default function MfaSecurity() {
     {offline && <p role="status">Sin conexión. Las operaciones se habilitarán cuando vuelvas a conectarte.</p>}
     {error && <p id="mfa-error" ref={feedback} tabIndex={-1} className="sii-auth-error" role="alert">{error}{sessionExpired && <> <Link href="/login">Ir al acceso</Link></>}</p>}
     {notice && <p role="status">{notice}</p>}
-    <button type="button" className="sii-outline-button" disabled={busy || offline} onClick={() => void perform(refresh)}>Actualizar estado de seguridad</button>
+    <Button variant="outline" type="button" className="sii-outline-button" disabled={busy || offline} onClick={() => void perform(refresh)}>Actualizar estado de seguridad</Button>
     {status && <>
       <p role="status">{status.configured ? `Autenticador activo · ${status.recoveryCodesRemaining} códigos de recuperación disponibles.` : status.pending ? 'Activación pendiente. Confirma el código o inicia una nueva activación.' : 'No tienes un autenticador activo.'}</p>
       {!status.configured && !enrollment && <form className="password-form" onSubmit={enroll}>
         <label htmlFor="mfa-enroll-password">Contraseña actual para activar</label>
-        <input id="mfa-enroll-password" ref={enrollmentPassword} name="currentPassword" type="password" autoComplete="current-password" required maxLength={512} disabled={!ready} aria-invalid={invalidField === 'mfa-enroll-password'} aria-describedby={error ? 'mfa-error' : undefined}/>
-        <button className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Preparando activación…' : status.pending ? 'Iniciar nueva activación' : 'Configurar autenticador'}</button>
+        <Input id="mfa-enroll-password" ref={enrollmentPassword} name="currentPassword" type="password" autoComplete="current-password" required maxLength={512} disabled={!ready} aria-invalid={invalidField === 'mfa-enroll-password'} aria-describedby={error ? 'mfa-error' : undefined}/>
+        <Button variant="default" className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Preparando activación…' : status.pending ? 'Iniciar nueva activación' : 'Configurar autenticador'}</Button>
       </form>}
       {enrollment && <div>
         <h3>Activa tu autenticador en tres pasos</h3>
@@ -189,10 +192,10 @@ export default function MfaSecurity() {
             <p id="mfa-key-help">Pega la clave completa en el campo «Clave» de tu aplicación autenticadora. Esta clave no es el código de verificación y solo aparece durante esta activación.</p>
             <div className="password-form">
               <label htmlFor="mfa-manual-key">Clave manual del autenticador</label>
-              <input id="mfa-manual-key" value={enrollment.secret} readOnly aria-describedby="mfa-key-help"/>
-              <button type="button" className="sii-submit" disabled={!ready} onClick={() => void perform(async () => {
+              <Input id="mfa-manual-key" value={enrollment.secret} readOnly aria-describedby="mfa-key-help"/>
+              <Button variant="default" type="button" className="sii-submit" disabled={!ready} onClick={() => void perform(async () => {
                 await navigator.clipboard.writeText(enrollment.secret); setNotice('Clave copiada. Pégala únicamente en tu aplicación autenticadora.');
-              })}>Copiar clave manual</button>
+              })}>Copiar clave manual</Button>
             </div>
           </li>
           <li>
@@ -200,49 +203,49 @@ export default function MfaSecurity() {
             <p id="mfa-enrollment-code-help">Usa los 6 números que muestra esa cuenta en tu app; cambian cada 30 segundos. No escribas fragmentos de la clave manual.</p>
             <form className="password-form" onSubmit={verifyEnrollment}>
               <label htmlFor="mfa-enrollment-code">Código para activar el autenticador</label>
-              <input id="mfa-enrollment-code" ref={codeInput} name="code" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={!ready}
+              <Input id="mfa-enrollment-code" ref={codeInput} name="code" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={!ready}
                 aria-invalid={Boolean(enrollmentCodeError) || invalidField === 'mfa-enrollment-code'}
                 aria-describedby={'mfa-enrollment-code-help' + (enrollmentCodeError ? ' mfa-enrollment-format-error' : '') + (error ? ' mfa-error' : '')}
                 onChange={event => setEnrollmentCodeError(/[^0-9]/.test(event.currentTarget.value) ? enrollmentCodeMessage : '')}
                 onBlur={event => { if (event.currentTarget.value && !enrollmentCodeFormat.test(event.currentTarget.value)) setEnrollmentCodeError(enrollmentCodeMessage); }}
                 onInvalid={event => { event.preventDefault(); setEnrollmentCodeError(enrollmentCodeMessage); codeInput.current?.focus(); }}/>
               {enrollmentCodeError && <p id="mfa-enrollment-format-error" className="sii-auth-error" role="alert">{enrollmentCodeError}</p>}
-              <button className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Verificando…' : 'Activar autenticador'}</button>
+              <Button variant="default" className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Verificando…' : 'Activar autenticador'}</Button>
             </form>
           </li>
         </ol>
         <p>Activación válida hasta {new Date(enrollment.expiresAt).toLocaleTimeString('es-MX')}.</p>
-        <button type="button" className="sii-outline-button" disabled={busy} onClick={() => {
+        <Button variant="outline" type="button" className="sii-outline-button" disabled={busy} onClick={() => {
           setEnrollment(null); setEnrollmentCodeError(''); setInvalidField(null); setRestartEnrollment(true);
           if (!sessionExpired) setError('');
           setNotice('Confirma tu contraseña para generar una nueva clave. La nueva activación reemplazará la anterior.');
-        }}>Reiniciar activación</button>
+        }}>Reiniciar activación</Button>
       </div>}
       <h3>Confirma tu identidad</h3>
       <p id="mfa-step-up-help">Esta confirmación dura cinco minutos y permite renovar códigos{status.requiredByRole?'':' o desactivar el autenticador'}. Un código ya utilizado requiere esperar al siguiente.</p>
       <form className="password-form" onSubmit={stepUp} aria-describedby="mfa-step-up-help">
         <label htmlFor="mfa-step-up-password">Contraseña actual para confirmar</label>
-        <input id="mfa-step-up-password" name="currentPassword" type="password" autoComplete="current-password" required maxLength={512} disabled={!ready} aria-invalid={invalidField === 'mfa-step-up-password'} aria-describedby={error ? 'mfa-error' : undefined}/>
+        <Input id="mfa-step-up-password" name="currentPassword" type="password" autoComplete="current-password" required maxLength={512} disabled={!ready} aria-invalid={invalidField === 'mfa-step-up-password'} aria-describedby={error ? 'mfa-error' : undefined}/>
         {status.configured && <>
           <label htmlFor="mfa-step-up-factor">{recovery ? 'Código de recuperación para confirmar' : 'Código del autenticador para confirmar'}</label>
-          <input key={recovery ? 'recovery' : 'totp'} id="mfa-step-up-factor" name="factor" type="text" autoComplete="one-time-code" inputMode={recovery ? 'text' : 'numeric'} autoCapitalize="characters" spellCheck={false} required minLength={recovery ? 32 : 6} maxLength={recovery ? 128 : 6} pattern={recovery ? undefined : '[0-9]{6}'} disabled={!ready} aria-invalid={invalidField === 'mfa-step-up-factor'} aria-describedby={error ? 'mfa-error' : 'mfa-step-up-help'}/>
-          <button type="button" className="sii-submit" disabled={!ready} onClick={() => setRecovery(value => !value)}>{recovery ? 'Usar código del autenticador' : 'Usar código de recuperación'}</button>
+          <Input key={recovery ? 'recovery' : 'totp'} id="mfa-step-up-factor" name="factor" type="text" autoComplete="one-time-code" inputMode={recovery ? 'text' : 'numeric'} autoCapitalize="characters" spellCheck={false} required minLength={recovery ? 32 : 6} maxLength={recovery ? 128 : 6} pattern={recovery ? undefined : '[0-9]{6}'} disabled={!ready} aria-invalid={invalidField === 'mfa-step-up-factor'} aria-describedby={error ? 'mfa-error' : 'mfa-step-up-help'}/>
+          <Button variant="default" type="button" className="sii-submit" disabled={!ready} onClick={() => setRecovery(value => !value)}>{recovery ? 'Usar código del autenticador' : 'Usar código de recuperación'}</Button>
         </>}
-        <button className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Confirmando…' : 'Confirmar identidad'}</button>
+        <Button variant="default" className="sii-submit" type="submit" disabled={!ready}>{busy ? 'Confirmando…' : 'Confirmar identidad'}</Button>
       </form>
       {fresh && <p role="status">Confirmación vigente hasta {new Date(status.stepUpExpiresAt!).toLocaleTimeString('es-MX')}.</p>}
       {status.configured && <div>
         <p>Renovar códigos invalida todos los anteriores.{!status.requiredByRole&&' Desactivar el autenticador cierra las sesiones de los otros dispositivos.'}</p>
         {status.requiredByRole&&<p id="mfa-required-by-role" className="sii-info-banner">No puedes desactivar el autenticador mientras mantengas perfiles privilegiados vigentes.</p>}
-        <button type="button" className="sii-outline-button" disabled={!ready || !fresh} onClick={() => void regenerate()}>Renovar códigos de recuperación</button>{' '}
-        <button type="button" className="sii-outline-button" disabled={!ready || !fresh || status.requiredByRole} aria-describedby={status.requiredByRole?'mfa-required-by-role':undefined} onClick={() => void revoke()}>Desactivar autenticador y cerrar otros dispositivos</button>
+        <Button variant="outline" type="button" className="sii-outline-button" disabled={!ready || !fresh} onClick={() => void regenerate()}>Renovar códigos de recuperación</Button>{' '}
+        <Button variant="outline" type="button" className="sii-outline-button" disabled={!ready || !fresh || status.requiredByRole} aria-describedby={status.requiredByRole?'mfa-required-by-role':undefined} onClick={() => void revoke()}>Desactivar autenticador y cerrar otros dispositivos</Button>
       </div>}
     </>}
     {codes.length > 0 && <div ref={savedCodes} tabIndex={-1} role="region" aria-labelledby="mfa-recovery-title">
       <h3 id="mfa-recovery-title">Guarda estos códigos de recuperación</h3>
       <p role="status">Cada código funciona una sola vez. Se muestran ahora y no podrás consultarlos después de salir de esta pantalla. Guárdalos en un lugar seguro.</p>
       <ul>{codes.map(code => <li key={code}><code>{code}</code></li>)}</ul>
-      <button type="button" className="sii-outline-button" onClick={() => setCodes([])}>Ya guardé mis códigos; ocultarlos</button>
+      <Button variant="outline" type="button" className="sii-outline-button" onClick={() => setCodes([])}>Ya guardé mis códigos; ocultarlos</Button>
     </div>}
   </section>;
 }

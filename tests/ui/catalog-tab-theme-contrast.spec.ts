@@ -53,6 +53,27 @@ for (const width of [1440, 390]) {
 
 for (const width of [1440, 390]) {
   for (const theme of ['light', 'dark'] as const) {
+    test(`institutional heading retains AA contrast during entry at ${width}px in ${theme}`, async ({page}) => {
+      await page.emulateMedia({reducedMotion: 'no-preference'});
+      await page.setViewportSize({width, height: 844});
+      await page.setContent(`<html lang="es-MX" data-sii-theme="${theme}"><head><title>SIII synthetic heading contrast</title><style>${styles}</style></head><body>
+        <div class="sii-app"><main class="sii-page" id="main-content"><div class="sii-page-eyebrow">CENTRO PERSONAL</div><div class="sii-page-heading sii-kit-page-heading"><div class="min-w-0">
+          <h1>Cuenta y seguridad</h1><p>Gestiona tus credenciales y consulta el estado de tu cuenta.</p>
+        </div></div></main></div></body></html>`);
+      const frames=await page.locator('.sii-page-heading p').evaluate(element=>{
+        const frames=[];
+        for(let ancestor:Element|null=element;ancestor;ancestor=ancestor.parentElement){
+          const animations=ancestor.getAnimations();
+          for(const animation of animations){animation.pause();animation.currentTime=43;}
+          if(animations.length)frames.push({opacity:getComputedStyle(ancestor).opacity,animation:getComputedStyle(ancestor).animationName});
+        }
+        return frames;
+      });
+      expect(frames.length).toBeGreaterThan(0);
+      expect(frames.every(frame=>frame.opacity==='1'),JSON.stringify(frames)).toBe(true);
+      const audit=await new AxeBuilder({page}).include('.sii-page-heading p').withRules(['color-contrast']).analyze();
+      expect(audit.violations.map(value=>({id:value.id,nodes:value.nodes.map(node=>node.target)}))).toEqual([]);
+    });
     test(`institution monogram retains AA contrast during entry at ${width}px in ${theme}`, async ({page}) => {
       await page.emulateMedia({reducedMotion: 'no-preference'});
       await page.setViewportSize({width, height: 844});

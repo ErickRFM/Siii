@@ -1,4 +1,6 @@
 'use client';
+import {Button} from '@/components/ui/button';
+
 
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
@@ -93,7 +95,7 @@ export function SecurityActionLink({ returnTo }: { returnTo: string }) {
 export function CapabilityState({ returnTo }: { returnTo: string }) {
   const { data, loading, error, refresh } = useInstitutionCapabilities();
   if (loading) return <p role="status">Consultando permisos vigentes…</p>;
-  if (error) return <div><p className="sii-catalog-error" role="alert">{error}</p><button type="button" className="sii-outline-button" onClick={refresh}>Reintentar permisos</button></div>;
+  if (error) return <div><p className="sii-catalog-error" role="alert">{error}</p><Button variant="outline" type="button" className="sii-outline-button" onClick={refresh}>Reintentar permisos</Button></div>;
   if (data?.restricted) return <div className="sii-info-banner"><p>{!data.assurance.mfaConfigured ? 'Configura un autenticador para acceder a esta institución.' : !data.assurance.mfaVerified ? 'Verifica tu autenticador para acceder a esta institución.' : 'Actualiza tu contraseña para acceder a esta institución.'}</p><SecurityActionLink returnTo={returnTo}/></div>;
   return null;
 }

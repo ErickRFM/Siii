@@ -5,6 +5,7 @@ export default tseslint.config(
  {ignores:['.next/**','node_modules/**','.p0-local/**','.superpowers/**','coverage/**','next-env.d.ts']},
  ...tseslint.configs.recommended,
  {files:['**/*.tsx'],plugins:{'react-hooks':hooks,'jsx-a11y':accessibility},
+  settings:{'jsx-a11y':{components:{Input:'input',NativeSelect:'select',Textarea:'textarea',Label:'label',Table:'table',TableHead:'th',TableCell:'td',TableRow:'tr'}}},
   rules:{'react-hooks/rules-of-hooks':'error','react-hooks/exhaustive-deps':'warn',...accessibility.configs.recommended.rules}},
  {rules:{'@typescript-eslint/no-unused-vars':['error',{argsIgnorePattern:'^_'}]}},
  {files:['**/*.mjs'],rules:{'@typescript-eslint/no-require-imports':'off'}}

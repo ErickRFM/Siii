@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
+import {NativeSelect} from '@/components/ui/native-select';
+
 import SiiScrollRegion from './sii-scroll-region';
 import {SiiSectionHeader} from './ui/sii-kit';
 import {useInstitutionConfirmation} from './sii-confirmation';
@@ -112,7 +117,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
  return <div className="sii-academic">
  {confirmation}
   <div className="sii-catalog-tabs" role="tablist" aria-label="Control escolar">
-   {(['students','teachers'] as Kind[]).map(k=><button type="button" role="tab" key={k} id={"registry-tab-"+k} aria-controls="registry-panel" tabIndex={kind===k?0:-1} onKeyDown={e=>navigateTabs(e,k)} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</button>)}
+   {(['students','teachers'] as Kind[]).map(k=><Button variant="ghost" type="button" role="tab" key={k} id={"registry-tab-"+k} aria-controls="registry-panel" tabIndex={kind===k?0:-1} onKeyDown={e=>navigateTabs(e,k)} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</Button>)}
   </div>
   <SiiSectionHeader workspace eyebrow="CONTROL ESCOLAR" title={kind==='students'?'Expedientes de estudiantes':'Plantilla docente'}
    description="Registros institucionales oficiales. La creación de cuentas de acceso es independiente."
@@ -122,42 +127,42 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   <div id="registry-panel" role="tabpanel" aria-labelledby={"registry-tab-"+kind} tabIndex={0} aria-busy={loading} className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-table-panel" aria-label="Listado oficial">
     <div className="sii-catalog-toolbar"><label htmlFor="school-search">Buscar en esta página</label>
-     <input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>
-     <button type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving||!!editing}>Actualizar</button></div>
+     <Input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>
+     <Button variant="outline" type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving||!!editing}>Actualizar</Button></div>
     {loading?<div className="sii-empty" role="status">Cargando registros…</div>:filtered.length===0?<div className="sii-empty">No hay registros coincidentes.</div>:
-     <SiiScrollRegion label="Tabla de expedientes, desplazamiento horizontal"><table className="sii-catalog-table">
-      <thead><tr><th scope="col">Identificador</th><th scope="col">Persona</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
-      <tbody>{filtered.map(row=><tr key={row.id}>
-       <td className="sii-catalog-code">{row.enrollmentNumber??row.employeeNumber}</td>
-       <td><strong>{row.firstName} {row.lastName}</strong><small>{row.institutionalEmail??'Sin correo institucional'}</small></td>
-       <td>{row.status}</td>
-       <td><button type="button" ref={node=>{if(node)editButtons.current.set(row.id,node);else editButtons.current.delete(row.id)}} disabled={saving||!!editing} onClick={()=>{returnFocusId.current=row.id;setEditing({...row});setError('');setNotice('')}}>Editar</button> <button type="button" disabled={saving||!!editing||!['active','inactive'].includes(row.status)} onClick={()=>void changeStatus(row)}>{row.status==='active'?'Desactivar':'Reactivar'}</button></td>
-      </tr>)}</tbody></table></SiiScrollRegion>}
+     <SiiScrollRegion label="Tabla de expedientes, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
+      <TableHeader><TableRow><TableHead scope="col">Identificador</TableHead><TableHead scope="col">Persona</TableHead><TableHead scope="col">Estado</TableHead><TableHead scope="col">Acciones</TableHead></TableRow></TableHeader>
+      <TableBody>{filtered.map(row=><TableRow key={row.id}>
+       <TableCell className="sii-catalog-code">{row.enrollmentNumber??row.employeeNumber}</TableCell>
+       <TableCell><strong>{row.firstName} {row.lastName}</strong><small>{row.institutionalEmail??'Sin correo institucional'}</small></TableCell>
+       <TableCell>{row.status}</TableCell>
+       <TableCell><Button variant="outline" type="button" ref={node=>{if(node)editButtons.current.set(row.id,node);else editButtons.current.delete(row.id)}} disabled={saving||!!editing} onClick={()=>{returnFocusId.current=row.id;setEditing({...row});setError('');setNotice('')}}>Editar</Button> <Button variant="outline" type="button" disabled={saving||!!editing||!['active','inactive'].includes(row.status)} onClick={()=>void changeStatus(row)}>{row.status==='active'?'Desactivar':'Reactivar'}</Button></TableCell>
+      </TableRow>)}</TableBody></Table></SiiScrollRegion>}
     <nav className="sii-catalog-pagination" aria-label="Paginación del registro">
-     <button type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!!editing} onClick={()=>void page('previous')}>Página anterior</button>
+     <Button variant="outline" type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!!editing} onClick={()=>void page('previous')}>Página anterior</Button>
      <span aria-live="polite">Página {history.length}</span>
-     <button type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!!editing} onClick={()=>void page('next')}>Siguiente página</button>
+     <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!!editing} onClick={()=>void page('next')}>Siguiente página</Button>
     </nav>
    </section>
    {editing?<section className="sii-panel sii-catalog-create" aria-label="Edición de expediente">
     <span className="sii-section-kicker">CORRECCIÓN INSTITUCIONAL</span><h3>Editar {kind==='students'?'estudiante':'docente'} · {editing.enrollmentNumber??editing.employeeNumber}</h3>
     <p>Corrige los datos del expediente. La cuenta de acceso, el identificador y las inscripciones se conservan.</p>
     <form key={editing.id} className="sii-catalog-form" onSubmit={event=>void saveProfile(event)}>
-     <label>Nombre(s)<input ref={editInput} name="firstName" required minLength={2} maxLength={120} defaultValue={editing.firstName} disabled={saving}/></label>
-     <label>Apellidos<input name="lastName" required minLength={2} maxLength={120} defaultValue={editing.lastName} disabled={saving}/></label>
-     <label>Correo institucional (opcional)<input name="institutionalEmail" type="email" defaultValue={editing.institutionalEmail??''} disabled={saving}/></label>
-     <button className="sii-submit" type="submit" disabled={saving}>{saving?'Guardando…':'Guardar cambios'}</button>
-     <button type="button" className="sii-outline-button" disabled={saving} onClick={cancelEdit}>Cancelar edición</button>
+     <label>Nombre(s)<Input ref={editInput} name="firstName" required minLength={2} maxLength={120} defaultValue={editing.firstName} disabled={saving}/></label>
+     <label>Apellidos<Input name="lastName" required minLength={2} maxLength={120} defaultValue={editing.lastName} disabled={saving}/></label>
+     <label>Correo institucional (opcional)<Input name="institutionalEmail" type="email" defaultValue={editing.institutionalEmail??''} disabled={saving}/></label>
+     <Button variant="default" className="sii-submit" type="submit" disabled={saving}>{saving?'Guardando…':'Guardar cambios'}</Button>
+     <Button variant="outline" type="button" className="sii-outline-button" disabled={saving} onClick={cancelEdit}>Cancelar edición</Button>
     </form>
    </section>:<aside className="sii-panel sii-catalog-create">
     <span className="sii-section-kicker">ALTA INSTITUCIONAL</span><h3>Nuevo {kind==='students'?'estudiante':'docente'}</h3>
     <form className="sii-catalog-form" onSubmit={e=>void submit(e)}>
-     <label>{kind==='students'?'Matrícula':'Número de empleado'}<input name="code" required minLength={2} maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_-]*"/></label>
-     <label>Nombre(s)<input name="firstName" required minLength={2}/></label>
-     <label>Apellidos<input name="lastName" required minLength={2}/></label>
-     <label>Correo institucional (opcional)<input type="email" name="institutionalEmail"/></label>
-     {kind==='students'&&<label>Programa académico<select aria-label="Programa académico" name="programId" required defaultValue=""><option value="" disabled>Selecciona un programa</option>{programs.map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}</select></label>}
-     <button className="sii-submit" type="submit" disabled={saving||(kind==='students'&&!programs.length)}>{saving?'Guardando…':'Guardar registro'}</button>
+     <label>{kind==='students'?'Matrícula':'Número de empleado'}<Input name="code" required minLength={2} maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_-]*"/></label>
+     <label>Nombre(s)<Input name="firstName" required minLength={2}/></label>
+     <label>Apellidos<Input name="lastName" required minLength={2}/></label>
+     <label>Correo institucional (opcional)<Input type="email" name="institutionalEmail"/></label>
+     {kind==='students'&&<label>Programa académico<NativeSelect aria-label="Programa académico" name="programId" required defaultValue=""><option value="" disabled>Selecciona un programa</option>{programs.map(p=><option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}</NativeSelect></label>}
+     <Button variant="default" className="sii-submit" type="submit" disabled={saving||(kind==='students'&&!programs.length)}>{saving?'Guardando…':'Guardar registro'}</Button>
     </form>
    </aside>}
   </div>
