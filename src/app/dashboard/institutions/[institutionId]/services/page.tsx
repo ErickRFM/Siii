@@ -1,3 +1,4 @@
+import {SiiPageIntro} from '@/components/ui/sii-kit';
 import Link from 'next/link';
 import { notFound,redirect } from 'next/navigation';
 import { getIdentity,authorizeInstitution } from '@/shared/auth/session';
@@ -12,10 +13,7 @@ export default async function UniversityServicesPage({params}:Props){
  const authorization=await authorizeInstitution(institutionId,'academic.manage');
  const access=authorization?.access;if(!access)notFound();
  return <>
-  <div className="sii-page-eyebrow">SERVICIOS UNIVERSITARIOS <span className="sii-page-eyebrow-line"/></div>
-  <div className="sii-page-heading"><div><h1>Atención institucional<span className="sii-welcome-period">.</span></h1>
-   <p>{access.institutionName} · Avisos, solicitudes y talleres autorizados.</p></div>
-   <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link></div>
+  <SiiPageIntro eyebrow="SERVICIOS UNIVERSITARIOS" title="Atención institucional" description={access.institutionName+' · Avisos, trámites y talleres.'} actions={<Link href={`/dashboard/institutions/${institutionId}`} className="sii-outline-button">← Institución</Link>}/>
   <UniversityServices institutionId={institutionId}/>
  </>;
 }

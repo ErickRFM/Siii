@@ -9,6 +9,23 @@ const access:InstitutionAccess={institutionId:'tenant',institutionName:'Syntheti
 const subject:Subject={id:'actor',active:true,mustChangePassword:false,grants:access.grants};
 const assurance={mfaConfigured:false,mfaVerified:false,stepUpAt:null};
 describe('trusted capability disclosure',()=>{
+ it.each(['admin','super_admin','control_escolar'] as const)('discloses the backed Admissions entry for an assured institutional %s',role=>{
+  const grant={...access.grants[0],role,scopeType:'institution' as const,scopeId:null};
+  const data=disclose({...subject,grants:[grant]},{...access,roles:[role],grants:[grant]},{mfaConfigured:true,mfaVerified:true,stepUpAt:now},now);
+  expect(data.capabilities).toContain('admissions.manage');
+ });
+ it('withholds Admissions for unprivileged, scoped, stale and unassured grants',()=>{
+  for(const role of ['guest','student','coordinator'] as const){
+   const grant={...access.grants[0],role,scopeType:'institution' as const,scopeId:null};
+   expect(disclose({...subject,grants:[grant]},{...access,roles:[role],grants:[grant]},assurance,now).capabilities).not.toContain('admissions.manage');
+  }
+  for(const patch of [{scopeType:'program' as const,scopeId:'program'},{validUntil:now},{revokedAt:now},{institutionId:'other-tenant'}]){
+   const grant={...access.grants[0],role:'admin' as const,scopeType:'institution' as const,scopeId:null,...patch};
+   expect(disclose({...subject,grants:[grant]},{...access,roles:['admin'],grants:[grant]},{mfaConfigured:true,mfaVerified:true,stepUpAt:now},now).capabilities).not.toContain('admissions.manage');
+  }
+  const grant={...access.grants[0],role:'admin' as const,scopeType:'institution' as const,scopeId:null};
+  expect(disclose({...subject,grants:[grant]},{...access,roles:['admin'],grants:[grant]},assurance,now).capabilities).not.toContain('admissions.manage');
+ });
  it('does not invent links from a scoped grant to courses, terms, users or future domains',()=>{
   const data=disclose(subject,access,assurance,now);
   expect(data.capabilities).toEqual([]);

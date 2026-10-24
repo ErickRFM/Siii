@@ -1,5 +1,6 @@
 
-import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
+import {SiiPageIntro} from '@/components/ui/sii-kit';
+import AdmissionsWorkspace from '@/components/admissions-workspace';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
@@ -27,6 +28,8 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
     applicantFirstName: applicantProfiles.firstName,
     applicantLastName: applicantProfiles.lastName,
     applicantEmail: applicantProfiles.email,
+    programId: academicPrograms.id,
+    programCode: academicPrograms.code,
     programName: academicPrograms.name,
   })
   .from(admissionApplications)
@@ -35,52 +38,10 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
   .where(and(eq(admissionApplications.institutionId, institutionId),institutionVisibility(authorization.subject,authorization.access,authorization.identity.sessionId,'admissions.manage')))
   .orderBy(desc(admissionApplications.createdAt));
 
-  return (
-    <>
-      <div className="sii-page-eyebrow">CONTROL ESCOLAR Y ADMISIONES <span className="sii-page-eyebrow-line" /></div>
-      <div className="sii-page-heading">
-        <div>
-          <h1>Gestión de Admisiones<span className="sii-welcome-period">.</span></h1>
-          <p>{access.institutionName} · Registro público, convocatorias y revisión de solicitudes de ingreso.</p>
-        </div>
-        <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Volver</Link>
-      </div>
-
-      <div className="sii-content-grid" style={{ marginBottom: '2rem' }}>
-        <section className="sii-panel">
-          <h3>Solicitudes Recibidas ({applications.length})</h3>
-          {applications.length === 0 ? (
-            <p className="sii-empty">No hay solicitudes de admisión registradas.</p>
-          ) : (
-            <div className="sii-table-container">
-              <Table className="sii-table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Folio</TableHead>
-                    <TableHead>Aspirante</TableHead>
-                    <TableHead>Programa</TableHead>
-                    <TableHead>Estatus</TableHead>
-                    <TableHead>Fecha</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {applications.map(app => (
-                    <TableRow key={app.id}>
-                      <TableCell><strong>{app.applicationNumber}</strong></TableCell>
-                      <TableCell>{app.applicantFirstName} {app.applicantLastName}<br/><small>{app.applicantEmail}</small></TableCell>
-                      <TableCell>{app.programName}</TableCell>
-                      <TableCell><span className={`sii-badge ${app.status === 'admitted' ? 'sii-badge--live' : app.status === 'rejected' ? 'sii-badge--error' : 'sii-badge--muted'}`}>{app.status.toUpperCase()}</span></TableCell>
-                      <TableCell>{app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('es-MX') : '-'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </section>
-      </div>
-
-      <Link className="sii-outline-button" href={{pathname:`/admissions/${institutionId}`}}>Abrir portal público de aspirantes</Link>
-    </>
-  );
+  return <>
+    <SiiPageIntro eyebrow="CONTROL ESCOLAR Y ADMISIONES" title="Gestión de Admisiones"
+      description={access.institutionName+' · Consulta y seguimiento de solicitudes de ingreso.'}
+      actions={<div className="sii-page-actions"><Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link><Link className="sii-outline-button" href={{pathname:`/admissions/${institutionId}`}}>Portal de aspirantes</Link></div>}/>
+    <AdmissionsWorkspace key={institutionId} institutionId={institutionId} applications={applications.map(row=>({...row,submittedAt:row.submittedAt?.toISOString()??null}))}/>
+  </>;
 }

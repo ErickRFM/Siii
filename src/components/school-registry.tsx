@@ -1,4 +1,5 @@
 'use client';
+import {SiiEmptyView} from '@/components/ui/sii-kit';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
@@ -114,7 +115,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   finally{setSaving(false)}
  }
  const filtered=rows.filter(r=>[r.firstName,r.lastName,r.enrollmentNumber,r.employeeNumber].join(' ').toLowerCase().includes(search.toLowerCase()));
- return <div className="sii-academic">
+ return <div className="sii-academic sii-workspace sii-workspace--registry">
  {confirmation}
   <div className="sii-catalog-tabs" role="tablist" aria-label="Control escolar">
    {(['students','teachers'] as Kind[]).map(k=><Button variant="ghost" type="button" role="tab" key={k} id={"registry-tab-"+k} aria-controls="registry-panel" tabIndex={kind===k?0:-1} onKeyDown={e=>navigateTabs(e,k)} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</Button>)}
@@ -129,7 +130,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
     <div className="sii-catalog-toolbar"><label htmlFor="school-search">Buscar en esta página</label>
      <Input id="school-search" ref={searchInput} value={search} onChange={e=>setSearch(e.target.value)} disabled={!!editing} type="search" placeholder="Matrícula, nombre o número de empleado"/>
      <Button variant="outline" type="button" className="sii-outline-button" onClick={()=>void refresh(kind,currentCursor)} disabled={loading||saving||!!editing}>Actualizar</Button></div>
-    {loading?<div className="sii-empty" role="status">Cargando registros…</div>:filtered.length===0?<div className="sii-empty">No hay registros coincidentes.</div>:
+    {loading?<div className="sii-empty" role="status">Cargando registros…</div>:filtered.length===0?<SiiEmptyView icon="users" title="No hay registros coincidentes." description={search?'Revisa la búsqueda o consulta otra página del listado.':'Registra el primer expediente de esta institución desde el panel de alta.'} action={<Button variant="outline" type="button" onClick={()=>{if(search){setSearch('');searchInput.current?.focus();}else document.getElementById('registry-code')?.focus();}}>{search?'Limpiar búsqueda':'Preparar registro'}</Button>}/>:
      <SiiScrollRegion label="Tabla de expedientes, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
       <TableHeader><TableRow><TableHead scope="col">Identificador</TableHead><TableHead scope="col">Persona</TableHead><TableHead scope="col">Estado</TableHead><TableHead scope="col">Acciones</TableHead></TableRow></TableHeader>
       <TableBody>{filtered.map(row=><TableRow key={row.id}>
@@ -157,7 +158,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
    </section>:<aside className="sii-panel sii-catalog-create">
     <span className="sii-section-kicker">ALTA INSTITUCIONAL</span><h3>Nuevo {kind==='students'?'estudiante':'docente'}</h3>
     <form className="sii-catalog-form" onSubmit={e=>void submit(e)}>
-     <label>{kind==='students'?'Matrícula':'Número de empleado'}<Input name="code" required minLength={2} maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_-]*"/></label>
+     <label>{kind==='students'?'Matrícula':'Número de empleado'}<Input id="registry-code" name="code" required minLength={2} maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_-]*"/></label>
      <label>Nombre(s)<Input name="firstName" required minLength={2}/></label>
      <label>Apellidos<Input name="lastName" required minLength={2}/></label>
      <label>Correo institucional (opcional)<Input type="email" name="institutionalEmail"/></label>

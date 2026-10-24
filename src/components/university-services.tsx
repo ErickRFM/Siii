@@ -1,4 +1,5 @@
 'use client';
+import {SiiEmptyView} from '@/components/ui/sii-kit';
 import {Button} from '@/components/ui/button';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
 import {Input} from '@/components/ui/input';
@@ -100,7 +101,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
   }else if(!await ask({title:'Cambiar estado del servicio',description:`Se aplicará el estado ${status} y quedará registrado.`,confirmLabel:'Aplicar cambio',destructive:status==='ARCHIVED'||status==='CANCELLED'}))return;
   await execute(payload,'PATCH');
  }
- return <div className="sii-academic">
+ return <div className="sii-academic sii-workspace sii-workspace--services">
  {confirmation}
   <SiiSectionHeader workspace eyebrow="SERVICIOS UNIVERSITARIOS" title="Gestión de servicios"
     description="Avisos, trámites y talleres de tu institución con acceso controlado."/>
@@ -114,8 +115,8 @@ export default function UniversityServices({institutionId}:{institutionId:string
   {peopleError&&<div role="alert"><p>{peopleError}</p><Button variant="outline" type="button" className="sii-outline-button" onClick={()=>setPeopleRevision(value=>value+1)}>Reintentar personas</Button></div>}
   <div id="services-panel" role="tabpanel" aria-labelledby={"services-tab-"+tab} tabIndex={0} aria-busy={loading} className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-table-panel">
-    <h2>{tabs.find(t=>t.id===tab)?.label}</h2>
-    {loading?<p role="status">Cargando datos institucionales…</p>:rows.length===0?<p>No hay registros en esta sección.</p>:
+    <div className="sii-catalog-toolbar"><h2>{tabs.find(t=>t.id===tab)?.label}</h2><Button variant="outline" type="button" disabled={loading||saving} onClick={()=>void fetchRows(tab)}>Actualizar servicios</Button></div>
+    {loading?<p role="status">Cargando datos institucionales…</p>:rows.length===0?<SiiEmptyView icon="services" title="No hay registros en esta sección." description="El panel de alta permite preparar un aviso, trámite o taller según la sección elegida." action={<Button variant="outline" type="button" onClick={()=>document.getElementById('service-create')?.querySelector<HTMLElement>('input,select')?.focus()}>Ir al formulario</Button>}/>:
     <SiiScrollRegion label="Tabla de servicios, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
      <TableHeader><TableRow><TableHead>Información</TableHead><TableHead>Estado</TableHead><TableHead>Operación</TableHead></TableRow></TableHeader>
      <TableBody>{rows.map(row=><TableRow key={row.id}>
@@ -133,7 +134,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
      </TableRow>)}</TableBody></Table></SiiScrollRegion>}
     {rows.length>=200&&<p>Se muestran hasta 200 registros; la búsqueda y paginación del servidor están pendientes.</p>}
    </section>
-   <aside className="sii-panel sii-catalog-create"><h3>Nuevo registro</h3>
+   <aside id="service-create" className="sii-panel sii-catalog-create"><span className="sii-section-kicker">REGISTRO INSTITUCIONAL</span><h3>{tab==='announcements'?'Nuevo aviso':tab==='requests'?'Nueva solicitud':'Nuevo taller'}</h3>
     <form className="sii-catalog-form" onSubmit={e=>void submit(e)}>
      {tab==='announcements'&&<><label>Título<Input name="title" minLength={3} required/></label><label>Mensaje<Textarea name="body" minLength={10} required rows={5}/></label></>}
      {tab==='requests'&&<><label>Alumno<NativeSelect disabled={peopleLoading} name="studentId" defaultValue="" required><option value="" disabled>Seleccionar matrícula</option>
