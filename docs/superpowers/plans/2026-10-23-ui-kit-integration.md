@@ -32,3 +32,4 @@
 - Verificación local: lint/typecheck y 847 pruebas unitarias correctos; build de producción correcto; audit 0. Playwright: 119/122 en la corrida completa y los tres casos restantes correctos tras corregir contraste y el selector exacto de Inicio (repetición 3/3).
 - Integración local: 577/578, con el único fallo transitorio de preparación de migración correcto en repetición aislada (1/1). CI del primer commit completó 578/578 e integración outbox habilitada; el PR debe aprobar de nuevo en el SHA final antes de fusionarse.
 - Revisión independiente de migraciones de componentes y ajustes posteriores: sin hallazgos pendientes; se conservan handlers, props, permisos y referencias nativas.
+- Contraste durante entrada: cuatro nuevas regresiones reproducen el fotograma intermedio del encabezado; corrección revisada y verificada con 12/12 casos de contraste y repetición 2/2 de los flujos reales afectados. Suite UI final: 126 casos, pendientes de CI del SHA final.
