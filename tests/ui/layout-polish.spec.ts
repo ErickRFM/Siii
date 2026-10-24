@@ -44,7 +44,9 @@ test.beforeAll(async()=>{
 
 test('admissions filters and detail preserve the authorized applications and keyboard focus',async({page})=>{
  await login(page);
- await page.goto(`/dashboard/institutions/${tenant}/admissions`);
+ await page.goto(`/dashboard/institutions/${tenant}`);
+ await page.getByRole('navigation',{name:'Gestión académica',exact:true}).getByRole('link',{name:'Admisiones',exact:true}).click();
+ await expect(page).toHaveURL(new RegExp(`/institutions/${tenant}/admissions$`));
  await expect(page.getByLabel('Buscar solicitudes')).toBeVisible();
  await page.getByLabel('Estado de solicitud').selectOption('admitted');
  await expect(page.locator('tbody tr')).toHaveCount(1);
