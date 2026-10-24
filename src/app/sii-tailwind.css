@@ -135,3 +135,73 @@
   .sii-app .sii-topbar-actions {gap:6px}
   .sii-ui input:not([type="checkbox"]):not([type="radio"]),.sii-ui select,.sii-ui textarea {font-size:16px}
 }
+
+
+/* Login-only composition: make the credential form the primary surface.
+   Keep the MFA and password-recovery workflows and all other auth routes intact. */
+@media (min-width: 841px) {
+  .sii-auth .sii-auth-access {
+    padding-inline:clamp(24px,3.4vw,56px);
+  }
+  .sii-auth .sii-auth-form-wrap {
+    width:min(100%,640px);
+    margin:auto;
+    padding:28px 0;
+    background:transparent;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    animation:none;
+  }
+  .sii-auth .sii-auth-card {
+    width:100%;
+    border-radius:24px;
+    box-shadow:0 24px 65px rgba(31,21,43,.12),0 4px 14px rgba(31,21,43,.04);
+  }
+  .sii-auth .sii-auth-card > [class*="p-6"] {
+    padding:clamp(30px,3vw,46px);
+  }
+  .sii-auth .sii-auth-card h2 {
+    max-width:none;
+    font-size:clamp(32px,2.5vw,41px);
+    line-height:1.14;
+    text-wrap:balance;
+  }
+  .sii-auth .sii-auth-card form {
+    max-width:none;
+  }
+  .sii-auth .sii-auth-card form input {
+    min-height:48px;
+  }
+  .sii-auth .sii-auth-card form button[type="submit"] {
+    min-height:48px;
+  }
+  .sii-auth .sii-auth-help {
+    margin-block:16px 13px;
+  }
+}
+@media (min-width:841px) and (max-height:800px) {
+  .sii-auth .sii-auth-form-wrap {padding-block:16px}
+  .sii-auth .sii-auth-card > [class*="p-6"] {padding:26px 36px}
+}
+@media (max-width:840px) {
+  .sii-auth .sii-auth-form-wrap {
+    width:min(100%,600px);
+    padding:0;
+    margin:22px auto;
+    background:transparent;
+    border:0;
+    box-shadow:none;
+    animation:none;
+  }
+  .sii-auth .sii-auth-card {width:100%;border-radius:20px}
+}
+@media (max-width:600px) {
+  .sii-auth .sii-auth-access {padding-inline:16px}
+  .sii-auth .sii-auth-form-wrap {margin-block:18px}
+  .sii-auth .sii-auth-card > [class*="p-6"] {padding:24px 20px}
+  .sii-auth .sii-auth-card h2 {font-size:clamp(28px,7vw,34px);text-wrap:balance}
+}
+@media (prefers-contrast:more) {
+  .sii-auth .sii-auth-card {box-shadow:none;border:2px solid var(--sii-text)}
+}
