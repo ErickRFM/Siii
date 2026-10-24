@@ -63,3 +63,9 @@ Estas pruebas requieren el entorno de PostgreSQL/browser de CI. La inspección d
 3. UX03/UX04 en PRs pequeños con comparaciones visuales y preservación de tablas y formularios.
 4. UX05 y UX06 una vez garantizada la compatibilidad de datos/servicios.
 5. UX07/UX08 de forma transversal; UX09 exclusivamente sobre la versión validada.
+
+## Actualización del kit institucional — 2026-10-23
+
+La tabla anterior conserva el registro inicial de 2026-10-19 y no describe por sí sola el árbol actual. La integración de shadcn/Radix, controles nativos tipados y tokens comunes para las pantallas institucionales y públicas se entrega en [PR #106](https://github.com/ErickRFM/Siii/pull/106). Admisiones se enlaza a su página existente con `admissions.manage`; no se añaden permisos ni endpoints ficticios.
+
+Guía y evidencia local: [SIII_UI_KIT.md](SIII_UI_KIT.md). El PR registra el CI del SHA final y el merge. Esta ampliación de componentes y coherencia visual no certifica por sí sola un cierre productivo global UX09 ni la configuración de servicios externos.

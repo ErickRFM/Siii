@@ -155,7 +155,7 @@ test('premium desktop sidebar collapses, persists and mobile drawer stays access
  await catalog(page);
  const app=page.locator('.sii-app');
  const nav=page.getByRole('navigation',{name:'Navegación institucional'});
- await expect(nav.getByRole('link',{name:'Inicio'})).toBeVisible();
+ await expect(nav.getByRole('link',{name:'Inicio',exact:true})).toBeVisible();
  const collapse=page.getByRole('button',{name:'Contraer menú lateral'});
  await expect(collapse).toHaveAttribute('aria-expanded','true');
  await collapse.click();
@@ -169,7 +169,7 @@ test('premium desktop sidebar collapses, persists and mobile drawer stays access
  await expect(app).not.toHaveClass(/sii-app--collapsed/);
  await page.setViewportSize({width:390,height:844});
  await page.getByRole('button',{name:'Abrir navegación'}).click();
- await expect(nav.getByRole('link',{name:'Inicio'})).toBeVisible();
+ await expect(nav.getByRole('link',{name:'Inicio',exact:true})).toBeVisible();
  await page.keyboard.press('Escape');
  await expect(page.locator('#sii-sidebar-mobile')).toBeHidden();
 });

@@ -25,3 +25,11 @@ Los proveedores de capacidades y borradores de calificaciones mantienen sus lím
 - Flujos reales con PostgreSQL sintético: suites de `tests/integration` y `tests/ui`; incluyen paginación, ediciones, MFA, borradores, ámbitos, admisiones y accesibilidad/temas/viewports.
 
 El merge y las pruebas con fixtures no acreditan por sí mismos disponibilidad productiva, configuración de correo o finalización de integraciones externas. Registrar SHA y CI del PR para el cierre.
+
+## Evidencia de integración — 2026-10-23
+
+Lint, TypeScript, 847 pruebas unitarias, build de producción y auditoría completa (0 vulnerabilidades) verificados. El parser transitivo de selectores CSS está fijado en 7.1.6 para corregir GHSA-rj75-hqrm-r3gf conservando Tailwind 3.
+
+Playwright recorrió 122 casos: 119 aprobados en la corrida completa y los tres restantes aprobados en repetición tras corregir contraste de acciones en tema oscuro/cambio de tema y distinguir el enlace Inicio del enlace de marca. Se comprobaron pantallas públicas, todos los módulos existentes, permisos, MFA, borradores entre rutas, estados offline, tablas y paginación reales. No se debilitó ninguna comprobación funcional o de accesibilidad.
+
+Las suites HTTP usan PostgreSQL desechable: 577/578 en la corrida local y el único fallo de preparación de migración aprobado en repetición aislada; CI también completó 578/578 en el primer commit. Las comprobaciones del último SHA, revisión y merge se registran en [PR #106](https://github.com/ErickRFM/Siii/pull/106), que es la referencia definitiva del cierre.

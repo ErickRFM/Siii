@@ -121,6 +121,12 @@
 }
 .sii-app .sii-menu-button {display:inline-flex;min-height:44px;min-width:44px}
 .sii-app .sii-submit,.sii-auth .sii-submit {color:hsl(var(--primary-foreground))}
+/* Older password/step-up forms must use the same foreground as kit buttons. */
+.sii-ui [data-sii-control="button"].bg-primary {
+  background:hsl(var(--primary));color:hsl(var(--primary-foreground));
+}
+/* Foreground/background switch atomically so theme changes retain AA contrast. */
+.sii-ui [data-sii-control] {transition-property:border-color,box-shadow,transform}
 .sii-ui :is([data-sii-control="input"],[data-sii-control="select"],[data-sii-control="textarea"]) {max-width:100%}
 .sii-ui [data-sii-control="input"]:is([type="checkbox"],[type="radio"]) {width:1rem;min-height:1rem;padding:0}
 @media(min-width:768px){.sii-app .sii-menu-button{display:none}}
