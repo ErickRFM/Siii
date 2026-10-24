@@ -133,7 +133,23 @@ for(const module of modules)test('layout evidence and responsive composition: '+
  }
  for(const theme of ['light','dark']){
   if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
-  const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
+  // Sample the transition in parallel with axe, without waiting for it to settle.
+  const contrastSamples=module==='invitations'
+   ?page.getByRole('button',{name:'Revocar invitación',exact:true}).first().evaluate(async button=>{
+    const luminance=(color:string)=>{
+     const channels=(color.match(/[\d.]+/g)??[]).slice(0,3).map(Number).map(value=>{const channel=value/255;return channel<=0.04045?channel/12.92:((channel+0.055)/1.055)**2.4;});
+     return channels[0]*0.2126+channels[1]*0.7152+channels[2]*0.0722;
+    };
+    const samples:number[]=[];
+    for(let frame=0;frame<12;frame++){
+     await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
+     const style=getComputedStyle(button),foreground=luminance(style.color),background=luminance(style.backgroundColor);
+     samples.push((Math.max(foreground,background)+0.05)/(Math.min(foreground,background)+0.05));
+    }
+    return samples;
+   }):Promise.resolve([] as number[]);
+  const [contrasts,result]=await Promise.all([contrastSamples,new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()]);
+  if(module==='invitations')expect(Math.min(...contrasts),'Invitation action retains AA contrast in sampled theme frames').toBeGreaterThanOrEqual(4.5);
   expect(result.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
   if(theme==='dark')await page.screenshot({path:`.p0-local/layout-polish/${stage}-${module}-dark-360.png`,fullPage:true,animations:'disabled'});
  }

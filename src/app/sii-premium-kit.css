@@ -422,7 +422,8 @@ html[data-sii-theme="dark"]{
    true for every frame, including immediately after a keyboard theme toggle.
    Keep transforms, borders and elevation animations for the premium feel. */
 .sii-app :is(
-  .sii-outline-button,.sii-logout,.sii-theme-toggle,.sii-catalog-tab,
+  .sii-outline-button,.sii-catalog-actions button,.sii-catalog-pagination button,
+  .sii-logout,.sii-theme-toggle,.sii-catalog-tab,
   .sii-badge,.sii-small-count,.sii-access-feature small,
   .sii-catalog-form input,.sii-catalog-form select,.sii-catalog-form textarea,
   .sii-catalog-toolbar input,.sii-catalog-edit input,

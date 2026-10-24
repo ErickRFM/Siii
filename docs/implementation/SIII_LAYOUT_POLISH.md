@@ -23,6 +23,7 @@ Los headers reutilizan `SiiPageIntro`; el breadcrumb compacto del shell se manti
 - Scroll horizontal confinado al componente accesible de tablas; sin overflow horizontal del documento. Admisiones utiliza ahora `SiiScrollRegion`, corrigiendo el hallazgo inicial `scrollable-region-focusable`.
 - Campos y acciones alcanzables con scroll natural. Sticky únicamente en el detalle breve de Admisiones, con espacio y altura suficientes; los formularios largos no se recortan.
 - Comprobaciones axe de WCAG 2/2.1/2.2 AA en claro y oscuro. CTA de limpieza que se desmonta devuelve foco al buscador; cerrar detalle devuelve foco a su acción de apertura.
+- El cambio de tema conserva contraste en acciones y paginación: el bloque atómico existente incluye estos selectores para superar la transición heredada de fondo. Una regresión mide 12 fotogramas en paralelo con axe; el build anterior falla con contraste mínimo 1,73:1.
 
 ## Evidencia reproducible
 
