@@ -1,3 +1,4 @@
+import {SiiPageIntro} from '@/components/ui/sii-kit';
 import Link from 'next/link';
 import { notFound,redirect } from 'next/navigation';
 import { getIdentity,authorizeInstitution } from '@/shared/auth/session';
@@ -13,10 +14,7 @@ export default async function AcademicOperationsPage({params}:Props){
  const authorization=await authorizeInstitution(institutionId,'academic.manage');
  const access=authorization?.access;if(!access)notFound();
  return <>
-  <div className="sii-page-eyebrow">GESTIÓN ACADÉMICA <span className="sii-page-eyebrow-line"/></div>
-  <div className="sii-page-heading"><div><h1>Operación académica<span className="sii-welcome-period">.</span></h1>
-   <p>{access.institutionName} · Secciones, inscripción y carga docente.</p></div>
-   <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Volver</Link></div>
+  <SiiPageIntro eyebrow="CONTROL ESCOLAR" title="Operación académica" description={access.institutionName+' · Oferta, grupos e inscripciones.'} actions={<Link href={`/dashboard/institutions/${institutionId}`} className="sii-outline-button">← Institución</Link>}/>
   <AcademicOperations institutionId={institutionId}/>
  </>;
 }

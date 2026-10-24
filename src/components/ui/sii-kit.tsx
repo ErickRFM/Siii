@@ -48,8 +48,8 @@ export function SiiStatusPill({children,live=false}:{
    {live&&<span className="sii-online-dot"/>}{children}
  </Badge>;
 }
-export function SiiEmptyView({icon,title,description}:{
- icon:SiiNavIconName;title:string;description:string;
+export function SiiEmptyView({icon,title,description,action}:{
+ icon:SiiNavIconName;title:string;description:string;action?:ReactNode;
 }){
  return <Empty className="sii-empty sii-kit-empty border">
    <EmptyHeader>
@@ -57,6 +57,7 @@ export function SiiEmptyView({icon,title,description}:{
     <EmptyTitle className="sii-kit-empty-title">{title}</EmptyTitle>
     <EmptyDescription>{description}</EmptyDescription>
    </EmptyHeader>
+   {action}
  </Empty>;
 }
 export function SiiModuleTile({title,description,icon,href,disabledReason}:{

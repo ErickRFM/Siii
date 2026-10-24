@@ -1,6 +1,9 @@
 /* SIII UI Kit components: stable, typed building blocks with institutional tokens. */
-.sii-kit-page-heading{padding:2px 0 3px}
+.sii-app .sii-kit-page-heading:not(.sii-kit-page-heading--hero){padding:0;margin:6px 0 20px;gap:12px;align-items:center}
+.sii-app .sii-kit-page-heading:not(.sii-kit-page-heading--hero) h1{font-size:clamp(25px,2.3vw,32px);line-height:1.2;letter-spacing:-.04em;margin:0 0 5px}
+.sii-app .sii-kit-page-heading:not(.sii-kit-page-heading--hero) p{font-size:13px;line-height:1.5;margin:0;max-width:75ch}
 .sii-kit-page-heading>div{min-width:0}
+.sii-page-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sii-kit-page-heading h1{text-wrap:balance}
 .sii-kit-section-header{align-items:start}
 .sii-kit-section-header h2{margin-top:6px;letter-spacing:-.035em;font-weight:830}
@@ -72,6 +75,119 @@
 .sii-app .sii-catalog-notice{border-left:3px solid var(--sii-success)}
 .sii-app .sii-catalog-error{border-left:3px solid #ac3852}
 .sii-app .sii-catalog-layout{margin-bottom:clamp(16px,2vw,24px)}
+
+/* Operational composition for the seven refined modules. Container width, rather
+   than viewport width, decides whether a table and its editor can share a row. */
+.sii-app .sii-page:has(.sii-workspace){width:100%;padding:24px clamp(16px,2.2vw,32px) 36px}
+.sii-app .sii-page:has(.sii-workspace) .sii-page-eyebrow{font-size:10px;line-height:1.4;margin:0 0 6px;letter-spacing:.12em}
+.sii-workspace{container:workspace / inline-size;min-width:0}
+.sii-workspace :where(h2,h3,h4){text-wrap:balance}
+.sii-app .sii-workspace :is(.sii-panel,.sii-catalog-table-panel,.sii-catalog-create){padding:20px;border-radius:14px;min-width:0;align-self:start}
+.sii-app .sii-workspace :is(.sii-catalog-layout,.sii-workspace-grid,.sii-security-layout){display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:start;margin-bottom:18px}
+.sii-workspace :is(.sii-catalog-layout,.sii-workspace-grid,.sii-security-layout)>*{grid-column:1/-1;min-width:0}
+.sii-app .sii-workspace .sii-catalog-create{position:static}
+.sii-app .sii-workspace>.sii-catalog-summary{padding:0;margin:0 0 14px;gap:12px}
+.sii-app .sii-workspace>.sii-catalog-summary .sii-section-kicker{display:none}
+.sii-app .sii-workspace>.sii-catalog-summary h2{font-size:18px;line-height:1.3;margin:0 0 4px}
+.sii-app .sii-workspace>.sii-catalog-summary p{font-size:12px;line-height:1.5;margin:0}
+.sii-app .sii-workspace .sii-catalog-tabs{padding:4px;gap:4px;margin-bottom:16px;border-radius:10px;box-shadow:none}
+.sii-app .sii-workspace .sii-catalog-tab{flex:0 0 auto;min-width:110px;min-height:38px;padding:8px 14px;border-radius:7px}
+.sii-app .sii-workspace .sii-catalog-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.sii-app .sii-workspace .sii-catalog-toolbar h2{flex:1;margin:0;font-size:17px;line-height:1.4;min-width:150px}
+.sii-app .sii-workspace :is(.sii-catalog-create,.sii-operation-roster)>:is(h2,h3){font-size:18px;line-height:1.3;margin:0 0 14px;letter-spacing:-.025em}
+.sii-app .sii-workspace .sii-catalog-create>.sii-section-kicker+:is(h2,h3){margin-top:6px}
+.sii-app .sii-workspace .sii-catalog-create>p{font-size:12px;line-height:1.5;margin:0 0 14px!important}
+.sii-app .sii-workspace .sii-catalog-form{gap:12px}
+.sii-app .sii-workspace .sii-catalog-form label{gap:5px;font-size:12px;line-height:1.4}
+.sii-app .sii-workspace .sii-catalog-form :is(p,small){font-size:12px;line-height:1.5;margin:0}
+.sii-app .sii-workspace .sii-catalog-form :is(input,select){min-height:40px;padding:8px 10px;font-size:13px}
+.sii-app .sii-workspace :is(.sii-outline-button,.sii-submit){min-height:38px;padding:8px 12px;font-size:12px;line-height:1.4;margin-top:0;box-shadow:none}
+.sii-app .sii-workspace .sii-submit{height:auto;min-height:40px;margin-top:4px}
+.sii-app .sii-workspace .sii-catalog-table :is(th,td){padding:10px 12px;line-height:1.45;font-family:inherit}
+.sii-app .sii-workspace .sii-catalog-table th{font-size:11px;letter-spacing:.025em}
+.sii-app .sii-workspace .sii-catalog-table td{font-size:13px}
+.sii-app .sii-workspace .sii-catalog-table td>small{font-size:11px;line-height:1.45;margin-top:3px}
+.sii-app .sii-workspace .sii-catalog-table button{font-size:12px;min-height:34px;padding:6px 9px}
+.sii-app .sii-workspace .sii-catalog-pagination{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:12px;margin-top:12px;border-top:1px solid var(--sii-line)}
+.sii-app .sii-workspace .sii-catalog-pagination button{min-height:36px;font-size:12px}
+.sii-app .sii-workspace .sii-kit-empty{padding:24px 16px;gap:12px;min-height:0;flex:none}
+.sii-app .sii-workspace .sii-kit-empty-icon{width:36px;height:36px;border-radius:10px}
+.sii-app .sii-workspace .sii-kit-empty-title{font-size:15px}
+.sii-app .sii-workspace-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));align-items:end;gap:10px;padding:12px;background:var(--sii-surface-soft);border:1px solid var(--sii-line);border-radius:10px;margin-bottom:16px}
+.sii-app .sii-workspace-filters label:first-child{grid-column:1/-1}
+.sii-app .sii-workspace-filters>button{align-self:end}
+.sii-user-detail-forms{display:grid;gap:20px}
+.sii-user-detail-forms h3{font-size:16px;margin:0}
+.sii-app .sii-user-detail .sii-catalog-form{gap:8px}
+.sii-app .sii-user-detail .sii-catalog-form>label{margin-top:4px}
+.sii-app .sii-user-detail>dl,.sii-admission-detail dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;padding:12px;background:var(--sii-surface-soft);border-radius:9px}
+.sii-user-detail dd,.sii-admission-detail dd{margin:0 0 8px;overflow-wrap:anywhere}
+.sii-user-detail dt,.sii-admission-detail dt{font-size:11px;color:var(--sii-muted);font-weight:600}
+.sii-user-detail>dl dt{grid-column:1}
+.sii-user-detail>dl dd{grid-column:2}
+.sii-app .sii-user-detail>p{font-size:12px;line-height:1.5}
+.sii-workspace--invitations .sii-catalog-table{min-width:660px}
+.sii-workspace--invitations .sii-catalog-table td:first-child{min-width:170px}
+.sii-workspace--invitations .sii-catalog-table td:last-child{min-width:170px}
+.sii-workspace--invitations .sii-catalog-table td:nth-child(3){min-width:120px;word-break:normal;overflow-wrap:normal}
+.sii-invitation-policy{flex-basis:100%;order:1;font-size:11px;line-height:1.5}
+.sii-invitation-policy summary{cursor:pointer;color:var(--sii-muted);padding:5px 0}
+.sii-invitation-policy summary:focus-visible{outline:2px solid var(--sii-primary);outline-offset:2px;border-radius:3px}
+.sii-invitation-policy small{display:block;margin-top:4px;font-size:11px}
+.sii-workspace--admissions .sii-catalog-table{min-width:780px}
+.sii-workspace--admissions tr[data-selected="true"]{background:var(--sii-primary-soft)}
+.sii-app .sii-admission-detail p{font-size:12px;line-height:1.5;color:var(--sii-muted)}
+.sii-admission-detail dd{font-size:13px;margin-top:5px}
+.sii-workspace-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--sii-line);font-size:13px}
+.sii-workspace-row>span{min-width:0;overflow-wrap:anywhere}
+.sii-workspace-row>button{flex-shrink:0}
+.sii-operation-roster .sii-catalog-form{padding-bottom:16px;border-bottom:1px solid var(--sii-line)}
+.sii-operation-roster h4{font-size:13px;margin:16px 0 4px}
+.sii-app .sii-operation-roster .sii-kit-empty{padding:14px;gap:10px;margin-top:8px;align-items:flex-start}
+.sii-operation-roster .sii-kit-empty [data-slot="empty-header"]{display:grid;grid-template-columns:28px minmax(0,1fr);text-align:left;column-gap:10px;max-width:none}
+.sii-app .sii-operation-roster .sii-kit-empty-icon{grid-row:span 2;width:28px;height:28px;margin:0;border-radius:6px}
+.sii-app .sii-operation-roster .sii-kit-empty-title{font-size:13px}
+.sii-operation-roster .sii-kit-empty [data-slot="empty-description"]{font-size:12px}
+.sii-security-secondary{display:grid;gap:18px}
+.sii-app .sii-security-workspace .sii-security-card h2{font-size:20px;margin:6px 0 8px;line-height:1.3}
+.sii-app .sii-security-workspace .sii-security-card h3{font-size:16px;margin:20px 0 8px;padding-top:16px;border-top:1px solid var(--sii-line)}
+.sii-app .sii-security-workspace .sii-security-card>p{font-size:13px;line-height:1.5;margin:8px 0 14px}
+.sii-app .sii-security-workspace .password-form{grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px}
+.sii-app .sii-security-workspace .password-form>label{margin-top:4px}
+.sii-app .sii-security-workspace .password-form input{min-height:40px;padding:9px 10px;font-size:14px}
+.sii-app .sii-security-workspace .password-form button{min-height:38px;padding:8px 12px;font-size:12px;white-space:normal}
+.sii-app .sii-security-workspace .password-form p{margin:0;line-height:1.5}
+.sii-app .sii-security-workspace .sii-security-aside{gap:8px}
+.sii-app .sii-security-workspace .sii-security-shield{width:32px;height:32px;border-radius:8px}
+.sii-app .sii-security-workspace .sii-security-aside h2{font-size:17px;margin:0}
+.sii-app .sii-security-workspace .sii-security-aside>p{font-size:12px;line-height:1.5;margin:0}
+.sii-app .sii-security-workspace .sii-access-feature{width:100%;padding:10px;margin:0;min-height:0}
+.sii-app .sii-security-workspace .sii-security-coming{margin-top:4px}
+@container workspace (min-width:800px){
+ .sii-workspace>.sii-catalog-layout>:first-child{grid-column:span 7}
+ .sii-workspace>.sii-catalog-layout>:nth-child(2){grid-column:span 5}
+ .sii-workspace .sii-workspace-grid--equal>*{grid-column:span 6}
+ .sii-workspace-grid--detail>:first-child,.sii-security-layout>:first-child{grid-column:span 7}
+ .sii-workspace-grid--detail>:nth-child(2),.sii-security-layout>:nth-child(2){grid-column:span 5}
+ .sii-app .sii-workspace-filters label:first-child{grid-column:auto}
+}
+@container workspace (min-width:1000px){
+ .sii-workspace>.sii-catalog-layout>:first-child{grid-column:span 8}
+ .sii-workspace>.sii-catalog-layout>:nth-child(2){grid-column:span 4}
+}
+@media(min-width:1180px) and (min-height:850px){
+ .sii-app .sii-workspace .sii-workspace-aside--short{position:sticky;top:96px}
+}
+@media(max-width:600px){
+ .sii-app .sii-page:has(.sii-workspace){padding:18px 12px 28px}
+ .sii-app .sii-workspace :is(.sii-panel,.sii-catalog-table-panel,.sii-catalog-create){padding:16px}
+ .sii-app .sii-workspace .sii-catalog-toolbar{align-items:stretch}
+ .sii-app .sii-workspace .sii-catalog-toolbar input{flex-basis:100%;min-width:0}
+ .sii-app .sii-workspace :is(.sii-catalog-form,.password-form) :is(input,select,textarea){font-size:16px}
+ .sii-app .sii-workspace .sii-catalog-pagination{justify-content:center}
+ .sii-app .sii-workspace .sii-catalog-pagination button{flex:1 1 auto;min-width:0;white-space:normal}
+ .sii-app .sii-workspace .sii-catalog-pagination span{flex-basis:100%;text-align:center;order:-1}
+}
 @media(max-width:600px){
   .sii-app .sii-catalog-table{min-width:470px}
   .sii-app .sii-catalog-scroll{max-width:100%;overscroll-behavior-x:contain}
