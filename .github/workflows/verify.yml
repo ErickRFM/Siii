@@ -188,7 +188,7 @@ jobs:
         with:
           repository: ErickRFM/Compa-ero-de-esc
           # TODO: root updates both SHA checks to the reviewed receiver commit before PR or CI execution.
-          ref: 586ec206576349c9a0d96ce85c50bbb3cf0fb0b5
+          ref: 6537119bf38fd1260f5349c56f15c05644ce6527
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -233,7 +233,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '586ec206576349c9a0d96ce85c50bbb3cf0fb0b5'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '6537119bf38fd1260f5349c56f15c05644ce6527'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Synthetic live contract evidence
         if: always()
