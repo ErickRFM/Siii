@@ -21,6 +21,10 @@ describe('SIII Premium UI Kit - server-compatible component contracts',()=>{
    const html=markup(createElement(SiiModuleTile,{title:'Calificaciones',icon:'grades',description:'Actas oficiales',disabledReason:'Sin permiso para este módulo'}));
    expect(html).toContain('<article');expect(html).not.toContain('<a ');expect(html).toContain('Sin permiso para este módulo');
  });
+ it('does not report a permission denial while access is still being verified',()=>{
+   const html=markup(createElement(SiiModuleTile,{title:'Admisiones',icon:'registry',description:'Solicitudes reales',disabledReason:'Verificando permisos…'}));
+   expect(html).toContain('Verificando permisos…');expect(html).not.toContain('Sin permiso para este módulo');
+ });
  it('shows accessible loading and empty states without fake data',()=>{
    const loading=markup(createElement(SiiSkeleton,{label:'Consultando permisos'}));
    const empty=markup(createElement(SiiEmptyView,{icon:'institution',title:'Sin instituciones',description:'Contacta administración'}));

@@ -65,12 +65,11 @@ export function SiiModuleTile({title,description,icon,href,disabledReason}:{
  const content=<>
    <div className="flex items-start justify-between gap-3">
     <span className="sii-module-glyph sii-kit-module-icon grid size-11 place-items-center rounded-xl bg-primary-soft text-primary" aria-hidden="true"><SiiNavIcon name={icon}/></span>
-    {!href&&<Badge variant="outline" className="text-[10px]">{disabledReason??'No disponible'}</Badge>}
    </div>
    <h3 className="mt-4 text-base font-bold tracking-tight">{title}</h3>
    <p className="mt-1.5 min-h-10 text-sm leading-relaxed text-muted-foreground">{description}</p>
    <div className="mt-5 flex items-center justify-between border-t pt-3 text-xs font-semibold text-primary">
-    <span>{href?'Abrir módulo':'Sin permiso para este módulo'}</span><span aria-hidden="true">{href?'↗':'·'}</span>
+    <span>{href?'Abrir módulo':disabledReason??'No disponible'}</span><span aria-hidden="true">{href?'↗':'·'}</span>
    </div>
  </>;
  return href

@@ -79,6 +79,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  const crumb=activeModule?activeModule.label:active==='overview'?'Inicio':active==='security'?'Seguridad':active==='academic'?'Catálogo académico':active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución';
  return <>
   <Sidebar collapsible="icon" className="border-sidebar-border bg-sidebar">
+   <nav aria-label="Navegación institucional" className="flex h-full min-h-0 flex-col">
    <SidebarHeader className="border-b border-sidebar-border px-3 py-4 group-data-[collapsible=icon]:px-1">
     <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col">
      <div className="group-data-[collapsible=icon]:hidden"><SiiBrand light/></div>
@@ -86,7 +87,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
      <CollapseButton/>
     </div>
    </SidebarHeader>
-   <SidebarContent className="px-2 py-3"><nav aria-label="Navegación institucional">
+   <SidebarContent className="px-2 py-3">
     <SidebarGroup>
      <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
      <SidebarGroupContent>
@@ -103,7 +104,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     <SidebarSeparator/>
     <SidebarGroup>
      <SidebarGroupLabel>Gestión académica</SidebarGroupLabel>
-     <SidebarGroupContent aria-busy={verifying}>
+     <SidebarGroupContent aria-busy={verifying}><nav aria-label="Gestión académica">
       <SidebarMenu>
        {institutionId&&academicAvailable?<ShellLink href={`/dashboard/institutions/${institutionId}/academic` as Route} label="Catálogo académico" icon="book" active={active==='academic'}/>:
         <MutedLink label="Catálogo académico" icon="book" unavailableLabel={unavailableLabel} verifying={verifying}/>}
@@ -113,9 +114,9 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
          <MutedLink key={module.id} label={module.label} icon={iconForModule(module.id)} unavailableLabel={unavailableLabel} verifying={verifying}/>;
        })}
       </SidebarMenu>
-     </SidebarGroupContent>
+     </nav></SidebarGroupContent>
     </SidebarGroup>
-   </nav></SidebarContent>
+   </SidebarContent>
    <SidebarFooter className="border-t border-sidebar-border p-3">
     <div className="flex items-center gap-2 rounded-md bg-sidebar-accent/70 px-2 py-2 group-data-[collapsible=icon]:justify-center">
      <Avatar className="size-8 border border-sidebar-border"><AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
@@ -123,6 +124,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     </div>
     <p className="mt-2 hidden items-center gap-2 px-1 text-[10px] text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden"><span className="size-1.5 rounded-full bg-emerald-400"/>Plataforma institucional · Acceso protegido</p>
    </SidebarFooter>
+   </nav>
   </Sidebar>
   <div className="sii-main flex min-w-0 flex-1 flex-col">
    <header className="sii-topbar">

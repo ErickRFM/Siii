@@ -43,7 +43,7 @@ export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
      <DialogTitle className="text-base">Ir a un módulo</DialogTitle>
      <DialogDescription>Solo aparecen secciones habilitadas para tu acceso.</DialogDescription>
     </DialogHeader>
-    <Command loop>
+    <Command label="Buscar secciones" loop>
      <CommandInput aria-label="Buscar secciones" placeholder="Busca una sección disponible…"/>
      <CommandList className="max-h-[min(60vh,420px)]">
       <CommandEmpty>No hay módulos disponibles con ese nombre.</CommandEmpty>

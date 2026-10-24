@@ -120,6 +120,7 @@
   background:var(--sii-surface);backdrop-filter:none;-webkit-backdrop-filter:none;
 }
 .sii-app .sii-menu-button {display:inline-flex;min-height:44px;min-width:44px}
+.sii-app .sii-submit,.sii-auth .sii-submit {color:hsl(var(--primary-foreground))}
 .sii-ui :is([data-sii-control="input"],[data-sii-control="select"],[data-sii-control="textarea"]) {max-width:100%}
 .sii-ui [data-sii-control="input"]:is([type="checkbox"],[type="radio"]) {width:1rem;min-height:1rem;padding:0}
 @media(min-width:768px){.sii-app .sii-menu-button{display:none}}

@@ -262,7 +262,7 @@ test('SPA back and forward preserve a newer private revision without a write',as
  await a.fill('6.43');await page.goBack();await page.goForward();await expect(a).toHaveValue('6.43');
  expect((await sql.query('SELECT id FROM assessment_scores WHERE institution_id=$1',[f.institution])).rows).toHaveLength(0);
 });
-async function quickNavigate(page:Page,label:string){await page.keyboard.press('Control+k');await page.getByLabel('Buscar secciones',{exact:true}).fill(label);const href=await page.locator('.sii-command-link').first().getAttribute('href');expect(href).toBeTruthy();await page.getByLabel('Buscar secciones',{exact:true}).press('Enter');await expect(page).toHaveURL(new URL(href!,page.url()).href);}
+async function quickNavigate(page:Page,label:string){await page.keyboard.press('Control+k');await page.getByRole('combobox',{name:'Buscar secciones',exact:true}).fill(label);const href=await page.getByRole('dialog',{name:'Ir a un módulo'}).getByRole('link').first().getAttribute('href');expect(href).toBeTruthy();await page.getByRole('combobox',{name:'Buscar secciones',exact:true}).press('Enter');await expect(page).toHaveURL(new URL(href!,page.url()).href);}
 test('real quick switch Enter retains a draft through another module',async({page})=>{
  const f=await fixture();await prepare(page,f);const a=page.getByLabel('DRAFT001 · Parcial uno',{exact:true});await a.fill('8.32');
  await quickNavigate(page,'Catálogo académico');await expect(page).toHaveURL(new RegExp('/'+f.institution+'/academic$'));
