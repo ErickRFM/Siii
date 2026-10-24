@@ -1,3 +1,5 @@
+
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
@@ -51,28 +53,28 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
             <p className="sii-empty">No hay solicitudes de admisión registradas.</p>
           ) : (
             <div className="sii-table-container">
-              <table className="sii-table">
-                <thead>
-                  <tr>
-                    <th>Folio</th>
-                    <th>Aspirante</th>
-                    <th>Programa</th>
-                    <th>Estatus</th>
-                    <th>Fecha</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table className="sii-table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Folio</TableHead>
+                    <TableHead>Aspirante</TableHead>
+                    <TableHead>Programa</TableHead>
+                    <TableHead>Estatus</TableHead>
+                    <TableHead>Fecha</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {applications.map(app => (
-                    <tr key={app.id}>
-                      <td><strong>{app.applicationNumber}</strong></td>
-                      <td>{app.applicantFirstName} {app.applicantLastName}<br/><small>{app.applicantEmail}</small></td>
-                      <td>{app.programName}</td>
-                      <td><span className={`sii-badge ${app.status === 'admitted' ? 'sii-badge--live' : app.status === 'rejected' ? 'sii-badge--error' : 'sii-badge--muted'}`}>{app.status.toUpperCase()}</span></td>
-                      <td>{app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('es-MX') : '-'}</td>
-                    </tr>
+                    <TableRow key={app.id}>
+                      <TableCell><strong>{app.applicationNumber}</strong></TableCell>
+                      <TableCell>{app.applicantFirstName} {app.applicantLastName}<br/><small>{app.applicantEmail}</small></TableCell>
+                      <TableCell>{app.programName}</TableCell>
+                      <TableCell><span className={`sii-badge ${app.status === 'admitted' ? 'sii-badge--live' : app.status === 'rejected' ? 'sii-badge--error' : 'sii-badge--muted'}`}>{app.status.toUpperCase()}</span></TableCell>
+                      <TableCell>{app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('es-MX') : '-'}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </section>

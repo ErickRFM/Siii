@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {NativeSelect} from '@/components/ui/native-select';
+import {Input} from '@/components/ui/input';
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
+
 import SiiScrollRegion from './sii-scroll-region';
 import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
@@ -78,43 +83,43 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
  {confirmation}
   <SiiSectionHeader workspace eyebrow="COORDINACIÓN ACADÉMICA" title="Planificador semanal"
     description="Conflictos de aula, docente y alumnos verificados antes de crear las ocurrencias."/>
-  {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" disabled={loading} onClick={()=>void Promise.all([refresh(),loadWeek()])}>Reintentar consulta</button></div>}
+  {error&&<div className="sii-catalog-error" role="alert"><p>{error}</p><Button variant="outline" type="button" className="sii-outline-button" disabled={loading} onClick={()=>void Promise.all([refresh(),loadWeek()])}>Reintentar consulta</Button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   <div className="sii-catalog-layout">
    <section className="sii-panel sii-catalog-create"><h3>Añadir aula</h3>
     <form className="sii-catalog-form" onSubmit={e=>void addRoom(e)}>
-     <label>Campus<select name="campusId" required defaultValue=""><option value="" disabled>Seleccionar campus</option>
-      {campuses.filter(x=>x.status==='active').map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</select></label>
-     <label>Clave del aula<input name="code" placeholder="A101" required/></label>
-     <label>Edificio<input name="building" placeholder="Edificio A" required/></label>
-     <label>Capacidad<input type="number" name="capacity" min={1} max={5000} required defaultValue={30}/></label>
-     <button type="submit" disabled={saving||loading||!campuses.length} className="sii-submit">Guardar aula</button>
+     <label>Campus<NativeSelect name="campusId" required defaultValue=""><option value="" disabled>Seleccionar campus</option>
+      {campuses.filter(x=>x.status==='active').map(x=><option value={x.id} key={x.id}>{x.name}</option>)}</NativeSelect></label>
+     <label>Clave del aula<Input name="code" placeholder="A101" required/></label>
+     <label>Edificio<Input name="building" placeholder="Edificio A" required/></label>
+     <label>Capacidad<Input type="number" name="capacity" min={1} max={5000} required defaultValue={30}/></label>
+     <Button variant="default" type="submit" disabled={saving||loading||!campuses.length} className="sii-submit">Guardar aula</Button>
     </form></section>
    <section className="sii-panel sii-catalog-create"><h3>Programar clase recurrente</h3>
     <form className="sii-catalog-form" onSubmit={e=>void addPattern(e)}>
-     <label>Sección<select name="sectionId" required defaultValue=""><option value="" disabled>Seleccionar sección</option>
-      {sections.filter(x=>x.status==='open').map(x=><option value={x.id} key={x.id}>{x.code}</option>)}</select></label>
-     <label>Aula<select name="roomId" required defaultValue=""><option value="" disabled>Seleccionar aula</option>
-      {rooms.filter(x=>x.isActive).map(x=><option value={x.id} key={x.id}>{x.building} · {x.code} ({x.capacity})</option>)}</select></label>
-     <label>Día<select name="weekday" defaultValue="1">{days.slice(1).map((day,i)=><option value={i+1} key={day}>{day}</option>)}</select></label>
-     <label>Inicio<input name="start" type="time" defaultValue="07:00" required/></label>
-     <label>Fin<input name="end" type="time" defaultValue="09:00" required/></label>
-     <button type="submit" disabled={saving||loading||!rooms.length||!sections.length} className="sii-submit">Comprobar y programar</button>
+     <label>Sección<NativeSelect name="sectionId" required defaultValue=""><option value="" disabled>Seleccionar sección</option>
+      {sections.filter(x=>x.status==='open').map(x=><option value={x.id} key={x.id}>{x.code}</option>)}</NativeSelect></label>
+     <label>Aula<NativeSelect name="roomId" required defaultValue=""><option value="" disabled>Seleccionar aula</option>
+      {rooms.filter(x=>x.isActive).map(x=><option value={x.id} key={x.id}>{x.building} · {x.code} ({x.capacity})</option>)}</NativeSelect></label>
+     <label>Día<NativeSelect name="weekday" defaultValue="1">{days.slice(1).map((day,i)=><option value={i+1} key={day}>{day}</option>)}</NativeSelect></label>
+     <label>Inicio<Input name="start" type="time" defaultValue="07:00" required/></label>
+     <label>Fin<Input name="end" type="time" defaultValue="09:00" required/></label>
+     <Button variant="default" type="submit" disabled={saving||loading||!rooms.length||!sections.length} className="sii-submit">Comprobar y programar</Button>
     </form></section>
   </div>
   <section className="sii-panel sii-catalog-table-panel"><h3>Patrones programados · {patterns.length}</h3>
-   <SiiScrollRegion label="Tabla de horarios, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th>Sección</th><th>Día</th><th>Horario</th><th>Aula</th></tr></thead>
-    <tbody>{patterns.map(p=><tr key={p.id}><td>{sections.find(s=>s.id===p.sectionId)?.code??p.sectionId}</td>
-     <td>{days[p.weekday??0]??'—'}</td><td>{clock(p.startMinute??0)}–{clock(p.endMinute??0)}</td>
-     <td>{rooms.find(r=>r.id===p.roomId)?.code??p.roomId}</td></tr>)}</tbody></table></SiiScrollRegion>
+   <SiiScrollRegion label="Tabla de horarios, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table"><TableHeader><TableRow><TableHead>Sección</TableHead><TableHead>Día</TableHead><TableHead>Horario</TableHead><TableHead>Aula</TableHead></TableRow></TableHeader>
+    <TableBody>{patterns.map(p=><TableRow key={p.id}><TableCell>{sections.find(s=>s.id===p.sectionId)?.code??p.sectionId}</TableCell>
+     <TableCell>{days[p.weekday??0]??'—'}</TableCell><TableCell>{clock(p.startMinute??0)}–{clock(p.endMinute??0)}</TableCell>
+     <TableCell>{rooms.find(r=>r.id===p.roomId)?.code??p.roomId}</TableCell></TableRow>)}</TableBody></Table></SiiScrollRegion>
   </section>
   <section className="sii-panel sii-catalog-table-panel"><h3>Ocurrencias de una semana</h3>
-   <label>Inicio de semana <input type="date" value={week} onChange={e=>setWeek(e.target.value)}/></label>
-   <SiiScrollRegion label="Tabla de sesiones, desplazamiento horizontal"><table className="sii-catalog-table"><thead><tr><th>Fecha</th><th>Materia / sección</th><th>Hora</th><th>Aula</th><th>Estado / acción</th></tr></thead>
-    <tbody>{occurrences.map(o=><tr key={o.id}><td>{o.date}</td><td>{o.courseName} · {o.sectionCode}</td>
-     <td>{clock(o.startMinute)}–{clock(o.endMinute)}</td><td>{o.roomBuilding} · {o.roomCode}</td>
-     <td>{o.state} {o.state!=='CANCELLED'&&<button type="button" disabled={saving} onClick={()=>void cancel(o)}>Cancelar</button>}</td>
-    </tr>)}</tbody></table></SiiScrollRegion>
+   <label>Inicio de semana <Input type="date" value={week} onChange={e=>setWeek(e.target.value)}/></label>
+   <SiiScrollRegion label="Tabla de sesiones, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table"><TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Materia / sección</TableHead><TableHead>Hora</TableHead><TableHead>Aula</TableHead><TableHead>Estado / acción</TableHead></TableRow></TableHeader>
+    <TableBody>{occurrences.map(o=><TableRow key={o.id}><TableCell>{o.date}</TableCell><TableCell>{o.courseName} · {o.sectionCode}</TableCell>
+     <TableCell>{clock(o.startMinute)}–{clock(o.endMinute)}</TableCell><TableCell>{o.roomBuilding} · {o.roomCode}</TableCell>
+     <TableCell>{o.state} {o.state!=='CANCELLED'&&<Button variant="outline" type="button" disabled={saving} onClick={()=>void cancel(o)}>Cancelar</Button>}</TableCell>
+    </TableRow>)}</TableBody></Table></SiiScrollRegion>
    {!occurrences.length&&<p>Aún no hay clases programadas en este intervalo.</p>}
   </section>
  </div>;

@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens stay unlayered so legacy root variables cannot override semantic HSL values. */
+  :root {
+    --background: 220 37% 97%;
+    --foreground: 221 43% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 221 43% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 43% 15%;
+    --primary: 345 62% 34%;
+    --primary-dark: 340 64% 21%;
+    --primary-soft: 348 73% 96%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 33% 98%;
+    --secondary-foreground: 221 43% 15%;
+    --muted: 220 33% 98%;
+    --muted-foreground: 218 11% 41%;
+    --accent: 348 73% 96%;
+    --accent-foreground: 345 62% 34%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 160 72% 28%;
+    --success-foreground: 0 0% 100%;
+    --border: 216 27% 92%;
+    --input: 216 27% 88%;
+    --ring: 345 62% 34%;
+    --sidebar-background: 338 52% 11%;
+    --sidebar-foreground: 345 40% 94%;
+    --sidebar-primary: 345 62% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 338 40% 18%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 338 28% 24%;
+    --sidebar-ring: 347 72% 72%;
+  }
+  [data-sii-theme="dark"] {
+    --background: 217 32% 10%;
+    --foreground: 214 38% 95%;
+    --card: 214 29% 15%;
+    --card-foreground: 214 38% 95%;
+    --popover: 214 29% 15%;
+    --popover-foreground: 214 38% 95%;
+    --primary: 347 72% 72%;
+    --primary-dark: 342 52% 38%;
+    --primary-soft: 337 30% 20%;
+    --primary-foreground: 340 55% 12%;
+    --secondary: 211 29% 18%;
+    --secondary-foreground: 214 38% 95%;
+    --muted: 211 29% 18%;
+    --muted-foreground: 215 18% 70%;
+    --accent: 337 30% 20%;
+    --accent-foreground: 347 72% 82%;
+    --destructive: 0 62% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 157 56% 62%;
+    --success-foreground: 160 72% 10%;
+    --border: 210 24% 26%;
+    --input: 210 24% 32%;
+    --ring: 347 72% 72%;
+    --sidebar-background: 300 28% 6%;
+    --sidebar-foreground: 340 30% 93%;
+    --sidebar-primary: 347 72% 72%;
+    --sidebar-primary-foreground: 340 55% 12%;
+    --sidebar-accent: 337 38% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 337 25% 20%;
+    --sidebar-ring: 347 72% 72%;
+  }
+@layer base {
+  .sii-ui {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--sii-text);
+  }
+  .sii-ui *, .sii-ui *::before, .sii-ui *::after {
+    border: 0 solid hsl(var(--border));
+  }
+  .sii-ui button, .sii-ui input, .sii-ui select, .sii-ui textarea {
+    font: inherit;
+  }
+}
+
+/* One palette serves both the kit and modules retaining their semantic classes. */
+:root, html[data-sii-theme="dark"] {
+  --sii-bg: hsl(var(--background));
+  --sii-surface: hsl(var(--card));
+  --sii-surface-soft: hsl(var(--secondary));
+  --sii-text: hsl(var(--foreground));
+  --sii-muted: hsl(var(--muted-foreground));
+  --sii-line: hsl(var(--border));
+  --sii-primary: hsl(var(--primary));
+  --sii-primary-dark: hsl(var(--primary-dark));
+  --sii-primary-soft: hsl(var(--primary-soft));
+  --sii-success: hsl(var(--success));
+  --sii-kit-bg: var(--sii-bg);
+  --sii-kit-surface: var(--sii-surface);
+  --sii-kit-elevated: var(--sii-surface);
+  --sii-kit-border: var(--sii-line);
+  --sii-kit-border-strong: hsl(var(--input));
+  --sii-kit-muted: var(--sii-muted);
+  --sii-kit-accent: var(--sii-primary);
+  --sii-kit-accent-strong: var(--sii-primary);
+  --sii-kit-gradient: var(--sii-primary);
+  --sii-kit-ring: hsl(var(--ring) / .2);
+}
+
+.sii-app.sii-ui {display:flex;background:var(--sii-bg)}
+.sii-app.sii-ui > .sii-main {width:auto}
+.sii-ui [data-sidebar="sidebar"] {font-family:inherit}
+.sii-ui [data-sidebar="header"] .sii-brand-caption {display:none}
+.sii-ui [data-sidebar="menu-button"] {white-space:normal}
+.sii-ui [data-sidebar="menu-button"][data-active="true"] {
+  background:hsl(var(--sidebar-accent));color:hsl(var(--sidebar-accent-foreground));
+  box-shadow:inset 3px 0 hsl(var(--sidebar-primary));
+}
+.sii-app :is(.sii-topbar,.sii-panel,.sii-module-card,.sii-metric,.sii-catalog-table-panel,.sii-catalog-create,.sii-catalog-tabs,.sii-security-card),
+.sii-auth .sii-auth-card {
+  background:var(--sii-surface);backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+.sii-app .sii-menu-button {display:inline-flex;min-height:44px;min-width:44px}
+.sii-ui :is([data-sii-control="input"],[data-sii-control="select"],[data-sii-control="textarea"]) {max-width:100%}
+.sii-ui [data-sii-control="input"]:is([type="checkbox"],[type="radio"]) {width:1rem;min-height:1rem;padding:0}
+@media(min-width:768px){.sii-app .sii-menu-button{display:none}}
+@media(max-width:767px){
+  .sii-app .sii-topbar {padding-inline:12px}
+  .sii-app .sii-topbar-actions {gap:6px}
+  .sii-ui input:not([type="checkbox"]):not([type="radio"]),.sii-ui select,.sii-ui textarea {font-size:16px}
+}

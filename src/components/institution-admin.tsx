@@ -1,4 +1,9 @@
 'use client';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Textarea} from '@/components/ui/textarea';
+import {NativeSelect} from '@/components/ui/native-select';
+
 import {useInstitutionConfirmation} from './sii-confirmation';
 
 import Link from 'next/link';
@@ -84,14 +89,14 @@ export function ManageableInstitutions() {
   return <section className="sii-panel sii-administration-discovery" aria-label="Instituciones administrables" aria-busy={loading}>
     <div className="sii-panel-top"><div><span className="sii-section-kicker">ADMINISTRACIÓN AUTORIZADA</span><h2>Gestión institucional</h2><p>Configuración e historial de las instituciones que puedes administrar.</p></div></div>
     {!online && <p role="status">Sin conexión. Las operaciones están deshabilitadas.</p>}
-    {loading ? <p role="status">Consultando instituciones administrables…</p> : error ? <div className="sii-catalog-error" role="alert"><p>{error}</p><button type="button" className="sii-outline-button" disabled={!online} onClick={() => setRevision(value => value + 1)}>Reintentar consulta</button></div> : !rows.length ? <p role="status">No hay instituciones administrables para esta consulta.</p> : <ul className="sii-administration-list">{rows.map(institution => <li key={institution.id}>
+    {loading ? <p role="status">Consultando instituciones administrables…</p> : error ? <div className="sii-catalog-error" role="alert"><p>{error}</p><Button variant="outline" type="button" className="sii-outline-button" disabled={!online} onClick={() => setRevision(value => value + 1)}>Reintentar consulta</Button></div> : !rows.length ? <p role="status">No hay instituciones administrables para esta consulta.</p> : <ul className="sii-administration-list">{rows.map(institution => <li key={institution.id}>
       <span className="sii-admin-institution-glyph" aria-hidden="true">▥</span><div><strong>{institution.name}</strong><small>{institution.code} · {statusLabels[institution.status]}</small></div>
       <Link href={`/dashboard/institutions/${institution.id}/admin` as Route} className="sii-outline-button" aria-label={`Administrar ${institution.name}`}>Administrar <span aria-hidden="true">→</span></Link>
     </li>)}</ul>}
     <nav className="sii-catalog-pagination" aria-label="Paginación de instituciones administrables">
-      <button type="button" className="sii-outline-button" disabled={pages.length === 1 || loading || !online} onClick={() => setPages(value => value.slice(0, -1))}>Instituciones: página anterior</button><span aria-live="polite">Página {pages.length}</span>
-      <button type="button" className="sii-outline-button" disabled={!nextCursor || loading || !online} onClick={() => setPages(value => [...value, nextCursor])}>Instituciones: siguiente página</button>
-      <button type="button" className="sii-outline-button" disabled={loading || !online} onClick={() => { setPages([null]); setRevision(value => value + 1); }}>Actualizar instituciones</button>
+      <Button variant="outline" type="button" className="sii-outline-button" disabled={pages.length === 1 || loading || !online} onClick={() => setPages(value => value.slice(0, -1))}>Instituciones: página anterior</Button><span aria-live="polite">Página {pages.length}</span>
+      <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor || loading || !online} onClick={() => setPages(value => [...value, nextCursor])}>Instituciones: siguiente página</Button>
+      <Button variant="outline" type="button" className="sii-outline-button" disabled={loading || !online} onClick={() => { setPages([null]); setRevision(value => value + 1); }}>Actualizar instituciones</Button>
     </nav>
   </section>;
 }
@@ -191,7 +196,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
     {(needsSecurity || blocked || (!archived && !actions.updateSettings && !actions.changeStatus)) && <div className="sii-info-banner sii-admin-security-banner"><div className="sii-admin-security-copy"><strong>Revisa tu seguridad de cuenta</strong><p>Confirma tu identidad para volver a consultar las acciones disponibles.</p></div><SecurityActionLink returnTo={returnTo}/></div>}
     <section className="sii-panel sii-administration-summary" aria-label="Contexto de administración">
       <div><span className="sii-admin-summary-label">CONTEXTO INSTITUCIONAL</span><h2>{institution.name}</h2><p className="sii-admin-summary-meta">{institution.code} · <strong data-status={institution.status}>{statusLabels[institution.status]}</strong> · Versión {institution.version}</p><p className="sii-admin-summary-date">Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
-      <button type="button" className="sii-outline-button" disabled={saving || loading || !online} onClick={() => void reload()}>Recargar configuración vigente</button>
+      <Button variant="outline" type="button" className="sii-outline-button" disabled={saving || loading || !online} onClick={() => void reload()}>Recargar configuración vigente</Button>
       {archived ? <p>Esta institución está archivada. Su configuración y estado son de solo lectura.</p> : !businessAvailable ? <p>La administración se limita a configuración, estado e historial. Las operaciones institucionales ordinarias permanecen bloqueadas.</p> : null}
     </section>
     {businessAvailable && <nav className="sii-panel sii-administration-links" aria-label="Áreas administrativas">
@@ -204,18 +209,18 @@ export default function InstitutionAdministration({initialInstitution, actions}:
       <section className="sii-panel sii-administration-card"><h2 ref={settingsHeading} tabIndex={-1}>Configuración institucional</h2>
         {loading && <p role="status">Consultando configuración vigente…</p>}
         <form className="sii-catalog-form" aria-label="Configuración institucional" onSubmit={saveSettings} aria-describedby={error ? 'institution-admin-error' : undefined}>
-          <label htmlFor="institution-name">Nombre de la institución</label><input id="institution-name" required minLength={1} maxLength={200} value={draft.name} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, name: event.target.value}))}/>
-          <label htmlFor="institution-short-name">Nombre corto</label><input id="institution-short-name" maxLength={80} value={draft.shortName ?? ''} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, shortName: event.target.value}))}/>
-          <label htmlFor="institution-code">Clave institucional</label><input id="institution-code" required maxLength={80} value={draft.code} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, code: event.target.value}))}/>
-          <label htmlFor="institution-timezone">Zona horaria</label><input id="institution-timezone" required maxLength={100} value={draft.timezone} aria-describedby="institution-timezone-help" disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, timezone: event.target.value}))}/><p id="institution-timezone-help">Usa el identificador de la zona, por ejemplo America/Mexico_City. Se valida al guardar.</p>
-          {actions.updateSettings && !archived && <><label htmlFor="institution-settings-reason">Motivo de la configuración</label><textarea id="institution-settings-reason" required minLength={3} maxLength={500} value={reason} disabled={disabled} onChange={event => setReason(event.target.value)}/><button type="submit" className="sii-submit" disabled={disabled}>{saving ? 'Guardando…' : 'Guardar configuración'}</button></>}
+          <label htmlFor="institution-name">Nombre de la institución</label><Input id="institution-name" required minLength={1} maxLength={200} value={draft.name} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, name: event.target.value}))}/>
+          <label htmlFor="institution-short-name">Nombre corto</label><Input id="institution-short-name" maxLength={80} value={draft.shortName ?? ''} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, shortName: event.target.value}))}/>
+          <label htmlFor="institution-code">Clave institucional</label><Input id="institution-code" required maxLength={80} value={draft.code} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, code: event.target.value}))}/>
+          <label htmlFor="institution-timezone">Zona horaria</label><Input id="institution-timezone" required maxLength={100} value={draft.timezone} aria-describedby="institution-timezone-help" disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, timezone: event.target.value}))}/><p id="institution-timezone-help">Usa el identificador de la zona, por ejemplo America/Mexico_City. Se valida al guardar.</p>
+          {actions.updateSettings && !archived && <><label htmlFor="institution-settings-reason">Motivo de la configuración</label><Textarea id="institution-settings-reason" required minLength={3} maxLength={500} value={reason} disabled={disabled} onChange={event => setReason(event.target.value)}/><Button variant="default" type="submit" className="sii-submit" disabled={disabled}>{saving ? 'Guardando…' : 'Guardar configuración'}</Button></>}
         </form>
       </section>
       <section className="sii-panel sii-administration-card"><h2>Estado institucional</h2><p>Los cambios de estado requieren motivo, confirmación de identidad vigente y registro en auditoría.</p>
         {actions.changeStatus && !archived ? <form className="sii-catalog-form" onSubmit={saveStatus} aria-label="Cambiar estado institucional" aria-describedby={error ? 'institution-admin-error' : undefined}>
-          <label htmlFor="institution-status">Nuevo estado institucional</label><select id="institution-status" required value={nextStatus} disabled={disabled} onChange={event => setNextStatus(event.target.value)}><option value="">Seleccionar estado</option>{['active', 'inactive', 'suspended'].filter(status => status !== institution.status).map(status => <option key={status} value={status}>{statusLabels[status]}</option>)}</select>
+          <label htmlFor="institution-status">Nuevo estado institucional</label><NativeSelect id="institution-status" required value={nextStatus} disabled={disabled} onChange={event => setNextStatus(event.target.value)}><option value="">Seleccionar estado</option>{['active', 'inactive', 'suspended'].filter(status => status !== institution.status).map(status => <option key={status} value={status}>{statusLabels[status]}</option>)}</NativeSelect>
           <p>{nextStatus === 'active' ? 'La institución recuperará las operaciones permitidas por sus concesiones vigentes. Las invitaciones revocadas no se restauran.' : 'Inactivar o suspender bloquea las operaciones ordinarias, revoca las invitaciones pendientes y cancela sus entregas en cola. Los administradores autorizados conservan esta gestión limitada.'}</p>
-          <label htmlFor="institution-status-reason">Motivo del cambio institucional</label><textarea id="institution-status-reason" required minLength={3} maxLength={500} value={statusReason} disabled={disabled} onChange={event => setStatusReason(event.target.value)}/><button type="submit" className="sii-submit" disabled={disabled || !nextStatus}>Confirmar estado institucional</button>
+          <label htmlFor="institution-status-reason">Motivo del cambio institucional</label><Textarea id="institution-status-reason" required minLength={3} maxLength={500} value={statusReason} disabled={disabled} onChange={event => setStatusReason(event.target.value)}/><Button variant="default" type="submit" className="sii-submit" disabled={disabled || !nextStatus}>Confirmar estado institucional</Button>
         </form> : <p>No hay cambios de estado autorizados para esta institución.</p>}
       </section>
     </div>
@@ -265,15 +270,15 @@ function InstitutionAudit({institutionId, online, revision, onAuthorizationLost}
     abort.current?.abort(); setFilterError(''); setFilters({...draft, action: draft.action.trim()}); setPages([null]); setRefresh(value => value + 1);
   }
   return <section className="sii-panel sii-administration-card" aria-label="Auditoría institucional" aria-busy={loading}>
-    <div className="sii-catalog-toolbar"><h2>Auditoría institucional</h2><button type="button" className="sii-outline-button" disabled={loading || !online} onClick={() => { setPages([null]); setRefresh(value => value + 1); }}>Actualizar auditoría</button></div>
+    <div className="sii-catalog-toolbar"><h2>Auditoría institucional</h2><Button variant="outline" type="button" className="sii-outline-button" disabled={loading || !online} onClick={() => { setPages([null]); setRefresh(value => value + 1); }}>Actualizar auditoría</Button></div>
     <p>Historial autorizado de esta institución. Los filtros de fechas usan tu hora local.</p>
     {filterError && <p role="alert" tabIndex={-1} ref={filterFeedback} id="institution-audit-filter-error" className="sii-catalog-error">{filterError}</p>}
     <form className="sii-catalog-form sii-administration-filters" onSubmit={apply} aria-label="Filtros de auditoría" aria-describedby={filterError ? 'institution-audit-filter-error' : undefined}>
-      <label htmlFor="institution-audit-action">Acción exacta<input id="institution-audit-action" maxLength={100} value={draft.action} onChange={event => setDraft(value => ({...value, action: event.target.value}))} disabled={!online} placeholder="Todas las acciones"/></label>
-      <label htmlFor="institution-audit-kind">Tipo de recurso<select id="institution-audit-kind" value={draft.targetKind} disabled={!online} onChange={event => setDraft(value => ({...value, targetKind: event.target.value}))}><option value="">Todos los recursos</option>{Object.entries(targetLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
-      <label htmlFor="institution-audit-from">Desde<input id="institution-audit-from" type="datetime-local" value={draft.from} disabled={!online} onChange={event => setDraft(value => ({...value, from: event.target.value}))}/></label>
-      <label htmlFor="institution-audit-to">Hasta<input id="institution-audit-to" type="datetime-local" value={draft.to} disabled={!online} onChange={event => setDraft(value => ({...value, to: event.target.value}))}/></label>
-      <button type="submit" className="sii-outline-button" disabled={!online}>Aplicar filtros de auditoría</button>
+      <label htmlFor="institution-audit-action">Acción exacta<Input id="institution-audit-action" maxLength={100} value={draft.action} onChange={event => setDraft(value => ({...value, action: event.target.value}))} disabled={!online} placeholder="Todas las acciones"/></label>
+      <label htmlFor="institution-audit-kind">Tipo de recurso<NativeSelect id="institution-audit-kind" value={draft.targetKind} disabled={!online} onChange={event => setDraft(value => ({...value, targetKind: event.target.value}))}><option value="">Todos los recursos</option>{Object.entries(targetLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</NativeSelect></label>
+      <label htmlFor="institution-audit-from">Desde<Input id="institution-audit-from" type="datetime-local" value={draft.from} disabled={!online} onChange={event => setDraft(value => ({...value, from: event.target.value}))}/></label>
+      <label htmlFor="institution-audit-to">Hasta<Input id="institution-audit-to" type="datetime-local" value={draft.to} disabled={!online} onChange={event => setDraft(value => ({...value, to: event.target.value}))}/></label>
+      <Button variant="outline" type="submit" className="sii-outline-button" disabled={!online}>Aplicar filtros de auditoría</Button>
     </form>
     {loading ? <p role="status">Consultando auditoría…</p> : error ? <p role="alert" className="sii-catalog-error">{error}</p> : !rows.length ? <p role="status">No hay eventos para esta consulta.</p> : <ol className="sii-administration-events">{rows.map(entry => <li key={entry.id}><article>
       <h3>{actionLabels[entry.action] ?? 'Operación institucional'}</h3><p>Acción: {entry.action} · <time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time></p><p>Responsable: {entry.actor?.label ?? 'Sistema / sin actor institucional'}</p>
@@ -281,9 +286,9 @@ function InstitutionAudit({institutionId, online, revision, onAuthorizationLost}
       <div className="sii-administration-changes"><div><h4>Antes</h4><ChangeValues value={entry.changes.before}/></div><div><h4>Después</h4><ChangeValues value={entry.changes.after}/></div></div>
     </article></li>)}</ol>}
     <nav className="sii-catalog-pagination" aria-label="Paginación de auditoría">
-      <button type="button" className="sii-outline-button" disabled={pages.length === 1 || loading || !online} onClick={() => setPages(value => value.slice(0, -1))}>Auditoría: página anterior</button><span aria-live="polite">Página de auditoría {pages.length}</span>
-      <button type="button" className="sii-outline-button" disabled={!nextCursor || loading || !online} onClick={() => setPages(value => [...value, nextCursor])}>Auditoría: siguiente página</button>
-      {error && <button type="button" className="sii-outline-button" disabled={!online || loading} onClick={() => { setPages([null]); setRefresh(value => value + 1); }}>Reintentar auditoría</button>}
+      <Button variant="outline" type="button" className="sii-outline-button" disabled={pages.length === 1 || loading || !online} onClick={() => setPages(value => value.slice(0, -1))}>Auditoría: página anterior</Button><span aria-live="polite">Página de auditoría {pages.length}</span>
+      <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor || loading || !online} onClick={() => setPages(value => [...value, nextCursor])}>Auditoría: siguiente página</Button>
+      {error && <Button variant="outline" type="button" className="sii-outline-button" disabled={!online || loading} onClick={() => { setPages([null]); setRefresh(value => value + 1); }}>Reintentar auditoría</Button>}
     </nav>
   </section>;
 }

@@ -64,6 +64,7 @@ test('catalog tabs implement arrow, home and end keyboard navigation',async({pag
 });
 test('catalog retrieves both pages with honest counts and supports edits',async({page})=>{
  await catalog(page);await page.getByRole('tab',{name:'Materias'}).click();
+ await expect(page.locator('#catalog-search')).toHaveAttribute('data-sii-control','input');
  await expect(page.locator('tbody tr')).toHaveCount(50);
  await page.getByRole('button',{name:'Siguiente página'}).click();await expect(page.locator('tbody tr')).toHaveCount(15);
  await page.getByRole('button',{name:'Página anterior'}).click();await expect(page.locator('tbody tr')).toHaveCount(50);
@@ -179,9 +180,26 @@ test('quick switch searches only available module links and closes with Escape',
  await page.keyboard.press('Control+k');
  const dialog=page.getByRole('dialog',{name:'Ir a un módulo'});
  await expect(dialog).toBeVisible();
- await page.getByRole('searchbox',{name:'Buscar secciones'}).fill('seguridad');
+ await page.getByRole('combobox',{name:'Buscar secciones'}).fill('seguridad');
  await expect(dialog.getByRole('link',{name:'Cuenta y seguridad'})).toBeVisible();
  await expect(dialog.getByRole('link',{name:'Administración institucional'})).toHaveCount(0);
  await page.keyboard.press('Escape');
  await expect(dialog).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Buscar módulos'})).toBeFocused();
+});
+
+test('mobile kit navigation closes after routing and after leaving its breakpoint',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await catalog(page);
+ await page.getByRole('button',{name:'Abrir navegación'}).click();
+ await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Cuenta y seguridad'}).click();
+ await expect(page).toHaveURL(/\/dashboard\/security$/);
+ await expect(page.locator('#sii-sidebar-mobile')).toBeHidden();
+ await expect(page.locator('html')).not.toHaveCSS('overflow','hidden');
+ await page.getByRole('button',{name:'Abrir navegación'}).click();
+ await page.setViewportSize({width:1024,height:844});
+ await expect(page.locator('#sii-sidebar-mobile')).toHaveCount(0);
+ await page.setViewportSize({width:390,height:844});
+ await expect(page.locator('#sii-sidebar-mobile')).toBeHidden();
+ await expect(page.getByRole('button',{name:'Abrir navegación'})).toHaveAttribute('aria-expanded','false');
 });

@@ -1,4 +1,7 @@
 'use client';
+import {Textarea} from '@/components/ui/textarea';
+import {Button} from '@/components/ui/button';
+
 import {useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
 export type ConfirmationOptions={title:string;description:string;confirmLabel?:string;destructive?:boolean;reasonLabel?:string;minReasonLength?:number};
 type Request=ConfirmationOptions & {id:number};
@@ -45,13 +48,13 @@ function ConfirmationDialog({request,onDecision}:{request:Request;onDecision:(an
   aria-labelledby="sii-confirm-title" aria-describedby="sii-confirm-description" className="sii-confirm-dialog">
    <div className="sii-confirm-heading"><span className="sii-section-kicker">CONFIRMACIÓN INSTITUCIONAL</span><h2 id="sii-confirm-title">{request.title}</h2><p id="sii-confirm-description">{request.description}</p></div>
    {request.reasonLabel&&<label className="sii-confirm-reason">{request.reasonLabel}
-    <textarea ref={reasonField} value={reason} onChange={e=>setReason(e.target.value)} minLength={min} rows={3} required aria-describedby="sii-confirm-reason-help"/>
+    <Textarea ref={reasonField} value={reason} onChange={e=>setReason(e.target.value)} minLength={min} rows={3} required aria-describedby="sii-confirm-reason-help"/>
     <small id="sii-confirm-reason-help">Motivo obligatorio de al menos {min} caracteres ({reason.trim().length}/{min}).</small></label>}
    <div className="sii-confirm-actions">
-    <button ref={cancelButton} type="button" className="sii-outline-button" onClick={()=>onDecision(null)}>Volver sin cambios</button>
-    <button type="button" className={request.destructive?'sii-confirm-submit sii-confirm-submit--destructive':'sii-confirm-submit'}
+    <Button variant="outline" ref={cancelButton} type="button" className="sii-outline-button" onClick={()=>onDecision(null)}>Volver sin cambios</Button>
+    <Button variant="default" type="button" className={request.destructive?'sii-confirm-submit sii-confirm-submit--destructive':'sii-confirm-submit'}
      disabled={Boolean(request.reasonLabel)&&reason.trim().length<min}
-     onClick={()=>onDecision(request.reasonLabel?reason.trim():'confirmed')}>{request.confirmLabel??'Confirmar operación'}</button>
+     onClick={()=>onDecision(request.reasonLabel?reason.trim():'confirmed')}>{request.confirmLabel??'Confirmar operación'}</Button>
    </div>
   </div></div>;
 }

@@ -1,4 +1,7 @@
 'use client';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+
 import SiiThemeToggle from '@/components/sii-theme-toggle';
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import type {ApplicantProof} from '@/shared/admissions-fragment';
@@ -12,7 +15,7 @@ export default function ApplicantVerification(){
   proof.current=null;setPassword('');setConfirmation('');setDone(true);
  }catch(cause){setError(cause instanceof Error?cause.message:'No hay conexión. Vuelve a intentar.');}finally{setBusy(false);}}
  return <main id="main-content" className="sii-main"><SiiThemeToggle/><section className="sii-panel"><h1>Verifica tu correo de aspirante</h1>
-  {done?<p role="status">Correo verificado. Regresa al portal de tu institución e inicia sesión con tu cuenta de aspirante.</p>:ready?<form className="sii-form-grid" onSubmit={verify}><p>Elige una contraseña nueva de al menos 12 caracteres para tu cuenta. El enlace caduca a los 30 minutos.</p><div className="sii-field"><label htmlFor="applicant-proof-password">Nueva contraseña de aspirante</label><input id="applicant-proof-password" type="password" autoComplete="new-password" minLength={12} maxLength={128} required value={password} onChange={event=>setPassword(event.target.value)}/></div><div className="sii-field"><label htmlFor="applicant-proof-confirmation">Confirma tu nueva contraseña</label><input id="applicant-proof-confirmation" type="password" autoComplete="new-password" minLength={12} maxLength={128} required value={confirmation} onChange={event=>setConfirmation(event.target.value)}/></div><button className="sii-primary-button" disabled={busy}>{busy?'Verificando…':'Verificar mi correo'}</button></form>:<p role="status">Abre el enlace original del correo. Si venció, solicita otro desde el portal de tu institución.</p>}
+  {done?<p role="status">Correo verificado. Regresa al portal de tu institución e inicia sesión con tu cuenta de aspirante.</p>:ready?<form className="sii-form-grid" onSubmit={verify}><p>Elige una contraseña nueva de al menos 12 caracteres para tu cuenta. El enlace caduca a los 30 minutos.</p><div className="sii-field"><label htmlFor="applicant-proof-password">Nueva contraseña de aspirante</label><Input id="applicant-proof-password" type="password" autoComplete="new-password" minLength={12} maxLength={128} required value={password} onChange={event=>setPassword(event.target.value)}/></div><div className="sii-field"><label htmlFor="applicant-proof-confirmation">Confirma tu nueva contraseña</label><Input id="applicant-proof-confirmation" type="password" autoComplete="new-password" minLength={12} maxLength={128} required value={confirmation} onChange={event=>setConfirmation(event.target.value)}/></div><Button variant="default" className="sii-primary-button" disabled={busy}>{busy?'Verificando…':'Verificar mi correo'}</Button></form>:<p role="status">Abre el enlace original del correo. Si venció, solicita otro desde el portal de tu institución.</p>}
   {error&&<p role="alert">{error}</p>}
  </section></main>;
 }

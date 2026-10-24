@@ -1,4 +1,7 @@
 'use client';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+
 
 import {useRef,useState,type FormEvent} from 'react';
 
@@ -51,15 +54,15 @@ export default function InstitutionStepUp({onConfirmed}:Props){
   {error&&<p ref={feedback} tabIndex={-1} className="sii-catalog-error" role="alert">{error}</p>}
   <form className="password-form" onSubmit={event=>void submit(event)}>
    <label htmlFor="invite-step-up-password">Contraseña actual</label>
-   <input id="invite-step-up-password" type="password" name="currentPassword" autoComplete="current-password" maxLength={512} required disabled={busy}/>
+   <Input id="invite-step-up-password" type="password" name="currentPassword" autoComplete="current-password" maxLength={512} required disabled={busy}/>
    <label htmlFor="invite-step-up-factor">{recovery?'Código de recuperación':'Código de seis dígitos del autenticador'}</label>
-   <input key={recovery?'recovery':'totp'} id="invite-step-up-factor" name="factor" type="text" inputMode={recovery?'text':'numeric'}
+   <Input key={recovery?'recovery':'totp'} id="invite-step-up-factor" name="factor" type="text" inputMode={recovery?'text':'numeric'}
     autoComplete="one-time-code" autoCapitalize="off" spellCheck={false}
     pattern={recovery?undefined:'[0-9]{6}'} minLength={recovery?32:6} maxLength={recovery?128:6} required disabled={busy}/>
-   <button type="button" className="sii-outline-button" disabled={busy} onClick={()=>{setRecovery(value=>!value);setError('');}}>
+   <Button variant="outline" type="button" className="sii-outline-button" disabled={busy} onClick={()=>{setRecovery(value=>!value);setError('');}}>
     {recovery?'Usar código del autenticador':'Usar código de recuperación'}
-   </button>
-   <button type="submit" className="sii-submit" disabled={busy}>{busy?'Confirmando…':'Confirmar identidad y continuar'}</button>
+   </Button>
+   <Button variant="default" type="submit" className="sii-submit" disabled={busy}>{busy?'Confirmando…':'Confirmar identidad y continuar'}</Button>
   </form>
   <p className="sii-catalog-hint">Nunca compartas estos códigos por correo ni por chat. Después de confirmar, pulsa «Crear invitación» nuevamente.</p>
  </section>;

@@ -7,7 +7,7 @@ describe('persistent dashboard navigation',()=>{
     expect(resolveDashboardLocation('/dashboard/security')).toEqual({active:'security'});
   });
   it('derives institutional module identity without an async permissions response',()=>{
-    for(const section of ['academic','registry','operations','grading','scheduling','services','users','roles','invitations','administration'])
+    for(const section of ['academic','registry','operations','grading','scheduling','services','users','roles','invitations','administration','admissions'])
       expect(resolveDashboardLocation(`/dashboard/institutions/inst-a/${section}`,'inst-b')).toEqual({active:section,institutionId:'inst-a'});
   });
   it('maps the admin URL to its visible administration tab',()=>{

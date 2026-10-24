@@ -39,7 +39,7 @@ test('teacher navigation exposes only the assigned gradebook module',async({page
 test('module directory keeps all six areas visible for an authenticated guest without granting links',async({page})=>{
  await fixture('guest');await login(page);await page.goto('/dashboard');
  const directory=page.getByRole('region',{name:'Módulos de QA consolidación'});
- await expect(directory.locator('.sii-module-card')).toHaveCount(6);
+ await expect(directory.locator('.sii-module-card')).toHaveCount(7);
  for(const label of ['Catálogo académico','Estudiantes y docentes','Grupos e inscripciones','Calificaciones','Horarios y aulas','Servicios universitarios']){
   await expect(directory.getByRole('heading',{name:label,exact:true})).toBeVisible();
   await expect(directory.getByRole('link',{name:new RegExp(label)})).toHaveCount(0);

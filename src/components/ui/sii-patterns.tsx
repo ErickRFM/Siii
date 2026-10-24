@@ -1,4 +1,6 @@
 'use client';
+import {Button} from '@/components/ui/button';
+
 
 import {useId,useState,type ReactNode,type KeyboardEvent} from 'react';
 
@@ -23,12 +25,12 @@ export function SiiTabs({items,label,initialTab}:{items:SiiTab[];label:string;in
  }
  return <section className="sii-kit-tabs">
    <div className="sii-catalog-tabs" role="tablist" aria-label={label} tabIndex={0} onKeyDown={handleKeyDown}>
-    {items.map(item=><button key={item.id} id={generatedId+'-tab-'+item.id}
+    {items.map(item=><Button variant="ghost" key={item.id} id={generatedId+'-tab-'+item.id}
       type="button" role="tab" aria-selected={item.id===active?.id}
       aria-controls={generatedId+'-panel-'+item.id} disabled={item.disabled}
       tabIndex={item.id===active?.id?0:-1}
       className={'sii-catalog-tab'+(item.id===active?.id?' sii-catalog-tab--active':'')}
-      onClick={()=>setSelected(item.id)}>{item.label}</button>)}
+      onClick={()=>setSelected(item.id)}>{item.label}</Button>)}
    </div>
    {items.map(item=><div key={item.id} id={generatedId+'-panel-'+item.id}
     role="tabpanel" aria-labelledby={generatedId+'-tab-'+item.id}
