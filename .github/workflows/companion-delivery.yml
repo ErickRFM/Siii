@@ -1,0 +1,42 @@
+name: Companion delivery (opt-in)
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+# No checkout, actions, deployment credentials or GitHub API access are needed.
+permissions: {}
+concurrency:
+  group: companion-delivery-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  delivery:
+    if: ${{ vars.SIII_COMPANION_AUTOMATION_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Request one protected delivery batch
+        shell: bash
+        env:
+          SIII_CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SIII_CRON_SECRET}" ]]; then
+            printf '%s\n' 'CRON_SECRET_MISSING' >&2
+            exit 1
+          fi
+          if ! status=$(curl --silent --show-error --request GET \
+            --connect-timeout 10 --max-time 110 --retry 0 \
+            --output /dev/null --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${SIII_CRON_SECRET}" \
+            'https://siii-three.vercel.app/api/internal/companion-snapshot-delivery'); then
+            printf '%s\n' 'COMPANION_DELIVERY_REQUEST_FAILED' >&2
+            exit 1
+          fi
+          if [[ "${status}" != '200' ]]; then
+            printf '%s\n' 'COMPANION_DELIVERY_HTTP_FAILED' >&2
+            exit 1
+          fi
+          printf '%s\n' 'COMPANION_DELIVERY_BATCH_REQUESTED'

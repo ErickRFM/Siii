@@ -9,7 +9,7 @@ const KEY=/^[A-Za-z0-9_-]{1,64}$/;
 const path='/integration/v1/events';
 const noStore={cache:'no-store' as const,redirect:'manual' as const,credentials:'omit' as const};
 
-function configFor(institutionId:string,encoded:string|undefined):{url:string;keyId:string;secret:Buffer}{
+export function academicDeliveryTarget(institutionId:string,encoded:string|undefined):{url:string;keyId:string;secret:Buffer}{
  if(!UUID.test(institutionId)||!encoded||encoded.length>32000)throw Error('COMPANION_TARGET_UNAVAILABLE');
  let targets:Targets;
  try{targets=JSON.parse(encoded) as Targets}catch{throw Error('COMPANION_TARGET_UNAVAILABLE')}
@@ -31,7 +31,7 @@ export function signedAcademicTransport(
 ):AcademicTransport {
  return async ({eventId,institutionId,body,signal}):Promise<AcademicDeliveryResult>=>{
   let target:{url:string;keyId:string;secret:Buffer};
-  try{target=configFor(institutionId,encodedTargets)}catch{return {status:'retryable'}}
+  try{target=academicDeliveryTarget(institutionId,encodedTargets)}catch{return {status:'retryable'}}
   try{
    const timestamp=Math.floor(Date.now()/1000).toString();
    const nonce=randomBytes(24).toString('base64url');

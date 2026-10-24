@@ -28,18 +28,38 @@ export async function completeAcademicEvent(tx:Transaction,event:AcademicLease,r
  if(row)await audit(tx,{institutionId:event.institutionId,action:'academic.snapshot.'+row.state,target:'event:'+event.eventId,requestId:randomUUID(),details:{after:{sourceVersion:event.sourceVersion,state:row.state,attempts:event.attempts}}});
  return row?.state??null;
 }
-/** No built-in HTTP or signing adapter. Accepted means authenticated202 receipt only, never APPLIED. */
-export async function deliverAcademicEvents(options:{transport:AcademicTransport;limit?:number}){
- const totals={disabled:!academicOutboxEnabled(),claimed:0,accepted:0,retried:0,failed:0};if(totals.disabled)return totals;
+export type AcademicDeliveryStore={
+ listDue:(now:Date,limit:number)=>Promise<{eventId:string}[]>;
+ claim:(eventId:string,now:Date)=>Promise<AcademicLease|null>;
+ complete:(event:AcademicLease,result:AcademicDeliveryResult,now:Date)=>Promise<'queued'|'accepted'|'failed'|null>;
+};
+const databaseStore:AcademicDeliveryStore={
+ listDue:(now,limit)=>db.select({eventId:academicSectionOutbox.eventId}).from(academicSectionOutbox).where(and(eq(academicSectionOutbox.state,'queued'),lte(academicSectionOutbox.nextAttemptAt,now),available(now))).orderBy(asc(academicSectionOutbox.nextAttemptAt),asc(academicSectionOutbox.eventId)).limit(limit),
+ claim:(eventId,now)=>db.transaction(tx=>claimAcademicEvent(tx,eventId,now)),
+ complete:(event,result,now)=>db.transaction(tx=>completeAcademicEvent(tx,event,result,now)),
+};
+/** Accepted is authenticated receipt only, never APPLIED. The monotonic budget
+ * includes database work, reserves a complete transport window before claiming,
+ * and leaves margin below the endpoint's 120s execution limit for completion.
+ */
+export async function deliverAcademicEvents(options:{transport:AcademicTransport;limit?:number;budgetMs?:number;clock?:()=>number;signal?:AbortSignal},store:AcademicDeliveryStore=databaseStore){
+ const totals={disabled:!academicOutboxEnabled(),claimed:0,accepted:0,retried:0,failed:0,budgetExhausted:false,cancelled:false};if(totals.disabled)return totals;
  const limit=options.limit??20;if(!Number.isInteger(limit)||limit<1||limit>100)throw Error('ACADEMIC_OUTBOX_LIMIT_INVALID');
- const now=new Date(),candidates=await db.select({eventId:academicSectionOutbox.eventId}).from(academicSectionOutbox).where(and(eq(academicSectionOutbox.state,'queued'),lte(academicSectionOutbox.nextAttemptAt,now),available(now))).orderBy(asc(academicSectionOutbox.nextAttemptAt),asc(academicSectionOutbox.eventId)).limit(limit);
+ const budgetMs=options.budgetMs??90000;if(!Number.isFinite(budgetMs)||budgetMs<0||budgetMs>90000)throw Error('ACADEMIC_OUTBOX_BUDGET_INVALID');
+ const clock=options.clock??(()=>performance.now()),deadline=clock()+budgetMs,remaining=()=>Math.max(0,deadline-clock());
+ const stopped=()=>{totals.cancelled=options.signal?.aborted??false;totals.budgetExhausted=remaining()<30000;return totals.cancelled||totals.budgetExhausted;};
+ if(stopped())return totals;
+ const candidates=await store.listDue(new Date(),limit);
  for(const candidate of candidates){
-  const event=await db.transaction(tx=>claimAcademicEvent(tx,candidate.eventId,new Date()));if(!event)continue;totals.claimed++;
+  if(stopped())break;
+  const event=await store.claim(candidate.eventId,new Date());if(!event)continue;totals.claimed++;
   let result:AcademicDeliveryResult;
   try{const body=openAcademicBody(event.bodyEncrypted,event);if(createHash('sha256').update(body).digest('hex')!==event.bodyDigest)throw Error('ACADEMIC_OUTBOX_BODY_INVALID');
-   result=await runAcademicTransport(options.transport,{eventId:event.eventId,institutionId:event.institutionId,sectionId:event.sectionId,sourceVersion:event.sourceVersion,body});
+   const timeoutMs=Math.max(0,Math.floor(Math.min(30000,remaining(),(event.leaseUntil?.getTime()??0)-Date.now()-1000)));
+   result=await runAcademicTransport(options.transport,{eventId:event.eventId,institutionId:event.institutionId,sectionId:event.sectionId,sourceVersion:event.sourceVersion,body},{timeoutMs,signal:options.signal});
   }catch(error){result=error instanceof Error&&error.message==='ACADEMIC_OUTBOX_KEY_UNAVAILABLE'?{status:'invalid',code:'KEY_UNAVAILABLE'}:error instanceof Error&&error.message==='ACADEMIC_OUTBOX_BODY_INVALID'?{status:'invalid',code:'BODY_INVALID'}:{status:'retryable'}}
-  const state=await db.transaction(tx=>completeAcademicEvent(tx,event,result,new Date()));if(state==='accepted')totals.accepted++;else if(state==='queued')totals.retried++;else if(state==='failed')totals.failed++;
+  const state=await store.complete(event,result,new Date());if(state==='accepted')totals.accepted++;else if(state==='queued')totals.retried++;else if(state==='failed')totals.failed++;
  }
+ stopped();
  return totals;
 }

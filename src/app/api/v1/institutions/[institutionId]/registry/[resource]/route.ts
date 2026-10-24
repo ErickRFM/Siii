@@ -9,6 +9,7 @@ import { academicPrograms, institutionalStudents, institutionalTeachers, securit
 import { authorizeInstitution } from '@/shared/auth/session';
 import { assertSameOrigin, jsonError } from '@/shared/auth/guards';
 import { registryCreate, registryUpdate, registryProfileUpdate } from '@/modules/registry/validation';
+import {queueRegistrySectionSnapshots} from '@/integrations/companion/outbox/registry-change';
 
 export const runtime='nodejs';
 type Context={params:Promise<{institutionId:string;resource:string}>};
@@ -74,6 +75,7 @@ export const PATCH=withDomainErrors(async (req:NextRequest,ctx:Context)=>{
   const access=await authorizeInstitution(p.institutionId,'academic.manage');
   if(!access)return jsonError('FORBIDDEN',403);
   const body:unknown=await req.json().catch(()=>null);
+  const auditRequestId=requestId(req.headers);
   try{
     if(typeof body==='object'&&body!==null&&'kind'in body){
       const parsed=registryProfileUpdate.safeParse(body);
@@ -86,20 +88,26 @@ export const PATCH=withDomainErrors(async (req:NextRequest,ctx:Context)=>{
         const {expected,profile}=parsed.data;
         if(before.firstName!==expected.firstName||before.lastName!==expected.lastName||before.institutionalEmail!==expected.institutionalEmail)throw new DomainConflict('REGISTRY_PROFILE_CONFLICT');
         const [row]=await tx.update(table).set({...profile,updatedAt:new Date()}).where(and(eq(table.id,current.id),eq(table.institutionId,p.institutionId))).returning();
-        await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:p.institutionId,action:'registry.'+p.resource+'.profile',target:p.resource+':'+row.id,details:{before,after:profile}});
+        await tx.insert(securityAuditLog).values({requestId:auditRequestId,actorUserId:access.identity.id,institutionId:p.institutionId,action:'registry.'+p.resource+'.profile',target:p.resource+':'+row.id,details:{before,after:profile}});
+        if((before.firstName!==profile.firstName||before.lastName!==profile.lastName)&&(p.resource==='students'||current.status==='active')){
+          await queueRegistrySectionSnapshots(tx,{institutionId:p.institutionId,resource:p.resource as 'students'|'teachers',sourceId:row.id,actorUserId:access.identity.id,requestId:auditRequestId});
+        }
         return row;
       });
       return data?NextResponse.json({data},{headers}):jsonError('NOT_FOUND',404);
     }
     const data=await domainTransaction(access,{permission:'academic.manage'},async tx=>{
-      const rows=p.resource==='students'
-        ? (()=>{const v=registryUpdate.students.safeParse(body);return v.success?tx.update(institutionalStudents).set({status:v.data.status,updatedAt:new Date()}).where(and(eq(institutionalStudents.id,v.data.id),eq(institutionalStudents.institutionId,p.institutionId))).returning():null})()
-        : (()=>{const v=registryUpdate.teachers.safeParse(body);return v.success?tx.update(institutionalTeachers).set({status:v.data.status,updatedAt:new Date()}).where(and(eq(institutionalTeachers.id,v.data.id),eq(institutionalTeachers.institutionId,p.institutionId))).returning():null})();
-      if(!rows)return {invalid:true} as const;
-      const changed=await rows;
-      if(!changed.length)return {missing:true} as const;
-      await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),actorUserId:access.identity.id,institutionId:p.institutionId,action:'registry.'+p.resource+'.status',target:p.resource+':'+changed[0].id});
-      return {data:changed[0]};
+      const parsed=(p.resource==='students'?registryUpdate.students:registryUpdate.teachers).safeParse(body);
+      if(!parsed.success)return {invalid:true} as const;
+      const table=p.resource==='students'?institutionalStudents:institutionalTeachers;
+      const [current]=await tx.select().from(table).where(and(eq(table.id,parsed.data.id),eq(table.institutionId,p.institutionId))).for('update');
+      if(!current)return {missing:true} as const;
+      const [changed]=await tx.update(table).set({status:parsed.data.status,updatedAt:new Date()}).where(and(eq(table.id,current.id),eq(table.institutionId,p.institutionId))).returning();
+      await tx.insert(securityAuditLog).values({requestId:auditRequestId,actorUserId:access.identity.id,institutionId:p.institutionId,action:'registry.'+p.resource+'.status',target:p.resource+':'+changed.id});
+      if(current.status!==changed.status){
+        await queueRegistrySectionSnapshots(tx,{institutionId:p.institutionId,resource:p.resource as 'students'|'teachers',sourceId:changed.id,actorUserId:access.identity.id,requestId:auditRequestId});
+      }
+      return {data:changed};
     });
     if('invalid'in data)return jsonError('VALIDATION_ERROR',422);
     if('missing'in data)return jsonError('NOT_FOUND',404);

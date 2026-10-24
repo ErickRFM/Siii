@@ -12,6 +12,7 @@ export const maxDuration=120;
 const headers={'Cache-Control':'no-store'};
 
 export async function GET(request:Request){
+ const started=performance.now();
  if(!cronAuthorized(request.headers.get('authorization'),process.env.CRON_SECRET)){
   return NextResponse.json({error:'UNAUTHORIZED'},{status:401,headers});
  }
@@ -23,7 +24,7 @@ export async function GET(request:Request){
  }
  try{
   await assertApplicationRole();
-  const outcome=await deliverAcademicEvents({transport:signedAcademicTransport(),limit:10});
+  const outcome=await deliverAcademicEvents({transport:signedAcademicTransport(),limit:10,budgetMs:Math.max(0,90000-(performance.now()-started)),signal:request.signal});
   return NextResponse.json({status:'processed',...outcome},{headers});
  }catch{
   logger.error({code:'SIII_COMPANION_DELIVERY_FAILED'},'Academic snapshot delivery failed');
