@@ -188,7 +188,7 @@ jobs:
         with:
           repository: ErickRFM/Compa-ero-de-esc
           # Validate the fixed HTTP receiver candidate before its merge.
-          ref: 220ee93c4f26ea57e28ef81b7f1997cdd17d574b
+          ref: f9aaf90378bb1073a617f0f4efdb459ce3672ef1
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -233,7 +233,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '220ee93c4f26ea57e28ef81b7f1997cdd17d574b'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = 'f9aaf90378bb1073a617f0f4efdb459ce3672ef1'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Synthetic live contract evidence
         if: always()
