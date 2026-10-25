@@ -211,3 +211,13 @@ Composición LOCAL PREPARATORIA posterior: merge0834b352 (prueba revisada de88 +
 
 
 Actualización de cierre local INT-04A: coordinación completó control A main5cb826/826(13.45s) y control B en esta rama826/826(8.17s), mismo npmtest estándar/Node24.18.0/Vitest4.1.12, cincoflagsunset registrados y sin diff unit/config/migrador/lock. No hubo cambio de fuente entre fallos y B. Gate local actual aprobado; se conservan dos825/826, aislado4/5 y diagnóstico910ms, sin atribuir causa ni mejora. Lint/tipos/build0,39ONdev,39ON+39OFF producción, claves/CIcontrato0 y revisión independienteC/I/M0. Commit local autorizado; reconciliación con mainfc65 y CI/publicación pendientes. No se declara cerrada INT-04 global ni producción.
+
+## INT-05 — autoridad y operación de la conexión (24 octubre2026)
+
+| Operación | Autoridad y persistencia | Evidencia | Estado |
+|---|---|---|---|
+| POST integrations/companion/v1/authority | HMAC de propósito exacto, institución de credencial, nonce único auditado; productor ON; institución/identidad/rol/vínculo vigentes; manifest sin PII con versión exacta, locks y revisión final |35HTTP ON,8firma/reloj; incluye revocación concurrente y caducidad durante auditoría bloqueada |LOCAL; CI/PRODUCCIÓN PENDIENTES|
+| GET institutions/:id/companion-sync |integrations.manage + sesión/assurance existente; metadatos limitados, observación remota firmada fueraTX y revalidación final de operador; accepted distinto de projected |15HTTP operaciones +19unit de observación; sin cuerpos/hash/PII; timeout/contrato inválido no verifican aplicación |LOCAL; RECEIPT E2E FINAL PENDIENTE|
+| POST institutions/:id/companion-sync |mismo permiso/origen; expectedSourceVersion bajo lock; snapshot nuevo y auditoría atómicos; histórico inmutable |concurrencia201/409, tenant/origen/MFA, rollback de evento/versión/auditoría, flagOFF503 |LOCAL; CI/PRODUCCIÓN PENDIENTES|
+
+Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md](../audits/SIII_COMPANION_CONNECTION_2026-10-24.md). Se conserva la evidencia histórica anterior; estas filas no acreditan migraciones ni activación productiva.

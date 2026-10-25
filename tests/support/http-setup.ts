@@ -26,6 +26,7 @@ export default async function setup(){
  process.env.SIII_PASSWORD_RESET_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
  process.env.SIII_PASSWORD_RESET_ACTIVE_KEY_ID ||= 'fixture';
  process.env.SIII_COMPANERO_INSTITUTION_ID ||= randomUUID();
+ process.env.SIII_COMPANION_DELIVERY_TARGETS_JSON ||= JSON.stringify({[process.env.SIII_COMPANERO_INSTITUTION_ID]:{origin:'https://companion.fixture.example',keyId:'authority-fixture',secretBase64:randomBytes(32).toString('base64')}});
  process.env.SIII_COMPANERO_TEST_TOKEN ||= randomBytes(32).toString('base64url');
  process.env.SIII_COMPANERO_TOKEN_SHA256 ||= createHash('sha256').update(process.env.SIII_COMPANERO_TEST_TOKEN).digest('hex');
  process.env.SIII_APPLICANT_EMAIL_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
