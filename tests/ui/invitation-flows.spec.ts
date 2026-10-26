@@ -97,6 +97,33 @@ test('public invitation preserves explicit consent and correction through offlin
  }finally{await other.context.close();}
 });
 
+test('mobile email registration shares server validation, toggles passwords and submits only once before real login',async({page,browser})=>{
+ test.setTimeout(150000);await administrator(page);const id=await create(page,`email-mobile-${randomUUID().slice(0,8)}@example.test`),link=await mailLink(id),other=await recipient(browser);
+ try{
+  const publicPage=other.page;await publicPage.setViewportSize({width:360,height:800});await publicPage.goto(link.path);
+  await expect(publicPage.getByText('Estudiante',{exact:true})).toBeVisible();
+  await expect(publicPage.locator('#invitation-username-help')).toContainText('correo electrónico completo');
+  await publicPage.getByLabel('Nombre',{exact:true}).fill('QA Correo');await publicPage.getByLabel('Apellidos',{exact:true}).fill('Sintético');
+  await publicPage.getByLabel('Nuevo usuario institucional').fill('bad..dots@example.test');
+  await publicPage.getByLabel('Nueva contraseña',{exact:true}).fill(password);await publicPage.getByLabel('Confirmar nueva contraseña').fill(password);
+  await publicPage.getByRole('button',{name:'Mostrar contraseña',exact:true}).click();await expect(publicPage.getByLabel('Nueva contraseña',{exact:true})).toHaveAttribute('type','text');
+  await publicPage.getByRole('button',{name:'Ocultar contraseña',exact:true}).click();await expect(publicPage.getByLabel('Nueva contraseña',{exact:true})).toHaveAttribute('type','password');
+  await publicPage.getByRole('button',{name:'Mostrar confirmación de contraseña',exact:true}).click();await expect(publicPage.getByLabel('Confirmar nueva contraseña')).toHaveAttribute('type','text');
+  await publicPage.getByRole('button',{name:'Ocultar confirmación de contraseña',exact:true}).click();
+  await publicPage.locator('#invitation-consent').check();let accepts=0;publicPage.on('request',request=>{if(request.url().endsWith('/api/v1/invitations/accept'))accepts++;});
+  await publicPage.getByRole('button',{name:'Crear cuenta y aceptar invitación',exact:true}).click();
+  await expect(publicPage.locator('#invitation-error')).toContainText('correo electrónico válido');expect(accepts).toBe(0);
+  await expect(publicPage.getByLabel('Nuevo usuario institucional')).toHaveAttribute('aria-invalid','true');await expect(publicPage.locator('#invitation-error')).toBeFocused();
+  expect((await sql.query('SELECT state FROM institution_invitations WHERE id=$1',[id])).rows[0].state).toBe('pending');
+  const name=`mobile.${randomUUID().slice(0,8)}@example.test`;await publicPage.getByLabel('Nuevo usuario institucional').fill(name);
+  await publicPage.evaluate(()=>{const form=document.querySelector('form')!;form.requestSubmit();form.requestSubmit();});
+  await expect(publicPage.getByRole('heading',{name:'Invitación aceptada.'})).toBeVisible();expect(accepts).toBe(1);
+  expect((await sql.query('SELECT count(*)::int AS n FROM platform_users WHERE username=$1',[name])).rows[0].n).toBe(1);
+  await publicPage.getByRole('link',{name:'Ir al acceso institucional',exact:true}).click();await login(publicPage,name);await axe(publicPage);
+  expect(await publicPage.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ }finally{await other.context.close();}
+});
+
 test('existing account consents after real login and step-up in separate tabs without changing its identity',async({page,browser})=>{
  test.setTimeout(150000);await administrator(page);const email=`existing-${randomUUID().slice(0,8)}@example.test`,name='existing-'+randomUUID().slice(0,8),first=await create(page,email),initial=await mailLink(first),other=await recipient(browser);
  try{

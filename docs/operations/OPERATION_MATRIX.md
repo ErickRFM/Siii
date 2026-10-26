@@ -221,3 +221,11 @@ Actualización de cierre local INT-04A: coordinación completó control A main5c
 | POST institutions/:id/companion-sync |mismo permiso/origen; expectedSourceVersion bajo lock; snapshot nuevo y auditoría atómicos; histórico inmutable |concurrencia201/409, tenant/origen/MFA, rollback de evento/versión/auditoría, flagOFF503 |LOCAL; CI/PRODUCCIÓN PENDIENTES|
 
 Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md](../audits/SIII_COMPANION_CONNECTION_2026-10-24.md). Se conserva la evidencia histórica anterior; estas filas no acreditan migraciones ni activación productiva.
+
+## Invitaciones — consolidación del 26 octubre 2026
+
+| Operación | Cambio y garantías | Evidencia | Estado |
+|---|---|---|---|
+| POST invitations/accept, cuenta nueva | Esquema de cuenta compartido con UI; 422 VALIDATION_ERROR independiente de existencia; conserva consentimiento, token pendiente tras validación, transacción/auditoría/MFA y control de emisor | `tests/integration/invitations.test.ts`: 39 aprobadas, incluida corrección de tres entradas, alta con correo y login; `tests/ui/invitation-flows.spec.ts`: 9 aprobadas, incluida doble entrega evitada y móvil 360 px | LOCAL VERIFICADO; CI/despliegue del SHA final en PR de consolidación |
+
+[Informe y límites productivos](../audits/SIII_CONSOLIDATION_2026-10-26.md). El contrato sintético y los GET públicos no acreditan cuentas reales ni sincronización productiva.
