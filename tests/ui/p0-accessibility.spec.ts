@@ -162,7 +162,7 @@ test('premium desktop sidebar collapses, persists and mobile drawer stays access
  await expect(app).toHaveClass(/sii-app--collapsed/);
  await expect(page.getByRole('button',{name:'Expandir menú lateral'})).toHaveAttribute('aria-expanded','false');
  await expect(page.locator('.sii-nav-glyph').first()).toBeVisible();
- await expect.poll(()=>page.evaluate(()=>localStorage.getItem('siii:sidebar-collapsed'))).toBe('true');
+ await expect.poll(async()=>(await page.context().cookies()).find(cookie=>cookie.name==='sidebar_state')?.value).toBe('false');
  await page.reload();
  await expect(app).toHaveClass(/sii-app--collapsed/);
  await page.getByRole('button',{name:'Expandir menú lateral'}).click();

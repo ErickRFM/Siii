@@ -15,6 +15,7 @@ import './sii-premium-kit.css';
 import './sii-kit-components.css';
 import './sii-interactions.css';
 import './sii-tailwind.css';
+import './sii-workspaces.css';
 export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'SII · Sistema Institucional Integral',description:'Plataforma institucional de gestión académica'};
 export default async function RootLayout({children}:{children:React.ReactNode}){

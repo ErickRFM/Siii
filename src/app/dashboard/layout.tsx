@@ -1,3 +1,4 @@
+import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
 import {getIdentity,getInstitutionAccess} from '@/shared/auth/session';
 import SiiAppShell from '@/components/sii-app-shell';
@@ -11,5 +12,5 @@ export default async function DashboardLayout({children}:{children:React.ReactNo
   const institutions=await getInstitutionAccess(user.id);
   const defaultInstitutionId=institutions.length===1?institutions[0].institutionId:undefined;
   return <SiiAppShell actorId={user.id} firstName={user.firstName} fullName={`${user.firstName} ${user.lastName}`}
-    defaultInstitutionId={defaultInstitutionId}>{children}</SiiAppShell>;
+    initialSidebarOpen={(await cookies()).get('sidebar_state')?.value!=='false'} defaultInstitutionId={defaultInstitutionId}>{children}</SiiAppShell>;
 }

@@ -205,8 +205,9 @@ export default function InstitutionAdministration({initialInstitution, actions}:
       {hasInstitutionCapability(capabilities, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`}><span aria-hidden="true">◇</span>Roles y permisos por ámbito</Link>}
       {hasInstitutionCapability(capabilities, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`}><span aria-hidden="true">✉</span>Invitaciones y altas</Link>}
     </nav>}
+    <nav className="sii-workspace-section-nav" aria-label="Secciones de administración"><a href="#institution-settings">Configuración</a><a href="#institution-state">Estado institucional</a>{actions.readAudit&&<a href="#institution-history">Historial y auditoría</a>}</nav>
     <div className="sii-administration-grid" aria-busy={loading || saving}>
-      <section className="sii-panel sii-administration-card"><h2 ref={settingsHeading} tabIndex={-1}>Configuración institucional</h2>
+      <section id="institution-settings" className="sii-panel sii-administration-card"><h2 ref={settingsHeading} tabIndex={-1}>Configuración institucional</h2>
         {loading && <p role="status">Consultando configuración vigente…</p>}
         <form className="sii-catalog-form" aria-label="Configuración institucional" onSubmit={saveSettings} aria-describedby={error ? 'institution-admin-error' : undefined}>
           <label htmlFor="institution-name">Nombre de la institución</label><Input id="institution-name" required minLength={1} maxLength={200} value={draft.name} disabled={disabled || !actions.updateSettings} onChange={event => setDraft(value => ({...value, name: event.target.value}))}/>
@@ -216,7 +217,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
           {actions.updateSettings && !archived && <><label htmlFor="institution-settings-reason">Motivo de la configuración</label><Textarea id="institution-settings-reason" required minLength={3} maxLength={500} value={reason} disabled={disabled} onChange={event => setReason(event.target.value)}/><Button variant="default" type="submit" className="sii-submit" disabled={disabled}>{saving ? 'Guardando…' : 'Guardar configuración'}</Button></>}
         </form>
       </section>
-      <section className="sii-panel sii-administration-card"><h2>Estado institucional</h2><p>Los cambios de estado requieren motivo, confirmación de identidad vigente y registro en auditoría.</p>
+      <section id="institution-state" className="sii-panel sii-administration-card"><h2>Estado institucional</h2><p>Los cambios de estado requieren motivo, confirmación de identidad vigente y registro en auditoría.</p>
         {actions.changeStatus && !archived ? <form className="sii-catalog-form" onSubmit={saveStatus} aria-label="Cambiar estado institucional" aria-describedby={error ? 'institution-admin-error' : undefined}>
           <label htmlFor="institution-status">Nuevo estado institucional</label><NativeSelect id="institution-status" required value={nextStatus} disabled={disabled} onChange={event => setNextStatus(event.target.value)}><option value="">Seleccionar estado</option>{['active', 'inactive', 'suspended'].filter(status => status !== institution.status).map(status => <option key={status} value={status}>{statusLabels[status]}</option>)}</NativeSelect>
           <p>{nextStatus === 'active' ? 'La institución recuperará las operaciones permitidas por sus concesiones vigentes. Las invitaciones revocadas no se restauran.' : 'Inactivar o suspender bloquea las operaciones ordinarias, revoca las invitaciones pendientes y cancela sus entregas en cola. Los administradores autorizados conservan esta gestión limitada.'}</p>
@@ -224,7 +225,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
         </form> : <p>No hay cambios de estado autorizados para esta institución.</p>}
       </section>
     </div>
-    {actions.readAudit && !blocked && <InstitutionAudit institutionId={institutionId} online={online} revision={auditRevision} onAuthorizationLost={authorizationLost}/>}
+    {actions.readAudit && !blocked && <div id="institution-history"><InstitutionAudit institutionId={institutionId} online={online} revision={auditRevision} onAuthorizationLost={authorizationLost}/></div>}
   </div>;
 }
 

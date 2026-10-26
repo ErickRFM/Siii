@@ -19,7 +19,6 @@ import {Breadcrumb,BreadcrumbItem,BreadcrumbList,BreadcrumbPage,BreadcrumbSepara
 import {Button} from '@/components/ui/button';
 import {Sidebar,SidebarContent,SidebarFooter,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarHeader,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarProvider,SidebarSeparator,useSidebar} from '@/components/ui/sidebar';
 
-const COLLAPSED_KEY='siii:sidebar-collapsed';
 function iconForModule(id:string):SiiNavIconName {
   switch(id){
     case 'registry': return 'registry';
@@ -31,18 +30,14 @@ function iconForModule(id:string):SiiNavIconName {
   }
 }
 
-export default function SiiAppShell({actorId,firstName,fullName,defaultInstitutionId,children}:{
- actorId:string; firstName:string; fullName:string; defaultInstitutionId?:string; children:ReactNode;
+export default function SiiAppShell({actorId,firstName,fullName,defaultInstitutionId,initialSidebarOpen=true,children}:{
+ actorId:string; firstName:string; fullName:string; defaultInstitutionId?:string; initialSidebarOpen?:boolean; children:ReactNode;
 }){
  const pathname=usePathname();
  const {active,institutionId}=resolveDashboardLocation(pathname,defaultInstitutionId);
- const [sidebarOpen,setSidebarOpen]=useState(true);
- useEffect(()=>{
-  try{setSidebarOpen(window.localStorage.getItem(COLLAPSED_KEY)!=='true');}catch{/* Optional preference. */}
- },[]);
+ const [sidebarOpen,setSidebarOpen]=useState(initialSidebarOpen);
  const updateSidebar=(open:boolean)=>{
   setSidebarOpen(open);
-  try{window.localStorage.setItem(COLLAPSED_KEY,String(!open));}catch{/* Optional preference. */}
  };
  return <GradebookDraftsProvider key={actorId} actorId={actorId}><InstitutionCapabilitiesProvider key={institutionId??'personal'} institutionId={institutionId}>
   <SidebarProvider open={sidebarOpen} onOpenChange={updateSidebar} className={'sii-app sii-ui flex min-h-svh w-full'+(sidebarOpen?'':' sii-app--collapsed')}>

@@ -1,3 +1,4 @@
+import {SiiPageIntro} from '@/components/ui/sii-kit';
 import Link from 'next/link';
 import { notFound,redirect } from 'next/navigation';
 import { getIdentity,authorizeInstitution } from '@/shared/auth/session';
@@ -12,10 +13,7 @@ export default async function SchedulingPage({params}:Props){
  const authorization=await authorizeInstitution(institutionId,'academic.manage');
  const access=authorization?.access;if(!access)notFound();
  return <>
-  <div className="sii-page-eyebrow">COORDINACIÓN · HORARIOS <span className="sii-page-eyebrow-line"/></div>
-  <div className="sii-page-heading"><div><h1>Planificador institucional<span className="sii-welcome-period">.</span></h1>
-   <p>{access.institutionName} · Aulas, clases recurrentes y ocurrencias fechadas.</p></div>
-   <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link></div>
+  <SiiPageIntro eyebrow="COORDINACIÓN · HORARIOS" title="Planificador institucional" description={access.institutionName+' · Aulas, clases recurrentes y ocurrencias fechadas.'} actions={<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>}/>
   <SchedulingStudio institutionId={institutionId}/>
  </>;
 }

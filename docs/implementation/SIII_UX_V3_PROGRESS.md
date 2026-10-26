@@ -69,3 +69,9 @@ Estas pruebas requieren el entorno de PostgreSQL/browser de CI. La inspección d
 La tabla anterior conserva el registro inicial de 2026-10-19 y no describe por sí sola el árbol actual. La integración de shadcn/Radix, controles nativos tipados y tokens comunes para las pantallas institucionales y públicas se entrega en [PR #106](https://github.com/ErickRFM/Siii/pull/106). Admisiones se enlaza a su página existente con `admissions.manage`; no se añaden permisos ni endpoints ficticios.
 
 Guía y evidencia local: [SIII_UI_KIT.md](SIII_UI_KIT.md). El PR registra el CI del SHA final y el merge. Esta ampliación de componentes y coherencia visual no certifica por sí sola un cierre productivo global UX09 ni la configuración de servicios externos.
+
+## Modernización VNext — 2026-10-26
+
+La rama `codex/ui-ux-vnext-20261025` parte del `main` remoto verificado `1699415748b71fad8f11a8754096e2ccc52d6b69`. Incorpora operaciones académicas por pestañas con drawers, planificador semanal, alta contextual de servicios, preferencia de sidebar desde servidor y dimensiones compartidas. Reconciliación UI pendiente previa: estilos de login de #108 incorporados; ese PR no se cierra automáticamente.
+
+Informe de archivos, compatibilidad, pruebas y límites de liberación: [SIII_UI_VNEXT.md](SIII_UI_VNEXT.md). Las capturas y el CI deben evaluarse sobre el SHA final del PR. Este registro no acredita merge, despliegue, dispositivos físicos ni lector de pantalla manual.
