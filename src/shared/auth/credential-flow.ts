@@ -1,5 +1,5 @@
 import {and,eq,gt,isNull} from 'drizzle-orm';
-import {authThrottle,platformUsers,authSessions} from '../../../db/schema';
+import {authThrottle,platformUsers,authSessions,accountEmailVerifications} from '../../../db/schema';
 import {db} from '@/infrastructure/database';
 import {audit,type Transaction} from '@/shared/http/request-context';
 import {consumeIp,lockThrottle} from './throttle';
@@ -13,8 +13,21 @@ export async function credentials(tx:Transaction,input:{username:string;password
   await audit(tx,{action:action+'.throttled',target:'ip:throttled',requestId:input.requestId});
   return {status:429 as const};
  }
- const account=await lockThrottle(tx,'login_account',input.username,now);
- const [user]=await tx.select().from(platformUsers).where(eq(platformUsers.username,input.username)).limit(1).for('update');
+ // Only email addresses with accepted invitation ownership proof can act as login aliases.
+ // Never authenticate using unverified people.email or institutional membership contact data.
+ const [directUser]=await tx.select({id:platformUsers.id}).from(platformUsers)
+  .where(eq(platformUsers.username,input.username)).limit(1);
+ const [verifiedAlias]=input.kind==='login'&&input.username.includes('@')
+  ?await tx.select({userId:accountEmailVerifications.userId}).from(accountEmailVerifications)
+   .where(eq(accountEmailVerifications.verifiedEmail,input.username)).limit(1):[];
+ const ambiguous=Boolean(directUser&&verifiedAlias&&directUser.id!==verifiedAlias.userId);
+ const identityId=ambiguous?undefined:(directUser?.id??verifiedAlias?.userId);
+ // Resolve the account key before row locks to preserve established lock ordering.
+ const [identity]=identityId?await tx.select({username:platformUsers.username}).from(platformUsers)
+  .where(eq(platformUsers.id,identityId)).limit(1):[];
+ const account=await lockThrottle(tx,'login_account',identity?.username??input.username,now);
+ const [user]=identityId?await tx.select().from(platformUsers)
+  .where(eq(platformUsers.id,identityId)).limit(1).for('update'):[];
  const factor=user?await lockMfaFactor(tx,user.id):null;
  now=new Date();
  let verifiedSession:typeof authSessions.$inferSelect|undefined;
