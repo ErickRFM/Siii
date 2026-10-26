@@ -1,119 +1,160 @@
 'use client';
-import {Button} from '@/components/ui/button';
-import {SiiEmptyView} from '@/components/ui/sii-kit';
-import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
-import {NativeSelect} from '@/components/ui/native-select';
-import {Input} from '@/components/ui/input';
 
+import {useCallback,useEffect,useMemo,useRef,useState,type FormEvent} from 'react';
+import {Button} from './ui/button';
+import {Input} from './ui/input';
+import {NativeSelect} from './ui/native-select';
+import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from './ui/table';
+import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
+import {SiiEmptyView,SiiSectionHeader,SiiSkeleton} from './ui/sii-kit';
+import {SiiDrawer,SiiSearchSelect,type SiiChoice} from './ui/sii-workspace';
 import SiiScrollRegion from './sii-scroll-region';
-import {SiiSectionHeader,SiiSkeleton} from './ui/sii-kit';
-/** Convert service error codes to clear UI feedback; server decisions are authoritative. */
-function userFacingError(code:string){
- const messages:Record<string,string>={
-  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
-  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
-  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
-  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
-  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
-  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
-  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
-  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
-  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
-  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
- };
- return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
-}
-
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
-import { useCallback,useEffect,useState,type FormEvent } from 'react';
-type Row={id:string;institutionId:string;code?:string;name?:string;firstName?:string;lastName?:string;status:string;capacity?:number;enrollmentNumber?:string;employeeNumber?:string;sectionId?:string;studentId?:string;teacherId?:string};
+import {registryCreate} from '@/modules/registry/validation';
+import {CapabilityState,hasInstitutionCapability,useInstitutionCapabilities} from './institution-capabilities';
+
+type Row={id:string;code?:string;name?:string;firstName?:string;lastName?:string;status?:string;capacity?:number;enrollmentNumber?:string;employeeNumber?:string;sectionId?:string;studentId?:string;teacherId?:string;termId?:string;courseId?:string};
 type Part='sections'|'enrollments'|'assignments';
+const tabs:{id:Part;label:string;create:string}[]=[
+ {id:'sections',label:'Secciones',create:'Nueva sección'},
+ {id:'enrollments',label:'Inscripciones',create:'Inscribir estudiante'},
+ {id:'assignments',label:'Asignaciones',create:'Asignar docente'},
+];
+const states:Record<string,string>={open:'Abierta',closed:'Cerrada',archived:'Archivada',enrolled:'Inscrito',withdrawn:'Retirado',active:'Vigente'};
+const messages:Record<string,string>={
+ FORBIDDEN:'Tu autorización cambió. Actualiza tus permisos antes de continuar.',UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
+ MFA_REQUIRED:'Verifica tu autenticador en Cuenta y seguridad.',STEP_UP_REQUIRED:'Confirma tu identidad en Cuenta y seguridad.',
+ PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña en Cuenta y seguridad.',VALIDATION_ERROR:'Revisa los campos del formulario.',
+ DUPLICATE_SECTION:'Ya existe esa sección en el periodo. Escribe otra clave.',ALREADY_ENROLLED:'El estudiante ya está inscrito en esa sección.',
+ ALREADY_ASSIGNED:'El docente ya está asignado a esa sección.',ENROLLMENT_BLOCKED:'Revisa el estado del alumno, la sección y el cupo disponible.',
+ ASSIGNMENT_BLOCKED:'Revisa que el docente esté activo y la sección disponible.',COURSE_OR_TERM_UNAVAILABLE:'El periodo o materia ya no está activo.',
+ SCHEDULE_CONFLICT:'El horario del alumno o docente entra en conflicto con otra sección.',
+};
+function feedback(code:string){return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza e intenta de nuevo.'}
+const choice=(rows:Row[],kind:'person'|'catalog'):SiiChoice[]=>rows.map(row=>({id:row.id,label:kind==='person'?`${row.enrollmentNumber??row.employeeNumber??''} · ${row.firstName??''} ${row.lastName??''}`:`${row.code??''}${row.name?' · '+row.name:''}`}));
+
 export default function AcademicOperations({institutionId}:{institutionId:string}){
- const {ask,confirmation}=useInstitutionConfirmation();
+ const {ask,confirmation,cancel:cancelConfirmation}=useInstitutionConfirmation();
+ const {data:capabilities,refresh:refreshCapabilities}=useInstitutionCapabilities();
+ const allowed=['programs','courses','curricula','terms','campuses'].every(resource=>hasInstitutionCapability(capabilities,resource+'.manage'));
  const base=`/api/v1/institutions/${institutionId}`;
- const [sections,setSections]=useState<Row[]>([]),[students,setStudents]=useState<Row[]>([]),[teachers,setTeachers]=useState<Row[]>([]);
- const [terms,setTerms]=useState<Row[]>([]),[courses,setCourses]=useState<Row[]>([]),[enrollments,setEnrollments]=useState<Row[]>([]),[assignments,setAssignments]=useState<Row[]>([]);
- const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
+ const [collections,setCollections]=useState<Record<string,Row[]>>({sections:[],students:[],teachers:[],terms:[],courses:[],enrollments:[],assignments:[]});
+ const {sections,students,teachers,terms,courses,enrollments}=collections;
+ const [part,setPart]=useState<Part>('sections'),[query,setQuery]=useState(''),[status,setStatus]=useState('');
+ const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[unavailable,setUnavailable]=useState(false);
+ const [error,setError]=useState(''),[notice,setNotice]=useState(''),[formError,setFormError]=useState('');
+ const [fields,setFields]=useState<Record<string,string>>({}),[drawer,setDrawer]=useState<'create'|Row|null>(null);
+ const [dirty,setDirty]=useState(false);
+ const controller=useRef<AbortController|null>(null),operation=useRef(false),search=useRef<HTMLInputElement>(null);
  const refresh=useCallback(async()=>{
-  setLoading(true);
-  const paths=['sections','registry/students','registry/teachers','academic/terms','academic/courses','enrollments','assignments'];
-  try {
-   const response=await Promise.all(paths.map(path=>readCollection<Row>(`${base}/${path}`)));
-   const [a,b,c,d,e,f,g]=response.map(r=>r.data);
-   setSections(a);setStudents(b);setTeachers(c);setTerms(d);setCourses(e);setEnrollments(f);setAssignments(g);setError('');
-  }catch{setError('No se pudieron cargar todos los datos; verifica permisos y migraciones.')}
-  finally{setLoading(false)}
+  controller.current?.abort();const request=new AbortController();controller.current=request;setLoading(true);
+  const paths={sections:'sections',students:'registry/students',teachers:'registry/teachers',terms:'academic/terms',courses:'academic/courses',enrollments:'enrollments',assignments:'assignments'};
+  try{
+   const response=await Promise.all(Object.entries(paths).map(async([key,path])=>[key,(await readCollection<Row>(`${base}/${path}`,{signal:request.signal})).data] as const));
+   if(!request.signal.aborted){setCollections(Object.fromEntries(response));setUnavailable(false);setError('')}
+  }catch{
+   if(!request.signal.aborted){setCollections({sections:[],students:[],teachers:[],terms:[],courses:[],enrollments:[],assignments:[]});setUnavailable(true);setError('No se pudieron cargar las operaciones. Verifica tu conexión y permisos.');}
+  }finally{if(!request.signal.aborted)setLoading(false)}
  },[base]);
- useEffect(()=>{void refresh()},[refresh]);
- async function submit(event:FormEvent<HTMLFormElement>,part:Part){
-  event.preventDefault();if(busy)return;
-  const form=event.currentTarget,values=new FormData(form);
-  const payload=part==='sections'?{termId:String(values.get('termId')??''),courseId:String(values.get('courseId')??''),code:String(values.get('code')??''),capacity:Number(values.get('capacity')??0)}
-   :part==='enrollments'?{studentId:String(values.get('studentId')??''),sectionId:String(values.get('sectionId')??'')}
-   :{teacherId:String(values.get('teacherId')??''),sectionId:String(values.get('sectionId')??'')};
-  setBusy(true);setError('');setNotice('');
-  try{
-   const r=await fetch(`${base}/${part}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-   if(!r.ok){const json=await r.json().catch(()=>({error:{code:'SERVER_ERROR'}})) as {error?:{code?:string}};throw Error(json.error?.code??'SERVER_ERROR')}
-   form.reset();setNotice('Operación realizada y auditada.');await refresh();
-  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'))}
-  finally{setBusy(false)}
+ useEffect(()=>{void refresh();return ()=>controller.current?.abort()},[refresh]);
+ const hadAuthority=useRef(false);
+ useEffect(()=>{
+  if(allowed){if(hadAuthority.current)void refresh();hadAuthority.current=true;return;}
+  if(!hadAuthority.current)return;
+  controller.current?.abort();cancelConfirmation();setDrawer(null);setDirty(false);setNotice('');
+  setCollections({sections:[],students:[],teachers:[],terms:[],courses:[],enrollments:[],assignments:[]});
+ },[allowed,refresh,cancelConfirmation]);
+ const indices=useMemo(()=>Object.fromEntries(Object.entries(collections).map(([key,rows])=>[key,new Map(rows.map(row=>[row.id,row]))])),[collections]);
+ const title=(row:Row)=>part==='sections'?row.code??'Sección':part==='enrollments'?choice([indices.students.get(row.studentId??'')??{} as Row],'person')[0].label:choice([indices.teachers.get(row.teacherId??'')??{} as Row],'person')[0].label;
+ const detail=(row:Row)=>part==='sections'?`${indices.terms.get(row.termId??'')?.name??'—'} · ${indices.courses.get(row.courseId??'')?.name??'—'}`:indices.sections.get(row.sectionId??'')?.code??'Sección no disponible';
+ const rows=collections[part],effectiveStatus=(row:Row)=>part==='assignments'?'active':row.status??'';
+ const visible=rows.filter(row=>(!status||effectiveStatus(row)===status)&&`${title(row)} ${detail(row)}`.toLocaleLowerCase('es-MX').includes(query.trim().toLocaleLowerCase('es-MX')));
+ const blocked=busy||loading||unavailable||!allowed;
+ const current=tabs.find(tab=>tab.id===part)!;
+ function openCreate(){setFormError('');setFields({});setDirty(false);setDrawer('create')}
+ async function close(){
+  if(busy)return;
+  if(dirty&&!await ask({title:'Descartar cambios sin guardar',description:'El formulario contiene cambios que aún no se han guardado.',confirmLabel:'Descartar cambios',destructive:true}))return;
+  setDrawer(null);setDirty(false);
  }
- async function revoke(part:Part,row:Row){
-  if(!await ask({title:'Confirmar cambio académico',description:part==='sections'?'La sección se cerrará y quedará auditada.':'La inscripción o asignación se revocará y quedará auditada.',confirmLabel:'Aplicar cambio',destructive:true}))return;
-  setBusy(true);setError('');
-  const payload={id:row.id,status:part==='sections'?'closed':'withdrawn'};
-  try{
-   const r=await fetch(`${base}/${part}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-   if(!r.ok)throw Error('No autorizado o registro ya modificado');
-   await refresh();
-  }catch(e){setError(e instanceof Error?e.message:'Error inesperado')}finally{setBusy(false)}
+ async function write(payload:unknown,method:'POST'|'PATCH'){
+  const response=await fetch(`${base}/${part}`,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!response.ok){
+   const result=await response.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};
+   if([401,403].includes(response.status)){setUnavailable(true);setCollections({sections:[],students:[],teachers:[],terms:[],courses:[],enrollments:[],assignments:[]});refreshCapabilities()}
+   throw Error(result.error?.code??'REQUEST_FAILED');
+  }
  }
- const activeSections=sections.filter(x=>x.status==='open');
- const option=(records:Row[],type:'student'|'teacher'|'section'|'term'|'course')=>
-  records.map(x=><option value={x.id} key={x.id}>{type==='student'?x.enrollmentNumber:type==='teacher'?x.employeeNumber:x.code} · {x.firstName?x.firstName+' '+x.lastName:x.name??'Sección'}</option>);
+ async function submit(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();if(blocked||operation.current)return;
+  const values=new FormData(event.currentTarget);
+  const payload=part==='sections'?{termId:values.get('termId'),courseId:values.get('courseId'),code:values.get('code'),capacity:Number(values.get('capacity'))}:part==='enrollments'?{studentId:values.get('studentId'),sectionId:values.get('sectionId')}:{teacherId:values.get('teacherId'),sectionId:values.get('sectionId')};
+  const parsed=registryCreate[part].safeParse(payload);
+  if(!parsed.success){setFields(Object.fromEntries(parsed.error.issues.map(issue=>[String(issue.path[0]),'Revisa este campo y elige un valor válido.'])));setFormError('Revisa los campos señalados.');return}
+  operation.current=true;setBusy(true);setFormError('');setFields({});setNotice('');
+  try{await write(parsed.data,'POST');setDrawer(null);setDirty(false);setNotice('Operación realizada y auditada.');await refresh()}
+  catch(cause){setFormError(feedback(cause instanceof Error?cause.message:''))}
+  finally{operation.current=false;setBusy(false)}
+ }
+ async function change(row:Row,next=part==='sections'?'closed':'withdrawn'){
+  if(blocked||operation.current)return;
+  if(!await ask({title:'Confirmar cambio académico',description:`${title(row)} · ${detail(row)}. Se aplicará el estado ${states[next]??next} y quedará auditado.`,confirmLabel:'Aplicar cambio',destructive:true}))return;
+  operation.current=true;setBusy(true);setFormError('');setError('');setNotice('');
+  try{await write({id:row.id,status:next},'PATCH');setDrawer(null);setNotice('Cambio aplicado y auditado.');await refresh()}
+  catch(cause){const message=feedback(cause instanceof Error?cause.message:'');if(drawer)setFormError(message);else setError(message)}
+  finally{operation.current=false;setBusy(false)}
+ }
+ const choices=part==='sections'?null:choice(sections.filter(row=>part==='enrollments'?row.status==='open':row.status!=='archived'),'catalog');
+ if(!allowed)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/operations`}/>;
  return <div className="sii-academic sii-workspace sii-workspace--operations">
- {confirmation}
-  <SiiSectionHeader workspace eyebrow="OPERACIÓN ACADÉMICA" title="Oferta, grupos e inscripciones"
-   description="Operaciones reales con validación de institución, cupos y asignaciones."
-   right={<Button variant="outline" type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar</Button>}/>
-  {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><Button variant="outline" type="button" className="sii-outline-button" disabled={loading||busy} onClick={()=>void refresh()}>Actualizar datos</Button></div>}
+  {!drawer&&confirmation}
+  <SiiSectionHeader workspace eyebrow="OPERACIÓN ACADÉMICA" title="Oferta, grupos e inscripciones" description="Consulta los registros de tu institución y prepara las operaciones en un panel contextual." right={<Button variant="outline" disabled={busy||loading} onClick={()=>void refresh()}>Actualizar</Button>}/>
+  {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><Button variant="outline" disabled={busy||loading} onClick={()=>void refresh()}>Actualizar datos</Button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
-  {loading?<SiiSkeleton label="Consultando operaciones institucionales"/>:<>
-   <div className="sii-catalog-layout">
-    <section className="sii-panel sii-catalog-table-panel">
-     <h3>Secciones abiertas y cerradas</h3><SiiScrollRegion label="Tabla de secciones, desplazamiento horizontal">
-      <Table scrollable={false} className="sii-catalog-table"><TableHeader><TableRow><TableHead>Sección</TableHead><TableHead>Periodo / materia</TableHead><TableHead>Cupo</TableHead><TableHead>Estado</TableHead><TableHead>Acción</TableHead></TableRow></TableHeader>
-       <TableBody>{sections.map(row=><TableRow key={row.id}><TableCell>{row.code}</TableCell>
-        <TableCell>{terms.find(t=>t.id===(row as Row & {termId?:string}).termId)?.name??'—'} · {courses.find(c=>c.id===(row as Row & {courseId?:string}).courseId)?.name??'—'}</TableCell>
-        <TableCell>{row.capacity}</TableCell><TableCell>{row.status}</TableCell><TableCell><Button variant="outline" disabled={busy||row.status!=='open'} type="button" onClick={()=>void revoke('sections',row)}>Cerrar</Button></TableCell>
-       </TableRow>)}</TableBody></Table></SiiScrollRegion>
-     {!sections.length&&<SiiEmptyView icon="layers" title="No hay secciones registradas" description="Crea la primera sección con un periodo y una materia activos." action={<Button variant="outline" type="button" onClick={()=>document.getElementById('section-code')?.focus()}>Preparar sección</Button>}/>}
-    </section>
-    <aside className="sii-panel sii-catalog-create"><h3>Nueva sección</h3><form className="sii-catalog-form" onSubmit={e=>void submit(e,'sections')}>
-     <label>Periodo<NativeSelect name="termId" required defaultValue=""><option value="" disabled>Selecciona periodo</option>{option(terms.filter(x=>x.status==='active'),'term')}</NativeSelect></label>
-     <label>Materia<NativeSelect name="courseId" required defaultValue=""><option value="" disabled>Selecciona materia</option>{option(courses.filter(x=>x.status==='active'),'course')}</NativeSelect></label>
-     <label>Grupo / sección<Input id="section-code" name="code" required minLength={2} maxLength={32} placeholder="9A"/></label>
-     <label>Cupo<Input name="capacity" type="number" min="1" max="500" required defaultValue="30"/></label>
-     <Button variant="default" type="submit" className="sii-submit" disabled={busy||!terms.length||!courses.length}>Crear sección</Button></form></aside>
-   </div>
-   <div className="sii-workspace-grid sii-workspace-grid--equal">
-    <section className="sii-panel sii-operation-roster"><h3>Inscribir estudiante</h3>
-     <form className="sii-catalog-form" onSubmit={e=>void submit(e,'enrollments')}>
-      <label>Estudiante<NativeSelect id="enrollment-student" name="studentId" required defaultValue=""><option value="" disabled>Selecciona alumno activo</option>{option(students.filter(x=>x.status==='active'),'student')}</NativeSelect></label>
-      <label>Sección<NativeSelect name="sectionId" required defaultValue=""><option value="" disabled>Selecciona sección</option>{option(activeSections,'section')}</NativeSelect></label>
-      <Button variant="default" type="submit" className="sii-submit" disabled={busy||!students.length||!activeSections.length}>Confirmar inscripción</Button>
-     </form><h4>Inscripciones</h4>{!enrollments.length&&<SiiEmptyView icon="users" title="Sin inscripciones registradas" description="Elige un estudiante y una sección para preparar su inscripción." action={<Button variant="outline" type="button" onClick={()=>document.getElementById('enrollment-student')?.focus()}>Elegir estudiante</Button>}/>}{enrollments.map(x=><div className="sii-workspace-row" key={x.id}><span>{students.find(s=>s.id===x.studentId)?.enrollmentNumber??'Alumno'} · {sections.find(s=>s.id===x.sectionId)?.code??'Sección'} — {x.status}</span>
-      {x.status==='enrolled'&&<Button variant="outline" type="button" disabled={busy} onClick={()=>void revoke('enrollments',x)}>Retirar</Button>}</div>)}</section>
-    <section className="sii-panel sii-operation-roster"><h3>Asignar docente</h3>
-     <form className="sii-catalog-form" onSubmit={e=>void submit(e,'assignments')}>
-      <label>Docente<NativeSelect id="assignment-teacher" name="teacherId" required defaultValue=""><option value="" disabled>Selecciona docente activo</option>{option(teachers.filter(x=>x.status==='active'),'teacher')}</NativeSelect></label>
-      <label>Sección<NativeSelect name="sectionId" required defaultValue=""><option value="" disabled>Selecciona sección</option>{option(sections.filter(x=>x.status!=='archived'),'section')}</NativeSelect></label>
-      <Button variant="default" type="submit" className="sii-submit" disabled={busy||!teachers.length||!sections.length}>Asignar</Button>
-     </form><h4>Asignaciones vigentes</h4>{!assignments.length&&<SiiEmptyView icon="book" title="Sin asignaciones docentes" description="Asigna un docente para vincularlo con una sección." action={<Button variant="outline" type="button" onClick={()=>document.getElementById('assignment-teacher')?.focus()}>Elegir docente</Button>}/>}{assignments.map(x=><div className="sii-workspace-row" key={x.id}><span>{teachers.find(t=>t.id===x.teacherId)?.employeeNumber??'Docente'} · {sections.find(s=>s.id===x.sectionId)?.code??'Sección'}</span>
-      <Button variant="outline" type="button" disabled={busy} onClick={()=>void revoke('assignments',x)}>Revocar</Button></div>)}</section>
-   </div>
-  </>}
+  <Tabs value={part} onValueChange={value=>{setPart(value as Part);setQuery('');setStatus('')}}>
+   <TabsList className="sii-workspace-tabs" aria-label="Operaciones académicas">{tabs.map(tab=><TabsTrigger key={tab.id} value={tab.id}>{tab.label} <span className="sii-tab-count">{loading?'…':collections[tab.id].length}</span></TabsTrigger>)}</TabsList>
+   <section className="sii-panel sii-operation-table" aria-busy={loading}>
+    <div className="sii-workspace-toolbar"><h3>{current.label}</h3><Button disabled={blocked} onClick={openCreate}>{current.create}</Button></div>
+    <div className="sii-workspace-filters">
+     <label>Buscar operaciones<Input ref={search} type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Nombre, clave, materia o sección"/></label>
+     <label>Estado de operación<NativeSelect value={status} onChange={event=>setStatus(event.target.value)}><option value="">Todos los estados</option>{(part==='sections'?['open','closed','archived']:part==='enrollments'?['enrolled','withdrawn']:['active']).map(value=><option key={value} value={value}>{states[value]}</option>)}</NativeSelect></label>
+     <Button variant="outline" onClick={()=>{setQuery('');setStatus('');search.current?.focus()}}>Limpiar filtros</Button>
+    </div>
+    {loading?<SiiSkeleton label="Consultando operaciones institucionales"/>:<>
+     <p className="sii-result-count" role="status">{visible.length} de {rows.length} registros{part==='assignments'?' vigentes':''}</p>
+     {tabs.map(tab=><TabsContent key={tab.id} value={tab.id}>
+      {visible.length?<SiiScrollRegion label={`Tabla de ${current.label.toLocaleLowerCase('es-MX')}, desplazamiento horizontal`}><Table scrollable={false} className="sii-catalog-table">
+       <TableHeader><TableRow><TableHead>{part==='sections'?'Sección':part==='enrollments'?'Estudiante':'Docente'}</TableHead><TableHead>{part==='sections'?'Periodo / materia':'Sección'}</TableHead>{part==='sections'&&<TableHead>Cupo</TableHead>}<TableHead>Estado</TableHead><TableHead>Acciones</TableHead></TableRow></TableHeader>
+       <TableBody>{visible.map(row=><TableRow key={row.id}><TableCell>{title(row)}</TableCell><TableCell>{detail(row)}</TableCell>{part==='sections'&&<TableCell>{enrollments.filter(item=>item.sectionId===row.id&&item.status==='enrolled').length} / {row.capacity}</TableCell>}<TableCell>{states[effectiveStatus(row)]??effectiveStatus(row)}</TableCell>
+        <TableCell><div className="sii-row-actions"><Button variant="outline" disabled={blocked} onClick={()=>{setFormError('');setDirty(false);setDrawer(row)}} aria-label={`Ver detalle de ${title(row)}`}>Ver detalle</Button>
+         {(part!=='enrollments'||row.status==='enrolled')&&(part!=='sections'||row.status==='open')&&<Button variant="outline" disabled={blocked} onClick={()=>void change(row)}>{part==='sections'?'Cerrar':part==='enrollments'?'Retirar':'Revocar'}</Button>}</div></TableCell>
+       </TableRow>)}</TableBody>
+      </Table></SiiScrollRegion>:<SiiEmptyView icon="layers" title={query||status?'No hay operaciones coincidentes':'Sin registros en esta sección'} description={query||status?'Cambia la búsqueda o el estado para recuperar los registros.':'Prepara el primer registro con los catálogos institucionales disponibles.'} action={<Button variant="outline" disabled={blocked} onClick={openCreate}>Preparar registro</Button>}/>}
+     </TabsContent>)}
+    </>}
+   </section>
+  </Tabs>
+  <SiiDrawer open={drawer!==null} onOpenChange={open=>{if(!open)void close()}} busy={busy} title={drawer==='create'?current.create:'Detalle académico'} description={drawer==='create'?'Revisa los datos antes de guardar. Se comprobarán el cupo y la disponibilidad de los registros seleccionados.':'Consulta el registro y aplica los cambios de estado autorizados.'}>
+   {confirmation}
+   {formError&&<p id="academic-form-error" role="alert" className="sii-catalog-error">{formError}</p>}
+   {drawer==='create'?<form className="sii-catalog-form" onSubmit={event=>void submit(event)} onChange={()=>setDirty(true)} aria-describedby={formError?'academic-form-error':undefined}>
+    <fieldset disabled={blocked} className="sii-form-fields">
+     {part==='sections'?<>
+      <SiiSearchSelect name="termId" label="Periodo" searchLabel="Buscar periodo" options={choice(terms.filter(row=>row.status==='active'),'catalog')} error={fields.termId}/>
+      <SiiSearchSelect name="courseId" label="Materia" searchLabel="Buscar materia" options={choice(courses.filter(row=>row.status==='active'),'catalog')} error={fields.courseId}/>
+      <div className="sii-form-fields"><label htmlFor="section-code">Grupo / sección</label><Input id="section-code" name="code" required minLength={2} maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_-]*" aria-invalid={Boolean(fields.code)} aria-describedby="section-code-help" placeholder="9A"/><small id="section-code-help">De 2 a 32 letras, números, guiones o guiones bajos.</small></div>
+      <label>Cupo<Input name="capacity" type="number" min={1} max={500} required defaultValue={30} aria-invalid={Boolean(fields.capacity)}/></label>
+     </>:<>
+      {part==='enrollments'?<SiiSearchSelect name="studentId" label="Estudiante" searchLabel="Buscar estudiante" options={choice(students.filter(row=>row.status==='active'),'person')} error={fields.studentId}/>:<SiiSearchSelect name="teacherId" label="Docente" searchLabel="Buscar docente" options={choice(teachers.filter(row=>row.status==='active'),'person')} error={fields.teacherId}/>}
+      <SiiSearchSelect name="sectionId" label="Sección" searchLabel="Buscar sección" options={choices??[]} error={fields.sectionId}/>
+     </>}
+    </fieldset>
+    <div className="sii-drawer-actions"><Button type="button" variant="outline" disabled={busy} onClick={()=>void close()}>Cancelar</Button><Button type="submit" disabled={blocked}>{busy?'Guardando…':part==='sections'?'Crear sección':part==='enrollments'?'Confirmar inscripción':'Asignar'}</Button></div>
+   </form>:drawer&&<>
+    <dl className="sii-detail-list"><div><dt>Registro</dt><dd>{title(drawer)}</dd></div><div><dt>{part==='sections'?'Periodo / materia':'Sección'}</dt><dd>{detail(drawer)}</dd></div><div><dt>Estado</dt><dd>{states[effectiveStatus(drawer)]??effectiveStatus(drawer)}</dd></div></dl>
+    {part==='sections'?<div className="sii-drawer-actions">{['open','closed','archived'].filter(value=>value!==drawer.status).map(value=><Button key={value} variant="outline" disabled={blocked} onClick={()=>void change(drawer,value)}>{value==='open'?'Abrir sección':value==='closed'?'Cerrar sección':'Archivar sección'}</Button>)}</div>:(part==='assignments'||drawer.status==='enrolled')&&<Button disabled={blocked} onClick={()=>void change(drawer)}>{part==='enrollments'?'Retirar':'Revocar'}</Button>}
+   </>}
+  </SiiDrawer>
  </div>;
 }

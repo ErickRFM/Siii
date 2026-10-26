@@ -16,7 +16,8 @@ export function useInstitutionConfirmation(){
  const settle=useCallback((answer:string|null)=>{const current=resolver.current;resolver.current=null;setRequest(null);current?.(answer);},[]);
  useEffect(()=>()=>{resolver.current?.(null);resolver.current=null;},[]);
  const confirmation:ReactNode=request?<ConfirmationDialog key={request.id} request={request} onDecision={settle}/>:null;
- return {ask,confirmation};
+ const cancel=useCallback(()=>settle(null),[settle]);
+ return {ask,confirmation,cancel};
 }
 function ConfirmationDialog({request,onDecision}:{request:Request;onDecision:(answer:string|null)=>void}){
  const [reason,setReason]=useState('');

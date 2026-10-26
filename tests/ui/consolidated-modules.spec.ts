@@ -69,8 +69,11 @@ test('registry pagination reaches persisted students beyond two hundred without 
  await sql.query(`INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) SELECT $1,'FAC'||n,'Facilitador','Sintético' FROM generate_series(1,65)n`,[tenant]);
  await page.getByRole('link',{name:'Servicios universitarios',exact:true}).first().click();
  await page.getByRole('tab',{name:'Trámites estudiantiles',exact:true}).click();
+ await page.getByRole('button',{name:'Nuevo registro',exact:true}).click();
  await expect(page.getByLabel(/^Alumno/).locator('option')).toHaveCount(206);
+ await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);
  await page.getByRole('tab',{name:'Talleres',exact:true}).click();
+ await page.getByRole('button',{name:'Nuevo registro',exact:true}).click();
  await expect(page.getByLabel(/^Facilitador/).locator('option')).toHaveCount(66);
 });
 
