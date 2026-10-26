@@ -152,8 +152,8 @@ export default function LoginPage(){
        </div>
       </form>:<form className="space-y-5" onSubmit={submit}>
        <div className="space-y-2">
-        <Label htmlFor="sii-login-username">Usuario institucional</Label>
-        <Input id="sii-login-username" name="username" type="text" autoComplete="username" aria-invalid={credentialsInvalid} aria-describedby={error?'sii-login-error':undefined} autoCapitalize="none" spellCheck={false} required minLength={3} maxLength={120} placeholder="Tu usuario" disabled={loading||offline} className="h-11"/>
+        <Label htmlFor="sii-login-username">Usuario institucional o correo verificado</Label>
+        <Input id="sii-login-username" name="username" type="text" autoComplete="username" aria-invalid={credentialsInvalid} aria-describedby={error?'sii-login-error':undefined} autoCapitalize="none" spellCheck={false} required minLength={3} maxLength={120} placeholder="Tu usuario o correo verificado" disabled={loading||offline} className="h-11"/>
        </div>
        <div className="space-y-2">
         <Label htmlFor="sii-login-password">Contraseña</Label>
