@@ -1,0 +1,56 @@
+name: Companion HMAC expiry guard
+
+on:
+  schedule:
+    - cron: '17 12 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: companion-hmac-expiry-guard
+  cancel-in-progress: false
+
+jobs:
+  expiry-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      HMAC_KEY_ID: siii-hmac-20261025-138dedb2ba5840759868ff77844616a7
+      HMAC_EXPIRES_AT: '1793591855'
+      ALERT_WINDOW_SECONDS: '604800'
+    steps:
+      - name: Check known credential expiry and open deduplicated issue
+        shell: bash
+        run: |
+          set -euo pipefail
+          now=$(date -u +%s)
+          remaining=$((HMAC_EXPIRES_AT - now))
+          echo "HMAC_CREDENTIAL_REMAINING_SECONDS=$remaining"
+          if (( remaining > ALERT_WINDOW_SECONDS )); then
+            echo 'HMAC_EXPIRY_NOT_IMMINENT'
+            exit 0
+          fi
+          title="Security: rotate SIII Companion HMAC credential before expiry"
+          issue_number=$(gh api --paginate "repos/$GH_REPO/issues?state=open&per_page=100" --jq ".[] | select(.pull_request == null and .title == \"$title\") | .number" | head -n 1)
+          if [[ -n "$issue_number" ]]; then
+            echo "HMAC_ROTATION_ISSUE_ALREADY_OPEN=#$issue_number"
+          else
+            if (( remaining <= 0 )); then
+              urgency='EXPIRED: integration may reject signed requests.'
+            else
+              urgency='Within seven days of expiry.'
+            fi
+            body=$(printf '%s\n'               "Credential key ID: \`$HMAC_KEY_ID\`"               'Expiry: 2026-11-02 03:57:35 UTC (2026-11-01 21:57:35 CDMX).'               "$urgency"               ''               'Required: coordinate issuance and storage of a replacement; overlap old/new verification; verify valid signature 200 and invalid signature 401; verify authorized processor and idempotency; revoke the old credential only after new production traffic succeeds.'               ''               'This workflow NEVER retrieves, creates, transmits, or rotates secrets. The timestamp is a known credential metadata value. Update the expiry metadata or replace this guard after verified renewal.')
+            gh api -X POST "repos/$GH_REPO/issues" -f title="$title" -f body="$body" --jq '.html_url'
+            echo 'HMAC_ROTATION_ISSUE_CREATED'
+          fi
+          if (( remaining <= 0 )); then
+            echo 'HMAC_CREDENTIAL_EXPIRED' >&2
+            exit 1
+          fi
+          echo 'HMAC_EXPIRY_WARNING'
