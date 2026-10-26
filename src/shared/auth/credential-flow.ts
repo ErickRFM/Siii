@@ -22,10 +22,12 @@ export async function credentials(tx:Transaction,input:{username:string;password
    .where(eq(accountEmailVerifications.verifiedEmail,input.username)).limit(1):[];
  const ambiguous=Boolean(directUser&&verifiedAlias&&directUser.id!==verifiedAlias.userId);
  const identityId=ambiguous?undefined:(directUser?.id??verifiedAlias?.userId);
+ // Resolve the account key before row locks to preserve established lock ordering.
+ const [identity]=identityId?await tx.select({username:platformUsers.username}).from(platformUsers)
+  .where(eq(platformUsers.id,identityId)).limit(1):[];
+ const account=await lockThrottle(tx,'login_account',identity?.username??input.username,now);
  const [user]=identityId?await tx.select().from(platformUsers)
   .where(eq(platformUsers.id,identityId)).limit(1).for('update'):[];
- // Throttle username and verified email through the same canonical account key.
- const account=await lockThrottle(tx,'login_account',user?.username??input.username,now);
  const factor=user?await lockMfaFactor(tx,user.id):null;
  now=new Date();
  let verifiedSession:typeof authSessions.$inferSelect|undefined;
