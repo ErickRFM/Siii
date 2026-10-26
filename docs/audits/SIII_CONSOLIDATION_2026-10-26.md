@@ -59,6 +59,8 @@ La primera integración completa local registró **598 aprobadas, 8 fallidas y 3
 
 Se corrigieron exclusivamente fixtures: el reset por probar se marca explícitamente vencido para su siguiente intento, y el factor sintético se crea un minuto antes de la prueba de sesión. No se altera el worker, su calendario real, expiraciones, MFA, permisos ni timeouts. La repetición completa de los tres archivos afectados y de invitaciones reconciliadas pasó **87/87**; las unitarias finales volvieron a pasar **922/922**, lint y tipos sin errores. La suite completa del SHA publicado sigue siendo obligatoria en CI; no se presenta la primera corrida como aprobada.
 
+La primera suite UI completa registró **151/152 aprobadas** tanto localmente como en el CI de `59be6c66`. El único fallo fue el selector de paginación por subcadena: `TEACHER13` coincidía con 11 filas (`TEACHER130..139`). La identidad escogida también podía aparecer en dos secciones. La prueba conserva los conteos de 208/207, HTTP, auditoría, persistencia y axe; ahora selecciona celda de identidad y sección exactas, y fija TEACHER13 para ejercitar siempre la colisión. La repetición local determinista pasó 1/1. No cambia UI ni endpoint. El SHA final debe repetir la suite completa en CI.
+
 ## Producción: evidencia de sólo lectura
 
 Vercel Production `siii-three.vercel.app` resolvía al deployment `dpl_7pFiFYzuoDiNWCNfUVVSpNQnN8h8`, estado READY, `main@a59dfc5313dbfaf978cfd25006e7e78bb5316f8b`. El despliegue de esta consolidación se debe verificar por separado después de fusionar.
@@ -77,3 +79,9 @@ Estos resultados actualizan las observaciones históricas de [24 octubre](SIII_C
 ## Límites de cierre
 
 La funcionalidad de backend se acredita mediante las suites y contratos indicados, no por compilar. La producción autenticada con usuarios reales, entrega de correo al destinatario real, sincronización HMAC con credenciales productivas, flags efectivas y pruebas físicas Android/iOS no se dan por comprobadas. No se crean invitaciones ni datos institucionales reales para aparentar ese cierre. La consolidación de Git y el despliegue del código no sustituyen esas puertas.
+
+### Bloqueo productivo observado en Compañero
+
+El 2026-10-26 a las 20:33 UTC, `https://compa-ero-de-esc.onrender.com/ready` respondió **503**, `status=down`, comprobación `mongodb=down`, tras un primer timeout de 20 segundos. El usuario confirmó el workspace Render `esc`; servicio `srv-db0vt5s9v7es73d98pu0`. Deployment `dep-dbfe57ivcj2c73fq61n0` figura `live` con `55a1b99780ddef2cb2e9add7f82f6d6124965628`, pero `live` no acredita readiness de MongoDB.
+
+El main actual de Compañero es ese mismo SHA. Frente al receptor fijado `127e7dfa`, sus seis commits posteriores sólo cambian tres archivos de UI/pruebas Android; no cambian el contrato del servicio. Atlas informa Cluster0 activo/no pausado, sin alertas abiertas. Su allowlist ya contiene 0.0.0.0/0: no se amplió acceso ni se cambiaron secretos. No declarar sincronización productiva operativa mientras falte resolver este bloqueo y realizar el piloto autorizado.
