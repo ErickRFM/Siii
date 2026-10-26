@@ -88,3 +88,66 @@
 @media(prefers-reduced-motion:reduce) {
  .sii-workspace-drawer {animation:none!important;transition:none!important}
 }
+
+
+/* Institutional scroll treatment — scoped to authenticated workspace surfaces.
+   Native scrollbar mechanics are preserved for keyboard, touch and OS accessibility.
+   Avoid global '*' rules: auth, system dialogs and third-party widgets retain their own scroll. */
+.sii-app {
+ --sii-scroll-thumb: hsl(345 30% 48% / .42);
+ --sii-scroll-thumb-hover: hsl(345 46% 42% / .75);
+ --sii-scroll-sidebar-thumb: hsl(345 65% 80% / .40);
+ --sii-scroll-sidebar-hover: hsl(345 70% 86% / .72);
+}
+html[data-sii-theme="dark"] .sii-app {
+ --sii-scroll-thumb: hsl(345 40% 72% / .42);
+ --sii-scroll-thumb-hover: hsl(345 65% 80% / .73);
+ --sii-scroll-sidebar-thumb: hsl(345 60% 78% / .45);
+ --sii-scroll-sidebar-hover: hsl(345 70% 86% / .78);
+}
+/* Sidebar scroll is intentionally easier to discover than workspace scroll. */
+.sii-app [data-sidebar="content"] {
+ scrollbar-width: thin;
+ scrollbar-color: var(--sii-scroll-sidebar-thumb) transparent;
+ overscroll-behavior-y: contain;
+ scrollbar-gutter: stable;
+}
+.sii-app :is(.sii-drawer-body,.sii-workspace-tabs,[data-radix-scroll-area-viewport],.overflow-auto,.overflow-y-auto,.overflow-x-auto) {
+ scrollbar-width: thin;
+ scrollbar-color: var(--sii-scroll-thumb) transparent;
+}
+/* Keep document scrollbar unobtrusive in the dashboard; no forced overflow mode. */
+html:has(.sii-app) {
+ scrollbar-width: thin;
+ scrollbar-color: hsl(345 30% 48% / .42) transparent;
+}
+html[data-sii-theme="dark"]:has(.sii-app) {
+ scrollbar-color: hsl(345 40% 72% / .45) transparent;
+}
+@supports selector(::-webkit-scrollbar) {
+ .sii-app [data-sidebar="content"]::-webkit-scrollbar {width:8px;height:8px}
+ .sii-app [data-sidebar="content"]::-webkit-scrollbar-track {background:transparent}
+ .sii-app [data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background:var(--sii-scroll-sidebar-thumb);border:2px solid transparent;
+  background-clip:padding-box;border-radius:999px;
+ }
+ .sii-app [data-sidebar="content"]::-webkit-scrollbar-thumb:hover {
+  background-color:var(--sii-scroll-sidebar-hover);
+ }
+ .sii-app :is(.sii-drawer-body,.sii-workspace-tabs,[data-radix-scroll-area-viewport],.overflow-auto,.overflow-y-auto,.overflow-x-auto)::-webkit-scrollbar {
+  width:9px;height:9px;
+ }
+ .sii-app :is(.sii-drawer-body,.sii-workspace-tabs,[data-radix-scroll-area-viewport],.overflow-auto,.overflow-y-auto,.overflow-x-auto)::-webkit-scrollbar-track {background:transparent}
+ .sii-app :is(.sii-drawer-body,.sii-workspace-tabs,[data-radix-scroll-area-viewport],.overflow-auto,.overflow-y-auto,.overflow-x-auto)::-webkit-scrollbar-thumb {
+  background:var(--sii-scroll-thumb);border:2px solid transparent;
+  background-clip:padding-box;border-radius:999px;
+ }
+ .sii-app :is(.sii-drawer-body,.sii-workspace-tabs,[data-radix-scroll-area-viewport],.overflow-auto,.overflow-y-auto,.overflow-x-auto)::-webkit-scrollbar-thumb:hover {
+  background-color:var(--sii-scroll-thumb-hover);
+ }
+}
+@media (forced-colors:active) {
+ .sii-app [data-sidebar="content"],
+ .sii-app :is(.sii-drawer-body,.sii-workspace-tabs,[data-radix-scroll-area-viewport],.overflow-auto,.overflow-y-auto,.overflow-x-auto),
+ html:has(.sii-app) {scrollbar-color:auto}
+}
