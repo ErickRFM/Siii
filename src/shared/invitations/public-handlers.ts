@@ -55,7 +55,9 @@ export const previewInvitation=withErrors(async(req:NextRequest)=>{
 export const acceptInvitation=withErrors(async(req:NextRequest)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const {requestId}=context(req);if(!await recipientBudget(req,requestId))return jsonError('RATE_LIMITED',429);
- const parsed=invitationConsentBody.safeParse(await req.json().catch(()=>null));if(!parsed.success)return unavailable(422);
+ // This input-only response does not depend on token, invitation or account existence.
+ // Keep all bearer/issuer/ownership failures indistinguishable below.
+ const parsed=invitationConsentBody.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
  const input=parsed.data,row=await candidate(input.invitationId,input.token);if(!row||!usableInvitation(row,new Date()))return unavailable();
  const identity=input.mode==='existing'?await getIdentity():null;
  if(input.mode==='existing'){

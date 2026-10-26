@@ -8,12 +8,14 @@ test.beforeAll(async()=>{await sql.connect()});test.afterAll(async()=>{await sql
 test('operations loads and updates enrollments and assignments beyond the former 200-row cap',async({page})=>{
  const fixture=await academicRostersFixture(sql);
  const enrollment=(await sql.query("SELECT e.id,s.enrollment_number,g.code FROM section_enrollments e JOIN institutional_students s ON s.id=e.student_id JOIN academic_sections g ON g.id=e.section_id WHERE e.institution_id=$1 AND e.status='enrolled' ORDER BY e.created_at,e.id LIMIT 1",[fixture.tenant])).rows[0];
- const assignment=(await sql.query('SELECT a.id,t.employee_number,g.code FROM section_teachers a JOIN institutional_teachers t ON t.id=a.teacher_id JOIN academic_sections g ON g.id=a.section_id WHERE a.institution_id=$1 AND a.revoked_at IS NULL ORDER BY a.created_at,a.id LIMIT 1',[fixture.tenant])).rows[0];
+ const assignment=(await sql.query("SELECT a.id,t.employee_number,g.code FROM section_teachers a JOIN institutional_teachers t ON t.id=a.teacher_id JOIN academic_sections g ON g.id=a.section_id WHERE a.institution_id=$1 AND a.revoked_at IS NULL AND t.employee_number='TEACHER13' ORDER BY a.created_at,a.id LIMIT 1",[fixture.tenant])).rows[0];
  await page.goto('/login');await page.getByLabel('Usuario institucional').fill(fixture.username);await page.getByLabel('Contraseña',{exact:true}).fill(fixture.password);await page.getByRole('button',{name:'Entrar al sistema'}).click();await expect(page).toHaveURL(/\/dashboard$/);
  await page.goto(`/dashboard/institutions/${fixture.tenant}/operations`);
  await page.getByRole('tab',{name:/Inscripciones/}).click();
  const enrollmentRows=page.locator('[role="tabpanel"] tbody tr');await expect(enrollmentRows).toHaveCount(208);
- const enrollmentRow=enrollmentRows.filter({hasText:enrollment.enrollment_number});await expect(enrollmentRow).toHaveCount(1);
+ // Match the complete identity cell and section: ROSTER13/TEACHER13 are
+ // prefixes of 130..139, and the fixture also assigns some people to two sections.
+ const enrollmentRow=enrollmentRows.filter({has:page.getByRole('cell',{name:enrollment.enrollment_number+' · Estudiante Sintético',exact:true})}).filter({has:page.getByRole('cell',{name:enrollment.code,exact:true})});await expect(enrollmentRow).toHaveCount(1);
  expect((await new AxeBuilder({page}).analyze()).violations).toEqual([]);
  const withdrawalAction=enrollmentRow.getByRole('button',{name:'Retirar',exact:true});await withdrawalAction.click();
  const confirmation=page.getByRole('alertdialog',{name:'Confirmar cambio académico'});await expect(confirmation).toBeVisible();
@@ -22,7 +24,7 @@ test('operations loads and updates enrollments and assignments beyond the former
  await expect(enrollmentRow).toContainText('Retirado');await expect(enrollmentRow.getByRole('button',{name:'Retirar',exact:true})).toHaveCount(0);
  await page.getByRole('tab',{name:/Asignaciones/}).click();
  const assignmentRows=page.locator('[role="tabpanel"] tbody tr');await expect(assignmentRows).toHaveCount(208);
- const assignmentRow=assignmentRows.filter({hasText:assignment.employee_number});await expect(assignmentRow).toHaveCount(1);
+ const assignmentRow=assignmentRows.filter({has:page.getByRole('cell',{name:assignment.employee_number+' · Docente Sintético',exact:true})}).filter({has:page.getByRole('cell',{name:assignment.code,exact:true})});await expect(assignmentRow).toHaveCount(1);
  const revoked=page.waitForResponse(response=>response.url().endsWith('/assignments')&&response.request().method()==='PATCH');await assignmentRow.getByRole('button',{name:'Revocar',exact:true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Aplicar cambio'}).click();expect((await revoked).status()).toBe(200);
  await expect(assignmentRows).toHaveCount(207);await expect(assignmentRow).toHaveCount(0);
  await page.reload();await page.getByRole('tab',{name:/Inscripciones/}).click();await expect(enrollmentRows).toHaveCount(208);await expect(enrollmentRow).toContainText('Retirado');

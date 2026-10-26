@@ -98,6 +98,24 @@ describe.sequential('F08 real invitations and explicit consent',()=>{
   const verified=(await sql.query('SELECT verified_email FROM account_email_verifications WHERE proof_invitation_id=$1',[invite.data.id])).rows[0];expect(verified.verified_email).toBe(invite.email);
   expect((await request('/api/v1/invitations/accept',{...proof(invite),consent:true,mode:'new',account:account()},'')).status).toBe(404);
  });
+ it('corrects invalid account fields without consuming the bearer, then registers and logs in with an email username',async()=>{
+  const invite=await issue({role:'student'}),own={...account(),username:'  Student.'+randomUUID()+'@Example.Test  '};
+  for(const invalid of [{...own,username:'bad@@example.test'},{...own,password:'short'},{...own,firstName:'   '}]){
+   const response=await request('/api/v1/invitations/accept',{...proof(invite),consent:true,mode:'new',account:invalid},'');
+   expect(response.status).toBe(422);expect((await response.json()).error.code).toBe('VALIDATION_ERROR');
+   expect((await sql.query('SELECT state FROM institution_invitations WHERE id=$1',[invite.data.id])).rows[0].state).toBe('pending');
+   expect((await sql.query('SELECT count(*)::int AS n FROM people WHERE email=$1',[invite.email])).rows[0].n).toBe(0);
+  }
+  const accepted=await request('/api/v1/invitations/accept',{...proof(invite),consent:true,mode:'new',account:own},'');expect(accepted.status).toBe(200);
+  const user=(await sql.query('SELECT u.id,u.username,m.id AS membership_id,r.role FROM platform_users u JOIN institution_memberships m ON m.user_id=u.id JOIN role_assignments r ON r.membership_id=m.id WHERE u.username=$1 AND m.institution_id=$2',[own.username.trim().toLowerCase(),unit])).rows;
+  expect(user).toHaveLength(1);expect(user[0].role).toBe('student');
+  const authenticated=await request('/api/v1/auth/login',{username:own.username,password},'');expect(authenticated.status).toBe(200);
+  expect((await request('/api/v1/auth/me',undefined,fixtureCookie(authenticated))).status).toBe(200);
+  // Preserve #114: the separately verified recipient email is also a login alias.
+  const alias=await request('/api/v1/auth/login',{username:invite.email.toUpperCase(),password},'');expect(alias.status).toBe(200);
+  expect((await request('/api/v1/auth/me',undefined,fixtureCookie(alias))).status).toBe(200);
+  expect((await request('/api/v1/invitations/accept',{...proof(invite),consent:true,mode:'new',account:own},'')).status).toBe(404);
+ });
  it('accepts existing self-consent after fresh proof without editing global PII and invalidates the old session',async()=>{
   const email='existing-'+randomUUID()+'@example.test',recipient=await newUser('',email),session=await login(recipient.username),invite=await issue({email});
   const before=(await sql.query('SELECT * FROM people WHERE id=$1',[recipient.person])).rows[0];
