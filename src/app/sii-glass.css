@@ -439,3 +439,23 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-track{background:rgb
 @media(max-width:720px){.sii-app.sii-ui .siii-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sii-app.sii-ui .siii-overview-progress-body{grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .siii-student-aside{grid-template-columns:1fr}}
 @media(max-width:520px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:auto}.sii-app.sii-ui .siii-overview-panel{padding:15px}.sii-app.sii-ui .siii-overview-metric{padding:13px}.sii-app.sii-ui .siii-overview-hero{padding:19px}.sii-app.sii-ui .siii-overview-term{grid-template-columns:minmax(70px,1fr) minmax(40px,1.5fr) 18px}}
 @media(prefers-reduced-motion:reduce){.sii-app.sii-ui .siii-overview-panel *, .sii-app.sii-ui .siii-overview-hero *{transition:none!important;animation:none!important}}
+
+/* Application shell final paint pass: preserve business behaviors and keyboard focus. */
+.sii-app.sii-ui{--sii-kit-bg:#342f2e;--sii-kit-surface:rgba(115,103,96,.33);--sii-kit-elevated:#544a45;--sii-kit-border:rgba(255,255,255,.075);--sii-kit-border-strong:rgba(255,255,255,.11);--sii-kit-muted:#d4c6bd;--sii-kit-accent:#d8bbab;--sii-kit-accent-strong:#eed9c9;--sii-kit-gradient:none;--sii-kit-shadow:none;--sii-kit-shadow-hover:none}
+html[data-sii-theme="light"] .sii-app.sii-ui{--sii-kit-bg:#e9dcd0;--sii-kit-surface:rgba(255,250,242,.62);--sii-kit-elevated:#f6efe7;--sii-kit-border:rgba(65,47,36,.10);--sii-kit-border-strong:rgba(65,47,36,.18);--sii-kit-muted:#5e514b;--sii-kit-accent:#56453c;--sii-kit-accent-strong:#45372f}
+.sii-app.sii-ui .sii-main{min-width:0;background:transparent}
+.sii-app.sii-ui .sii-page{min-width:0}
+.sii-app.sii-ui [data-sidebar="sidebar"]{color:hsl(var(--sidebar-foreground));border:0!important;background:var(--sii-glass-panel)!important}
+.sii-app.sii-ui [data-sidebar="menu-button"]{border-radius:11px;min-height:38px;transition:background .16s ease,color .16s ease}
+.sii-app.sii-ui [data-sidebar="menu-button"][data-active="true"]{background:rgba(224,205,190,.18)!important;box-shadow:none!important}
+.sii-app.sii-ui [data-sidebar="group-label"]{color:hsl(var(--sidebar-foreground) / .76)!important;letter-spacing:.04em}
+.sii-app.sii-ui .sii-topbar{border:0!important;border-radius:14px;box-shadow:none!important;margin:14px 16px 0;min-height:60px}
+.sii-app.sii-ui .sii-topbar .sii-topbar-actions{min-width:0;gap:9px}
+.sii-app.sii-ui .sii-sidebar,.sii-app.sii-ui [data-sidebar="sidebar"]{box-shadow:none!important}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-access-panel,.sii-institution-item){border:0!important;box-shadow:none!important}
+.sii-app.sii-ui .sii-workspace :is(button,a,input,select,textarea):focus-visible{outline:2px solid hsl(var(--ring))!important;outline-offset:2px}
+.sii-app.sii-ui :is(.sii-workspace,.sii-topbar,.sii-sidebar) *{overflow-wrap:break-word}
+.sii-app.sii-ui .sii-kit-page-heading h1{letter-spacing:-.035em}
+@media(max-width:760px){.sii-app.sii-ui .sii-topbar{margin:9px 9px 0;border-radius:12px}.sii-app.sii-ui .siii-student-dashboard{gap:11px}.sii-app.sii-ui .siii-student-main,.sii-app.sii-ui .siii-student-aside{gap:11px}}
+@media(prefers-contrast:more){.sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero){background:hsl(var(--card))!important;border:1px solid hsl(var(--border))!important}}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero){background:#514a46}}

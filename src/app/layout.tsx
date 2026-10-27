@@ -7,7 +7,6 @@ import {applicantFragmentBootstrap} from '@/shared/admissions-fragment';
 import './globals.css';
 import './sii-v2.css';
 import './academic-v2.css';
-import './sii-glass.css';
 import './sii-ux-refinement.css';
 import './sii-motion-polish.css';
 import './sii-system-coherence.css';
@@ -16,6 +15,8 @@ import './sii-kit-components.css';
 import './sii-interactions.css';
 import './sii-tailwind.css';
 import './sii-workspaces.css';
+// Final scoped paint layer: shared glass tokens override legacy visual skins without altering their behavior.
+import './sii-glass.css';
 export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'SII · Sistema Institucional Integral',description:'Plataforma institucional de gestión académica'};
 export default async function RootLayout({children}:{children:React.ReactNode}){
