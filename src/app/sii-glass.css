@@ -485,28 +485,8 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow small{opacit
 
 .sii-app.sii-ui .siii-overview-track svg{display:block;width:100%;height:8px}
 
-/* WCAG AA: shadcn's generated /60 and /50 opacity classes retain insufficient
-   contrast on warm translucent sidebar. Opaque accessible captions in both modes. */
-html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] :is(.text-sidebar-foreground\\/60,.text-sidebar-foreground\\/50),
-html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{
- color:#efe6df!important;
-}
-html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] :is(.text-sidebar-foreground\\/60,.text-sidebar-foreground\\/50),
-html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{
- color:#43362f!important;
-}
-.sii-app.sii-ui [data-sidebar="sidebar"] [data-sidebar="group-label"]{opacity:1}
 
-/* Match the approved student composition: no duplicate page title, extra card, or tab rail above the hero.
-   Preserve the underlying accessible tabs, profile, refresh action and institutional links below the dashboard. */
-.sii-app.sii-ui .siii-student-home-shell{display:flex;flex-direction:column;gap:0;min-width:0}
-.sii-app.sii-ui .siii-student-home-shell .siii-home-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs{order:1;display:flex;flex-direction:column;gap:0;min-width:0}
-.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tabpanel"]{order:0;margin-top:0}
-.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tablist"]{order:2;margin-top:20px}
-.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>.siii-student-identity-card{order:3;margin-top:14px}
-.sii-app.sii-ui .siii-student-home-shell>.siii-student-utility-links{order:4;margin-top:12px}
-.sii-app.sii-ui .siii-student-home-shell>p:last-child{order:5}
-.sii-app.sii-ui .siii-overview-calendar .siii-calendar-days{margin-top:15px}
-.sii-app.sii-ui .siii-student-identity-card{background:rgba(125,115,109,.24)!important;border:0!important;box-shadow:none!important}
-@media(max-width:640px){.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tablist"]{margin-top:14px;overflow-x:auto;max-width:100%}}
+/* WCAG AA: use attribute selectors rather than escaping Tailwind's slash classes. */
+html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#efe6df!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#43362f!important}
+.sii-app.sii-ui [data-sidebar="sidebar"] [data-sidebar="group-label"]{opacity:1}
