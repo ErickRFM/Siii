@@ -40,7 +40,8 @@ describe('Smoked Glass cross-module design contract',()=>{
   const svg=source('public/visuals/siii-warm-architecture.svg');
   expect(svg).toContain('<svg ');
   expect(svg).not.toContain('<script');
-  expect(svg).not.toContain('http://');
+  expect(svg).not.toContain('<image');
+  expect(svg).not.toContain('<foreignObject');
   expect(source('src/app/sii-glass.css')).toContain("/visuals/siii-warm-architecture.svg");
  });
  it('shows only bounded academic indicators and no ungrounded credit plan percentage',()=>{
