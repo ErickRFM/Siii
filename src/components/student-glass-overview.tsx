@@ -14,6 +14,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
 }){
  const m=institutionalStudentSummary(snapshot);
  const outstandingLabel=m.currency?formatMoney(m.outstanding,m.currency):m.outstanding===0?'Sin cargos pendientes':'Ver desglose por moneda';
+ const deadlines=snapshot.orders.filter(o=>['pending','partially_paid'].includes(o.status)&&o.dueDate&&Number.isFinite(Date.parse(o.dueDate))&&Date.parse(o.dueDate)>=Date.now()-86400000).sort((a,b)=>Date.parse(a.dueDate!)-Date.parse(b.dueDate!)).slice(0,3);
  const quick=(label:string,section:string,academicView?:PersonalView)=><button className="siii-overview-quick" key={label} type="button" onClick={()=>onNavigate(section,academicView)}>{label}<ChevronRight size={15} aria-hidden="true"/></button>;
  return <div className="siii-student-dashboard">
   <div className="siii-student-main">
@@ -30,25 +31,25 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
    </header>
    <div className="siii-overview-metrics" aria-label="Resumen institucional">
     <section className="siii-overview-panel siii-overview-metric">
-     <BookOpen size={20} aria-hidden="true"/>
+     <span className="siii-overview-metric-icon"><BookOpen size={21} aria-hidden="true"/></span>
      <span>Promedio de notas publicadas</span>
      <strong>{m.gradeMean===null?'—':m.gradeMean.toFixed(2)}</strong>
      <small>No es el promedio oficial</small>
     </section>
     <section className="siii-overview-panel siii-overview-metric">
-     <GraduationCap size={20} aria-hidden="true"/>
+     <span className="siii-overview-metric-icon"><GraduationCap size={21} aria-hidden="true"/></span>
      <span>Créditos con nota publicada</span>
      <strong>{m.creditsWithPublishedGrade}</strong>
      <small>El plan oficial no está disponible</small>
     </section>
     <section className="siii-overview-panel siii-overview-metric">
-     <Wallet size={20} aria-hidden="true"/>
+     <span className="siii-overview-metric-icon"><Wallet size={21} aria-hidden="true"/></span>
      <span>Cargos por liquidar</span>
      <strong>{outstandingLabel}</strong>
      <small>{snapshot.orders.length?'Según el registro de Caja':'Sin movimientos registrados'}</small>
     </section>
     <section className="siii-overview-panel siii-overview-metric">
-     <FileText size={20} aria-hidden="true"/>
+     <span className="siii-overview-metric-icon"><FileText size={21} aria-hidden="true"/></span>
      <span>Trámites activos</span>
      <strong>{m.pendingCount}</strong>
      <small>Solicitudes en seguimiento</small>
@@ -106,6 +107,11 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <div className="siii-overview-heading"><h3>Avisos institucionales</h3></div>
     {snapshot.announcements.slice(0,3).map(notice=><article key={notice.id} className="siii-overview-listrow"><CheckCircle2 size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div></article>)}
     {!snapshot.announcements.length&&<p className="siii-overview-empty">No hay avisos vigentes.</p>}
+   </section>
+   <section className="siii-overview-panel siii-overview-dates">
+    <h3>Próximas fechas</h3>
+    {deadlines.map(order=><div className="siii-overview-date" key={order.id}><span className="siii-overview-date-dot" aria-hidden="true"/><div><strong>{order.feeTypeName}</strong><small>Vencimiento: {new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(order.dueDate!))}</small></div></div>)}
+    {!deadlines.length&&<p className="siii-overview-empty">No se registran vencimientos próximos en tu estado de cuenta.</p>}
    </section>
    <section className="siii-overview-panel">
     <h3>Accesos rápidos</h3>

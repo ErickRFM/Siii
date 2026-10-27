@@ -524,3 +524,18 @@ html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger kb
 .sii-app.sii-ui .siii-overview-hero .siii-overview-refresh:hover{background:rgba(255,255,255,.17)}
 .sii-app.sii-ui .siii-overview-hero .siii-overview-refresh:disabled{opacity:.55;cursor:not-allowed}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-hero .siii-overview-refresh{background:rgba(88,66,47,.08)}
+
+/* Restrained reference icon colors; visible without heavy outlines or glow. */
+.sii-app.sii-ui .siii-overview-metric-icon{width:43px;height:43px;border-radius:12px;display:grid;place-items:center;margin-bottom:1px;background:rgba(195,148,104,.24);color:#f3d7b1}
+.sii-app.sii-ui .siii-overview-metric:nth-child(2) .siii-overview-metric-icon{background:rgba(116,144,220,.28);color:#c6d3ff}
+.sii-app.sii-ui .siii-overview-metric:nth-child(3) .siii-overview-metric-icon{background:rgba(108,182,144,.22);color:#b8eacb}
+.sii-app.sii-ui .siii-overview-metric:nth-child(4) .siii-overview-metric-icon{background:rgba(203,135,91,.23);color:#f4c5a5}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric-icon{color:#8b562c}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(2) .siii-overview-metric-icon{color:#3254a4}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(3) .siii-overview-metric-icon{color:#246e48}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(4) .siii-overview-metric-icon{color:#a15426}
+.sii-app.sii-ui .siii-overview-date{display:flex;gap:11px;min-width:0;margin-top:15px}
+.sii-app.sii-ui .siii-overview-date>div{min-width:0;overflow-wrap:anywhere}
+.sii-app.sii-ui .siii-overview-date strong{display:block;font-size:12px;font-weight:600}
+.sii-app.sii-ui .siii-overview-date small{display:block;opacity:.84;font-size:11px;margin-top:3px}
+.sii-app.sii-ui .siii-overview-date-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;margin-top:5px;background:#d7c7bd;box-shadow:none}
