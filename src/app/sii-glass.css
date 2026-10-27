@@ -465,3 +465,20 @@ html[data-sii-theme="light"] .sii-app.sii-ui{--sii-kit-bg:#e9dcd0;--sii-kit-surf
 .sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="menu-button"]{font-size:12px;font-weight:500;min-height:34px}
 .sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="group-label"]{font-size:10px}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-sidebar-group{background:rgba(73,53,40,.045)}
+
+/* Sidebar contrast is rooted at shadcn's real data-sidebar node, not a legacy .sii-sidebar class. */
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"]{
+ --sidebar-foreground:24 15% 16%;--sidebar-accent-foreground:24 15% 16%;
+ --sidebar-primary-foreground:24 15% 16%;
+ background:rgba(255,250,242,.73)!important;color:#302b29!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] :is(
+ .sii-brand-name,.sii-brand-description,
+ .text-sidebar-foreground,.text-sidebar-foreground\/60,.text-sidebar-foreground\/50,
+ [data-sidebar="menu-button"],[data-sidebar="group-label"]
+){color:#332a26!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#4d3f38!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="opacity-60"]{opacity:.83}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric>small,
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-empty,
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow small{opacity:1;color:#5d5049}
