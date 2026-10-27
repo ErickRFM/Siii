@@ -1,6 +1,6 @@
 import {beforeAll,afterAll,describe,it,expect} from 'vitest';
 import pg from 'pg';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,randomBytes,createHash} from 'node:crypto';
 import {isolatedDatabaseUrl} from '../support/database-url';
 import {portalFixture} from '../support/portal-fixture';
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()}),base='http://127.0.0.1:3107';
@@ -13,6 +13,18 @@ describe.sequential('personal portal real HTTP ownership and publication contrac
   const response=await read('profile');expect(response.status).toBe(200);expect(response.headers.get('cache-control')).toContain('no-store');
   const text=await response.text();expect(text).not.toContain('private-phone');expect(text).not.toContain('private@example');
   expect(JSON.parse(text).data).toMatchObject({id:f.studentId,firstName:'Alumna propia',programName:'Ingeniería de Sistemas',timeZone:'America/Mexico_City',verifiedEmail:null});
+ });
+ it('binds personal responses to the current actor, session, record and authority',async()=>{
+  const profile=await read('profile'),courses=await read('courses');
+  const revision=profile.headers.get('x-siii-portal-context');expect(revision).toMatch(/^[a-f0-9]{64}$/);
+  expect(profile.headers.get('x-siii-portal-actor')).toBe(f.student.id);
+  expect(courses.headers.get('x-siii-portal-context')).toBe(revision);
+  expect((await read('profile','student',f.secondStudent.cookie)).headers.get('x-siii-portal-context')).not.toBe(revision);
+  const token=randomBytes(32).toString('base64url');
+  const session=(await sql.query("INSERT INTO auth_sessions(user_id,token_hash,expires_at) VALUES($1,$2,now()+interval '1 hour') RETURNING id",[f.student.id,createHash('sha256').update(token).digest('hex')])).rows[0].id;
+  try{const anotherSession=await read('profile','student','siii_session='+token);expect(anotherSession.status).toBe(200);expect(anotherSession.headers.get('x-siii-portal-context')).not.toBe(revision)}finally{await sql.query('UPDATE auth_sessions SET revoked_at=now() WHERE id=$1',[session])}
+  await sql.query("UPDATE role_assignments SET scope_type='program',scope_program_id=$1,institution_id=$3 WHERE id=$2",[f.program,f.student.grant,f.tenant]);
+  try{expect((await read('profile')).headers.get('x-siii-portal-context')).not.toBe(revision)}finally{await sql.query("UPDATE role_assignments SET scope_type='institution',scope_program_id=null WHERE id=$1",[f.student.grant])}
  });
  it('reads enrolled courses, assigned teachers and recorded schedule without teacher private contact',async()=>{
   const courses=await read('courses');expect(courses.status).toBe(200);expect((await courses.json()).data).toEqual([expect.objectContaining({sectionId:f.section,courseName:'Álgebra institucional',credits:6})]);

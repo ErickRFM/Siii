@@ -245,3 +245,13 @@ Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md
 | POST invitations/accept, cuenta nueva | Esquema de cuenta compartido con UI; 422 VALIDATION_ERROR independiente de existencia; conserva consentimiento, token pendiente tras validación, transacción/auditoría/MFA y control de emisor | `tests/integration/invitations.test.ts`: 39 aprobadas, incluida corrección de tres entradas, alta con correo y login; `tests/ui/invitation-flows.spec.ts`: 9 aprobadas, incluida doble entrega evitada y móvil 360 px | LOCAL VERIFICADO; CI/despliegue del SHA final en PR de consolidación |
 
 [Informe y límites productivos](../audits/SIII_CONSOLIDATION_2026-10-26.md). El contrato sintético y los GET públicos no acreditan cuentas reales ni sincronización productiva.
+
+## Portal institucional V3 — 26 octubre 2026
+
+| Operación | Autoridad y garantías | Evidencia | Estado |
+|---|---|---|---|
+| GET institutions/:id/portal/:kind/:resource | Conserva self.read, sesión, tenant, ámbito y vínculo vigente en cada SQL; respuestas no-store incluyen contexto opaco actor/sesión/grants/expediente; colecciones fijadas al expediente resuelto | `personal-portals-http.test.ts`: 12/12 locales; pruebas UI de cuenta distinta, contexto distinto en segunda página y denegación | LOCAL VERIFICADO; CI/merge/despliegue final pendientes |
+| Navegación/consulta personal | Inicio institucional sin agenda diaria; cinco destinos móviles; consulta secundaria bajo demanda; conserva búsqueda al refrescar contexto válido y retira datos al cambiar acceso, expediente o conexión | Full UI 167/167; bundle final con dos regresiones de pestaña/foco, 22/22 portal + catálogo; HTTP personal 12/12 | LOCAL VERIFICADO; CI/merge/despliegue final pendientes |
+| Catálogo de consulta | Sin guía de configuración ni acciones de gestión para lector; estado activo por defecto con opción explícita de consultar inactivos/archivados dentro del permiso vigente | `academic-initial-setup.spec.ts` y escenario V3 de catálogo, incluidos en 22/22 finales; preparación administrativa conservada para gestores | LOCAL VERIFICADO; CI/merge/despliegue final pendientes |
+
+[Inventario, revisión y límites del bloque](../audits/SIII_V3_EXECUTION_2026-10-26.md). No hay DDL nuevo ni cambios de contrato con Compañero. Los metadatos de contexto no se aceptan como credenciales ni sustituyen autorización del servidor.
