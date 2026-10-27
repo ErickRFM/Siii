@@ -14,7 +14,7 @@ export default function SiiThemeToggle(){
    document.documentElement.dataset.siiTheme=resolved;
    setTheme(resolved);
   }catch{
-   document.documentElement.dataset.siiTheme='light';
+   document.documentElement.dataset.siiTheme='dark';
   }
  },[]);
  const toggle=()=>{

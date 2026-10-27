@@ -98,6 +98,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
   </div>
   <aside className="siii-student-aside" aria-label="Información complementaria">
    <section className="siii-overview-panel siii-overview-calendar">
+    <h3 className="sr-only">Calendario</h3>
     <SiiiGlassCalendar timeZone={profile.timeZone}/>
    </section>
    <section className="siii-overview-panel">
