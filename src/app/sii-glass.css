@@ -302,3 +302,36 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
  .sii-app.sii-ui .siii-teacher-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
  .sii-app.sii-ui .siii-teacher-metrics>*:first-child{grid-column:1/-1}
 }
+
+/* Light cream variant of the approved smoked-glass design. */
+html[data-sii-theme="light"] .sii-app.sii-ui{
+  --background:32 37% 93%;--foreground:24 15% 15%;
+  --card:30 30% 95%;--card-foreground:24 15% 15%;
+  --popover:30 30% 96%;--popover-foreground:24 15% 15%;
+  --primary:21 23% 29%;--primary-foreground:30 35% 97%;
+  --secondary:30 23% 89%;--secondary-foreground:24 15% 15%;
+  --muted:30 22% 89%;--muted-foreground:25 12% 32%;
+  --accent:30 25% 88%;--accent-foreground:24 15% 15%;
+  --border:25 18% 79%;--input:25 18% 77%;--ring:21 23% 29%;
+  --sidebar-background:30 27% 93%;--sidebar-foreground:24 15% 15%;
+  --sidebar-accent:30 22% 85%;--sidebar-accent-foreground:24 15% 15%;
+  --sii-text:#302b29;--sii-muted:#615750;
+  --sii-glass-panel:rgba(255,251,245,.59);
+  --sii-glass-soft:rgba(255,249,241,.52);
+  --sii-glass-header:rgba(255,251,245,.68);
+  color:#302b29;
+  background:linear-gradient(125deg,rgba(239,229,218,.78),rgba(218,203,191,.75)),radial-gradient(ellipse at 72% 9%,#f5ece3,#d0b9a6 68%)!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar{background:rgba(255,249,242,.48)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,250,243,.57)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-glass :is(.siii-student-hero,.siii-student-metric,.siii-student-panel,.siii-student-wide),
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-teacher-metric,.siii-teacher-work){background:rgba(255,251,246,.57)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-muted{color:#675a53}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-link{color:#342f2e}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-pill{color:#342f2e;background:rgba(92,72,60,.10)}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-row{border-bottom-color:rgba(52,47,46,.09)}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{background:rgba(92,72,60,.17)!important;color:#302b29!important}
+.sii-app.sii-ui .siii-student-glass>*{min-width:0}
+.sii-app.sii-ui .siii-student-glass :is(button,a):focus-visible{outline:2px solid #e5d5c8;outline-offset:3px}
+@media(max-width:720px){.sii-app.sii-ui .siii-student-glass{grid-template-columns:repeat(2,minmax(0,1fr))}.sii-app.sii-ui .siii-student-glass :is(.siii-student-hero,.siii-student-panel,.siii-student-wide){grid-column:1/-1}}
