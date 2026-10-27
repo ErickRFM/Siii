@@ -599,3 +599,94 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
 .sii-app.sii-ui .siii-shared-metric-copy>small{font-size:11px;line-height:1.3;opacity:.83;overflow-wrap:anywhere}
 @media(max-width:660px){.sii-app.sii-ui .siii-shared-glass-metric{grid-template-columns:minmax(0,1fr);align-content:start;gap:7px;min-height:135px}.sii-app.sii-ui .siii-shared-glass-metric>.siii-overview-metric-icon{align-self:start}}
 @media(prefers-reduced-motion:no-preference){.sii-app.sii-ui .siii-overview-track rect{transition:width .2s ease}}
+
+
+/*
+ * Smoked Glass shared workspaces. A single material class on the existing
+ * academic/financial/administrative surfaces; business features are untouched.
+ * Form controls remain opaque enough for legibility and keyboard focus.
+ */
+.sii-app.sii-ui .siii-glass-workspace{min-width:0;max-width:100%;isolation:isolate}
+.sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-panel,.sii-catalog-summary,.sii-workspace-toolbar,
+ .sii-catalog-toolbar,.sii-workspace-filters,.sii-catalog-form,
+ .sii-workspace-tabs,.sii-catalog-tabs,
+ .sii-catalog-create,.sii-workspace-drawer,.sii-services-list
+){
+ --glass-tint:rgba(123,111,103,.27);
+ border-color:transparent;
+ box-shadow:none;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+ background:var(--sii-glass-panel)!important;
+ border:0!important;border-radius:17px!important;
+ box-shadow:none!important;
+ backdrop-filter:blur(12px) saturate(106%);
+ -webkit-backdrop-filter:blur(12px) saturate(106%);
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar,.sii-workspace-toolbar){
+ gap:12px;min-width:0;align-items:center;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar h2,.sii-workspace-toolbar h2){
+ font-size:clamp(16px,1.5vw,21px);font-weight:650;letter-spacing:-.025em;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-workspace-filters,.sii-catalog-form){
+ min-width:0;border-radius:14px;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(input:not([type=checkbox]),textarea,select,[role=combobox]){
+ background:rgba(38,33,31,.35)!important;
+ border:1px solid rgba(242,226,215,.16)!important;
+ box-shadow:none!important;min-width:0;max-width:100%;
+ color:#fff6ee;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{color:#dccfc5;opacity:.78}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-panel,.sii-catalog-summary,.sii-catalog-create
+){background:rgba(255,250,243,.60)!important;color:#302b29}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ input:not([type=checkbox]),textarea,select,[role=combobox]
+){background:rgba(255,254,251,.72)!important;border-color:rgba(78,55,43,.2)!important;color:#342a25}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{
+ color:#68564e;opacity:1;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table,.sii-workspace table){
+ min-width:0;border-collapse:separate;border-spacing:0;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table th,.sii-workspace th){
+ background:rgba(245,232,219,.055);
+ border-bottom:1px solid rgba(245,232,219,.13);
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table td,.sii-workspace td){
+ border-bottom:1px solid rgba(245,232,219,.08);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table th,.sii-workspace th){
+ background:rgba(72,52,42,.06);border-bottom-color:rgba(72,52,42,.13)
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table td,.sii-workspace td){
+ border-bottom-color:rgba(72,52,42,.1)
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tabs,.sii-workspace-tabs){
+ background:rgba(121,106,95,.13)!important;border:0!important;box-shadow:none!important;border-radius:13px;max-width:100%;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab--active,[data-state=active]){
+ background:rgba(225,206,193,.18)!important;box-shadow:none!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab--active,[data-state=active]){
+ background:rgba(91,70,58,.15)!important;color:#302b29!important
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab,.sii-workspace-tabs [role=tab]):focus-visible{
+ outline:2px solid hsl(var(--ring))!important;outline-offset:2px;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-layout,.sii-workspace-grid,.sii-services-list){
+ min-width:0;max-width:100%;
+}
+@media(max-width:760px){
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+ }
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-layout,.sii-workspace-grid){max-width:100%}
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar,.sii-workspace-toolbar){flex-wrap:wrap}
+}
+@media(prefers-contrast:more),(forced-colors:active){
+ .sii-app.sii-ui .siii-glass-workspace .sii-panel{background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important;backdrop-filter:none!important}
+}

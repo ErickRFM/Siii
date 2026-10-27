@@ -107,7 +107,7 @@ export default function AcademicOperations({institutionId}:{institutionId:string
  }
  const choices=part==='sections'?null:choice(sections.filter(row=>part==='enrollments'?row.status==='open':row.status!=='archived'),'catalog');
  if(!allowed)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/operations`}/>;
- return <div className="sii-academic sii-workspace sii-workspace--operations">
+ return <div className="sii-academic sii-workspace sii-workspace--operations siii-glass-workspace">
   {!drawer&&confirmation}
   <SiiSectionHeader workspace eyebrow="OPERACIÓN ACADÉMICA" title="Oferta, grupos e inscripciones" description="Consulta los registros de tu institución y prepara las operaciones en un panel contextual." right={<Button variant="outline" disabled={busy||loading} onClick={()=>void refresh()}>Actualizar</Button>}/>
   {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><Button variant="outline" disabled={busy||loading} onClick={()=>void refresh()}>Actualizar datos</Button></div>}

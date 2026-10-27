@@ -79,7 +79,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   if(view==='schedule')return <Schedule rows={snapshot.schedule} teachers={snapshot.teachers} timeZone={profile.timeZone}/>;
   return null;
  }
- return <div className={'sii-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}><div className={section==='home'?'siii-home-visually-hidden':''}><SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={section==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/></div>
+ return <div className={'sii-workspace siii-glass-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}><div className={section==='home'?'siii-home-visually-hidden':''}><SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={section==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/></div>
   <nav aria-label="Contexto del portal" className="siii-student-utility-links flex flex-wrap gap-3 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link></nav>
   <Tabs value={section} onValueChange={setSection} className={'min-w-0 space-y-5'+(section==='home'?' siii-home-tabs':'')}>
    <TabsList aria-label={'Navegación estudiantil'} className="sii-personal-navigation">

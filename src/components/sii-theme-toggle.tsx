@@ -6,15 +6,15 @@ import {Button} from '@/components/ui/button';
 
 type Theme='light'|'dark';
 export default function SiiThemeToggle(){
- const [theme,setTheme]=useState<Theme>('dark');
+ const [theme,setTheme]=useState<Theme>('light');
  useEffect(()=>{
   try{
    const saved=window.localStorage.getItem('sii-theme');
-   const resolved:Theme=saved==='light'?'light':'dark';
+   const resolved:Theme=saved==='dark'?'dark':'light';
    document.documentElement.dataset.siiTheme=resolved;
    setTheme(resolved);
   }catch{
-   document.documentElement.dataset.siiTheme='dark';
+   document.documentElement.dataset.siiTheme='light';
   }
  },[]);
  const toggle=()=>{

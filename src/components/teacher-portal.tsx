@@ -30,7 +30,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
  const terms=Array.from(new Map(groups.map(group=>[group.termId,group.termName])).entries());
  const inTerm=groups.filter(group=>!term||group.termId===term),visible=inTerm.filter(group=>!state||group.sectionStatus===state);
  function open(id:string,mode:'roster'|'capture'|'results'){setSelection({id,mode});setView('evaluations');}
- return <div className="sii-workspace sii-teacher-portal sii-glass-role min-w-0 space-y-6">
+ return <div className="sii-workspace siii-glass-workspace sii-teacher-portal sii-glass-role min-w-0 space-y-6">
   <SiiPageIntro eyebrow="PORTAL DOCENTE" title="Mi docencia" description={institutionName} actions={<Button variant="outline" disabled={loading} onClick={()=>refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
   <nav aria-label="Contexto del portal" className="flex flex-wrap gap-4 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link><Link className="font-semibold text-primary underline" href={{pathname:`/dashboard/institutions/${institutionId}/grading/corrections`}}>Mis rectificaciones</Link></nav>
   {error&&<div role="alert" className="sii-catalog-error">{error}<Button variant="outline" onClick={()=>refresh()}>Reintentar consulta</Button></div>}

@@ -119,7 +119,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
   setCreateOpen(false);setDirty(false);
  }
  if(!allowed)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/services`}/>;
- return <div className="sii-academic sii-workspace sii-workspace--services">
+ return <div className="sii-academic sii-workspace sii-workspace--services siii-glass-workspace">
  {!createOpen&&confirmation}
   <SiiSectionHeader workspace eyebrow="SERVICIOS UNIVERSITARIOS" title="Gestión de servicios"
     description="Avisos, trámites y talleres de tu institución con acceso controlado." right={<Button disabled={loading||saving} onClick={()=>{setDirty(false);setError('');setCreateOpen(true)}}>Nuevo registro</Button>}/>

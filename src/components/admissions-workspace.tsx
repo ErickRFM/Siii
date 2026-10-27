@@ -28,7 +28,7 @@ export default function AdmissionsWorkspace({institutionId,applications}:{instit
  const filtered=applications.filter(row=>(!status||row.status===status)&&(!program||row.programId===program)&&(!normalized||[row.applicationNumber,row.applicantFirstName,row.applicantLastName,row.applicantEmail].join(' ').toLocaleLowerCase('es-MX').includes(normalized)));
  function clearFilters(){setQuery('');setStatus('');setProgram('');setSelectedId(null);}
  function close(){setSelectedId(null);window.requestAnimationFrame(()=>returnFocus.current?.focus());}
- return <div className="sii-workspace sii-workspace--admissions">
+ return <div className="sii-workspace sii-workspace--admissions siii-glass-workspace">
   <div className="sii-catalog-toolbar">
    <h2>Solicitudes de ingreso</h2>
    <span className="sii-small-count" role="status">{filtered.length} de {applications.length} solicitudes</span>
