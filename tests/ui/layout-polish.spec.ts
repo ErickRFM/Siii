@@ -224,7 +224,8 @@ for(const area of ['operations','scheduling','services','registry','admissions',
    }
   }
   await page.setViewportSize({width:1366,height:1000});await page.evaluate(()=>{document.body.style.zoom='2'});
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'200% CSS zoom reflow: '+JSON.stringify(await page.evaluate(()=>Array.from(document.querySelectorAll('header,main,section,nav')).filter(node=>node.getBoundingClientRect().right>innerWidth+2).map(node=>({tag:node.tagName,cls:node.className,right:node.getBoundingClientRect().right}))))).toBe(true);
+  const reflow=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,nodes:Array.from(document.querySelectorAll('body *')).filter(node=>node.getBoundingClientRect().right>innerWidth+2).map(node=>({tag:node.tagName,cls:node.className,right:node.getBoundingClientRect().right,position:getComputedStyle(node).position,overflow:getComputedStyle(node).overflow}))}));
+  expect(reflow.scrollWidth,'200% CSS zoom reflow: '+JSON.stringify(reflow)).toBeLessThanOrEqual(reflow.width+2);
   await page.screenshot({path:`.p0-local/vnext/${area}-zoom-200.png`,fullPage:true,animations:'disabled'});
   await page.evaluate(()=>{document.body.style.zoom=''});
   if(['operations','scheduling','services'].includes(area)){
