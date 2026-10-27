@@ -355,3 +355,9 @@ html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar :is(.text-sidebar-fore
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar [data-sidebar="group-label"]{color:#554941!important}
 html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-muted-foreground{color:#554941!important}
+
+.sii-app.sii-ui .siii-student-sidepanel{grid-column:span 4;min-width:0;padding:20px;border-radius:17px;background:rgba(111,101,96,.30);backdrop-filter:blur(14px)}
+@media(min-width:1250px){.sii-app.sii-ui .siii-student-hero{grid-column:1/10}.sii-app.sii-ui .siii-student-sidepanel{grid-column:10/13}}
+@media(max-width:1249px){.sii-app.sii-ui .siii-student-sidepanel{grid-column:span 6}}
+@media(max-width:650px){.sii-app.sii-ui .siii-student-sidepanel{grid-column:1/-1;padding:16px}}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-sidepanel{background:rgba(255,251,246,.57);color:#302b29}
