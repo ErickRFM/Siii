@@ -197,7 +197,7 @@ function MobileTrigger(){
 function ShellLink({href,label,icon,active}:{href:Route|string;label:string;icon:SiiNavIconName;active:boolean}){
  return <SidebarMenuItem>
   <SidebarMenuButton asChild isActive={active} tooltip={label} className="h-10 gap-3 text-[13px] font-semibold">
-   <Link href={href as Route} aria-current={active?'page':undefined}>
+   <Link href={href as Route} aria-current={active?'page':undefined} onClick={()=>{const hash=String(href).split('#')[1];if(String(href).includes('/student#')&&hash)window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:hash}))}}>
     <SiiNavIcon name={icon}/><span>{label}</span>
    </Link>
   </SidebarMenuButton>

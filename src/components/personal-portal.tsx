@@ -38,10 +38,11 @@ const studentDestinations=[{id:'home',label:'Inicio',icon:Home},{id:'academic',l
 
 export default function PersonalPortal({institutionId,institutionName,actorId}:{institutionId:string;institutionName:string;actorId:string}){
  const [section,setSection]=useState('home'),[academicView,setAcademicView]=useState<PersonalView>('courses');
- // Deep-link sections from the capability-filtered institution sidebar without duplicating portals.
+ // The App Router may update a same-page hash through history.pushState (without hashchange).
+ // Listen to our navigation event as well as real hash changes, retaining deep-link reloads.
  useEffect(()=>{
-  const fromHash=()=>{
-   const destination=decodeURIComponent(window.location.hash.replace(/^#/,''));
+  const apply=(raw:string)=>{
+   const destination=decodeURIComponent(raw.replace(/^#/,''));
    const map:Record<string,{section:string;academic?:PersonalView}>={
     inicio:{section:'home'},inscripciones:{section:'academic',academic:'courses'},
     calificaciones:{section:'academic',academic:'grades'},
@@ -51,8 +52,11 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
    const selected=map[destination];
    if(selected){if(selected.academic)setAcademicView(selected.academic);setSection(selected.section)}
   };
+  const fromHash=()=>apply(window.location.hash);
+  const onNavigation=(event:Event)=>apply((event as CustomEvent<string>).detail);
   fromHash();window.addEventListener('hashchange',fromHash);
-  return ()=>window.removeEventListener('hashchange',fromHash);
+  window.addEventListener('siii:student-navigation',onNavigation);
+  return ()=>{window.removeEventListener('hashchange',fromHash);window.removeEventListener('siii:student-navigation',onNavigation)};
  },[]);
 
  const view:PersonalView=section==='academic'?academicView:section as PersonalView;
