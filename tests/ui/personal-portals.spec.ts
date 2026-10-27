@@ -48,7 +48,7 @@ test('student sidebar opens real academic and finance sections without duplicati
  await expect(page.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
  await expect(page.getByRole('tab',{name:'Calificaciones e historial',exact:true})).toHaveAttribute('data-state','active');
  await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Estado de cuenta'}).click();
- await expect(page.getByRole('tab',{name:'Financiero',exact:true})).toHaveAttribute('data-state','active');
+ await expect(page.getByRole('tab',{name:'Finanzas',exact:true})).toHaveAttribute('data-state','active');
 });
 test('V3 revalidation preserves displayed records and search while a valid profile is checked',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
