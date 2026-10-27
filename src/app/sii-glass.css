@@ -776,3 +776,25 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
   background:#f5eee5!important;color:#312a27!important;
  }
 }
+
+
+/* Institution landing and directorate/coordinator overview share the same glass grammar. */
+.sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
+){
+ background:var(--sii-glass-panel)!important;
+ border:0!important;border-radius:17px!important;box-shadow:none!important;
+ backdrop-filter:blur(12px) saturate(106%);
+ -webkit-backdrop-filter:blur(12px) saturate(106%);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
+){background:rgba(255,250,243,.6)!important;color:#302b29}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside) h2{
+ font-weight:650;letter-spacing:-.025em
+}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-item{border-radius:11px;padding-inline:10px}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(255,255,255,.05)}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(76,55,45,.07)}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-monogram{box-shadow:none;border-radius:12px}
+@media(max-width:760px){.sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel){backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}}
