@@ -137,3 +137,101 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 @media (prefers-reduced-motion:reduce) {
   .sii-app :is(.sii-module-card,.sii-metric,.sii-institution-item){transition:none!important;transform:none!important}
 }
+
+
+/* SIII Smoked Glass v1 — shared matte material, based on the approved student reference.
+   No artificial glow, no redesign of business logic or permission boundaries. */
+.sii-app.sii-ui {
+  --sii-bg:#342f2e;
+  --sii-surface:rgba(98,88,83,.46);
+  --sii-text:#f7f1ec;
+  --sii-muted:#d0c4bd;
+  --sii-line:rgba(255,255,255,.055);
+  --sii-glass-panel:rgba(110,100,95,.34);
+  --sii-glass-soft:rgba(124,113,107,.25);
+  --sii-glass-header:rgba(105,96,90,.32);
+  --sii-glass-edge:transparent;
+  --sii-glass-depth:0 14px 34px rgba(18,16,16,.09);
+  --sii-glass-hover:0 17px 38px rgba(18,16,16,.13);
+  color:#f7f1ec;
+  background:linear-gradient(120deg,rgba(58,48,45,.82),rgba(51,48,48,.92)),radial-gradient(ellipse at 72% 8%,#ac8572,#342f2e 62%)!important;
+  background-attachment:fixed!important;
+}
+.sii-app.sii-ui .sii-sidebar {
+  background:rgba(102,93,87,.34)!important;
+  border:0!important;
+  border-radius:17px;
+  box-shadow:none!important;
+  backdrop-filter:blur(19px) saturate(112%);
+}
+.sii-app.sii-ui .sii-topbar {
+  background:rgba(108,98,92,.26)!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px);
+}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .rounded-xl.border.bg-card,.sii-workspace .rounded-xl.border) {
+  background:var(--sii-glass-panel)!important;
+  border-color:transparent!important;
+  box-shadow:var(--sii-glass-depth)!important;
+  backdrop-filter:blur(17px) saturate(108%);
+  border-radius:17px;
+}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-sidebar,.sii-topbar) {
+  outline:0!important;
+}
+.sii-app.sii-ui .sii-nav-item--active {
+  background:rgba(222,204,190,.19)!important;
+  box-shadow:none!important;
+}
+.sii-app.sii-ui :is(.sii-nav-item,.sii-module-card) {
+  transition:background-color .18s ease,transform .18s ease!important;
+}
+.sii-app.sii-ui :is(.sii-catalog-form input,.sii-catalog-form select,.sii-catalog-edit input) {
+  background:rgba(255,255,255,.09)!important;
+  border-color:rgba(255,255,255,.10)!important;
+}
+.sii-student-portal .siii-student-glass {
+  display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;min-width:0;
+}
+.sii-student-portal .siii-student-hero {
+  grid-column:1/-1;padding:24px 26px;min-height:150px;
+  background:linear-gradient(105deg,rgba(185,157,141,.20),rgba(255,255,255,.045))!important;
+  border-radius:17px;
+}
+.sii-student-portal .siii-student-hero h2{font-size:clamp(1.7rem,2.6vw,2.5rem);letter-spacing:-.04em;line-height:1.14}
+.sii-student-portal .siii-student-metric{grid-column:span 3;min-width:0}
+.sii-student-portal .siii-student-panel{grid-column:span 4;min-width:0}
+.sii-student-portal .siii-student-wide{grid-column:span 8;min-width:0}
+.sii-student-portal .siii-student-glass :is(.siii-student-hero,.siii-student-metric,.siii-student-panel,.siii-student-wide) {
+  background:rgba(111,101,96,.30);border:0;border-radius:17px;box-shadow:none;
+  backdrop-filter:blur(15px) saturate(108%);
+}
+.sii-student-portal .siii-student-metric{padding:20px}
+.sii-student-portal .siii-student-panel,.sii-student-portal .siii-student-wide{padding:22px}
+.sii-student-portal .siii-glass-title{font-weight:650;letter-spacing:-.015em;font-size:1rem;margin-bottom:16px}
+.sii-student-portal .siii-glass-muted{color:rgba(243,233,225,.72);font-size:.84rem}
+.sii-student-portal .siii-glass-number{font-size:clamp(1.4rem,2.2vw,2rem);font-weight:650;line-height:1.2;letter-spacing:-.035em}
+.sii-student-portal .siii-glass-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.085)}
+.sii-student-portal .siii-glass-row:last-child{border-bottom:0}
+.sii-student-portal .siii-glass-link{display:inline-flex;align-items:center;gap:6px;color:#ede3da;text-decoration:underline;text-underline-offset:4px;font-size:.84rem}
+.sii-student-portal .siii-glass-pill{display:inline-flex;align-items:center;border-radius:999px;background:rgba(218,204,191,.14);padding:5px 11px;color:#f5eae0;font-size:.78rem}
+@media(max-width:1100px){
+ .sii-student-portal .siii-student-metric{grid-column:span 6}
+ .sii-student-portal .siii-student-panel{grid-column:span 6}
+ .sii-student-portal .siii-student-wide{grid-column:1/-1}
+}
+@media(max-width:650px){
+ .sii-app.sii-ui .sii-sidebar{border-radius:0}
+ .sii-student-portal .siii-student-glass{gap:10px}
+ .sii-student-portal .siii-student-metric{grid-column:span 6;padding:14px}
+ .sii-student-portal .siii-student-panel,.sii-student-portal .siii-student-wide{grid-column:1/-1;padding:16px}
+ .sii-student-portal .siii-student-hero{padding:19px;min-height:unset}
+}
+@media(prefers-reduced-motion:reduce){
+ .sii-app.sii-ui :is(.sii-nav-item,.sii-module-card){transition:none!important}
+}
+@media(forced-colors:active){
+ .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card){border:1px solid CanvasText!important;background:Canvas!important}
+ .sii-app.sii-ui{background:Canvas!important;color:CanvasText}
+}
