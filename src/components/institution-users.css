@@ -1,7 +1,0 @@
-.sii-users textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--sii-line);border-radius:9px;background:var(--sii-surface-soft);color:var(--sii-text);padding:10px;font:inherit}
-.sii-users textarea:focus-visible{outline:3px solid var(--sii-primary);outline-offset:3px;scroll-margin-top:6rem}
-.sii-users :where(dd,li,p){overflow-wrap:anywhere}
-.sii-users dd{margin:4px 0 15px}
-.sii-users dt{font-weight:700}
-.sii-users ol>li{margin-bottom:22px}
-@media(max-width:600px){.sii-users .sii-catalog-pagination{flex-wrap:wrap}.sii-users .sii-catalog-pagination button{flex:1;min-width:140px}}
