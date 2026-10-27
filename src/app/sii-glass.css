@@ -288,3 +288,17 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 @media (forced-colors:active){
  .sii-app.sii-ui :is(.sii-workspace .bg-card,.sii-workspace .bg-muted,.sii-kit-module-card,.sii-kit-metric){background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important}
 }
+
+/* Teaching dashboard reuses the approved material, not student business widgets. */
+.sii-app.sii-ui .siii-teacher-metric,
+.sii-app.sii-ui .siii-teacher-work{
+  background:rgba(111,101,96,.30)!important;
+  border:0!important;border-radius:17px;
+  box-shadow:none!important;backdrop-filter:blur(15px) saturate(108%);
+}
+.sii-app.sii-ui .siii-teacher-metrics{gap:14px}
+.sii-app.sii-ui .siii-teacher-metric p.tabular-nums{letter-spacing:-.04em}
+@media(max-width:650px){
+ .sii-app.sii-ui .siii-teacher-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .sii-app.sii-ui .siii-teacher-metrics>*:first-child{grid-column:1/-1}
+}
