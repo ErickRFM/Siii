@@ -16,10 +16,10 @@ export default async function AcademicCatalogPage({ params }: PageProps) {
   if (!access) notFound();
   return (
     <>
-      <div className="sii-page-eyebrow">GESTIÓN ACADÉMICA <span className="sii-page-eyebrow-line"/></div>
+      <div className="sii-page-eyebrow">CATÁLOGO INSTITUCIONAL <span className="sii-page-eyebrow-line"/></div>
       <div className="sii-page-heading">
         <div><h1>Catálogo académico<span className="sii-welcome-period">.</span></h1>
-          <p>{access.institutionName} · Administra programas, materias, campus, periodos y versiones de planes.</p></div>
+          <p>{access.institutionName} · Consulta los programas, materias, campus, periodos y planes disponibles dentro de tu ámbito.</p></div>
         <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>
       </div>
       <AcademicCatalog institutionId={institutionId} />

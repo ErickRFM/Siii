@@ -71,11 +71,13 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   useEffect(()=>{if(mutationError){if(nameError)document.getElementById('catalog-edit-name')?.focus();else mutationErrorRef.current?.focus();}},[mutationError,nameError]);
   const [notice,setNotice] = useState('');
   const [search,setSearch] = useState('');
+  const [includeInactive,setIncludeInactive]=useState(false);
   const [editing,setEditing] = useState<string | null>(null);
   const [editName,setEditName] = useState('');
   const base = `/api/v1/institutions/${institutionId}/academic`;
   const selectedTab=availableTabs.some(item=>item.id===tab)?tab:availableTabs[0]?.id;
   const canManage=Boolean(selectedTab&&hasAnyCapability(access,`${selectedTab}.manage`));
+  const hasManagement=tabs.some(item=>hasAnyCapability(access,`${item.id}.manage`));
   const canCreate=Boolean(selectedTab&&(hasInstitutionCapability(access,`${selectedTab}.manage`)||(selectedTab==='curricula'&&hasAnyCapability(access,'curricula.manage'))));
   const canManageRow=(row:RecordRow)=>['active','inactive'].includes(row.status)&&Boolean(selectedTab&&(selectedTab==='programs'?hasScopedCapability(access,'programs.manage','program',row.id):selectedTab==='curricula'?hasScopedCapability(access,'curricula.manage','program',row.programId):selectedTab==='campuses'?hasScopedCapability(access,'campuses.manage','campus',row.id):hasInstitutionCapability(access,`${selectedTab}.manage`)));
 
@@ -208,14 +210,14 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   }
 
   const selected=tabs.find(t=>t.id===(selectedTab??tab))!;
-  const filtered=rows.filter(row=>[row.name??'',row.code??'',row.version??'']
+  const filtered=rows.filter(row=>(hasManagement||includeInactive||row.status==='active')&&[row.name??'',row.code??'',row.version??'']
     .some(v=>v.toLocaleLowerCase('es-MX').includes(search.trim().toLocaleLowerCase('es-MX'))));
   if(permissionsLoading||permissionsError||access?.restricted)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/academic`}/>;
   if(!access||availableTabs.length===0)return <p className="sii-info-banner">No tienes acceso a catálogos académicos.</p>;
   return (
     <div className="sii-academic">
  {confirmation}
-      <AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>
+      {hasManagement&&<AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>}
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">
         {availableTabs.map(t=><Button variant="ghost" type="button" role="tab" key={t.id} aria-selected={tab===t.id} id={'catalog-tab-'+t.id} aria-controls="catalog-panel" tabIndex={tab===t.id?0:-1} onKeyDown={e=>moveTab(e,t.id)} disabled={saving}
           className={tab===t.id?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'}
@@ -237,6 +239,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
             <label htmlFor="catalog-search">Buscar en esta página de {selected.label.toLowerCase()}</label>
             <Input id="catalog-search" type="search" value={search} onChange={e=>setSearch(e.target.value)}
               placeholder="Nombre, clave o versión…"/>
+            {!hasManagement&&<label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={includeInactive} onChange={event=>setIncludeInactive(event.target.checked)}/>Incluir registros inactivos y archivados</label>}
             <Button variant="outline" type="button" className="sii-outline-button" onClick={()=>{setMutationError('');setNameError(false);if(tab==='curricula')setProgramsReload(value=>value+1);void load(tab,undefined,currentCursor);}} disabled={loading||saving||!online}>Actualizar</Button>
           </div>
           {loading?<div className="sii-empty" role="status">Cargando datos académicos…</div>

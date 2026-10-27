@@ -42,11 +42,11 @@ test('a failed presence request stays unknown until retry succeeds',async({page}
  await expect(campus).toContainText('No se pudo consultar');await expect(campus).not.toContainText('Sin registros');
  fail=false;await campus.getByRole('button',{name:'Reintentar Campus'}).click();await expect(campus).toContainText('Sin registros en tu ámbito');
 });
-test('read-only users can consult setup without acquiring create controls',async({page})=>{
- await catalog(page,'student');const guide=page.getByRole('region',{name:'Preparación inicial de catálogos'});
- await expect(guide.getByText('Sin registros en tu ámbito',{exact:true})).toHaveCount(5);
- await guide.getByRole('button',{name:'Abrir Programas',exact:true}).click();await expect(page.getByRole('tab',{name:'Programas',exact:true})).toBeFocused();
- await expect(page.getByRole('button',{name:'Guardar registro'})).toHaveCount(0);await expect(guide.getByText('Solo consulta',{exact:true})).toHaveCount(5);
+test('read-only users consult catalogs without administrative setup or create controls',async({page})=>{
+ await catalog(page,'student');await expect(page.getByRole('tab',{name:'Programas',exact:true})).toBeVisible();
+ await expect(page.getByRole('region',{name:'Preparación inicial de catálogos'})).toHaveCount(0);
+ await page.getByRole('tab',{name:'Materias',exact:true}).click();await expect(page.getByRole('tab',{name:'Materias',exact:true})).toHaveAttribute('aria-selected','true');
+ await expect(page.getByRole('button',{name:'Guardar registro'})).toHaveCount(0);await expect(page.getByRole('checkbox',{name:'Incluir registros inactivos y archivados'})).toBeVisible();
 });
 
 

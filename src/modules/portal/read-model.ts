@@ -16,7 +16,7 @@ export async function personalContext(institutionId:string,kind:PortalKind){
  const eligible=context.access.grants.filter(grant=>(kind==='student'?grant.scopeType!=='campus':grant.scopeType==='institution')&&can({...context.subject,grants:[grant]},capability,{institutionId,status:'active',ownerUserId:context.identity.id,...(grant.scopeType==='program'?{programId:grant.scopeId!}:{})}));
  return eligible.length&&privilegedAssuranceAllows(context.access.grants,context.identity)?{...context,eligible,kind}:null;
 }
-type Context=NonNullable<Awaited<ReturnType<typeof personalContext>>>;
+type Context=NonNullable<Awaited<ReturnType<typeof personalContext>>>&{recordId?:string};
 
 /** A relation is rechecked inside every data query, never accepted as a student/teacher ID from the client. */
 function studentAccess(context:Context):SQL{
@@ -24,10 +24,11 @@ function studentAccess(context:Context):SQL{
  return exists(db.select({one:sql`1`}).from(studentAccountLinks)
   .innerJoin(institutionalStudents,and(eq(institutionalStudents.id,studentAccountLinks.studentId),eq(institutionalStudents.institutionId,studentAccountLinks.institutionId)))
   .where(and(eq(studentAccountLinks.institutionId,access.institutionId),eq(studentAccountLinks.membershipId,access.membershipId),isNull(studentAccountLinks.revokedAt),
+   context.recordId?eq(studentAccountLinks.studentId,context.recordId):undefined,
    readVisibility(subject,access,identity.sessionId,eligible,or(eq(roleAssignments.scopeType,'institution'),and(eq(roleAssignments.scopeType,'program'),eq(roleAssignments.programId,institutionalStudents.programId)))))));
 }
 function ownStudent(context:Context,column:SQL):SQL{
- return exists(db.select({one:sql`1`}).from(studentAccountLinks).where(and(eq(studentAccountLinks.institutionId,context.access.institutionId),eq(studentAccountLinks.membershipId,context.access.membershipId),isNull(studentAccountLinks.revokedAt),sql`${studentAccountLinks.studentId}=${column}`)));
+ return exists(db.select({one:sql`1`}).from(studentAccountLinks).where(and(eq(studentAccountLinks.institutionId,context.access.institutionId),eq(studentAccountLinks.membershipId,context.access.membershipId),isNull(studentAccountLinks.revokedAt),context.recordId?eq(studentAccountLinks.studentId,context.recordId):undefined,sql`${studentAccountLinks.studentId}=${column}`)));
 }
 function ownEnrollment(context:Context,section:SQL):SQL{
  return exists(db.select({one:sql`1`}).from(sectionEnrollments).where(and(eq(sectionEnrollments.institutionId,context.access.institutionId),eq(sectionEnrollments.status,'enrolled'),sql`${sectionEnrollments.sectionId}=${section}`,ownStudent(context,sql`${sectionEnrollments.studentId}`))));
@@ -36,7 +37,7 @@ function ownTeaching(context:Context,section:SQL):SQL{
  return exists(db.select({one:sql`1`}).from(teacherAccountLinks)
   .innerJoin(institutionalTeachers,and(eq(institutionalTeachers.id,teacherAccountLinks.teacherId),eq(institutionalTeachers.institutionId,teacherAccountLinks.institutionId)))
   .innerJoin(sectionTeachers,and(eq(sectionTeachers.teacherId,teacherAccountLinks.teacherId),eq(sectionTeachers.institutionId,teacherAccountLinks.institutionId)))
-  .where(and(eq(teacherAccountLinks.institutionId,context.access.institutionId),eq(teacherAccountLinks.membershipId,context.access.membershipId),isNull(teacherAccountLinks.revokedAt),eq(institutionalTeachers.status,'active'),isNull(sectionTeachers.revokedAt),sql`${sectionTeachers.sectionId}=${section}`)));
+  .where(and(eq(teacherAccountLinks.institutionId,context.access.institutionId),eq(teacherAccountLinks.membershipId,context.access.membershipId),isNull(teacherAccountLinks.revokedAt),context.recordId?eq(teacherAccountLinks.teacherId,context.recordId):undefined,eq(institutionalTeachers.status,'active'),isNull(sectionTeachers.revokedAt),sql`${sectionTeachers.sectionId}=${section}`)));
 }
 function teacherAccess(context:Context){return readVisibility(context.subject,context.access,context.identity.sessionId,context.eligible)}
 function ownOrder(context:Context){return and(eq(paymentOrders.institutionId,context.access.institutionId),studentAccess(context),or(ownStudent(context,sql`${paymentOrders.payerStudentId}`),and(isNull(paymentOrders.payerStudentId),eq(paymentOrders.payerUserId,context.identity.id))))}

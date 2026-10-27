@@ -6,7 +6,7 @@ import {NativeSelect} from './ui/native-select';
 import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
 import {SiiDrawer} from './ui/sii-workspace';
 import {SiiPageIntro,SiiSkeleton,SiiEmptyView} from './ui/sii-kit';
-import {PersonalTable} from './personal-portal';
+import {PersonalTable} from './personal-table';
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection,CollectionReadError} from '@/shared/client/read-collection';
 import {recordExternalPaymentSchema} from '@/modules/financials/validation';
