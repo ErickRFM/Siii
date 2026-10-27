@@ -19,6 +19,7 @@ export default async function Dashboard(){
  if(!user)redirect('/login');
  const institutions=await getInstitutionAccess(user.id);
  const roleNames=[...new Set(institutions.flatMap(item=>item.roles))].map(role=>ROLE_LABELS[role]);
+ const personalOnly=institutions.length>0&&institutions.every(item=>item.roles.every(role=>['student','teacher','teacher_pending','workshop_participant','guest'].includes(role)));
 
  return <div className="space-y-8">
   <SiiPageIntro hero eyebrow="CENTRO DE OPERACIONES" title={`Bienvenido, ${user.firstName}`}
@@ -32,12 +33,12 @@ export default async function Dashboard(){
    </section>
   )}
 
-  <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Resumen de tu acceso">
+  {!personalOnly&&<section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Resumen de tu acceso">
    <SiiMetricTile label="Instituciones asignadas" value={institutions.length} caption="Membresías con acceso vigente" icon="institution" tone="rose"/>
    <SiiMetricTile label="Perfiles autorizados" value={roleNames.length} caption="Roles distintos entre tus instituciones" icon="users" tone="amber"/>
    <SiiMetricTile label="Seguridad de cuenta" value={user.mustChangePassword?'Acción requerida':'Al día'} caption="Sesión y factores de autenticación" icon="shield" tone="blue"
     href="/dashboard/security" actionLabel="Gestionar seguridad"/>
-  </section>
+  </section>}
 
   <ManageableInstitutions/>
 

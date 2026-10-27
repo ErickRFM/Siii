@@ -22,6 +22,8 @@ async function fixture(){return db.transaction(async tx=>{
  return {institutionId:institution.id,sectionId:section.id,requestId:randomUUID()};
 })}
 const enqueue=(scope:Awaited<ReturnType<typeof fixture>>)=>db.transaction(tx=>enqueueAcademicSection(tx,scope));
+// Delivery scenarios require an event already due, independently of Node/PostgreSQL clock skew.
+const due=(eventId:string)=>pool.query("UPDATE academic_section_outbox SET next_attempt_at=clock_timestamp()-interval '1 second' WHERE event_id=$1",[eventId]);
 async function frozen(eventId:string){const {rows}=await pool.query('SELECT * FROM academic_section_outbox WHERE event_id=$1',[eventId]);const row=rows[0];return {row,body:JSON.parse(openAcademicBody(row.body_encrypted,{eventId,institutionId:row.institution_id,sectionId:row.section_id}))}}
 describe('transactional academic outbox PostgreSQL',()=>{
  it('default disabled touches no new tables even with invalid scope/transport',async()=>{delete process.env.SIII_ACADEMIC_OUTBOX_ENABLED;expect(await enqueueAcademicSection({} as never,{} as never)).toEqual({status:'disabled'});expect(await deliverAcademicEvents({transport:async()=>{throw Error('must not call')}})).toMatchObject({disabled:true})});
@@ -66,7 +68,7 @@ describe('transactional academic outbox PostgreSQL',()=>{
   expect((await pool.query('SELECT count(*)::int AS n FROM security_audit_log WHERE institution_id=$1 AND action=$2',[scope.institutionId,'academic.snapshot.queued'])).rows[0].n).toBe(3);
  });
  it('retries the identical body after source changes and fences a worker whose lease was reclaimed',async()=>{
-  const scope=await fixture();const event=await enqueue(scope);if(event.status!=='queued')throw Error('missing');const old=await db.transaction(tx=>claimAcademicEvent(tx,event.eventId,new Date()));if(!old)throw Error('claim');
+  const scope=await fixture();const event=await enqueue(scope);if(event.status!=='queued')throw Error('missing');await due(event.eventId);const old=await db.transaction(tx=>claimAcademicEvent(tx,event.eventId,new Date()));if(!old)throw Error('claim');
   await db.update(academicSections).set({code:'NEW-CODE'}).where(eq(academicSections.id,scope.sectionId));await pool.query("UPDATE academic_section_outbox SET lease_until=now()-interval '1 second' WHERE event_id=$1",[event.eventId]);
   const fresh=await db.transaction(tx=>claimAcademicEvent(tx,event.eventId,new Date()));if(!fresh)throw Error('reclaim');expect(fresh.leaseToken).not.toBe(old.leaseToken);
   expect(await db.transaction(tx=>completeAcademicEvent(tx,old,{status:'accepted'},new Date()))).toBeNull();
@@ -94,7 +96,7 @@ it('allows backend enqueue/lease/completion but rejects updates to every frozen 
  for(const [column,value] of Object.entries(columns)){
   const client=await pool.connect();try{await client.query('BEGIN');await client.query('SET LOCAL ROLE siii_app');await expect(client.query('UPDATE academic_section_outbox SET '+column+'=$1 WHERE event_id=$2',[value,event.eventId])).rejects.toHaveProperty('code','42501')}finally{await client.query('ROLLBACK');client.release()}
  }
- const lease=await db.transaction(async tx=>{await tx.execute(sql.raw('SET LOCAL ROLE siii_app'));return claimAcademicEvent(tx,event.eventId,new Date())});if(!lease)throw Error('claim');expect(await db.transaction(async tx=>{await tx.execute(sql.raw('SET LOCAL ROLE siii_app'));return completeAcademicEvent(tx,lease,{status:'accepted'},new Date())})).toBe('accepted');
+ await due(event.eventId);const lease=await db.transaction(async tx=>{await tx.execute(sql.raw('SET LOCAL ROLE siii_app'));return claimAcademicEvent(tx,event.eventId,new Date())});if(!lease)throw Error('claim');expect(await db.transaction(async tx=>{await tx.execute(sql.raw('SET LOCAL ROLE siii_app'));return completeAcademicEvent(tx,lease,{status:'accepted'},new Date())})).toBe('accepted');
 });
 it('fails source-version overflow atomically and preserves empty delete tombstone identity',async()=>{
  const scope=await fixture();const event=await db.transaction(tx=>enqueueAcademicSection(tx,{...scope,operation:'delete'}));if(event.status!=='queued')throw Error('missing');const {body}=await frozen(event.eventId);expect(body.operation).toBe('delete');expect(body.payload).toEqual({});expect(body.externalId).toBe(scope.sectionId);
@@ -107,7 +109,7 @@ it('rejects3001 persisted occurrences without truncating or committing a version
  await expect(enqueue(scope)).rejects.toThrow('ACADEMIC_SNAPSHOT_LIMIT_EXCEEDED');expect((await pool.query('SELECT count(*)::int AS n FROM academic_section_versions WHERE section_id=$1',[scope.sectionId])).rows[0].n).toBe(0);
 });
 it('fences an expired lease even before reclaim and bounds exhausted retries',async()=>{
- const scope=await fixture();const event=await enqueue(scope);if(event.status!=='queued')throw Error('missing');const lease=await db.transaction(tx=>claimAcademicEvent(tx,event.eventId,new Date()));if(!lease)throw Error('claim');
+ const scope=await fixture();const event=await enqueue(scope);if(event.status!=='queued')throw Error('missing');await due(event.eventId);const lease=await db.transaction(tx=>claimAcademicEvent(tx,event.eventId,new Date()));if(!lease)throw Error('claim');
  expect(await db.transaction(tx=>completeAcademicEvent(tx,lease,{status:'accepted'},new Date(Date.now()+61000)))).toBeNull();
  await pool.query("UPDATE academic_section_outbox SET attempts=8,lease_until=now()-interval '1 second' WHERE event_id=$1",[event.eventId]);expect(await db.transaction(tx=>claimAcademicEvent(tx,event.eventId,new Date()))).toBeNull();expect((await frozen(event.eventId)).row).toMatchObject({state:'failed',failure_code:'RETRY_EXHAUSTED',attempts:8});
 });

@@ -1,7 +1,7 @@
 import type {AcademicModule} from './academic-modules';
 
-export type DashboardActive=AcademicModule|'overview'|'security'|'institution'|'academic'|'roles'|'invitations'|'users'|'administration';
-const SECTIONS:readonly DashboardActive[]=['academic','registry','operations','grading','scheduling','services','admissions','users','roles','invitations','administration'];
+export type DashboardActive=AcademicModule|'overview'|'security'|'institution'|'academic'|'roles'|'invitations'|'users'|'administration'|'student'|'teacher'|'financials';
+const SECTIONS:readonly DashboardActive[]=['academic','registry','operations','grading','scheduling','services','admissions','users','roles','invitations','administration','student','teacher','financials'];
 
 /** Projects navigation from its URL, never from an unfinished permission request. */
 export function resolveDashboardLocation(pathname:string,defaultInstitutionId?:string):{active:DashboardActive;institutionId?:string}{

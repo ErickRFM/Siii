@@ -1,5 +1,11 @@
 # Avance de integración — 2026-10-17
 
+## Incremento vigente — 26 octubre 2026
+
+La consolidación institucional VNext se documenta en [SIII_INSTITUTIONAL_VNEXT_2026-10-26](SIII_INSTITUTIONAL_VNEXT_2026-10-26.md): portales personales de estudiante/docente, historial publicado, programación de sólo lectura, avisos vigentes, Caja con cargos/abonos idempotentes y captura docente con control de versión. Se apoya en main reconciliado con #115 y conserva sus contratos. Sin DDL nuevo ni cambios de secretos.
+
+El reporte distingue pruebas locales, CI, merge, deployment y aceptación productiva. Asistencia S2S desde Compañero, rectificaciones con doble control, documentos certificados, políticas académicas adicionales y operaciones financieras de conciliación/devolución siguen identificadas como pendientes. Las secciones inferiores conservan el historial de sus respectivas fechas.
+
 ## Recuperación y navegación
 
 - PR32 integrado en main: cdc18b28b7144471d91621820f44d9806e983a0b. CI del SHA: SUCCESS (run39072016078). Revisión independiente favorable.

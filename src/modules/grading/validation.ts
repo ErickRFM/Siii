@@ -7,7 +7,7 @@ export const componentCreate = z.strictObject({
   .regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/).transform(s=>s.toUpperCase()),
  title:z.string().trim().min(3).max(160), weight:z.number().int().min(1).max(100),
 });
-export const scorePut = z.strictObject({kind:z.literal('score'),componentId:z.uuid(),studentId:z.uuid(),scoreHundredths:z.number().int().min(0).max(1000)});
+export const scorePut = z.strictObject({kind:z.literal('score'),componentId:z.uuid(),studentId:z.uuid(),scoreHundredths:z.number().int().min(0).max(1000),expectedUpdatedAt:z.iso.datetime().refine(value=>Number(value.slice(0,4))>=1).nullable()});
 export const publishGrades = z.strictObject({kind:z.literal('publish'),sectionId:z.uuid(),operationId:z.uuid()});
 export const gradeCommand = z.discriminatedUnion('kind',[componentCreate,scorePut,publishGrades]);
 

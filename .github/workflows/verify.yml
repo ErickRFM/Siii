@@ -130,6 +130,7 @@ jobs:
             .p0-local/c32-admissions-*.png
             .p0-local/layout-polish/after-*.png
             .p0-local/vnext/*.png
+            .p0-local/vnext-institutional/*-360.png
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 3

@@ -9,6 +9,12 @@ const access:InstitutionAccess={institutionId:'tenant',institutionName:'Syntheti
 const subject:Subject={id:'actor',active:true,mustChangePassword:false,grants:access.grants};
 const assurance={mfaConfigured:false,mfaVerified:false,stepUpAt:null};
 describe('trusted capability disclosure',()=>{
+ it('discloses the personal student portal inside its real program scope without institution-wide access',()=>{
+  const grant={...access.grants[0],role:'student' as const};
+  const data=disclose({...subject,grants:[grant]},{...access,roles:['student'],grants:[grant]},assurance,now);
+  expect(data.capabilities).not.toContain('student.self.read');
+  expect(data.scopedCapabilities[0].capabilities).toContain('student.self.read');
+ });
  it.each(['admin','super_admin','control_escolar'] as const)('discloses the backed Admissions entry for an assured institutional %s',role=>{
   const grant={...access.grants[0],role,scopeType:'institution' as const,scopeId:null};
   const data=disclose({...subject,grants:[grant]},{...access,roles:[role],grants:[grant]},{mfaConfigured:true,mfaVerified:true,stepUpAt:now},now);

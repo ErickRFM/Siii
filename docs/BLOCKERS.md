@@ -1,5 +1,16 @@
 # P0 — puertas pendientes para cierre y promoción
 
+## Actualización VNext — 26 octubre 2026
+
+Las notas P0 históricas siguientes no describen por sí solas el estado vigente de main ni de Supabase. El incremento institucional y sus límites están en [SIII_INSTITUTIONAL_VNEXT_2026-10-26](implementation/SIII_INSTITUTIONAL_VNEXT_2026-10-26.md).
+
+- **Asistencia en SIII:** Compañero@55a1b997 ofrece historial con autenticación/identidad nativa; falta el contrato de lectura S2S autorizado para el portal. No se reutilizan credenciales de usuario ni se duplica QR/pase de lista.
+- **Ciclo académico adicional:** rectificación con doble control, expedición de documentos oficiales, equivalencias y promedios/aprobación reglamentarios necesitan sus contratos y reglas persistentes. El historial CSV es informativo.
+- **Ciclo financiero adicional:** conciliación, devoluciones/cancelaciones, comprobantes oficiales y segregación del rol de Caja siguen pendientes. No existe una pasarela habilitada en este incremento; efectivo y transferencia son registros de cobros externos.
+- **Aceptación productiva:** pruebas con identidades institucionales autorizadas, reglas reales, lector humano y servicios externos productivos no se sustituyen por fixtures locales ni por deployment READY. El release del código se acredita por separado mediante CI/SHA/alias.
+
+---
+
 La implementación y sus pruebas locales son revisables. P0 permanece pendiente de cerrar la Definition of Done completa del prompt maestro.
 
 1. **Lector de pantalla por flujo (sección 8.4).** Chromium/axe y teclado tienen evidencia automática. No existe evidencia de una persona escuchando y verificando login, cambio de contraseña y catálogos con lector de pantalla. La inspección de árbol accesible no sustituye esta prueba. Registrar lector/versiones, navegador, recorridos y resultados antes de cerrar esta puerta.
