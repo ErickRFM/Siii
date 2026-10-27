@@ -151,12 +151,12 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
        <BreadcrumbItem><BreadcrumbPage className="font-semibold">{crumb}</BreadcrumbPage></BreadcrumbItem>
       </BreadcrumbList>
      </Breadcrumb>
+     <SiiQuickSwitch links={quickLinks}/>
     </div>
     <div className="sii-topbar-actions">
-     <SiiQuickSwitch links={quickLinks}/>
      <Badge variant="secondary" className="hidden gap-1.5 md:inline-flex"><span className="sii-online-dot"/>Sesión autenticada</Badge>
      <SiiThemeToggle/>
-     <Avatar className="hidden size-9 sm:flex"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
+     <div className="siii-account-chip hidden items-center gap-2 sm:flex"><Avatar className="size-9"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar><span className="hidden min-w-0 lg:block"><strong className="block max-w-36 truncate text-xs">{fullName}</strong><small className="block text-[11px] text-muted-foreground">Cuenta institucional</small></span></div>
      <form action="/api/v1/auth/logout" method="post"><Button type="submit" variant="outline" size="sm" className="gap-1.5">Salir <span aria-hidden="true">↗</span></Button></form>
     </div>
    </header>

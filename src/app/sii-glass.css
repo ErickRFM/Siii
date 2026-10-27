@@ -490,3 +490,27 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow small{opacit
 html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#efe6df!important}
 html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#43362f!important}
 .sii-app.sii-ui [data-sidebar="sidebar"] [data-sidebar="group-label"]{opacity:1}
+
+/* Screenshot-aligned command search and compact authenticated identity. */
+.sii-app.sii-ui .sii-topbar .sii-topbar-start{min-width:0;display:flex;align-items:center;gap:15px;flex:1}
+.sii-app.sii-ui .sii-topbar .sii-command-trigger{
+ width:min(420px,42vw);height:44px;justify-content:flex-start;gap:12px;
+ background:rgba(201,190,183,.13)!important;border:0!important;
+ border-radius:14px;box-shadow:none!important;color:hsl(var(--foreground));
+ font-size:12px;font-weight:400;
+}
+.sii-app.sii-ui .sii-topbar .sii-command-trigger-label{flex:1;text-align:left;opacity:.84}
+.sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{
+ border:0!important;background:rgba(255,255,255,.1)!important;border-radius:7px;padding:5px 9px
+}
+.sii-app.sii-ui .siii-account-chip{background:rgba(196,182,172,.10);padding:5px 11px;border-radius:14px;max-width:230px;min-width:0}
+.sii-app.sii-ui .siii-account-chip small{color:hsl(var(--foreground) / .8)!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger{background:rgba(255,248,241,.57)!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-account-chip{background:rgba(255,249,242,.5)}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{background:rgba(69,48,32,.09)!important}
+@media(max-width:1070px){
+ .sii-app.sii-ui .sii-topbar .sii-command-trigger{width:44px;flex:0 0 44px;padding:11px;justify-content:center}
+ .sii-app.sii-ui .sii-topbar .sii-command-trigger-label,.sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{display:none!important}
+ .sii-app.sii-ui .sii-topbar .sii-topbar-start{gap:8px}
+}
+@media(max-width:640px){.sii-app.sii-ui .sii-topbar .sii-topbar-start{flex:0 1 auto}.sii-app.sii-ui .sii-topbar .sii-command-trigger{height:38px;width:38px;flex-basis:38px}.sii-app.sii-ui .siii-account-chip{padding:0;background:transparent}}
