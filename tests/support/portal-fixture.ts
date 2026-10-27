@@ -4,9 +4,9 @@ import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {sealMfaSecret} from '../../src/shared/auth/mfa-primitives';
 
 export const portalPassword='Synthetic-portal-2026!';
-export async function portalFixture(sql:pg.Client){
+export async function portalFixture(sql:pg.Client,institutionId:string=randomUUID()){
  const suffix=randomUUID().slice(0,8);
- const tenant=(await sql.query("INSERT INTO institutions(name,code) VALUES('Universidad de pruebas VNext',$1) RETURNING id",['VN'+suffix])).rows[0].id as string;
+ const tenant=(await sql.query("INSERT INTO institutions(id,name,code) VALUES($1,'Universidad de pruebas VNext',$2) RETURNING id",[institutionId,'VN'+suffix])).rows[0].id as string;
  const other=(await sql.query("INSERT INTO institutions(name,code) VALUES('Institución externa de pruebas',$1) RETURNING id",['VO'+suffix])).rows[0].id as string;
  const program=(await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,'SYS','Ingeniería de Sistemas','ingenieria','presencial') RETURNING id",[tenant])).rows[0].id as string;
  const term=(await sql.query("INSERT INTO academic_terms(institution_id,code,name,start_date,end_date) VALUES($1,'2026-3','Otoño 2026','2026-09-01','2026-12-31') RETURNING id",[tenant])).rows[0].id as string;

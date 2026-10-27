@@ -255,3 +255,14 @@ Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md
 | Catálogo de consulta | Sin guía de configuración ni acciones de gestión para lector; estado activo por defecto con opción explícita de consultar inactivos/archivados dentro del permiso vigente | `academic-initial-setup.spec.ts` y escenario V3 de catálogo, incluidos en 22/22 finales; preparación administrativa conservada para gestores | LOCAL VERIFICADO; CI/merge/despliegue final pendientes |
 
 [Inventario, revisión y límites del bloque](../audits/SIII_V3_EXECUTION_2026-10-26.md). No hay DDL nuevo ni cambios de contrato con Compañero. Los metadatos de contexto no se aceptan como credenciales ni sustituyen autorización del servidor.
+
+
+## Portal docente y rectificaciones — 26 octubre 2026
+
+| Operación | Autoridad y garantías | Evidencia | Estado |
+|---|---|---|---|
+| Grupos/lista/captura/resultados docentes | Identidad activa, asignación propia, tenant y capacidades; lectura sin agenda; cierre bajo locks; notas finales separadas de scores privados | teacher-workspace-http.test.ts, teacher-workspace.spec.ts, gradebook-drafts.spec.ts y personal-portals.spec.ts | IMPLEMENTADO; gate final pendiente |
+| Solicitud/evidencia/revisión/resolución de rectificación | Solicitante vinculado; roles institucionales explícitos por configuración; evidencia privada 2 MiB; revisión optimista; auditoría por operación; sin autoaprobación | grade-corrections-http.test.ts, grade-correction-policy.test.ts y grade-corrections.spec.ts | INFRAESTRUCTURA; activación institucional bloqueada por defecto |
+| Aplicación de rectificación | Aprobación distinta de ejecución, MFA/step-up, fuente y política vigentes, versión nueva inmutable; extraordinaria exige habilitación y autoridad adicional | Contratos de idempotencia, rechazo, fuente obsoleta, cierre y allowExecution=false | INFRAESTRUCTURA; sin ejecución productiva |
+
+Informe y límites: [SIII_TEACHER_V3_2026-10-26.md](../audits/SIII_TEACHER_V3_2026-10-26.md).

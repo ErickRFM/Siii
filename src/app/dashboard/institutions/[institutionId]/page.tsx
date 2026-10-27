@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import {correctionPolicy,correctionStaff} from '@/modules/grading/correction-policy';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 
@@ -25,6 +26,7 @@ export default async function InstitutionPage({ params }: PageProps) {
           <span className="sii-section-kicker">INSTITUCIÓN AUTORIZADA</span>
           <h2>{access.institutionName}</h2><p>Clave institucional: {access.institutionCode}</p>
           <InstitutionOverview institutionId={institutionId}/>
+          {correctionStaff({id:user.id,active:true,mustChangePassword:user.mustChangePassword,grants:access.grants},institutionId,correctionPolicy(institutionId))&&<Link className="sii-outline-button" href={{pathname:`/dashboard/institutions/${institutionId}/grading/corrections`}}>Revisión institucional de rectificaciones</Link>}
         </section>
         <aside className="sii-panel sii-security-aside"><span className="sii-security-shield" aria-hidden="true">▥</span>
           <h2>Acceso por institución</h2>

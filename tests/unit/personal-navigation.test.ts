@@ -1,6 +1,8 @@
 import {describe,it,expect} from 'vitest';
 import {hasOnlyPersonalRoles,personalModuleLinks} from '@/shared/navigation/personal-modules';
 import {can,ROLE_CAPABILITIES,type Subject,type P1Role} from '@/shared/auth/capabilities';
+it('describes institutional teaching without a personal agenda',()=>{expect(personalModuleLinks(['teacher.self.read'],['teacher'])[0].description).not.toContain('horarios')});
+
 describe('personal capabilities and multirole navigation',()=>{
  it('retains institutional work for a student who also has Control Escolar, coordinator or administrator authority',()=>{
   for(const role of ['control_escolar','coordinator','admin','super_admin','tutor'])expect(hasOnlyPersonalRoles(['student',role])).toBe(false);

@@ -9,3 +9,5 @@ export type PersonalPayment={id:string;transactionNumber:string;orderNumber:stri
 export const financeStatus:Record<string,string>={pending:'Pendiente',partially_paid:'Pago parcial',paid:'Pagada',cancelled:'Cancelada',waived:'Exenta',refunded:'Devuelta'};
 export const academicStatus:Record<string,string>={active:'Activo',inactive:'Inactivo',withdrawn:'Baja',graduated:'Egresado',open:'Abierto',closed:'Cerrado',archived:'Archivado',enrolled:'Inscrito'};
 export const formatMoney=(cents:number,currency:string)=>new Intl.NumberFormat('es-MX',{style:'currency',currency}).format(cents/100);
+
+export type PersonalTeachingGroup=PersonalCourse&{termStatus:string;componentCount:number;weightTotal:number;savedScoreCount:number};
