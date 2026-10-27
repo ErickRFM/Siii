@@ -78,7 +78,7 @@ export default function FinancialWorkspace({institutionId,institutionName}:{inst
   catch(cause){if(!controller.signal.aborted){if(cause instanceof CollectionReadError&&[401,403].includes(cause.status))retirePrivate();else setFormError('No se pudieron consultar los movimientos de la orden.')}}
   finally{if(!controller.signal.aborted&&movementRead.current===controller)setMovementsBusy(false)}
  }
- return <div className="sii-workspace space-y-6"><SiiPageIntro eyebrow="OPERACIÓN FINANCIERA" title="Caja y finanzas" description={institutionName+' · Registro de cobros externos y órdenes institucionales.'} actions={<Button variant="outline" disabled={loading||busy} onClick={()=>void load()}>Actualizar Caja</Button>}/>
+ return <div className="sii-workspace siii-glass-workspace space-y-6"><SiiPageIntro eyebrow="OPERACIÓN FINANCIERA" title="Caja y finanzas" description={institutionName+' · Registro de cobros externos y órdenes institucionales.'} actions={<Button variant="outline" disabled={loading||busy} onClick={()=>void load()}>Actualizar Caja</Button>}/>
   <p className="rounded-lg border p-4 text-sm text-muted-foreground">Registra únicamente dinero recibido por medios externos autorizados. Las tarjetas y los pagos en línea requieren una pasarela institucional; no están habilitados en este módulo.</p>
   {error&&<p role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void load()}>Reintentar</Button></p>}{notice&&<p role="status" className="rounded-lg border border-primary/30 bg-primary-soft p-4 text-sm">{notice}</p>}
   {loading&&<SiiSkeleton label="Consultando órdenes y conceptos de Caja"/>}

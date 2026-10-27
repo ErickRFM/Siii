@@ -108,7 +108,7 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
   await send('occurrences',{id:occ.id,state:'CANCELLED',reason:reason.trim()},'PATCH');
  }
  if(!allowed)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/scheduling`}/>;
- return <div className="sii-academic sii-workspace sii-workspace--scheduling">
+ return <div className="sii-academic sii-workspace sii-workspace--scheduling siii-glass-workspace">
  {!panel&&confirmation}
  <SiiSectionHeader workspace eyebrow="COORDINACIÓN ACADÉMICA" title="Planificador semanal" description="Consulta la semana completa y prepara aulas o clases sin perder el contexto del calendario."
  right={<div className="sii-row-actions"><Button variant="outline" disabled={loading||saving} onClick={()=>{setDirty(false);setError('');setPanel('room')}}>Añadir aula</Button><Button disabled={loading||saving} onClick={()=>{setDirty(false);setError('');setPanel('pattern')}}>Programar clase recurrente</Button></div>}/>
