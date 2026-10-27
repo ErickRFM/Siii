@@ -14,6 +14,7 @@ describe('trusted capability disclosure',()=>{
   const data=disclose({...subject,grants:[grant]},{...access,roles:['student'],grants:[grant]},assurance,now);
   expect(data.capabilities).not.toContain('student.self.read');
   expect(data.scopedCapabilities[0].capabilities).toContain('student.self.read');
+  expect(data.scopedCapabilities[0].capabilities).toContain('student.requests.create');
  });
  it.each(['admin','super_admin','control_escolar'] as const)('discloses the backed Admissions entry for an assured institutional %s',role=>{
   const grant={...access.grants[0],role,scopeType:'institution' as const,scopeId:null};

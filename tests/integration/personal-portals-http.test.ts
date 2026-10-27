@@ -3,7 +3,7 @@ import pg from 'pg';
 import {randomUUID,randomBytes,createHash} from 'node:crypto';
 import {isolatedDatabaseUrl} from '../support/database-url';
 import {portalFixture} from '../support/portal-fixture';
-const sql=new pg.Client({connectionString:isolatedDatabaseUrl()}),base='http://127.0.0.1:3107';
+const sql=new pg.Client({connectionString:isolatedDatabaseUrl()}),base='http://127.0.0.1:'+Number(process.env.SIII_TEST_PORT??3107);
 let f:Awaited<ReturnType<typeof portalFixture>>;
 async function read(resource:string,kind='student',cookie=f.student.cookie,tenant=f.tenant){return fetch(`${base}/api/v1/institutions/${tenant}/portal/${kind}/${resource}`,{headers:{cookie}})}
 describe.sequential('personal portal real HTTP ownership and publication contracts',()=>{
@@ -17,12 +17,15 @@ describe.sequential('personal portal real HTTP ownership and publication contrac
  it('binds personal responses to the current actor, session, record and authority',async()=>{
   const profile=await read('profile'),courses=await read('courses');
   const revision=profile.headers.get('x-siii-portal-context');expect(revision).toMatch(/^[a-f0-9]{64}$/);
+  const authority=profile.headers.get('x-siii-portal-authority');expect(authority).toMatch(/^[a-f0-9]{64}$/);expect(courses.headers.get('x-siii-portal-authority')).toBe(authority);
   expect(profile.headers.get('x-siii-portal-actor')).toBe(f.student.id);
   expect(courses.headers.get('x-siii-portal-context')).toBe(revision);
   expect((await read('profile','student',f.secondStudent.cookie)).headers.get('x-siii-portal-context')).not.toBe(revision);
   const token=randomBytes(32).toString('base64url');
   const session=(await sql.query("INSERT INTO auth_sessions(user_id,token_hash,expires_at) VALUES($1,$2,now()+interval '1 hour') RETURNING id",[f.student.id,createHash('sha256').update(token).digest('hex')])).rows[0].id;
-  try{const anotherSession=await read('profile','student','siii_session='+token);expect(anotherSession.status).toBe(200);expect(anotherSession.headers.get('x-siii-portal-context')).not.toBe(revision)}finally{await sql.query('UPDATE auth_sessions SET revoked_at=now() WHERE id=$1',[session])}
+  try{const anotherSession=await read('profile','student','siii_session='+token);expect(anotherSession.status).toBe(200);expect(anotherSession.headers.get('x-siii-portal-context')).not.toBe(revision);expect(anotherSession.headers.get('x-siii-portal-authority')).not.toBe(authority)}finally{await sql.query('UPDATE auth_sessions SET revoked_at=now() WHERE id=$1',[session])}
+  await sql.query("UPDATE academic_programs SET name='Programa renombrado para prueba' WHERE id=$1",[f.program]);
+  try{const renamed=await read('profile');expect(renamed.headers.get('x-siii-portal-context')).not.toBe(revision);expect(renamed.headers.get('x-siii-portal-authority')).toBe(authority)}finally{await sql.query("UPDATE academic_programs SET name='Ingeniería de Sistemas' WHERE id=$1",[f.program])}
   await sql.query("UPDATE role_assignments SET scope_type='program',scope_program_id=$1,institution_id=$3 WHERE id=$2",[f.program,f.student.grant,f.tenant]);
   try{expect((await read('profile')).headers.get('x-siii-portal-context')).not.toBe(revision)}finally{await sql.query("UPDATE role_assignments SET scope_type='institution',scope_program_id=null WHERE id=$1",[f.student.grant])}
  });

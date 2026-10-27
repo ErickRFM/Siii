@@ -4,6 +4,7 @@ export type P1Role = Role | 'guest' | 'control_escolar' | 'workshop_facilitator'
 /** Stable action identifiers, suitable for API capability disclosures. */
 export const CAPABILITIES = Object.freeze({
   'student.self.read': 'student.self.read', 'teacher.self.read': 'teacher.self.read',
+  'student.requests.create': 'student.requests.create',
   'admissions.manage': 'admissions.manage',
   'institutions.read': 'institutions.read', 'institutions.manage': 'institutions.manage',
   'users.read': 'users.read', 'users.create': 'users.create', 'users.update': 'users.update',
@@ -27,7 +28,7 @@ const readonlyCapabilities = (...capabilities: Capability[]): readonly Capabilit
 
 export const ROLE_CAPABILITIES: Readonly<Record<P1Role, readonly Capability[]>> = Object.freeze({
   guest: readonlyCapabilities('institutions.read'),
-  student: readonlyCapabilities('student.self.read', 'institutions.read', ...CATALOG_READ, 'grades.read'),
+  student: readonlyCapabilities('student.self.read', 'student.requests.create', 'institutions.read', ...CATALOG_READ, 'grades.read'),
   workshop_participant: readonlyCapabilities('institutions.read'),
   teacher_pending: readonlyCapabilities('institutions.read'),
   teacher: readonlyCapabilities('teacher.self.read', 'institutions.read', ...CATALOG_READ, 'grades.read', 'grades.manage', 'grades.publish'),
@@ -97,7 +98,7 @@ function stateAllows(capability: Capability, status: string | undefined): boolea
   return status === 'active';
 }
 function relationAllows(subject: Subject, grant: Grant, capability: Capability, resource: Resource): boolean {
-  if (capability === 'student.self.read' || capability === 'teacher.self.read') return resource.ownerUserId === subject.id;
+  if (capability === 'student.self.read' || capability === 'teacher.self.read' || capability === 'student.requests.create') return resource.ownerUserId === subject.id;
   if (!capability.startsWith('grades.')) return true;
   if (grant.role === 'admin' || grant.role === 'super_admin') return grant.scopeType === 'institution';
   if (grant.role === 'student') return resource.ownerUserId === subject.id;

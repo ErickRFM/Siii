@@ -52,7 +52,8 @@ Antes de activar institucionalmente: el responsable debe aprobar la política y 
 - Migración en base limpia: `MIGRATIONS_APPLIED`.
 - `npm audit`: 0 vulnerabilidades.
 - Integración integral local: 653 aprobadas y 35 omitidas; cinco expectativas históricas de total de migraciones/tablas detectadas y corregidas. Repetición PostgreSQL de ambos módulos: 45/45 aprobadas, conservando controles de datos, permisos, RLS, hash/perfil e idempotencia.
-- Regresión UI: 54 escenarios aprobados; tres escenarios ajustados requieren repetición final. CI y cierre deben registrarse sobre el SHA final; los resultados anteriores no sustituyen ese gate.
+- Regresión UI focal: 54 escenarios aprobados y repetición final de los tres ajustados, 3/3 aprobados. Incluye recorrido completo de rectificación con MFA y actores distintos, captura no guardada, retiro real y ambos temas.
+- Reconciliación: se incorporó `main@8d7cc7d6` (solicitudes estudiantiles, PR #118). Se conservaron ambos flujos y se resolvieron cuatro conflictos semánticamente. El CI del resultado combinado sigue siendo el gate final.
 
 ## Revisión independiente
 Se corrigieron los casos detectados: capturas ocultas tras cierre; selección de otro grupo al solicitar uno no autorizado; aprobación obsoleta sin recuperación; envío de una solicitud con cambios visibles sin guardar. Los últimos dos tienen reproducción RED y validación GREEN parcial/pendiente de UI final.

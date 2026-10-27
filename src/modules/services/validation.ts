@@ -3,6 +3,7 @@ const uuid=z.uuid(), text=z.string().trim().min(3).max(160);
 export const noticeCreate=z.strictObject({title:text,body:z.string().trim().min(10).max(8000),expiresAt:z.iso.datetime({offset:true}).optional()});
 export const noticeStatus=z.strictObject({id:uuid,status:z.enum(['PUBLISHED','ARCHIVED'])});
 export const requestCreate=z.strictObject({studentId:uuid,requestType:z.enum(['CERTIFICATE','ENROLLMENT_CHANGE','JUSTIFICATION','OTHER']),summary:z.string().trim().min(10).max(1200)});
+export const personalRequestCreate=requestCreate.omit({studentId:true}).extend({operationId:uuid.transform(value=>value.toLowerCase())});
 export const requestDecision=z.strictObject({id:uuid,status:z.enum(['IN_REVIEW','APPROVED','REJECTED','CLOSED']),decisionReason:z.string().trim().min(6).max(1000)});
 export const tutorCreate=z.strictObject({studentId:uuid,teacherId:uuid,subject:text,privateNotes:z.string().trim().max(3000).optional()});
 export const tutorDecision=z.strictObject({id:uuid,status:z.enum(['RESOLVED','CLOSED'])});

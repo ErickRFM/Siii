@@ -1,9 +1,12 @@
 'use client';
 import Link from 'next/link';
-import {useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState,type SetStateAction} from 'react';
+import dynamic from 'next/dynamic';
 import {Home,GraduationCap,Wallet,FileText,UserRound} from 'lucide-react';
 import {usePersonalSnapshot,type PersonalView} from './use-personal-snapshot';
 import {PersonalEnrollments,PersonalHistory} from './personal-academics';
+import {emptyPersonalRequestDraft,type PersonalRequestDraft} from '@/shared/client/personal-request-draft';
+import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
 import {Button} from './ui/button';
 import {Input} from './ui/input';
@@ -12,7 +15,9 @@ import {Card,CardHeader,CardContent,CardTitle} from './ui/card';
 import {PersonalTable} from './personal-table';
 import {AcademicWeek,weekDates} from './academic-week';
 import type {PersonalProfile,PersonalTeacher,PersonalSchedule,PersonalOrder,PersonalPayment} from '@/modules/portal/contracts';
-import {academicStatus,financeStatus,formatMoney} from '@/modules/portal/contracts';
+import {academicStatus,financeStatus,formatMoney,requestTypeLabel,requestStatusLabel} from '@/modules/portal/contracts';
+
+const PersonalRequests=dynamic(()=>import('./personal-requests'),{loading:()=> <SiiSkeleton label="Cargando el formulario de solicitudes"/>});
 
 function calendarNow(timeZone:string){
  try{const values=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).map(part=>[part.type,part.value]));return {date:`${values.year}-${values.month}-${values.day}`,minute:Number(values.hour)*60+Number(values.minute)}}catch{return null}
@@ -33,13 +38,19 @@ const studentDestinations=[{id:'home',label:'Inicio',icon:Home},{id:'academic',l
 export default function PersonalPortal({institutionId,institutionName,actorId}:{institutionId:string;institutionName:string;actorId:string}){
  const [section,setSection]=useState('home'),[academicView,setAcademicView]=useState<PersonalView>('courses');
  const view:PersonalView=section==='academic'?academicView:section as PersonalView;
- const {snapshot,loading,error,updatedAt,refresh}=usePersonalSnapshot(institutionId,'student',actorId,view),profile=snapshot?.profile;
- const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className="text-sm text-muted-foreground">Actualizando información…</p>:<SiiSkeleton label="Consultando tu información institucional"/>)}{snapshot&&!profile&&<SiiEmptyView icon="registry" title="Expediente aún sin vincular" description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
+ const {snapshot,loading,error,updatedAt,refresh,authority,accessChanged,retire}=usePersonalSnapshot(institutionId,'student',actorId,view),profile=snapshot?.profile;
+ const permissions=useInstitutionCapabilities();
+ const [requestDraft,setRequestDraft]=useState<{authority:string;value:PersonalRequestDraft}|null>(null);
+ const currentAuthority=useRef(authority);useLayoutEffect(()=>{currentAuthority.current=authority},[authority]);
+ useEffect(()=>{if(accessChanged)setRequestDraft(null);else if(authority)setRequestDraft(previous=>previous&&previous.authority!==authority?null:previous)},[authority,accessChanged]);
+ function updateRequestDraft(change:SetStateAction<PersonalRequestDraft>){const expected=authority;setRequestDraft(previous=>{if(!expected||currentAuthority.current!==expected)return previous;const value=previous?.authority===expected?previous.value:emptyPersonalRequestDraft();return {authority:expected,value:typeof change==='function'?change(value):change}})}
+ const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className="text-sm text-muted-foreground">Actualizando información…</p>:<SiiSkeleton label="Consultando tu información institucional"/>)}{snapshot&&!profile&&<SiiEmptyView icon="registry" title={'Expediente aún sin vincular'} description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
  function content(){
   if(!snapshot||!profile)return null;
   if(view==='home')return <div className="space-y-5">
    <Card><CardHeader><CardTitle>Mi situación institucional</CardTitle></CardHeader><CardContent className="space-y-4"><p>Estado académico: <strong>{academicStatus[profile.status]??profile.status}</strong></p><div className="flex flex-wrap gap-3"><Button variant="outline" onClick={()=>setSection('academic')}>Consultar mis inscripciones</Button><Button variant="outline" onClick={()=>setSection('services')}>Consultar servicios</Button></div></CardContent></Card>
    <Card><CardHeader><CardTitle>Cargos pendientes</CardTitle></CardHeader><CardContent className="space-y-3">{snapshot.orders.filter(row=>['pending','partially_paid'].includes(row.status)).map(row=><div key={row.id} className="flex flex-wrap justify-between gap-3 border-b py-3 last:border-0"><span className="min-w-0 break-words">{row.feeTypeName}<span className="block text-sm text-muted-foreground">{financeStatus[row.status]}</span></span><strong>{formatMoney(row.totalAmountCents-row.paidAmountCents,row.currency)}</strong></div>)}{!snapshot.orders.some(row=>['pending','partially_paid'].includes(row.status))&&<p>No tienes cargos pendientes registrados en Caja.</p>}<Button variant="outline" onClick={()=>setSection('orders')}>Ver mi estado de cuenta</Button></CardContent></Card>
+   <Card><CardHeader><CardTitle>Solicitudes en seguimiento</CardTitle></CardHeader><CardContent className="space-y-3">{snapshot.pendingRequests.length?snapshot.pendingRequests.map(row=><div key={row.id} className="border-b py-3 last:border-0"><strong>{requestTypeLabel[row.requestType]??row.requestType}</strong><p className="text-sm text-muted-foreground">{requestStatusLabel[row.status]??row.status}</p><p className="break-all text-sm">Folio: {row.id}</p></div>):<p>No tienes solicitudes pendientes de revisión.</p>}<Button variant="outline" onClick={()=>setSection('services')}>Ver mis solicitudes</Button></CardContent></Card>
    <Card><CardHeader><CardTitle>Avisos institucionales</CardTitle></CardHeader><CardContent>{snapshot.announcements.length?snapshot.announcements.map(notice=><article key={notice.id} className="space-y-2 border-b py-3 last:border-0"><h3 className="font-semibold">{notice.title}</h3><p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{notice.body}</p></article>):<p>No hay avisos publicados vigentes.</p>}</CardContent></Card>
   </div>;
   if(view==='courses')return <PersonalEnrollments courses={snapshot.courses} teachers={snapshot.teachers}/>;
@@ -47,17 +58,17 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   if(view==='grades')return <PersonalHistory rows={snapshot.grades}/>;
   if(view==='orders')return <Statements orders={snapshot.orders} payments={snapshot.payments}/>;
   if(view==='profile')return <Profile profile={profile}/>;
-  if(view==='services')return <div className="space-y-4"><Card><CardHeader><CardTitle>Trámites y documentos</CardTitle></CardHeader><CardContent className="space-y-3"><p>La recepción de solicitudes se gestiona actualmente por Control Escolar. El autoservicio para iniciar y dar seguimiento a tus trámites está en preparación.</p><p className="text-sm text-muted-foreground">Las constancias y el historial oficial requieren emisión y verificación institucional. Puedes consultar tus resultados publicados en Académico.</p><Button variant="outline" onClick={()=>{setAcademicView('grades');setSection('academic')}}>Consultar mi historial académico</Button></CardContent></Card><Card><CardHeader><CardTitle>Tutorías y talleres</CardTitle></CardHeader><CardContent><p>Las solicitudes e inscripciones personales requieren habilitación institucional. Consulta a tu institución para conocer los servicios disponibles.</p></CardContent></Card></div>;
+  if(view==='services')return <PersonalRequests key={authority} institutionId={institutionId} rows={snapshot.requests} history={snapshot.requestHistory} canCreate={profile.status==='active'&&hasAnyCapability(permissions.data,'student.requests.create')} draft={requestDraft?.authority===authority?requestDraft.value:emptyPersonalRequestDraft()} onDraftChange={updateRequestDraft} onChanged={refresh} onDenied={()=>{setRequestDraft(null);retire()}}/>;
   if(view==='schedule')return <Schedule rows={snapshot.schedule} teachers={snapshot.teachers} timeZone={profile.timeZone}/>;
   return null;
  }
- return <div className="sii-workspace space-y-6 sii-student-portal"><SiiPageIntro eyebrow="PORTAL ESTUDIANTIL" title="Mi vida universitaria" description={institutionName} actions={<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
+ return <div className="sii-workspace space-y-6 sii-student-portal"><SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
   <nav aria-label="Contexto del portal" className="flex flex-wrap gap-3 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link></nav>
   <Tabs value={section} onValueChange={setSection} className="min-w-0 space-y-5">
-   <TabsList aria-label="Navegación estudiantil" className="sii-personal-navigation">
+   <TabsList aria-label={'Navegación estudiantil'} className="sii-personal-navigation">
     {studentDestinations.map(item=><TabsTrigger key={item.id} value={item.id} className="min-h-11 gap-2"><item.icon className="size-5" aria-hidden="true"/><span>{item.label}</span></TabsTrigger>)}
    </TabsList>
-   {profile&&<div className="rounded-xl border bg-card p-5"><p className="text-sm text-muted-foreground">Estudiante · {academicStatus[profile.status]??profile.status}</p><h2 className="mt-1 text-xl font-semibold">{profile.firstName} {profile.lastName}</h2><p className="mt-1 text-sm">{profile.enrollmentNumber}{profile.programName?' · '+profile.programName:''}</p></div>}
+   {profile&&<div className="rounded-xl border bg-card p-5"><p className="text-sm text-muted-foreground">{'Estudiante'} · {academicStatus[profile.status]??profile.status}</p><h2 className="mt-1 text-xl font-semibold">{profile.firstName} {profile.lastName}</h2><p className="mt-1 text-sm">{profile.enrollmentNumber}{profile.programName?' · '+profile.programName:''}</p></div>}
    {['home','academic','orders','services','profile'].map(destination=><TabsContent key={destination} value={destination} className="space-y-4">
     {destination==='academic'?<Tabs value={academicView} onValueChange={value=>setAcademicView(value as PersonalView)} className="space-y-4"><TabsList aria-label="Consultas académicas" className="sii-workspace-tabs flex h-auto w-full flex-wrap justify-start gap-1 bg-muted p-1">{[['courses','Mis inscripciones'],['teachers','Mis docentes'],['grades','Calificaciones e historial']].map(([value,label])=><TabsTrigger key={value} value={value} className="min-h-11">{label}</TabsTrigger>)}</TabsList>{['courses','teachers','grades'].map(value=><TabsContent key={value} value={value} className="space-y-4">{status}{content()}</TabsContent>)}<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/academic`}>Consultar oferta académica</Link></Tabs>:<>{status}{content()}</>}
    </TabsContent>)}

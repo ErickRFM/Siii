@@ -35,7 +35,7 @@ test('student consults official own academic records in both themes across all r
 test('V3 student home stays institutional and loads secondary resources on demand',async({page})=>{
  const resources:string[]=[];page.on('request',request=>{const match=request.url().match(/\/portal\/student\/([^?]+)/);if(match)resources.push(match[1])});
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
- await expect(page.getByRole('heading',{name:'Próximas clases registradas'})).toHaveCount(0);
+ await expect(page.getByText('Próximas clases registradas',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Mi horario',exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Académico',exact:true})).toBeVisible();
  expect(resources).not.toContain('schedule');expect(resources).not.toContain('grades');expect(resources).not.toContain('payments');

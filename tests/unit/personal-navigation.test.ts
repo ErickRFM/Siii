@@ -16,10 +16,10 @@ describe('personal capabilities and multirole navigation',()=>{
  it('allows personal capabilities only with an owning relation, a live grant and a supported role',()=>{
   for(const role of Object.keys(ROLE_CAPABILITIES) as P1Role[]){
    const subject:Subject={id:'actor',active:true,mustChangePassword:false,grants:[{role,institutionId:'tenant',scopeType:'institution',scopeId:null,validUntil:null,revokedAt:null}]};
-   for(const capability of ['student.self.read','teacher.self.read'] as const){
+   for(const capability of ['student.self.read','teacher.self.read','student.requests.create'] as const){
     expect(can(subject,capability,{institutionId:'tenant',status:'active',ownerUserId:'other'})).toBe(false);
     expect(can(subject,capability,{institutionId:'other',status:'active',ownerUserId:'actor'})).toBe(false);
-    const expected=capability==='student.self.read'?['student','admin','super_admin']:['teacher','admin','super_admin'];
+    const expected=capability==='teacher.self.read'?['teacher','admin','super_admin']:['student','admin','super_admin'];
     expect(can(subject,capability,{institutionId:'tenant',status:'active',ownerUserId:'actor'})).toBe(expected.includes(role));
    }
   }

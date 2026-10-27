@@ -1,8 +1,9 @@
 import 'server-only';
-import {and,eq,isNull,or,exists,notExists,sql,desc,type SQL} from 'drizzle-orm';
+import {and,eq,isNull,or,exists,notExists,sql,desc,inArray,type SQL} from 'drizzle-orm';
 import {alias} from 'drizzle-orm/pg-core';
 import {db} from '@/infrastructure/database';
-import {academicSections,academicCourses,academicTerms,academicPrograms,institutionalStudents,institutionalTeachers,studentAccountLinks,teacherAccountLinks,sectionEnrollments,sectionTeachers,classOccurrences,schedulePatterns,classrooms,campuses,finalGrades,gradePublications,assessmentComponents,assessmentScores,paymentOrders,paymentTransactions,financialFeeTypes,roleAssignments,institutionalAnnouncements,accountEmailVerifications,institutions} from '../../../db/schema';
+import {academicSections,academicCourses,academicTerms,academicPrograms,institutionalStudents,institutionalTeachers,studentAccountLinks,teacherAccountLinks,sectionEnrollments,sectionTeachers,classOccurrences,schedulePatterns,classrooms,campuses,finalGrades,gradePublications,assessmentComponents,assessmentScores,paymentOrders,paymentTransactions,financialFeeTypes,roleAssignments,institutionalAnnouncements,accountEmailVerifications,institutions,studentServiceRequests,securityAuditLog} from '../../../db/schema';
+import {personalRequestFields,requestEventStatus} from '@/modules/services/personal-requests';
 import {institutionContext} from '@/shared/auth/session';
 import {can} from '@/shared/auth/capabilities';
 import {privilegedAssuranceAllows} from '@/shared/auth/privileged-policy';
@@ -41,7 +42,7 @@ function ownTeaching(context:Context,section:SQL):SQL{
 }
 function teacherAccess(context:Context){return readVisibility(context.subject,context.access,context.identity.sessionId,context.eligible)}
 function ownOrder(context:Context){return and(eq(paymentOrders.institutionId,context.access.institutionId),studentAccess(context),or(ownStudent(context,sql`${paymentOrders.payerStudentId}`),and(isNull(paymentOrders.payerStudentId),eq(paymentOrders.payerUserId,context.identity.id))))}
-export const studentResources=['profile','courses','teachers','schedule','grades','orders','payments','announcements'] as const;
+export const studentResources=['profile','courses','teachers','schedule','grades','orders','payments','announcements','requests','pending-requests','request-history'] as const;
 export const teacherResources=['profile','groups','schedule'] as const;
 
 export async function personalProfile(context:Context){
@@ -61,6 +62,16 @@ const sectionDetails={sectionId:academicSections.id,sectionCode:academicSections
 export async function personalCollection(context:Context,resource:string,page:PageInput,scope:string){
  const institutionId=context.access.institutionId;
  const rows=await (async()=>{
+  if(resource==='requests'||resource==='pending-requests')return db.select({...personalRequestFields,cursorAt:cursorTimestamp(studentServiceRequests.createdAt)}).from(studentServiceRequests)
+   .where(and(eq(studentServiceRequests.institutionId,institutionId),resource==='pending-requests'?inArray(studentServiceRequests.status,['SUBMITTED','IN_REVIEW']):undefined,studentAccess(context),ownStudent(context,sql`${studentServiceRequests.studentId}`),cursorPredicate(page,studentServiceRequests.createdAt,studentServiceRequests.id)))
+   .orderBy(desc(studentServiceRequests.createdAt),desc(studentServiceRequests.id)).limit(page.limit+1);
+  if(resource==='request-history'){
+   const events=await db.select({id:securityAuditLog.id,requestId:studentServiceRequests.id,action:securityAuditLog.action,createdAt:securityAuditLog.createdAt,decisionReason:sql<string|null>`${securityAuditLog.details}->'after'->>'decisionReason'`,cursorAt:cursorTimestamp(securityAuditLog.createdAt)}).from(securityAuditLog)
+    .innerJoin(studentServiceRequests,and(eq(studentServiceRequests.institutionId,institutionId),eq(securityAuditLog.target,sql`'request:'||${studentServiceRequests.id}::text`)))
+    .where(and(eq(securityAuditLog.institutionId,institutionId),inArray(securityAuditLog.action,Object.keys(requestEventStatus)),studentAccess(context),ownStudent(context,sql`${studentServiceRequests.studentId}`),cursorPredicate(page,securityAuditLog.createdAt,securityAuditLog.id)))
+    .orderBy(desc(securityAuditLog.createdAt),desc(securityAuditLog.id)).limit(page.limit+1);
+   return events.map(({action,...event})=>({...event,status:requestEventStatus[action]}));
+  }
   if(resource==='announcements')return db.select({id:institutionalAnnouncements.id,cursorAt:cursorTimestamp(institutionalAnnouncements.createdAt),title:institutionalAnnouncements.title,body:institutionalAnnouncements.body,publishedAt:institutionalAnnouncements.publishedAt}).from(institutionalAnnouncements)
    .where(and(eq(institutionalAnnouncements.institutionId,institutionId),eq(institutionalAnnouncements.status,'PUBLISHED'),or(isNull(institutionalAnnouncements.expiresAt),sql`${institutionalAnnouncements.expiresAt}>clock_timestamp()`),studentAccess(context),cursorPredicate(page,institutionalAnnouncements.createdAt,institutionalAnnouncements.id)))
    .orderBy(desc(institutionalAnnouncements.createdAt),desc(institutionalAnnouncements.id)).limit(page.limit+1);
