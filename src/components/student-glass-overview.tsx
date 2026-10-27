@@ -6,7 +6,7 @@ import type {PersonalSnapshot,PersonalView} from './use-personal-snapshot';
 import {institutionalStudentSummary} from './student-dashboard-metrics';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
-import {SiiiGlassMetric} from './ui/siii-glass-kit';
+import {SiiiGlassMetric,SiiiGlassPanel,SiiiGlassPanelHeading} from './ui/siii-glass-kit';
 import {BookOpen,CheckCircle2,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet} from 'lucide-react';
 
 type Destination=(section:string,academicView?:PersonalView)=>void;
@@ -37,30 +37,30 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <SiiiGlassMetric label="Trámites activos" value={m.pendingCount} description="Solicitudes en seguimiento" icon={<FileText size={21}/>} tone="terracotta"/>
    </div>
    <div className="siii-overview-detail-grid">
-    <section className="siii-overview-panel">
-     <div className="siii-overview-heading"><h3>Calificaciones recientes</h3>{quick('Ver todas','academic','grades')}</div>
+    <SiiiGlassPanel >
+     <SiiiGlassPanelHeading title="Calificaciones recientes" action={quick('Ver todas','academic','grades')}/>
      {m.published.slice(0,4).map(grade=><div key={grade.sectionId} className="siii-overview-listrow">
       <div><strong>{grade.courseName}</strong><small>{grade.termName}</small></div>
       <b className="siii-overview-grade">{(grade.scoreHundredths/100).toFixed(2)}</b>
      </div>)}
      {m.published.length===0&&<p className="siii-overview-empty">Aún no hay calificaciones publicadas.</p>}
-    </section>
-    <section className="siii-overview-panel">
-     <div className="siii-overview-heading"><h3>Estado de cuenta</h3>{quick('Ver más','orders')}</div>
+    </SiiiGlassPanel>
+    <SiiiGlassPanel >
+     <SiiiGlassPanelHeading title="Estado de cuenta" action={quick('Ver más','orders')}/>
      <span className="siii-overview-eyebrow">Saldo por liquidar</span>
      <div className="siii-overview-balance">{outstandingLabel}</div>
      <p className="siii-overview-subtle">{snapshot.orders.length?'Cargos y abonos institucionales registrados':'Sin órdenes financieras registradas'}</p>
      {snapshot.orders.filter(o=>o.status==='pending'||o.status==='partially_paid').slice(0,2).map(o=><div key={o.id} className="siii-overview-listrow"><div><strong>{o.feeTypeName}</strong><small>{financeStatus[o.status]||o.status}</small></div><b>{formatMoney(Math.max(0,o.totalAmountCents-o.paidAmountCents),o.currency)}</b></div>)}
      <button type="button" className="siii-overview-primary" onClick={()=>onNavigate('orders')}>Consultar estado de cuenta<ChevronRight size={16}/></button>
-    </section>
-    <section className="siii-overview-panel">
-     <div className="siii-overview-heading"><h3>Mis trámites</h3>{quick('Ver todos','services')}</div>
+    </SiiiGlassPanel>
+    <SiiiGlassPanel >
+     <SiiiGlassPanelHeading title="Mis trámites" action={quick('Ver todos','services')}/>
      {snapshot.pendingRequests.slice(0,4).map(request=><div key={request.id} className="siii-overview-listrow"><div><strong>{requestTypeLabel[request.requestType]||request.requestType}</strong><small>{request.summary}</small></div><span className="siii-overview-status">{requestStatusLabel[request.status]||request.status}</span></div>)}
      {!snapshot.pendingRequests.length&&<p className="siii-overview-empty">No hay trámites pendientes.</p>}
-    </section>
+    </SiiiGlassPanel>
    </div>
-   <section className="siii-overview-panel siii-overview-progress">
-    <div className="siii-overview-heading"><h3>Mi progreso académico registrado</h3>{quick('Historial','academic','grades')}</div>
+   <SiiiGlassPanel className="siii-overview-progress">
+    <SiiiGlassPanelHeading title="Mi progreso académico registrado" action={quick('Historial','academic','grades')}/>
     <div className="siii-overview-progress-body">
      <div className="siii-overview-progress-summary">
       {m.publicationRatio!==null?<SiiiProgressRing value={m.publicationRatio} label="Proporción de inscripciones consultadas con calificación publicada" size={120}/>:<GraduationCap size={45} aria-hidden="true"/>}
@@ -77,19 +77,19 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
       <small>Estos indicadores describen los registros disponibles; no sustituyen el avance oficial del plan de estudios.</small>
      </div>
     </div>
-   </section>
+   </SiiiGlassPanel>
   </div>
   <aside className="siii-student-aside" aria-label="Información complementaria">
-   <section className="siii-overview-panel siii-overview-calendar">
+   <SiiiGlassPanel className="siii-overview-calendar">
     <h3 className="sr-only">Calendario</h3>
     <SiiiGlassCalendar timeZone={profile.timeZone}/>
-   </section>
-   <section className="siii-overview-panel">
-    <div className="siii-overview-heading"><h3>Avisos institucionales</h3></div>
+   </SiiiGlassPanel>
+   <SiiiGlassPanel >
+    <SiiiGlassPanelHeading title="Avisos institucionales"/>
     {snapshot.announcements.slice(0,3).map(notice=><article key={notice.id} className="siii-overview-listrow"><CheckCircle2 size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div></article>)}
     {!snapshot.announcements.length&&<p className="siii-overview-empty">No hay avisos vigentes.</p>}
-   </section>
-   <section className="siii-overview-panel">
+   </SiiiGlassPanel>
+   <SiiiGlassPanel >
     <h3>Accesos rápidos</h3>
     <div className="siii-overview-shortcuts">
      {quick('Mis docentes','academic','teachers')}
@@ -97,11 +97,12 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
      {quick('Mis inscripciones','academic','courses')}
      {quick('Mis solicitudes','services')}
     </div>
-   </section>   <section className="siii-overview-panel siii-overview-dates">
+   </SiiiGlassPanel>
+   <SiiiGlassPanel className="siii-overview-dates">
     <h3>Próximas fechas</h3>
     {deadlines.map(order=><div className="siii-overview-date" key={order.id}><span className="siii-overview-date-dot" aria-hidden="true"/><div><strong>{order.feeTypeName}</strong><small>Vencimiento: {new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(order.dueDate!))}</small></div></div>)}
     {!deadlines.length&&<p className="siii-overview-empty">No se registran vencimientos próximos en tu estado de cuenta.</p>}
-   </section>
+   </SiiiGlassPanel>
 
   </aside>
  </div>;

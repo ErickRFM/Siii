@@ -31,9 +31,13 @@ describe('Smoked Glass cross-module design contract',()=>{
   expect(css).toContain('prefers-reduced-motion:reduce');
   expect(css).toContain('forced-colors:active');
   expect(css).not.toContain('filter:drop-shadow(');
-  expect(source('src/components/ui/siii-glass-kit.tsx')).toContain('export function SiiiGlassMetric');
+  const kit=source('src/components/ui/siii-glass-kit.tsx');
+  expect(kit).toContain('export function SiiiGlassMetric');
+  expect(kit).toContain('export function SiiiGlassPanel');
+  expect(kit).toContain('export function SiiiGlassPanelHeading');
   expect(source('src/components/teacher-portal.tsx')).toContain('<SiiiGlassMetric');
   expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassMetric');
+  expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassPanel');
  });
  it('uses its own decorative backdrop rather than a rasterized dashboard',()=>{
   expect(existsSync(resolve('public/visuals/siii-warm-architecture.svg'))).toBe(true);
