@@ -87,7 +87,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
       <p>Calificaciones publicadas por periodo</p>
       {m.terms.map(term=><div className="siii-overview-term" key={term.name}>
        <span>{term.name}</span>
-       <div className="siii-overview-track"><span style={{width:String(m.published.length?100*term.count/m.published.length:0)+'%'}}/></div>
+       <div className="siii-overview-track"><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect width={m.published.length?100*term.count/m.published.length:0} height="8" rx="4" fill="#8bc6ad"/></svg></div>
        <b>{term.count}</b>
       </div>)}
       {!m.terms.length&&<p className="siii-overview-empty">No existen resultados publicados para graficar.</p>}

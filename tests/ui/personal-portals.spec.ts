@@ -32,6 +32,23 @@ test('student consults official own academic records in both themes across all r
   }
  }
 });
+test('approved glass student overview stays readable and without overflow on mobile and desktop',async({page})=>{
+ await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Calificaciones recientes'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Estado de cuenta'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Mis trámites'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Calendario'})).toBeVisible();
+ for(const theme of ['dark','light']){
+  const current=await page.locator('html').getAttribute('data-sii-theme');
+  if(current!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro'}).click();
+  for(const width of [320,390,768,1440]){
+   await page.setViewportSize({width,height:900});
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+   await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+  }
+ }
+});
 test('V3 student home stays institutional and loads only dashboard resources',async({page})=>{
  const resources:string[]=[];page.on('request',request=>{const match=request.url().match(/\/portal\/student\/([^?]+)/);if(match)resources.push(match[1])});
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
