@@ -550,3 +550,37 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="blue"] .siii-overview-metric-icon{color:#3254a4}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="green"] .siii-overview-metric-icon{color:#246e48}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="terracotta"] .siii-overview-metric-icon{color:#a15426}
+
+/* Shared matte-glass surface contract across Student, Teacher, Services, Administration and Directorate. */
+.sii-app.sii-ui .siii-glass-surface{
+ background:var(--sii-glass-panel)!important;
+ border:0!important;border-radius:17px!important;
+ box-shadow:none!important;
+ backdrop-filter:blur(12px) saturate(106%);
+ -webkit-backdrop-filter:blur(12px) saturate(106%);
+}
+.sii-app.sii-ui .siii-teacher-profile-hero{
+ background:linear-gradient(115deg,rgba(166,144,127,.27),rgba(102,93,89,.25))!important;
+ position:relative;overflow:hidden;min-height:136px;
+}
+.sii-app.sii-ui .siii-teacher-profile-hero h2{font-size:clamp(24px,2.7vw,36px);letter-spacing:-.035em;line-height:1.2}
+.sii-app.sii-ui .siii-teacher-profile-hero p{color:var(--sii-text);opacity:.86}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-surface{background:rgba(255,250,243,.60)!important;color:#302b29}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero{background:linear-gradient(115deg,rgba(255,249,241,.72),rgba(231,216,202,.48))!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:#51453f}
+@media(max-width:768px){
+ .sii-app.sii-ui .siii-glass-surface,
+ .sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero,.siii-teacher-profile-hero){
+  backdrop-filter:blur(8px) saturate(103%);
+  -webkit-backdrop-filter:blur(8px) saturate(103%);
+ }
+ .sii-app.sii-ui{background-attachment:scroll!important}
+}
+@media(prefers-reduced-transparency:reduce){
+ .sii-app.sii-ui :is(.siii-glass-surface,.siii-overview-panel,.siii-overview-hero){
+  background:#4b433f!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+ }
+ html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-glass-surface,.siii-overview-panel,.siii-overview-hero){
+  background:#f8eee3!important;color:#302b29
+ }
+}
