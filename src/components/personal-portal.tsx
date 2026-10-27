@@ -38,6 +38,23 @@ const studentDestinations=[{id:'home',label:'Inicio',icon:Home},{id:'academic',l
 
 export default function PersonalPortal({institutionId,institutionName,actorId}:{institutionId:string;institutionName:string;actorId:string}){
  const [section,setSection]=useState('home'),[academicView,setAcademicView]=useState<PersonalView>('courses');
+ // Deep-link sections from the capability-filtered institution sidebar without duplicating portals.
+ useEffect(()=>{
+  const fromHash=()=>{
+   const destination=decodeURIComponent(window.location.hash.replace(/^#/,''));
+   const map:Record<string,{section:string;academic?:PersonalView}>={
+    inicio:{section:'home'},inscripciones:{section:'academic',academic:'courses'},
+    calificaciones:{section:'academic',academic:'grades'},
+    docentes:{section:'academic',academic:'teachers'},
+    finanzas:{section:'orders'},tramites:{section:'services'},perfil:{section:'profile'}
+   };
+   const selected=map[destination];
+   if(selected){if(selected.academic)setAcademicView(selected.academic);setSection(selected.section)}
+  };
+  fromHash();window.addEventListener('hashchange',fromHash);
+  return ()=>window.removeEventListener('hashchange',fromHash);
+ },[]);
+
  const view:PersonalView=section==='academic'?academicView:section as PersonalView;
  const {snapshot,loading,error,updatedAt,refresh,authority,accessChanged,retire}=usePersonalSnapshot(institutionId,'student',actorId,view),profile=snapshot?.profile;
  const permissions=useInstitutionCapabilities();

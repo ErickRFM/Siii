@@ -88,6 +88,20 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
    </SidebarHeader>
    <SidebarContent className="px-2 py-3">
     {institutionId&&personal.length>0&&<SidebarGroup><SidebarGroupLabel>Mi espacio</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{personal.map(module=><ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}`} label={module.label} icon={module.icon} active={active===module.id}/>)}</SidebarMenu></SidebarGroupContent></SidebarGroup>}
+    {institutionId&&personal.some(item=>item.id==='student')&&<SidebarGroup className="siii-student-sidebar-group group-data-[collapsible=icon]:hidden">
+      <SidebarGroupLabel>Académico</SidebarGroupLabel>
+      <SidebarGroupContent><SidebarMenu>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inicio'} label="Inicio estudiantil" icon="home" active={false}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inscripciones'} label="Mis inscripciones" icon="book" active={false}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#calificaciones'} label="Calificaciones e historial" icon="grades" active={false}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#docentes'} label="Mis docentes" icon="users" active={false}/>
+      </SidebarMenu></SidebarGroupContent>
+      <SidebarGroupLabel>Financiero y servicios</SidebarGroupLabel>
+      <SidebarGroupContent><SidebarMenu>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#finanzas'} label="Estado de cuenta" icon="registry" active={false}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#tramites'} label="Mis trámites" icon="services" active={false}/>
+      </SidebarMenu></SidebarGroupContent>
+    </SidebarGroup>}
     <SidebarGroup>
      <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
      <SidebarGroupContent>

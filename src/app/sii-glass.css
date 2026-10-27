@@ -459,3 +459,9 @@ html[data-sii-theme="light"] .sii-app.sii-ui{--sii-kit-bg:#e9dcd0;--sii-kit-surf
 @media(max-width:760px){.sii-app.sii-ui .sii-topbar{margin:9px 9px 0;border-radius:12px}.sii-app.sii-ui .siii-student-dashboard{gap:11px}.sii-app.sii-ui .siii-student-main,.sii-app.sii-ui .siii-student-aside{gap:11px}}
 @media(prefers-contrast:more){.sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero){background:hsl(var(--card))!important;border:1px solid hsl(var(--border))!important}}
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero){background:#514a46}}
+
+/* Institutional student sidebar navigation; permission-filtered at render time. */
+.sii-app.sii-ui .siii-student-sidebar-group{margin:0 7px;padding-block:4px;border-radius:13px;background:rgba(255,255,255,.035)}
+.sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="menu-button"]{font-size:12px;font-weight:500;min-height:34px}
+.sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="group-label"]{font-size:10px}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-sidebar-group{background:rgba(73,53,40,.045)}

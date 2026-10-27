@@ -42,6 +42,14 @@ test('V3 student home stays institutional and loads only dashboard resources',as
  await page.getByRole('tab',{name:'Académico',exact:true}).click();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Calificaciones e historial',exact:true}).click();await expect(page.getByRole('tabpanel').last()).toContainText('8.50');
 });
+test('student sidebar opens real academic and finance sections without duplicating operational schedules',async({page})=>{
+ await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Calificaciones e historial'}).click();
+ await expect(page.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
+ await expect(page.getByRole('tab',{name:'Calificaciones e historial',exact:true})).toHaveAttribute('data-state','active');
+ await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Estado de cuenta'}).click();
+ await expect(page.getByRole('tab',{name:'Financiero',exact:true})).toHaveAttribute('data-state','active');
+});
 test('V3 revalidation preserves displayed records and search while a valid profile is checked',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  let release=()=>{};const gate=new Promise<void>(resolve=>{release=resolve});
