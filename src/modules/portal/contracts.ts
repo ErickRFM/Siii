@@ -6,6 +6,10 @@ export type PersonalSchedule=PersonalCourse&{date:string;state:string;reason:str
 export type PersonalGrade=PersonalCourse&{scoreHundredths:number;version:number;publishedAt:string};
 export type PersonalOrder={id:string;orderNumber:string;feeTypeName:string;totalAmountCents:number;paidAmountCents:number;currency:string;status:string;dueDate:string|null;enrollmentNumber?:string;studentFirstName?:string;studentLastName?:string};
 export type PersonalPayment={id:string;transactionNumber:string;orderNumber:string;amountCents:number;paymentMethod:string;reference:string|null;currency:string;createdAt:string};
+export type PersonalServiceRequest={id:string;requestType:string;summary:string;status:string;decisionReason:string|null;createdAt:string;updatedAt:string};
+export type PersonalRequestEvent={id:string;requestId:string;status:string;createdAt:string;decisionReason:string|null};
+export const requestTypeLabel:Record<string,string>={CERTIFICATE:'Constancia',ENROLLMENT_CHANGE:'Cambio de inscripción',JUSTIFICATION:'Justificación',OTHER:'Otro trámite'};
+export const requestStatusLabel:Record<string,string>={SUBMITTED:'Recibida',IN_REVIEW:'En revisión',APPROVED:'Aprobada',REJECTED:'Rechazada',CLOSED:'Cerrada'};
 export const financeStatus:Record<string,string>={pending:'Pendiente',partially_paid:'Pago parcial',paid:'Pagada',cancelled:'Cancelada',waived:'Exenta',refunded:'Devuelta'};
 export const academicStatus:Record<string,string>={active:'Activo',inactive:'Inactivo',withdrawn:'Baja',graduated:'Egresado',open:'Abierto',closed:'Cerrado',archived:'Archivado',enrolled:'Inscrito'};
 export const formatMoney=(cents:number,currency:string)=>new Intl.NumberFormat('es-MX',{style:'currency',currency}).format(cents/100);

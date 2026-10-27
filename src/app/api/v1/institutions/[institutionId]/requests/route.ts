@@ -46,7 +46,7 @@ export const PATCH=withDomainErrors(async (req:NextRequest,c:Ctx)=>{
   const [changed]=await tx.update(studentServiceRequests).set({status:parsed.data.status,decidedBy:access.identity.id,
     decisionReason:parsed.data.decisionReason,updatedAt:new Date()})
    .where(and(eq(studentServiceRequests.id,current.id),eq(studentServiceRequests.institutionId,id))).returning();
-  await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId:id,actorUserId:access.identity.id,action:'service.request.'+parsed.data.status.toLowerCase(),target:'request:'+changed.id});
+  await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId:id,actorUserId:access.identity.id,action:'service.request.'+parsed.data.status.toLowerCase(),target:'request:'+changed.id,details:{before:{status:current.status,decisionReason:current.decisionReason},after:{status:changed.status,decisionReason:changed.decisionReason}}});
   return {data:changed,status:200} as const;
  });
  return 'error'in result&&typeof result.error==='string'?jsonError(result.error,result.status):

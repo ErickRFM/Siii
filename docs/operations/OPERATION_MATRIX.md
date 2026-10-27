@@ -255,3 +255,13 @@ Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md
 | Catálogo de consulta | Sin guía de configuración ni acciones de gestión para lector; estado activo por defecto con opción explícita de consultar inactivos/archivados dentro del permiso vigente | `academic-initial-setup.spec.ts` y escenario V3 de catálogo, incluidos en 22/22 finales; preparación administrativa conservada para gestores | LOCAL VERIFICADO; CI/merge/despliegue final pendientes |
 
 [Inventario, revisión y límites del bloque](../audits/SIII_V3_EXECUTION_2026-10-26.md). No hay DDL nuevo ni cambios de contrato con Compañero. Los metadatos de contexto no se aceptan como credenciales ni sustituyen autorización del servidor.
+
+## Solicitudes personales V3 — 26 octubre 2026
+
+| Operación | Autoridad y garantías | Evidencia | Estado |
+|---|---|---|---|
+| POST institutions/:id/portal/student/requests | student.requests.create propietario/programa/activo; vínculo obtenido en servidor; Origin/sesión/MFA vigente; lock inicial/final, reloj DB, request+audit atómicos; operationId UUID idempotente/replay del estado actual | `personal-requests-http.test.ts`: ocho escenarios HTTP, concurrencia, scope/tenant/mass assignment, auditoría rollback y caducidad bajo barrera; incluidos en 20/20 junto a portal | LOCAL VERIFICADO; CI/merge pendientes |
+| GET …/requests, …/pending-requests, …/request-history | self.read + vínculo/tenant/ámbito dentro SQL; cursor propio; estados/razones públicas de eventos permitidos, sin actor ni otros dominios | Contratos de propiedad, aislamiento, query estricta e historia/resolución; `personal-portals-http.test.ts` comprueba contexto/autoridad/sesiones | LOCAL VERIFICADO; regresión final pendiente |
+| Formulario/seguimiento estudiantil | revisión, folio real, filtros/páginas, estado/resolución/historia; envío ambiguo retiene misma UUID en RAM oculta hasta revalidar misma autoridad; denegación confirmada retira borrador | `personal-requests.spec.ts`: seis casos, incluidos dos RED→GREEN offline/read-error; portales+solicitudes 23/23 en puerto aislado 3117, móvil/temas/axe | LOCAL VERIFICADO; CI/producción pendientes |
+
+[Implementación, decisión documental y límites](../implementation/SIII_PERSONAL_REQUESTS_2026-10-26.md). No hay DDL ni emisión certificada. La aprobación de solicitud no emite un documento ni cambia matrícula.
