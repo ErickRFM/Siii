@@ -1,5 +1,6 @@
 import {afterAll,beforeAll,describe,expect,it} from 'vitest';
 import pg from 'pg';
+import {readFileSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {seedFinancialBaseline24} from '../support/financial-tenant-database';
@@ -8,6 +9,7 @@ import {isolatedDatabaseUrl} from '../support/database-url';
 const source=isolatedDatabaseUrl(),admin=new pg.Client({connectionString:source});
 const prefix='siii_financial_fk_'+randomUUID().replaceAll('-','').slice(0,10);
 const created:{name:string;url:string;client:pg.Client}[]=[];
+const migrationTimes=(JSON.parse(readFileSync(new URL('../../db/migrations/meta/_journal.json',import.meta.url),'utf8')) as {entries:{when:number}[]}).entries.map(entry=>entry.when);
 const expectedFks=['orders_payer_student_tenant_fk','orders_payer_user_tenant_fk'];
 function command(script:string,url:string,profile?:string){
  const result=spawnSync(process.execPath,['--import','tsx',script],{env:{...process.env,DATABASE_URL:url,INTEGRATION_DATABASE_URL:url,SIII_DATABASE_ENV:'test',SIII_MIGRATION_PROFILE:profile},encoding:'utf8',windowsHide:true,timeout:30000});
@@ -113,14 +115,14 @@ describe.sequential('financial payer tenant constraints through real PostgreSQL 
  });
  it.each(['canonical','supabase-v1'])('migrates a fresh %s database and repeats without ledger changes',async profile=>{
   const db=await database('fresh_'+profile.replace('-',''));const result=command('db/migrate.ts',db.url,profile);
-  expect(result).toMatchObject({status:0});expect((await ledger(db.client))).toHaveLength(26);expect(await constraints(db.client)).toHaveLength(2);
+  expect(result).toMatchObject({status:0});expect((await ledger(db.client)).map(row=>Number(row.created_at))).toEqual(migrationTimes);expect(await constraints(db.client)).toHaveLength(2);
   const before=await ledger(db.client);expect(command('db/migrate.ts',db.url).status).toBe(0);expect(await ledger(db.client)).toEqual(before);
  },60000);
  it.each(['canonical','supabase-v1'])('upgrades populated0024 %s without data, roles or grants changes',async profile=>{
   const db=await database('populated_'+profile.replace('-',''),true,profile),f=await fixture(db.client),before=await order(db.client,f),guards=await security(db.client);
   expect(await ledger(db.client)).toHaveLength(25);expect(command('db/migrate.ts',db.url,profile).status).toBe(0);
   expect((await db.client.query('SELECT * FROM payment_orders WHERE id=$1',[before.id])).rows[0]).toEqual(before);
-  expect(await security(db.client)).toEqual(guards);expect(await ledger(db.client)).toHaveLength(26);
+  expect(await security(db.client)).toEqual(guards);expect((await ledger(db.client)).map(row=>Number(row.created_at))).toEqual(migrationTimes);
  },60000);
  it.each(['student','user'] as const)('fails closed on historical foreign %s without changing data, DDL or ledger',async kind=>{
   const db=await database('dirty_'+kind,true),f=await fixture(db.client),before=await order(db.client,f,kind==='student'?f.foreignStudent:f.student,kind==='user'?f.foreignUser:f.user),history=await ledger(db.client);
