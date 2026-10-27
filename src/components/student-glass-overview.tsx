@@ -6,7 +6,7 @@ import type {PersonalSnapshot,PersonalView} from './use-personal-snapshot';
 import {institutionalStudentSummary} from './student-dashboard-metrics';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
-import {SiiiGlassMetric,SiiiGlassPanel,SiiiGlassPanelHeading} from './ui/siii-glass-kit';
+import {SiiiGlassMetric,SiiiGlassPanel,SiiiGlassPanelHeading,SiiiGlassMetricsRow} from './ui/siii-glass-kit';
 import {BookOpen,CheckCircle2,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet} from 'lucide-react';
 
 type Destination=(section:string,academicView?:PersonalView)=>void;
@@ -30,12 +30,12 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     </div>
     <span className="siii-overview-watermark" aria-hidden="true"/>
    </header>
-   <div className="siii-overview-metrics" aria-label="Resumen institucional">
+   <SiiiGlassMetricsRow className="siii-overview-metrics" aria-label="Resumen institucional">
     <SiiiGlassMetric label="Promedio de notas publicadas" value={m.gradeMean===null?'—':m.gradeMean.toFixed(2)} description="No es el promedio oficial" icon={<BookOpen size={21}/>} tone="amber"/>
     <SiiiGlassMetric label="Créditos con nota publicada" value={m.creditsWithPublishedGrade} description="El plan oficial no está disponible" icon={<GraduationCap size={21}/>} tone="blue"/>
     <SiiiGlassMetric label="Cargos por liquidar" value={outstandingLabel} description={snapshot.orders.length?'Según el registro de Caja':'Sin movimientos registrados'} icon={<Wallet size={21}/>} tone="green"/>
     <SiiiGlassMetric label="Trámites activos" value={m.pendingCount} description="Solicitudes en seguimiento" icon={<FileText size={21}/>} tone="terracotta"/>
-   </div>
+   </SiiiGlassMetricsRow>
    <div className="siii-overview-detail-grid">
     <SiiiGlassPanel >
      <SiiiGlassPanelHeading title="Calificaciones recientes" action={quick('Ver todas','academic','grades')}/>

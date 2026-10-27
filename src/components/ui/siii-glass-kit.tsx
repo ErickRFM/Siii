@@ -5,6 +5,11 @@ export function SiiiGlassPanel({className='',children,...props}:HTMLAttributes<H
  return <section {...props} className={['siii-overview-panel',className].filter(Boolean).join(' ')}>{children}</section>;
 }
 
+/** One responsive layout for per-role metrics without assuming the same data. */
+export function SiiiGlassMetricsRow({children,className='',...props}:HTMLAttributes<HTMLDivElement>){
+ return <div {...props} className={['siii-glass-metrics-grid',className].filter(Boolean).join(' ')}>{children}</div>;
+}
+
 /** Small accessible heading with an optional functional action. */
 export function SiiiGlassPanelHeading({title,action}:{title:string;action?:ReactNode}){
  return <div className="siii-overview-heading"><h3>{title}</h3>{action}</div>;

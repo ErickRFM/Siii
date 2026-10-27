@@ -35,6 +35,8 @@ describe('Smoked Glass cross-module design contract',()=>{
   expect(kit).toContain('export function SiiiGlassMetric');
   expect(kit).toContain('export function SiiiGlassPanel');
   expect(kit).toContain('export function SiiiGlassPanelHeading');
+  expect(kit).toContain('export function SiiiGlassMetricsRow');
+  for(const file of ['student-glass-overview','teacher-portal','financial-workspace','admissions-workspace'])expect(source('src/components/'+file+'.tsx')).toContain('<SiiiGlassMetricsRow');
   expect(source('src/components/teacher-portal.tsx')).toContain('<SiiiGlassMetric');
   expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassMetric');
   expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassPanel');

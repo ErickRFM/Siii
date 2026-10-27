@@ -798,3 +798,24 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(76,55,45,.07)}
 .sii-app.sii-ui .siii-glass-workspace .sii-institution-monogram{box-shadow:none;border-radius:12px}
 @media(max-width:760px){.sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel){backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}}
+
+
+/* Shared responsive metric bands for admissions, finance and personal role portals. */
+.sii-app.sii-ui .siii-glass-metrics-grid{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));
+ gap:12px;min-width:0;max-width:100%;
+}
+.sii-app.sii-ui .siii-glass-metrics-grid .siii-shared-glass-metric{
+ min-width:0;max-width:100%;height:100%;
+}
+@media(max-width:540px){
+ .sii-app.sii-ui .siii-glass-metrics-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ }
+ .sii-app.sii-ui .siii-glass-metrics-grid .siii-shared-glass-metric{min-height:118px}
+}
+@media(max-width:340px){
+ .sii-app.sii-ui :is(.siii-finance-metrics,.siii-admissions-metrics){
+  grid-template-columns:minmax(0,1fr);
+ }
+}
