@@ -89,11 +89,6 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     {snapshot.announcements.slice(0,3).map(notice=><article key={notice.id} className="siii-overview-listrow"><CheckCircle2 size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div></article>)}
     {!snapshot.announcements.length&&<p className="siii-overview-empty">No hay avisos vigentes.</p>}
    </section>
-   <section className="siii-overview-panel siii-overview-dates">
-    <h3>Próximas fechas</h3>
-    {deadlines.map(order=><div className="siii-overview-date" key={order.id}><span className="siii-overview-date-dot" aria-hidden="true"/><div><strong>{order.feeTypeName}</strong><small>Vencimiento: {new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(order.dueDate!))}</small></div></div>)}
-    {!deadlines.length&&<p className="siii-overview-empty">No se registran vencimientos próximos en tu estado de cuenta.</p>}
-   </section>
    <section className="siii-overview-panel">
     <h3>Accesos rápidos</h3>
     <div className="siii-overview-shortcuts">
@@ -102,7 +97,12 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
      {quick('Mis inscripciones','academic','courses')}
      {quick('Mis solicitudes','services')}
     </div>
+   </section>   <section className="siii-overview-panel siii-overview-dates">
+    <h3>Próximas fechas</h3>
+    {deadlines.map(order=><div className="siii-overview-date" key={order.id}><span className="siii-overview-date-dot" aria-hidden="true"/><div><strong>{order.feeTypeName}</strong><small>Vencimiento: {new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(order.dueDate!))}</small></div></div>)}
+    {!deadlines.length&&<p className="siii-overview-empty">No se registran vencimientos próximos en tu estado de cuenta.</p>}
    </section>
+
   </aside>
  </div>;
 }

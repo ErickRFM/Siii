@@ -584,3 +584,18 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
   background:#f8eee3!important;color:#302b29
  }
 }
+
+/* Exact metric hierarchy from reference: icon on left, value/label on right. */
+.sii-app.sii-ui .siii-shared-glass-metric{
+ display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;
+ padding:16px;min-height:102px;
+}
+.sii-app.sii-ui .siii-shared-glass-metric>.siii-overview-metric-icon{margin:0;align-self:center}
+.sii-app.sii-ui .siii-shared-metric-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sii-app.sii-ui .siii-shared-metric-copy>span{font-size:12px;line-height:1.3;overflow-wrap:break-word}
+.sii-app.sii-ui .siii-shared-metric-copy>strong{
+ font-size:clamp(20px,1.75vw,27px);font-weight:650;letter-spacing:-.025em;line-height:1.2;overflow-wrap:anywhere
+}
+.sii-app.sii-ui .siii-shared-metric-copy>small{font-size:11px;line-height:1.3;opacity:.83;overflow-wrap:anywhere}
+@media(max-width:660px){.sii-app.sii-ui .siii-shared-glass-metric{grid-template-columns:minmax(0,1fr);align-content:start;gap:7px;min-height:135px}.sii-app.sii-ui .siii-shared-glass-metric>.siii-overview-metric-icon{align-self:start}}
+@media(prefers-reduced-motion:no-preference){.sii-app.sii-ui .siii-overview-track rect{transition:width .2s ease}}

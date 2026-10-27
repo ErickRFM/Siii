@@ -7,8 +7,10 @@ export function SiiiGlassMetric({label,value,description,icon,tone='amber',class
 }){
  return <section className={['siii-overview-panel','siii-overview-metric','siii-shared-glass-metric',className].filter(Boolean).join(' ')} data-tone={tone} aria-label={label}>
   {icon&&<span className="siii-overview-metric-icon" aria-hidden="true">{icon}</span>}
-  <span>{label}</span>
-  <strong className="tabular-nums">{value}</strong>
-  {description!=null&&<small>{description}</small>}
+  <div className="siii-shared-metric-copy">
+   <span>{label}</span>
+   <strong className="tabular-nums">{value}</strong>
+   {description!=null&&<small>{description}</small>}
+  </div>
  </section>;
 }
