@@ -335,3 +335,11 @@ html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-t
 .sii-app.sii-ui .siii-student-glass>*{min-width:0}
 .sii-app.sii-ui .siii-student-glass :is(button,a):focus-visible{outline:2px solid #e5d5c8;outline-offset:3px}
 @media(max-width:720px){.sii-app.sii-ui .siii-student-glass{grid-template-columns:repeat(2,minmax(0,1fr))}.sii-app.sii-ui .siii-student-glass :is(.siii-student-hero,.siii-student-panel,.siii-student-wide){grid-column:1/-1}}
+
+/* Surface finishing shared by admissions, finance, directorate and administration. */
+.sii-app.sii-ui :is(.sii-workspace,.sii-access-panel,.sii-institution-item){min-width:0}
+.sii-app.sii-ui :is(.sii-workspace input,.sii-workspace select,.sii-workspace textarea){max-width:100%}
+.sii-app.sii-ui :is(.sii-workspace .overflow-x-auto,.sii-workspace [data-slot=table-container]){max-width:100%;overscroll-behavior-inline:contain}
+.sii-app.sii-ui .siii-student-panel .siii-glass-row{min-width:0}
+.sii-app.sii-ui .siii-student-panel .siii-glass-row strong{white-space:nowrap}
+@media(prefers-reduced-motion:reduce){.sii-app.sii-ui *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
