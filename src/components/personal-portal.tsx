@@ -16,7 +16,7 @@ import {PersonalTable} from './personal-table';
 import StudentGlassOverview from './student-glass-overview';
 import {AcademicWeek,weekDates} from './academic-week';
 import type {PersonalProfile,PersonalTeacher,PersonalSchedule,PersonalOrder,PersonalPayment} from '@/modules/portal/contracts';
-import {academicStatus,financeStatus,formatMoney,requestTypeLabel,requestStatusLabel} from '@/modules/portal/contracts';
+import {academicStatus,financeStatus,formatMoney} from '@/modules/portal/contracts';
 
 const PersonalRequests=dynamic(()=>import('./personal-requests'),{loading:()=> <SiiSkeleton label="Cargando el formulario de solicitudes"/>});
 
