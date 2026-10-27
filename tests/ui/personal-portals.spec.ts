@@ -32,13 +32,13 @@ test('student consults official own academic records in both themes across all r
   }
  }
 });
-test('V3 student home stays institutional and loads secondary resources on demand',async({page})=>{
+test('V3 student home stays institutional and loads only dashboard resources',async({page})=>{
  const resources:string[]=[];page.on('request',request=>{const match=request.url().match(/\/portal\/student\/([^?]+)/);if(match)resources.push(match[1])});
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await expect(page.getByText('Próximas clases registradas',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Mi horario',exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Académico',exact:true})).toBeVisible();
- expect(resources).not.toContain('schedule');expect(resources).not.toContain('grades');expect(resources).not.toContain('payments');
+ expect(resources).not.toContain('schedule');expect(resources).toContain('grades');expect(resources).toContain('payments');
  await page.getByRole('tab',{name:'Académico',exact:true}).click();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Calificaciones e historial',exact:true}).click();await expect(page.getByRole('tabpanel').last()).toContainText('8.50');
 });
