@@ -5,9 +5,10 @@ import { and,eq,sql,desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
 import { assessmentComponents,assessmentScores,sectionEnrollments,institutionalStudents,gradePublications,finalGrades,securityAuditLog } from '../../../../../../../db/schema';
-import { teachingScope } from '@/modules/grading/teaching-scope';
+import { teachingScope,teachingReadVisibility } from '@/modules/grading/teaching-scope';
 import { gradeCommand,calculateWeightedGrade } from '@/modules/grading/validation';
 import { assertSameOrigin,jsonError } from '@/shared/auth/guards';
+import {cursorTimestamp} from '@/shared/http/pagination';
 export const runtime='nodejs';
 const noCache={'Cache-Control':'no-store'};
 type Ctx={params:Promise<{institutionId:string}>};
@@ -20,17 +21,17 @@ function fail(e:unknown){const v=e as {code?:string;cause?:{code?:string}};const
 export const GET=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  const institutionId=await ctxId(ctx),sectionId=req.nextUrl.searchParams.get('sectionId');
  if(!institutionId||!sectionId||!z.uuid().safeParse(sectionId).success)return jsonError('INVALID_SECTION',422);
- if(!await teachingScope(institutionId,sectionId))return jsonError('FORBIDDEN',403);
+ const access=await teachingScope(institutionId,sectionId);if(!access)return jsonError('FORBIDDEN',403);
  const [components,scores,publications,roster]=await Promise.all([
-  db.select().from(assessmentComponents).where(and(eq(assessmentComponents.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId))),
-  db.select({id:assessmentScores.id,componentId:assessmentScores.componentId,studentId:assessmentScores.studentId,scoreHundredths:assessmentScores.scoreHundredths})
+  db.select().from(assessmentComponents).where(and(eq(assessmentComponents.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId),teachingReadVisibility(access,sql`${assessmentComponents.sectionId}`))),
+  db.select({id:assessmentScores.id,componentId:assessmentScores.componentId,studentId:assessmentScores.studentId,scoreHundredths:assessmentScores.scoreHundredths,updatedAt:cursorTimestamp(assessmentScores.updatedAt)})
    .from(assessmentScores).innerJoin(assessmentComponents,eq(assessmentScores.componentId,assessmentComponents.id))
-   .where(and(eq(assessmentScores.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId))),
+   .where(and(eq(assessmentScores.institutionId,institutionId),eq(assessmentComponents.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId),teachingReadVisibility(access,sql`${assessmentComponents.sectionId}`))),
   db.select({id:gradePublications.id,version:gradePublications.version,publishedAt:gradePublications.publishedAt})
-   .from(gradePublications).where(and(eq(gradePublications.institutionId,institutionId),eq(gradePublications.sectionId,sectionId))).orderBy(desc(gradePublications.version)),
+   .from(gradePublications).where(and(eq(gradePublications.institutionId,institutionId),eq(gradePublications.sectionId,sectionId),teachingReadVisibility(access,sql`${gradePublications.sectionId}`))).orderBy(desc(gradePublications.version)),
   db.select({studentId:institutionalStudents.id,enrollmentNumber:institutionalStudents.enrollmentNumber,firstName:institutionalStudents.firstName,lastName:institutionalStudents.lastName})
    .from(sectionEnrollments).innerJoin(institutionalStudents,eq(sectionEnrollments.studentId,institutionalStudents.id))
-   .where(and(eq(sectionEnrollments.institutionId,institutionId),eq(sectionEnrollments.sectionId,sectionId),eq(sectionEnrollments.status,'enrolled')))
+   .where(and(eq(sectionEnrollments.institutionId,institutionId),eq(institutionalStudents.institutionId,institutionId),eq(sectionEnrollments.sectionId,sectionId),eq(sectionEnrollments.status,'enrolled'),teachingReadVisibility(access,sql`${sectionEnrollments.sectionId}`)))
  ]);
  return NextResponse.json({components,scores,publications,roster},{headers:noCache});
 });
@@ -74,12 +75,15 @@ export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
       .where(and(eq(sectionEnrollments.institutionId,institutionId),eq(sectionEnrollments.sectionId,sectionId),
        eq(sectionEnrollments.studentId,payload.studentId),eq(sectionEnrollments.status,'enrolled'))).limit(1);
     if(!student)return {error:'STUDENT_NOT_ENROLLED',status:422} as const;
+    const [current]=await tx.select({id:assessmentScores.id,scoreHundredths:assessmentScores.scoreHundredths,updatedAt:cursorTimestamp(assessmentScores.updatedAt),matches:payload.expectedUpdatedAt===null?sql<boolean>`false`:sql<boolean>`${assessmentScores.updatedAt}=${payload.expectedUpdatedAt}::timestamptz`}).from(assessmentScores)
+     .where(and(eq(assessmentScores.institutionId,institutionId),eq(assessmentScores.componentId,payload.componentId),eq(assessmentScores.studentId,payload.studentId))).for('update');
+    if(current?!current.matches:payload.expectedUpdatedAt!==null)return {error:'GRADE_SCORE_CONFLICT',status:409} as const;
     const [item]=await tx.insert(assessmentScores).values({
       institutionId,componentId:payload.componentId,studentId:payload.studentId,
       scoreHundredths:payload.scoreHundredths,updatedBy:access.identity.id,
     }).onConflictDoUpdate({target:[assessmentScores.componentId,assessmentScores.studentId],
-      set:{scoreHundredths:payload.scoreHundredths,updatedBy:access.identity.id,updatedAt:new Date()}}).returning();
-    await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId,actorUserId:access.identity.id,action:'grade.score.save',target:'score:'+item.id});
+      set:{scoreHundredths:payload.scoreHundredths,updatedBy:access.identity.id,updatedAt:sql`greatest(clock_timestamp(),${assessmentScores.updatedAt}+interval '1 microsecond')`}}).returning();
+    await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId,actorUserId:access.identity.id,action:'grade.score.save',target:'score:'+item.id,details:{before:{scoreHundredths:current?.scoreHundredths??null,updatedAt:current?.updatedAt??null},after:{scoreHundredths:payload.scoreHundredths}}});
     return {data:item,status:200} as const;
    }
    const [replay]=await tx.select().from(gradePublications)

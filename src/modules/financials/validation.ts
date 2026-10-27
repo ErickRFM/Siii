@@ -9,6 +9,7 @@ export const feeTypeSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
+  operationId:z.uuid().transform(value=>value.toLowerCase()).optional(),
   feeTypeId: z.string().uuid('Identificador de concepto no válido'),
   payerStudentId: z.string().uuid('Identificador de estudiante no válido').optional(),
   payerUserId: z.string().uuid('Identificador de usuario no válido').optional(),
@@ -22,6 +23,15 @@ export const recordPaymentSchema = z.object({
   reference: z.string().trim().optional(),
   notes: z.string().trim().optional(),
 });
+
+/** External money already received by authorized Caja staff; no simulated card gateway. */
+export const recordExternalPaymentSchema=z.object({
+  operationId:z.uuid().transform(value=>value.toLowerCase()),
+  amountCents:z.number().int().min(1).max(2147483647),
+  paymentMethod:z.enum(['cash','transfer']),
+  reference:z.string().trim().max(200).default(''),
+  notes:z.string().trim().max(1000).default(''),
+}).strict().refine(value=>value.paymentMethod!=='transfer'||value.reference.length>0,{path:['reference'],message:'Se requiere la referencia de transferencia'});
 
 export const applyWaiverSchema = z.object({
   discountAmountCents: z.number().int().min(1, 'El monto de exención debe ser mayor a 0'),

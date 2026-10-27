@@ -19,6 +19,7 @@ function userFacingError(code:string){
   NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
   CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
   SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
+  GRADE_SCORE_CONFLICT:'Otra captura cambió esta nota. Actualiza el libro y compara el último valor guardado con tu captura antes de volver a guardar.',
  };
  return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
 }
@@ -27,20 +28,22 @@ import {useInstitutionConfirmation} from './sii-confirmation';
 import {SecurityActionLink} from './institution-capabilities';
 import { useCallback,useEffect,useRef,useState,type FormEvent } from 'react';
 import {gradebookCell,gradebookScope,useGradebookDrafts} from './teacher-gradebook-drafts';
+import {readCollection,CollectionReadError} from '@/shared/client/read-collection';
 type Section={id:string;code:string;courseName:string;status:string};
 type Component={id:string;code:string;title:string;weight:number};
-type Score={id:string;componentId:string;studentId:string;scoreHundredths:number};
+type Score={id:string;componentId:string;studentId:string;scoreHundredths:number;updatedAt:string};
 type Student={studentId:string;enrollmentNumber:string;firstName:string;lastName:string};
 type Publication={id:string;version:number;publishedAt:string};
 type Snapshot={components:Component[];scores:Score[];publications:Publication[];roster:Student[]};
 
-export default function TeacherGradebook({institutionId}:{institutionId:string}){
+export default function TeacherGradebook({institutionId,initialSectionId}:{institutionId:string;initialSectionId?:string}){
  const {ask,confirmation}=useInstitutionConfirmation();
  const base=`/api/v1/institutions/${institutionId}/grading`;
  const {drafts,writeDraft,readDraft,confirmDraft,clearDrafts,hasDrafts,retireActor,identityReady,identityChecking,identityError,revalidateIdentity,isCurrent,authorityEpoch,rememberSection,selectedSection,reconcileSections,restoreFocus}=useGradebookDrafts(institutionId,ask);
  const [sections,setSections]=useState<Section[]>([]);
  const [sectionQuery,setSectionQuery]=useState(0);
  const [sectionId,setSectionId]=useState('');
+ const requestedSelection=useRef(initialSectionId);
  const scope=gradebookScope(institutionId,sectionId);
  const [loaded,setLoaded]=useState<{scope:string;epoch:number;value:Snapshot}|null>(null);
  const snapshot=identityReady&&loaded?.scope===scope&&loaded.epoch===authorityEpoch?loaded.value:null;
@@ -57,13 +60,12 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
   if(!identityReady){setSections([]);setLoaded(null);setLoading(identityChecking);return;}
   const controller=new AbortController();
   setSections([]);setSectionId('');setLoaded(null);loadedScope.current='';setLoading(true);setError('');setNotice('');
-  void fetch(`${base}/sections`,{signal:controller.signal,cache:'no-store'})
-   .then(async r=>{if(!r.ok){if((r.status===401||r.status===403)&&!controller.signal.aborted)retirePrivate(r.status);throw Error('NO_SECTION_ACCESS')}return r.json() as Promise<{data:Section[]}>})
-   .then(v=>{if(controller.signal.aborted||!isCurrent(authorityEpoch))return;reconcileSections(institutionId,v.data.map(section=>section.id));setSections(v.data);setSectionId(s=>{const remembered=s||selectedSection(institutionId);return v.data.some(section=>section.id===remembered)?remembered!:v.data[0]?.id||''})})
-   .catch(()=>{if(!controller.signal.aborted)setError('No fue posible consultar tus grupos docentes.')})
+  void readCollection<Section>(`${base}/sections`,{signal:controller.signal})
+   .then(v=>{if(controller.signal.aborted||!isCurrent(authorityEpoch))return;reconcileSections(institutionId,v.data.map(section=>section.id));setSections(v.data);const requested=requestedSelection.current;requestedSelection.current=undefined;if(requested&&v.data.some(section=>section.id===requested))rememberSection(institutionId,requested);setSectionId(s=>{const remembered=requested||s||selectedSection(institutionId);return v.data.some(section=>section.id===remembered)?remembered!:v.data[0]?.id||''})})
+   .catch(cause=>{if(!controller.signal.aborted){if(cause instanceof CollectionReadError&&[401,403].includes(cause.status))retirePrivate(cause.status);setError('No fue posible consultar tus grupos docentes.')}})
    .finally(()=>{if(!controller.signal.aborted)setLoading(false)});
   return ()=>controller.abort();
- },[base,retirePrivate,sectionQuery,identityReady,identityChecking,authorityEpoch,isCurrent,institutionId,reconcileSections,selectedSection]);
+ },[base,retirePrivate,sectionQuery,identityReady,identityChecking,authorityEpoch,isCurrent,institutionId,reconcileSections,selectedSection,rememberSection]);
  const refresh=useCallback(async(id:string)=>{
   const target=gradebookScope(institutionId,id);
   if(!identityReady||!isCurrent(authorityEpoch)||!id||activeScope.current!==target)return false;
@@ -139,7 +141,8 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
    setError('La calificación debe estar entre 0 y 10, con máximo dos decimales.');return;
   }
   const key=gradebookCell(scope,studentId,componentId),sent=readDraft(key);
-  await command({kind:'score',componentId,studentId,scoreHundredths:Math.round(n*100)},()=>confirmDraft(key,sent?.revision));
+  const expectedUpdatedAt=snapshot.scores.find(score=>score.componentId===componentId&&score.studentId===studentId)?.updatedAt??null;
+  await command({kind:'score',componentId,studentId,scoreHundredths:Math.round(n*100),expectedUpdatedAt},()=>confirmDraft(key,sent?.revision));
  }
  async function publish(){
   if(!snapshot||!sectionId||snapshot.publications.length||operation.current||hasDrafts(scope))return;
@@ -197,6 +200,7 @@ export default function TeacherGradebook({institutionId}:{institutionId:string})
          <label>Nota<Input data-gradebook-cell={gradebookCell(scope,student.studentId,c.id)} aria-label={`${student.enrollmentNumber} · ${c.title}`} type="number" name="grade" min="0" max="10" step="0.01"
           value={drafts.get(gradebookCell(scope,student.studentId,c.id))?.raw??(score?(score.scoreHundredths/100).toFixed(2):'')}
           onChange={e=>{if(operation.current!=='publish')writeDraft(scope,student.studentId,c.id,`${student.enrollmentNumber} · ${c.title}`,e.target.value);}} disabled={publishing} required/></label>
+         {drafts.has(gradebookCell(scope,student.studentId,c.id))&&<small>Último guardado: {score?(score.scoreHundredths/100).toFixed(2):'Sin captura'}</small>}
          <Button variant="outline" type="submit" disabled={saving}>Guardar</Button></form>}</TableCell>})}</TableRow>)}</TableBody></Table></SiiScrollRegion>}
    </section>
    {excluded.length>0&&<section aria-label={published?'Captura local no incluida en el acta':'Captura local fuera del listado'} className="sii-panel">

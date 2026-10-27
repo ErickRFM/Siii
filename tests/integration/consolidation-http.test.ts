@@ -41,13 +41,13 @@ describe.sequential('consolidated real domain handlers',()=>{
   const enrolled=(await sql.query(`SELECT student_id FROM section_enrollments WHERE section_id=$1 AND status='enrolled'`,[section])).rows;expect(enrolled).toHaveLength(1);
   const path='/api/v1/institutions/'+tenant+'/grading';
   const component=await request(path,'POST',{kind:'component',sectionId:section,code:'FINAL',title:'Evaluación final',weight:100},teacherCookie);expect(component.status).toBe(201);const part=(await component.json()).data;
-  expect((await request(path,'POST',{kind:'score',componentId:part.id,studentId:enrolled[0].student_id,scoreHundredths:888},teacherCookie)).status).toBe(200);
+  expect((await request(path,'POST',{kind:'score',componentId:part.id,studentId:enrolled[0].student_id,scoreHundredths:888,expectedUpdatedAt:null},teacherCookie)).status).toBe(200);
   const publish={kind:'publish',sectionId:section,operationId:randomUUID()};
   await sql.query(`UPDATE auth_sessions SET step_up_at=now()-interval '11 minutes' WHERE user_id=$1`,[teacherUser]);
   expect((await request(path,'POST',publish,teacherCookie)).status).toBe(403);
   const username='teacher-consolidation-'+suffix;const login=await request('/api/v1/auth/login','POST',{username,password},'');teacherCookie=await fixtureMfaLogin(sql,base,username,password,login);
   expect((await request(path,'POST',publish,teacherCookie)).status).toBe(201);expect((await request(path,'POST',publish,teacherCookie)).status).toBe(200);
-  expect((await request(path,'POST',{kind:'score',componentId:part.id,studentId:enrolled[0].student_id,scoreHundredths:999},teacherCookie)).status).toBe(409);
+  expect((await request(path,'POST',{kind:'score',componentId:part.id,studentId:enrolled[0].student_id,scoreHundredths:999,expectedUpdatedAt:null},teacherCookie)).status).toBe(409);
   expect((await sql.query('SELECT score_hundredths FROM final_grades WHERE student_id=$1',[enrolled[0].student_id])).rows).toEqual([{score_hundredths:888}]);
  });
  it('freezes enrollment and withdrawal after an official acta',async()=>{

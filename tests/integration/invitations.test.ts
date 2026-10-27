@@ -43,6 +43,8 @@ async function issue(extra:Record<string,unknown>={}){
  expect(JSON.stringify(data).includes(token)).toBe(false);
  return {data,event,message,token,invitationId,email:String(extra.email??email)};
 }
+// Delivery cases require a due message, not a race between PostgreSQL and the Node clock.
+async function issueForDelivery(){const invite=await issue();await due(invite.event.id);return invite;}
 const proof=(invite:{invitationId:string;token:string})=>({invitationId:invite.invitationId,token:invite.token});
 const account=()=>({username:'new-'+randomUUID(),password,firstName:'Own',lastName:'Registration'});
 describe.sequential('F08 real invitations and explicit consent',()=>{
@@ -234,7 +236,7 @@ describe.sequential('F08 real invitations and explicit consent',()=>{
   expect(await eventRow(invite.event.id)).toMatchObject({state:'queued',attempts:0,lease_token:null,sender_email:null,failure_code:'EMAIL_NOT_CONFIGURED'});
  });
  it('durably claims before synthetic provider acceptance and preserves immutable ciphertext and routing on retry',async()=>{
-  const invite=await issue();configureMail();
+  const invite=await issueForDelivery();configureMail();
   const messages:string[]=[],senders:unknown[]=[];
   const first=await deliver({limit:1,transport:async(message,sender)=>{
    const row=await eventRow(invite.event.id);expect(row.lease_token).toBeTruthy();expect(row.attempts).toBe(1);
@@ -249,7 +251,7 @@ describe.sequential('F08 real invitations and explicit consent',()=>{
   expect((await (await request(url())).json()).data[0].delivery).toEqual({state:'accepted',code:null});
  });
  it('allows only one concurrent worker to own an unexpired lease',async()=>{
-  const invite=await issue();configureMail();let calls=0,entered!:()=>void,release!:()=>void;
+  const invite=await issueForDelivery();configureMail();let calls=0,entered!:()=>void,release!:()=>void;
   const arrived=new Promise<void>(resolve=>{entered=resolve;}),gate=new Promise<void>(resolve=>{release=resolve;});
   const first=deliver({limit:1,transport:async()=>{calls++;entered();await gate;return {status:'accepted',messageId:randomUUID()};}});
   await arrived;
@@ -257,14 +259,14 @@ describe.sequential('F08 real invitations and explicit consent',()=>{
   expect((await first).accepted).toBe(1);expect(calls).toBe(1);expect((await eventRow(invite.event.id)).attempts).toBe(1);
  });
  it('cannot resurrect a revoked invitation when an in-flight provider submission completes',async()=>{
-  const invite=await issue();configureMail();let entered!:()=>void,release!:()=>void;
+  const invite=await issueForDelivery();configureMail();let entered!:()=>void,release!:()=>void;
   const arrived=new Promise<void>(resolve=>{entered=resolve;}),gate=new Promise<void>(resolve=>{release=resolve;});
   const pending=deliver({limit:1,transport:async()=>{entered();await gate;return {status:'accepted',messageId:randomUUID()};}});
   await arrived;try{expect((await request(url('/'+invite.data.id+'/revoke'),{})).status).toBe(200);}finally{release();}
   expect((await pending).accepted).toBe(0);expect(await eventRow(invite.event.id)).toMatchObject({state:'cancelled',provider_message_id:null,lease_token:null});
  });
  it('cannot overwrite a replacement lease after an ambiguous delayed submission',async()=>{
-  const invite=await issue();configureMail();let entered!:()=>void,release!:()=>void;
+  const invite=await issueForDelivery();configureMail();let entered!:()=>void,release!:()=>void;
   const arrived=new Promise<void>(resolve=>{entered=resolve;}),gate=new Promise<void>(resolve=>{release=resolve;});
   const old=deliver({limit:1,transport:async()=>{entered();await gate;return {status:'accepted',messageId:randomUUID()};}});
   await arrived;
@@ -276,25 +278,25 @@ describe.sequential('F08 real invitations and explicit consent',()=>{
   expect((await old).accepted).toBe(0);expect(await eventRow(invite.event.id)).toMatchObject({state:'accepted',provider_message_id:providerId,attempts:2});
  });
  it('cancels stale issuer authority before calling the provider',async()=>{
-  const invite=await issue();configureMail();await sql.query('UPDATE role_assignments SET revoked_at=now() WHERE id=$1',[issuerGrant]);
+  const invite=await issueForDelivery();configureMail();await sql.query('UPDATE role_assignments SET revoked_at=now() WHERE id=$1',[issuerGrant]);
   let calls=0;await deliver({limit:1,transport:async()=>{calls++;return {status:'accepted',messageId:randomUUID()};}});
   expect(calls).toBe(0);expect((await eventRow(invite.event.id)).state).toBe('cancelled');
  });
  it('fails closed on tampered ciphertext before submission without exposing the message',async()=>{
-  const invite=await issue();configureMail();await sql.query("UPDATE invitation_delivery_outbox SET payload_encrypted='invalid' WHERE id=$1",[invite.event.id]);
+  const invite=await issueForDelivery();configureMail();await sql.query("UPDATE invitation_delivery_outbox SET payload_encrypted='invalid' WHERE id=$1",[invite.event.id]);
   let calls=0;expect((await deliver({limit:1,transport:async()=>{calls++;return {status:'accepted',messageId:randomUUID()};}})).failed).toBe(1);
   expect(calls).toBe(0);expect(await eventRow(invite.event.id)).toMatchObject({state:'failed',failure_code:'INVITATION_DELIVERY_INVALID',provider_message_id:null});
  });
  it('bounds retries to eight attempts and stops before provider idempotency retention expires',async()=>{
-  const invite=await issue();configureMail();await sql.query('UPDATE invitation_delivery_outbox SET attempts=7 WHERE id=$1',[invite.event.id]);
+  const invite=await issueForDelivery();configureMail();await sql.query('UPDATE invitation_delivery_outbox SET attempts=7 WHERE id=$1',[invite.event.id]);
   expect((await deliver({limit:1,transport:async()=>({status:'retryable',code:'EMAIL_PROVIDER_RETRY'})})).failed).toBe(1);
   expect(await eventRow(invite.event.id)).toMatchObject({state:'failed',attempts:8,failure_code:'RETRY_EXHAUSTED'});
-  const late=await issue();await sql.query("UPDATE invitation_delivery_outbox SET created_at=now()-interval '22 hours 59 minutes 50 seconds',expires_at=now()+interval '10 seconds' WHERE id=$1",[late.event.id]);
+  const late=await issueForDelivery();await sql.query("UPDATE invitation_delivery_outbox SET created_at=now()-interval '22 hours 59 minutes 50 seconds',expires_at=now()+interval '10 seconds' WHERE id=$1",[late.event.id]);
   expect((await deliver({limit:1,transport:async()=>({status:'retryable',code:'EMAIL_PROVIDER_RETRY'})})).failed).toBe(1);
   expect((await eventRow(late.event.id)).state).toBe('failed');
  });
  it('retains accepted delivery history even after the pending invitation is revoked',async()=>{
-  const invite=await issue();configureMail();const providerId=randomUUID();
+  const invite=await issueForDelivery();configureMail();const providerId=randomUUID();
   expect((await deliver({limit:1,transport:async()=>({status:'accepted',messageId:providerId})})).accepted).toBe(1);
   const revoked=await request(url('/'+invite.data.id+'/revoke'),{});expect(revoked.status).toBe(200);
   expect((await revoked.json()).data.delivery).toEqual({state:'accepted',code:null});
@@ -360,7 +362,7 @@ describe.sequential('F08 real invitations and explicit consent',()=>{
   expect((await sql.query("SELECT count(*)::int AS n FROM security_audit_log WHERE action='invitation.consent.throttled' AND target='invitation:unavailable'")).rows[0].n).toBeGreaterThan(0);
  });
  it('does not submit encrypted mail when its key is unavailable',async()=>{
-  const invite=await issue();configureMail();const keys=process.env.SIII_INVITATION_KEYS;process.env.SIII_INVITATION_KEYS='{}';let calls=0;
+  const invite=await issueForDelivery();configureMail();const keys=process.env.SIII_INVITATION_KEYS;process.env.SIII_INVITATION_KEYS='{}';let calls=0;
   try{
    expect((await deliver({limit:1,transport:async()=>{calls++;return {status:'accepted',messageId:randomUUID()};}})).failed).toBe(1);
    expect(calls).toBe(0);expect(await eventRow(invite.event.id)).toMatchObject({state:'failed',failure_code:'INVITATION_KEY_UNAVAILABLE'});

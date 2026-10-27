@@ -13,7 +13,8 @@ describe('R3 grading policy',()=>{
  it('accepts only valid grade commands, scale and idempotency keys',()=>{
   expect(gradeCommand.safeParse({kind:'component',sectionId:id,code:'parcial-1',title:'Parcial 1',weight:30}).success).toBe(true);
   expect(gradeCommand.safeParse({kind:'component',sectionId:id,code:'A',title:'P',weight:100}).success).toBe(false);
-  expect(gradeCommand.safeParse({kind:'score',studentId:id,componentId:id,scoreHundredths:1050}).success).toBe(false);
+  expect(gradeCommand.safeParse({kind:'score',studentId:id,componentId:id,scoreHundredths:1050,expectedUpdatedAt:null}).success).toBe(false);
+  expect(gradeCommand.safeParse({kind:'score',studentId:id,componentId:id,scoreHundredths:850,expectedUpdatedAt:null}).success).toBe(true);
   expect(gradeCommand.safeParse({kind:'publish',sectionId:id,operationId:'duplicate'}).success).toBe(false);
   expect(gradeCommand.safeParse({kind:'publish',sectionId:id,operationId:id}).success).toBe(true);
  });

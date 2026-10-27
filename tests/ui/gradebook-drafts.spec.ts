@@ -93,7 +93,7 @@ test('publication cannot emit an official grade while a newer local draft remain
  const f=await fixture(),components=await prepare(page,f);
  const stepUp=await page.request.post('/api/v1/auth/mfa/step-up',{headers:{origin:new URL(page.url()).origin},data:{currentPassword:password,recoveryCode:f.codes[1]}});expect(stepUp.status()).toBe(200);
  for(const [studentIndex,values] of [[0,[800,600]],[1,[700,900]]] as const){for(let index=0;index<components.length;index++){
-  const score=await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:components[index].id,studentId:f.students[studentIndex].id,scoreHundredths:values[index]}});expect(score.status()).toBe(200);
+  const score=await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:components[index].id,studentId:f.students[studentIndex].id,scoreHundredths:values[index],expectedUpdatedAt:null}});expect(score.status()).toBe(200);
  }}
  await page.reload();const a=page.getByLabel('DRAFT001 · Parcial uno',{exact:true});await expect(a).toHaveValue('8.00');await a.fill('9.50');
  const publish=page.getByRole('button',{name:'Publicar acta oficial',exact:true});await evidence(page,info,f,'draft-before-publication',{draft:'9.50',publishEnabled:await publish.isEnabled()});
@@ -111,7 +111,7 @@ test('publication cannot emit an official grade while a newer local draft remain
 test('editing during publication confirmation prevents the final request',async({page})=>{
  const f=await fixture(),components=await prepare(page,f);
  expect((await page.request.post('/api/v1/auth/mfa/step-up',{headers:{origin:new URL(page.url()).origin},data:{currentPassword:password,recoveryCode:f.codes[1]}})).status()).toBe(200);
- for(const student of f.students)for(const component of components)expect((await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:component.id,studentId:student.id,scoreHundredths:800}})).status()).toBe(200);
+ for(const student of f.students)for(const component of components)expect((await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:component.id,studentId:student.id,scoreHundredths:800,expectedUpdatedAt:null}})).status()).toBe(200);
  await page.reload();await page.getByRole('button',{name:'Publicar acta oficial',exact:true}).click();
  await expect(page.getByRole('alertdialog')).toBeVisible();
  await page.getByLabel('DRAFT001 · Parcial uno',{exact:true}).fill('9.25');
@@ -124,7 +124,7 @@ test('editing during publication confirmation prevents the final request',async(
 test('a real publication in flight disables capture and emits persisted official grades',async({page})=>{
  const f=await fixture(),components=await prepare(page,f);
  expect((await page.request.post('/api/v1/auth/mfa/step-up',{headers:{origin:new URL(page.url()).origin},data:{currentPassword:password,recoveryCode:f.codes[1]}})).status()).toBe(200);
- for(const student of f.students)for(const component of components)expect((await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:component.id,studentId:student.id,scoreHundredths:800}})).status()).toBe(200);
+ for(const student of f.students)for(const component of components)expect((await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:component.id,studentId:student.id,scoreHundredths:800,expectedUpdatedAt:null}})).status()).toBe(200);
  await page.reload();await page.getByRole('button',{name:'Publicar acta oficial',exact:true}).click();
  const gate=new pg.Client({connectionString:isolatedDatabaseUrl()});await gate.connect();await gate.query('BEGIN');await gate.query('LOCK TABLE security_audit_log IN ACCESS EXCLUSIVE MODE');
  const response=page.waitForResponse(r=>r.url().endsWith(endpoint(f))&&r.request().method()==='POST');
@@ -140,7 +140,7 @@ test('a real publication in flight disables capture and emits persisted official
 test('an act published elsewhere keeps excluded local capture recoverable and read only',async({page})=>{
  const f=await fixture(),components=await prepare(page,f),headers={origin:new URL(page.url()).origin};
  expect((await page.request.post('/api/v1/auth/mfa/step-up',{headers,data:{currentPassword:password,recoveryCode:f.codes[1]}})).status()).toBe(200);
- for(const student of f.students)for(const component of components)expect((await page.request.post(endpoint(f),{headers,data:{kind:'score',componentId:component.id,studentId:student.id,scoreHundredths:800}})).status()).toBe(200);
+ for(const student of f.students)for(const component of components)expect((await page.request.post(endpoint(f),{headers,data:{kind:'score',componentId:component.id,studentId:student.id,scoreHundredths:800,expectedUpdatedAt:null}})).status()).toBe(200);
  await page.reload();const a=page.getByLabel('DRAFT001 · Parcial uno',{exact:true});await a.fill('9.50');
  expect((await page.request.post(endpoint(f),{headers,data:{kind:'publish',sectionId:f.section,operationId:randomUUID()}})).status()).toBe(201);
  await a.locator('..').locator('..').getByRole('button',{name:'Guardar',exact:true}).click();await expect(page.locator('.sii-academic').getByRole('alert')).toBeVisible();

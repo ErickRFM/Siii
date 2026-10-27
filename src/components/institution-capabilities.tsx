@@ -7,6 +7,7 @@ import {usePathname} from 'next/navigation';
 import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import type {Route} from 'next';
 import {academicModuleLinks} from '@/shared/navigation/academic-modules';
+import {personalModuleLinks} from '@/shared/navigation/personal-modules';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 export type InstitutionGrant = { id: string; role: string; scopeType: 'institution' | 'program' | 'campus'; scopeId: string | null; expiresAt: string | null };
@@ -109,6 +110,7 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
   const { data } = useInstitutionCapabilities();
   return <>
     <CapabilityState returnTo={`/dashboard/institutions/${institutionId}`}/>
+    {data&&!data.restricted&&personalModuleLinks(data.capabilities,data.roles,data.scopedCapabilities).map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-outline-button">{module.label}</Link>)}
     {data && <><div className="sii-role-list">{data.roles.map(role => <span className="sii-role-pill" key={role}>{PROFILE_LABELS[role] ?? role}</span>)}</div>
       {data.grants.length > 0 && <ul>{data.grants.map(grant => <li key={grant.id}>{PROFILE_LABELS[grant.role] ?? grant.role} · {grant.scopeType === 'institution' ? 'Institución' : grant.scopeType === 'program' ? 'Programa asignado' : 'Campus asignado'} · {grant.expiresAt ? `Vigente hasta ${new Date(grant.expiresAt).toLocaleString('es-MX')}` : 'Sin vencimiento'}</li>)}</ul>}
       {!data.restricted && ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}

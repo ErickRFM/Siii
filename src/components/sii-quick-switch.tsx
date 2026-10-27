@@ -11,7 +11,7 @@ import {Command,CommandEmpty,CommandGroup,CommandInput,CommandItem,CommandList} 
 import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle} from '@/components/ui/dialog';
 
 /** Client-only navigation projection, not an authorization boundary. */
-export type SiiQuickLink={id:string;label:string;href:string;group:'Plataforma'|'Gestión académica'};
+export type SiiQuickLink={id:string;label:string;href:string;group:'Mi espacio'|'Plataforma'|'Gestión académica'};
 export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
  const [open,setOpen]=useState(false);
  const router=useRouter();
@@ -47,7 +47,7 @@ export default function SiiQuickSwitch({links}:{links:readonly SiiQuickLink[]}){
      <CommandInput aria-label="Buscar secciones" placeholder="Busca una sección disponible…"/>
      <CommandList className="max-h-[min(60vh,420px)]">
       <CommandEmpty>No hay módulos disponibles con ese nombre.</CommandEmpty>
-      {(['Plataforma','Gestión académica'] as const).map(group=>{
+      {(['Mi espacio','Plataforma','Gestión académica'] as const).map(group=>{
        const matches=links.filter(link=>link.group===group);
        return matches.length?<CommandGroup key={group} heading={group}>
         {matches.map(link=><CommandItem key={link.id} value={link.label} onSelect={()=>go(link.href)} className="gap-3 py-2.5">

@@ -13,6 +13,7 @@ import SiiThemeToggle from './sii-theme-toggle';
 import {InstitutionCapabilitiesProvider,useInstitutionCapabilities,hasInstitutionCapability} from './institution-capabilities';
 import {GradebookDraftsProvider} from './teacher-gradebook-drafts';
 import {academicModuleLinks,allAcademicModuleLinks} from '@/shared/navigation/academic-modules';
+import {personalModuleLinks,hasOnlyPersonalRoles} from '@/shared/navigation/personal-modules';
 import {Avatar,AvatarFallback} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {Breadcrumb,BreadcrumbItem,BreadcrumbList,BreadcrumbPage,BreadcrumbSeparator} from '@/components/ui/breadcrumb';
@@ -52,6 +53,8 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  const verifying=Boolean(institutionId && loading && !data);
  const unavailableLabel=!institutionId?'Selecciona institución':verifying?'Verificando…':error?'No disponible':'Restringido';
  const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
+ const personal=data&&!data.restricted?personalModuleLinks(data.capabilities,data.roles,data.scopedCapabilities):[];
+ const personalOnly=Boolean(data&&hasOnlyPersonalRoles(data.roles));
  const activeModule=allAcademicModuleLinks.find(module=>module.id===active);
  const academicAvailable=['programs','courses','curricula','terms','campuses'].some(resource=>hasInstitutionCapability(data,`${resource}.read`));
  const quickLinks:SiiQuickLink[]=[
@@ -60,6 +63,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  ];
  if(institutionId){
   const base='/dashboard/institutions/'+institutionId;
+  for(const module of personal)quickLinks.push({id:module.id,label:module.label,href:base+'/'+module.id,group:'Mi espacio'});
   if(institutionAdministrationAvailable||hasInstitutionCapability(data,'institutions.manage'))
    quickLinks.push({id:'administration',label:'Administración institucional',href:base+'/admin',group:'Plataforma'});
   if(hasInstitutionCapability(data,'users.read'))
@@ -71,7 +75,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
   if(academicAvailable)quickLinks.push({id:'academic',label:'Catálogo académico',href:base+'/academic',group:'Gestión académica'});
   for(const module of modules)quickLinks.push({id:module.id,label:module.label,href:base+'/'+module.id,group:'Gestión académica'});
  }
- const crumb=activeModule?activeModule.label:active==='overview'?'Inicio':active==='security'?'Seguridad':active==='academic'?'Catálogo académico':active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución';
+ const crumb=personal.find(module=>module.id===active)?.label??(activeModule?activeModule.label:active==='overview'?'Inicio':active==='security'?'Seguridad':active==='academic'?'Catálogo académico':active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución');
  return <>
   <Sidebar collapsible="icon" className="border-sidebar-border bg-sidebar">
    <nav aria-label="Navegación institucional" className="flex h-full min-h-0 flex-col">
@@ -83,6 +87,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     </div>
    </SidebarHeader>
    <SidebarContent className="px-2 py-3">
+    {institutionId&&personal.length>0&&<SidebarGroup><SidebarGroupLabel>Mi espacio</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{personal.map(module=><ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}`} label={module.label} icon={module.icon} active={active===module.id}/>)}</SidebarMenu></SidebarGroupContent></SidebarGroup>}
     <SidebarGroup>
      <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
      <SidebarGroupContent>
@@ -103,7 +108,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
       <SidebarMenu>
        {institutionId&&academicAvailable?<ShellLink href={`/dashboard/institutions/${institutionId}/academic` as Route} label="Catálogo académico" icon="book" active={active==='academic'}/>:
         <MutedLink label="Catálogo académico" icon="book" unavailableLabel={unavailableLabel} verifying={verifying}/>}
-       {allAcademicModuleLinks.map(module=>{
+       {(personalOnly?allAcademicModuleLinks.filter(module=>modules.some(item=>item.id===module.id)):allAcademicModuleLinks).map(module=>{
         const allowed=Boolean(institutionId&&modules.some(item=>item.id===module.id));
         return allowed?<ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} label={module.label} icon={iconForModule(module.id)} active={active===module.id}/>:
          <MutedLink key={module.id} label={module.label} icon={iconForModule(module.id)} unavailableLabel={unavailableLabel} verifying={verifying}/>;

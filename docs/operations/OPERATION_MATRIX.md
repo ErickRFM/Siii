@@ -1,3 +1,19 @@
+# VNext institucional — 26 octubre 2026
+
+Evidencia y límites: [SIII_INSTITUTIONAL_VNEXT_2026-10-26](../implementation/SIII_INSTITUTIONAL_VNEXT_2026-10-26.md). Este incremento no requiere DDL. La certificación productiva/autenticada y los contratos pendientes no se infieren de las pruebas locales.
+
+| Operación | Autoridad / integridad | Evidencia | Estado |
+|---|---|---|---|
+| GET institutions/:id/portal/student/{profile,courses,teachers,schedule,grades,orders,payments,announcements} | student.self.read, vínculo propio no revocado, grant vigente/programa real, SQL con sesión/tenant/MFA; última calificación publicada del estudiante por sección; avisos publicados/vigentes | personal-portals-http.test.ts; personal-navigation.test.ts; capability-disclosure.test.ts | HTTP/UI LOCAL VERIFICADOS; CI FINAL PENDIENTE |
+| GET institutions/:id/portal/teacher/{profile,groups,schedule} | teacher.self.read institucional, vínculo y asignación vigente; roster count real, no grupos ajenos | personal-portals-http.test.ts; personal-portals.spec.ts | HTTP/UI LOCAL VERIFICADOS; CI FINAL PENDIENTE |
+| GET institutions/:id/grading/sections y GET grading?sectionId=… | Cursor sin tope silencioso, autoridad/relación en cada consulta SQL, deep link validado contra grupos autorizados | grading-concurrency-http.test.ts; consolidation-http.test.ts; gradebook-drafts.spec.ts | HTTP/UI LOCAL VERIFICADOS; CI FINAL PENDIENTE |
+| POST grading, kind:score | expectedUpdatedAt obligatorio, comparación/avance monotónico bajo lock, 409 al perder carrera, antes/después en auditoría; no rectifica actas | grading-concurrency-http.test.ts; consumidores de gradebook-drafts.spec.ts actualizados | HTTP/UI LOCAL VERIFICADOS; CI FINAL PENDIENTE |
+| GET/POST financials/orders | institutions.manage/MFA vigente; lista con cursor; UUID de cargo/replay; moneda del concepto, auditoría y validación transaccional de pagador | financial-payments-http.test.ts; financial-write-authority-http.test.ts | HTTP/UI LOCAL VERIFICADOS; CI FINAL PENDIENTE |
+| GET/POST financials/orders/:orderId/payments | institutions.manage/MFA, origen, UUID idempotente, bloqueo/saldo/estado, abono+saldo+auditoría atómicos; efectivo/transferencia externa | financial-payments-http.test.ts; personal-portals.spec.ts | HTTP/UI LOCAL VERIFICADOS; CI FINAL PENDIENTE |
+| Consulta de historial de asistencia Compañero desde SIII | El contrato nativo actual no es un contrato S2S de historial; no se usa JWT ajeno ni se replica QR | AttendanceRoutes.kt y SiiiAttendanceAuthority.kt en Compañero@55a1b997 | CONTRACT_REQUIRED; NO IMPLEMENTADO |
+
+---
+
 # Consolidación 2026-10-15 — estado verificado
 
 Las filas heredadas que siguen describen sus ramas originales. La promoción integral permanece PARTIAL; evidencia vigente en [SII_CONSOLIDATION_REPORT](../audit/SII_CONSOLIDATION_REPORT.md).
