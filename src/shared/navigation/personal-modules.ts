@@ -4,7 +4,7 @@ export function personalModuleLinks(capabilities:readonly string[],roles:readonl
  const has=(capability:string)=>capabilities.includes(capability)||scoped.some(scope=>scope.capabilities.includes(capability));
  return [
   ...(roles.includes('student')&&has('student.self.read')?[{id:'student',label:'Mi vida universitaria',icon:'book' as const,description:'Expediente, inscripciones, calificaciones, servicios y estado de cuenta.'}]:[]),
-  ...(roles.includes('teacher')&&has('teacher.self.read')?[{id:'teacher',label:'Mi docencia',icon:'grades' as const,description:'Grupos asignados, listas oficiales, horarios y evaluación.'}]:[]),
+  ...(roles.includes('teacher')&&has('teacher.self.read')?[{id:'teacher',label:'Mi docencia',icon:'grades' as const,description:'Grupos asignados, listas oficiales, evaluación y resultados institucionales.'}]:[]),
   ...(capabilities.includes('institutions.manage')?[{id:'financials',label:'Caja y finanzas',icon:'services' as const,description:'Conceptos, órdenes y registro de pagos externos.'}]:[]),
  ];
 }

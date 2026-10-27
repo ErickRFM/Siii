@@ -104,7 +104,7 @@ for(const departure of ['hidden','blur'] as const)test(`V3 return after ${depart
 test('teacher sees only assigned groups and can open the existing real gradebook',async({page})=>{
  await login(page,f.teacher);await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await expect(page.getByRole('heading',{name:'Mi docencia.'})).toBeVisible();
  await expect(page.getByRole('tabpanel')).toContainText('SYS-101');await expect(page.getByRole('tabpanel')).not.toContainText('SYS-202');
- await page.getByRole('link',{name:'Abrir evaluación de SYS-101'}).click();await expect(page).toHaveURL(/\/grading/);await expect(page.getByRole('heading',{name:'Calificaciones.'})).toBeVisible();
+ await page.getByRole('tab',{name:'Mis grupos',exact:true}).click();await page.getByRole('button',{name:'Evaluar SYS-101'}).click();await expect(page.getByRole('heading',{name:'Libro de calificaciones'})).toBeVisible();
 });
 test('cashier records an external payment once and student sees its persistent statement',async({page,browser})=>{
  await login(page,f.admin);await page.goto(`/dashboard/institutions/${f.tenant}/financials`);await expect(page.getByRole('heading',{name:'Caja y finanzas.'})).toBeVisible();
@@ -127,7 +127,7 @@ test('teacher deep link selects the requested authorized group instead of the re
  await sql.query('INSERT INTO section_teachers(institution_id,section_id,teacher_id) VALUES($1,$2,$4),($1,$3,$4)',[f.tenant,f.section,f.otherSection,teacher]);
  await login(page,f.secondTeacher);await page.goto(`/dashboard/institutions/${f.tenant}/grading`);
  const remembered=await page.getByLabel('Materia y grupo asignado').inputValue();const requested=remembered===f.section?f.otherSection:f.section,code=requested===f.section?'SYS-101':'SYS-202';
- await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await page.getByRole('link',{name:'Abrir evaluación de '+code}).click();await expect(page.getByLabel('Materia y grupo asignado')).toHaveValue(requested);
+ await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await page.getByRole('tab',{name:'Mis grupos',exact:true}).click();await page.getByRole('button',{name:'Evaluar '+code}).click();await expect(page.getByLabel('Materia y grupo asignado')).toHaveValue(requested);
 });
 test('late movements response cannot fill the drawer of another order',async({page})=>{
  await login(page,f.admin);const numbers=(await sql.query('SELECT id,order_number FROM payment_orders WHERE id=ANY($1::uuid[])',[[f.orderId,f.otherOrderId]])).rows;

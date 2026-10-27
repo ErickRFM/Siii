@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { and,eq,sql,desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
-import { assessmentComponents,assessmentScores,sectionEnrollments,institutionalStudents,gradePublications,finalGrades,securityAuditLog } from '../../../../../../../db/schema';
+import { assessmentComponents,assessmentScores,sectionEnrollments,institutionalStudents,gradePublications,finalGrades,securityAuditLog,academicSections,academicCourses,academicTerms } from '../../../../../../../db/schema';
 import { teachingScope,teachingReadVisibility } from '@/modules/grading/teaching-scope';
 import { gradeCommand,calculateWeightedGrade } from '@/modules/grading/validation';
 import { assertSameOrigin,jsonError } from '@/shared/auth/guards';
@@ -22,18 +22,27 @@ export const GET=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  const institutionId=await ctxId(ctx),sectionId=req.nextUrl.searchParams.get('sectionId');
  if(!institutionId||!sectionId||!z.uuid().safeParse(sectionId).success)return jsonError('INVALID_SECTION',422);
  const access=await teachingScope(institutionId,sectionId);if(!access)return jsonError('FORBIDDEN',403);
- const [components,scores,publications,roster]=await Promise.all([
+ const [sectionRows,results,components,scores,publications,roster]=await Promise.all([
+  db.select({id:academicSections.id,code:academicSections.code,status:academicSections.status,courseName:academicCourses.name,termName:academicTerms.name,termStatus:academicTerms.status}).from(academicSections)
+   .innerJoin(academicCourses,and(eq(academicCourses.id,academicSections.courseId),eq(academicCourses.institutionId,institutionId)))
+   .innerJoin(academicTerms,and(eq(academicTerms.id,academicSections.termId),eq(academicTerms.institutionId,institutionId)))
+   .where(and(eq(academicSections.id,sectionId),eq(academicSections.institutionId,institutionId),teachingReadVisibility(access,sql`${academicSections.id}`))),
+  db.select({id:finalGrades.id,publicationId:finalGrades.publicationId,studentId:finalGrades.studentId,scoreHundredths:finalGrades.scoreHundredths,enrollmentNumber:institutionalStudents.enrollmentNumber,firstName:institutionalStudents.firstName,lastName:institutionalStudents.lastName}).from(finalGrades)
+   .innerJoin(gradePublications,and(eq(gradePublications.id,finalGrades.publicationId),eq(gradePublications.institutionId,institutionId)))
+   .innerJoin(institutionalStudents,and(eq(institutionalStudents.id,finalGrades.studentId),eq(institutionalStudents.institutionId,institutionId)))
+   .where(and(eq(finalGrades.institutionId,institutionId),eq(gradePublications.sectionId,sectionId),teachingReadVisibility(access,sql`${gradePublications.sectionId}`))),
   db.select().from(assessmentComponents).where(and(eq(assessmentComponents.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId),teachingReadVisibility(access,sql`${assessmentComponents.sectionId}`))),
   db.select({id:assessmentScores.id,componentId:assessmentScores.componentId,studentId:assessmentScores.studentId,scoreHundredths:assessmentScores.scoreHundredths,updatedAt:cursorTimestamp(assessmentScores.updatedAt)})
    .from(assessmentScores).innerJoin(assessmentComponents,eq(assessmentScores.componentId,assessmentComponents.id))
    .where(and(eq(assessmentScores.institutionId,institutionId),eq(assessmentComponents.institutionId,institutionId),eq(assessmentComponents.sectionId,sectionId),teachingReadVisibility(access,sql`${assessmentComponents.sectionId}`))),
-  db.select({id:gradePublications.id,version:gradePublications.version,publishedAt:gradePublications.publishedAt})
+  db.select({id:gradePublications.id,version:gradePublications.version,publishedAt:gradePublications.publishedAt,publishedBy:gradePublications.publishedBy})
    .from(gradePublications).where(and(eq(gradePublications.institutionId,institutionId),eq(gradePublications.sectionId,sectionId),teachingReadVisibility(access,sql`${gradePublications.sectionId}`))).orderBy(desc(gradePublications.version)),
   db.select({studentId:institutionalStudents.id,enrollmentNumber:institutionalStudents.enrollmentNumber,firstName:institutionalStudents.firstName,lastName:institutionalStudents.lastName})
    .from(sectionEnrollments).innerJoin(institutionalStudents,eq(sectionEnrollments.studentId,institutionalStudents.id))
    .where(and(eq(sectionEnrollments.institutionId,institutionId),eq(institutionalStudents.institutionId,institutionId),eq(sectionEnrollments.sectionId,sectionId),eq(sectionEnrollments.status,'enrolled'),teachingReadVisibility(access,sql`${sectionEnrollments.sectionId}`)))
  ]);
- return NextResponse.json({components,scores,publications,roster},{headers:noCache});
+ if(!sectionRows.length)return jsonError('FORBIDDEN',403);
+ return NextResponse.json({section:sectionRows[0],results,components,scores,publications,roster},{headers:noCache});
 });
 export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
@@ -52,8 +61,12 @@ export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
  if(!access)return jsonError('FORBIDDEN',403);
  try{
   const result=await domainTransaction(access,{grade:{sectionId:sectionId!,capability:payload.kind==='publish'?'grades.publish':'grades.manage'}},async tx=>{
-   const rows=await tx.execute(sql`SELECT id FROM academic_sections WHERE id=${sectionId} AND institution_id=${institutionId} FOR UPDATE`);
+   const rows=await tx.execute(sql`SELECT id,status,term_id FROM academic_sections WHERE id=${sectionId} AND institution_id=${institutionId} FOR UPDATE`);
    if(!rows.rows.length)return {error:'SECTION_NOT_FOUND',status:404} as const;
+   // Serialize academic closure with every grade mutation. Calendar dates alone
+   // do not decide closure; the institution's explicit status is authoritative.
+   const term=await tx.execute(sql`SELECT status FROM academic_terms WHERE id=${rows.rows[0].term_id} AND institution_id=${institutionId} FOR SHARE`);
+   if(rows.rows[0].status!=='open'||term.rows[0]?.status!=='active')return {error:'GRADE_PERIOD_CLOSED',status:409} as const;
    if(payload.kind==='component'){
     const existing=await tx.select({id:gradePublications.id}).from(gradePublications)
      .where(and(eq(gradePublications.institutionId,institutionId),eq(gradePublications.sectionId,sectionId))).limit(1);

@@ -236,12 +236,15 @@ test('real withdrawal keeps excluded capture visible until explicit confirmed di
   await a.locator('..').locator('..').getByRole('button',{name:'Guardar',exact:true}).click();await expect(page.locator('.sii-academic').getByRole('alert')).toBeVisible();
   await page.getByRole('button',{name:'Reintentar consulta',exact:true}).click();await expect(a).toHaveCount(0);
   const excluded=page.getByRole('region',{name:'Captura local fuera del listado'});await expect(excluded).toContainText('DRAFT001 · Parcial uno: 8.95');
+  const components=(await page.request.get(endpoint(f)+'?sectionId='+f.section).then(response=>response.json())).components as {id:string}[];
+  for(const component of components)expect((await page.request.post(endpoint(f),{headers:{origin:new URL(page.url()).origin},data:{kind:'score',componentId:component.id,studentId:f.students[1].id,scoreHundredths:800,expectedUpdatedAt:null}})).status()).toBe(200);
+  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(page.getByLabel('DRAFT002 · Parcial uno',{exact:true})).toHaveValue('8.00');
   const publish=page.getByRole('button',{name:'Publicar acta oficial',exact:true});await expect(publish).toBeDisabled();
   await excluded.getByRole('button',{name:'Descartar captura DRAFT001 · Parcial uno',exact:true}).click();await page.getByRole('button',{name:'Volver sin cambios',exact:true}).click();await expect(excluded).toContainText('8.95');
   await excluded.getByRole('button',{name:'Descartar captura DRAFT001 · Parcial uno',exact:true}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Descartar captura',exact:true}).click();
   await expect(excluded).toHaveCount(0);await expect(publish).toBeEnabled();
   expect((await sql.query("SELECT actor_user_id FROM security_audit_log WHERE institution_id=$1 AND action='enrollment.withdraw' AND target=$2",[f.institution,'enrollment:'+enrollment])).rows).toEqual([{actor_user_id:administrator.user}]);
-  expect((await sql.query('SELECT id FROM assessment_scores WHERE institution_id=$1',[f.institution])).rows).toHaveLength(0);
+  expect((await sql.query('SELECT student_id FROM assessment_scores WHERE institution_id=$1',[f.institution])).rows).toEqual([{student_id:f.students[1].id},{student_id:f.students[1].id}]);
  }finally{await adminContext.close();}
 });
 

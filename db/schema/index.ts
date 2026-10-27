@@ -11,3 +11,4 @@ export * from './services';
 export * from './academic-outbox';
 export * from './admissions';
 export * from './financials';
+export * from './grade-corrections';

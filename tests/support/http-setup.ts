@@ -32,6 +32,13 @@ export default async function setup(){
  process.env.SIII_APPLICANT_EMAIL_KEYS ||= JSON.stringify({fixture:randomBytes(32).toString('base64')});
  process.env.SIII_APPLICANT_EMAIL_ACTIVE_KEY_ID ||= 'fixture';
  process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
+ // Synthetic correction authorities exist only inside this isolated test server.
+ process.env.SIII_GRADE_CORRECTIONS_ENABLED='true';
+ process.env.SIII_CORRECTION_TEST_TENANT=randomUUID();
+ process.env.SIII_CORRECTION_CLOSED_TEST_TENANT=randomUUID();
+ process.env.SIII_CORRECTION_BLOCKED_TEST_TENANT=randomUUID();
+ const correctionFixturePolicy={reference:'Synthetic test policy; not institutional approval',approved:true,reviewerRoles:['control_escolar'],approverRoles:['coordinator'],executorRoles:['control_escolar'],closedAuthorityRoles:['coordinator','control_escolar'],requireEvidence:true,allowExecution:true,allowClosedRequests:false,allowClosedExecution:false};
+ process.env.SIII_GRADE_CORRECTION_POLICIES=JSON.stringify({[process.env.SIII_CORRECTION_TEST_TENANT]:correctionFixturePolicy,[process.env.SIII_CORRECTION_CLOSED_TEST_TENANT]:{...correctionFixturePolicy,allowClosedRequests:true,allowClosedExecution:true},[process.env.SIII_CORRECTION_BLOCKED_TEST_TENANT]:{...correctionFixturePolicy,allowExecution:false}});
  const academicFixture=process.env.SIII_ACADEMIC_OUTBOX_ENABLED==='true';
  const academicKeys=['SIII_ACADEMIC_OUTBOX_KEYS','SIII_ACADEMIC_OUTBOX_ACTIVE_KEY_ID'] as const;
  const previousAcademicKeys=academicKeys.map(key=>[key,process.env[key]] as const);

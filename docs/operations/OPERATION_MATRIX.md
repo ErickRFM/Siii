@@ -265,3 +265,14 @@ Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md
 | Formulario/seguimiento estudiantil | revisión, folio real, filtros/páginas, estado/resolución/historia; envío ambiguo retiene misma UUID en RAM oculta hasta revalidar misma autoridad; denegación confirmada retira borrador | `personal-requests.spec.ts`: seis casos, incluidos dos RED→GREEN offline/read-error; portales+solicitudes 23/23 en puerto aislado 3117, móvil/temas/axe | LOCAL VERIFICADO; CI/producción pendientes |
 
 [Implementación, decisión documental y límites](../implementation/SIII_PERSONAL_REQUESTS_2026-10-26.md). No hay DDL ni emisión certificada. La aprobación de solicitud no emite un documento ni cambia matrícula.
+
+
+## Portal docente y rectificaciones — 26 octubre 2026
+
+| Operación | Autoridad y garantías | Evidencia | Estado |
+|---|---|---|---|
+| Grupos/lista/captura/resultados docentes | Identidad activa, asignación propia, tenant y capacidades; lectura sin agenda; cierre bajo locks; notas finales separadas de scores privados | teacher-workspace-http.test.ts, teacher-workspace.spec.ts, gradebook-drafts.spec.ts y personal-portals.spec.ts; 43 HTTP combinados y regresión de ambos portales | LOCAL VALIDADO; CI final pendiente |
+| Solicitud/evidencia/revisión/resolución de rectificación | Solicitante vinculado; roles institucionales explícitos por configuración; evidencia privada 2 MiB; revisión optimista; auditoría por operación; sin autoaprobación | grade-corrections-http.test.ts, grade-correction-policy.test.ts y grade-corrections.spec.ts | INFRAESTRUCTURA; activación institucional bloqueada por defecto |
+| Aplicación de rectificación | Aprobación distinta de ejecución, MFA/step-up, fuente y política vigentes, versión nueva inmutable; extraordinaria exige habilitación y autoridad adicional | Contratos de idempotencia, rechazo, fuente obsoleta, cierre y allowExecution=false | INFRAESTRUCTURA; sin ejecución productiva |
+
+Informe y límites: [SIII_TEACHER_V3_2026-10-26.md](../audits/SIII_TEACHER_V3_2026-10-26.md).

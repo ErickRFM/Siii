@@ -4,10 +4,10 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {CollectionReadError,readCollection} from '@/shared/client/read-collection';
 import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
-import type {PersonalProfile,PersonalCourse,PersonalTeacher,PersonalSchedule,PersonalGrade,PersonalOrder,PersonalPayment,PersonalAnnouncement,PersonalServiceRequest,PersonalRequestEvent} from '@/modules/portal/contracts';
+import type {PersonalProfile,PersonalCourse,PersonalTeachingGroup,PersonalTeacher,PersonalSchedule,PersonalGrade,PersonalOrder,PersonalPayment,PersonalAnnouncement,PersonalServiceRequest,PersonalRequestEvent} from '@/modules/portal/contracts';
 
 export type PersonalView='home'|'courses'|'teachers'|'grades'|'orders'|'services'|'profile'|'groups'|'schedule';
-export type PersonalSnapshot={profile:PersonalProfile|null;courses:PersonalCourse[];teachers:PersonalTeacher[];schedule:PersonalSchedule[];grades:PersonalGrade[];orders:PersonalOrder[];payments:PersonalPayment[];groups:PersonalCourse[];announcements:PersonalAnnouncement[];requests:PersonalServiceRequest[];pendingRequests:PersonalServiceRequest[];requestHistory:PersonalRequestEvent[]};
+export type PersonalSnapshot={profile:PersonalProfile|null;courses:PersonalCourse[];teachers:PersonalTeacher[];schedule:PersonalSchedule[];grades:PersonalGrade[];orders:PersonalOrder[];payments:PersonalPayment[];groups:PersonalTeachingGroup[];announcements:PersonalAnnouncement[];requests:PersonalServiceRequest[];pendingRequests:PersonalServiceRequest[];requestHistory:PersonalRequestEvent[]};
 const empty:PersonalSnapshot={profile:null,courses:[],teachers:[],schedule:[],grades:[],orders:[],payments:[],groups:[],announcements:[],requests:[],pendingRequests:[],requestHistory:[]};
 const resources:Record<PersonalView,readonly Exclude<keyof PersonalSnapshot,'profile'>[]>={home:['orders','announcements','pendingRequests'],courses:['courses','teachers'],teachers:['teachers'],grades:['grades'],orders:['orders','payments'],services:['requests','requestHistory'],profile:[],groups:['groups'],schedule:['schedule']};
 type State={scope:string;view:PersonalView;snapshot:PersonalSnapshot|null;context:string;authority:string;accessChanged:boolean;loading:boolean;error:string;updatedAt:string};
