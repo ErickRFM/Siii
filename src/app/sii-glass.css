@@ -484,3 +484,15 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-empty,
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow small{opacity:1;color:#5d5049}
 
 .sii-app.sii-ui .siii-overview-track svg{display:block;width:100%;height:8px}
+
+/* WCAG AA: shadcn's generated /60 and /50 opacity classes retain insufficient
+   contrast on warm translucent sidebar. Opaque accessible captions in both modes. */
+html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] :is(.text-sidebar-foreground\\/60,.text-sidebar-foreground\\/50),
+html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{
+ color:#efe6df!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] :is(.text-sidebar-foreground\\/60,.text-sidebar-foreground\\/50),
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{
+ color:#43362f!important;
+}
+.sii-app.sii-ui [data-sidebar="sidebar"] [data-sidebar="group-label"]{opacity:1}
