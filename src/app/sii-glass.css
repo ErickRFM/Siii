@@ -361,3 +361,9 @@ html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-mute
 @media(max-width:1249px){.sii-app.sii-ui .siii-student-sidepanel{grid-column:span 6}}
 @media(max-width:650px){.sii-app.sii-ui .siii-student-sidepanel{grid-column:1/-1;padding:16px}}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-sidepanel{background:rgba(255,251,246,.57);color:#302b29}
+
+.sii-app.sii-ui .siii-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:14px;text-align:center;font-size:.78rem}
+.sii-app.sii-ui .siii-calendar-days span{display:grid;place-items:center;min-height:28px}
+.sii-app.sii-ui .siii-calendar-today{border-radius:9px;background:#cbbdb4;color:#2b2523;font-weight:700}
+.sii-app.sii-ui .siii-calendar-shell button{padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.08)}
+@media(min-width:1250px){.sii-app.sii-ui .siii-calendar-shell{grid-column:10/13}}
