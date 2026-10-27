@@ -3,10 +3,10 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 const read=(path:string)=>readFileSync(resolve(process.cwd(),path),'utf8');
 describe('institutional UX contracts',()=>{
- it('loads glass before refinement',()=>{
+ it('loads scoped final glass after shared workspaces',()=>{
   const layout=read('src/app/layout.tsx');
   expect(layout.indexOf("import './sii-glass.css'")).toBeGreaterThan(0);
-  expect(layout.indexOf("import './sii-ux-refinement.css'")).toBeGreaterThan(layout.indexOf("import './sii-glass.css'"));
+  expect(layout.indexOf("import './sii-glass.css'")).toBeGreaterThan(layout.indexOf("import './sii-workspaces.css'"));
  });
  it('uses accessible confirmation instead of blocking prompts',()=>{
   const dialog=read('src/components/sii-confirmation.tsx');
