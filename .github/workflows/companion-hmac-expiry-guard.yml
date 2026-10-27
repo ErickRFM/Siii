@@ -20,14 +20,17 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      HMAC_KEY_ID: siii-hmac-20261025-138dedb2ba5840759868ff77844616a7
-      HMAC_EXPIRES_AT: '1793591855'
-      ALERT_WINDOW_SECONDS: '604800'
+      # Non-secret metadata. Update ONLY after verifying the successor in MongoDB and production.
+      HMAC_KEY_ID: ${{ vars.SIII_HMAC_WATCH_KEY_ID || 'siii-hmac-20261025-138dedb2ba5840759868ff77844616a7' }}
+      HMAC_EXPIRES_AT: ${{ vars.SIII_HMAC_WATCH_EXPIRES_AT || '1793591855' }}
+      ALERT_WINDOW_SECONDS: '1209600'
     steps:
-      - name: Check known credential expiry and open deduplicated issue
+      - name: Validate metadata and alert on expiry
         shell: bash
         run: |
           set -euo pipefail
+          [[ "$HMAC_EXPIRES_AT" =~ ^[0-9]{10,12}$ ]] || { echo 'INVALID_HMAC_EXPIRY_METADATA' >&2; exit 1; }
+          [[ "$HMAC_KEY_ID" =~ ^[a-zA-Z0-9_-]{8,128}$ ]] || { echo 'INVALID_HMAC_KEY_ID_METADATA' >&2; exit 1; }
           now=$(date -u +%s)
           remaining=$((HMAC_EXPIRES_AT - now))
           echo "HMAC_CREDENTIAL_REMAINING_SECONDS=$remaining"
@@ -35,19 +38,28 @@ jobs:
             echo 'HMAC_EXPIRY_NOT_IMMINENT'
             exit 0
           fi
-          title="Security: rotate SIII Companion HMAC credential before expiry"
-          issue_number=$(gh api --paginate "repos/$GH_REPO/issues?state=open&per_page=100" --jq ".[] | select(.pull_request == null and .title == \"$title\") | .number" | head -n 1)
-          if [[ -n "$issue_number" ]]; then
-            echo "HMAC_ROTATION_ISSUE_ALREADY_OPEN=#$issue_number"
+          # Each key gets its own issue; old open issues cannot hide warnings for a successor.
+          title="Security: rotate SIII Companion HMAC [$HMAC_KEY_ID]"
+          issue_number=$(gh api --paginate "repos/$GH_REPO/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | [.number,.title] | @tsv' | awk -F '\t' -v expected="$title" '$2 == expected {print $1; exit}')
+          if (( remaining <= 0 )); then
+            urgency='EXPIRED: signed SIII → Compañero requests may be rejected.'
+          elif (( remaining <= 86400 )); then
+            urgency='CRITICAL: less than 24 hours to expiry.'
+          elif (( remaining <= 259200 )); then
+            urgency='URGENT: less than three days to expiry.'
+          elif (( remaining <= 604800 )); then
+            urgency='WARNING: less than seven days to expiry.'
           else
-            if (( remaining <= 0 )); then
-              urgency='EXPIRED: integration may reject signed requests.'
-            else
-              urgency='Within seven days of expiry.'
-            fi
-            body=$(printf '%s\n'               "Credential key ID: \`$HMAC_KEY_ID\`"               'Expiry: 2026-11-02 03:57:35 UTC (2026-11-01 21:57:35 CDMX).'               "$urgency"               ''               'Required: coordinate issuance and storage of a replacement; overlap old/new verification; verify valid signature 200 and invalid signature 401; verify authorized processor and idempotency; revoke the old credential only after new production traffic succeeds.'               ''               'This workflow NEVER retrieves, creates, transmits, or rotates secrets. The timestamp is a known credential metadata value. Update the expiry metadata or replace this guard after verified renewal.')
+            urgency='NOTICE: less than fourteen days to expiry.'
+          fi
+          body=$(printf '%s\n' "Credential keyId: \`$HMAC_KEY_ID\`" "Expiry (UTC): $(date -u -d "@$HMAC_EXPIRES_AT" +%Y-%m-%dT%H:%M:%SZ)" "$urgency" '' 'This alert is based on repository metadata, NOT a live verifier query. Confirm credential state in MongoDB before declaring renewal.' 'Required: issue successor; overlap validation; smoke tests 200/401, nonce and tenant; promote issuer; confirm production traffic; revoke predecessor with audit.' 'No secret is retrieved, logged or modified.')
+          if [[ -z "$issue_number" ]]; then
             gh api -X POST "repos/$GH_REPO/issues" -f title="$title" -f body="$body" --jq '.html_url'
             echo 'HMAC_ROTATION_ISSUE_CREATED'
+          else
+            # Refresh the issue each day to escalate urgency without creating duplicates.
+            gh api -X PATCH "repos/$GH_REPO/issues/$issue_number" -f body="$body" >/dev/null
+            echo "HMAC_ROTATION_ISSUE_UPDATED=#$issue_number"
           fi
           if (( remaining <= 0 )); then
             echo 'HMAC_CREDENTIAL_EXPIRED' >&2
