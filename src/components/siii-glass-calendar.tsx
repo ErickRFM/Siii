@@ -1,13 +1,39 @@
 'use client';
 import {useState} from 'react';
-const names=['D','L','M','M','J','V','S'];
+
+const days=['L','M','M','J','V','S','D'];
+
+/** A navigable, Monday-first reference calendar, not a source of academic events. */
 export default function SiiiGlassCalendar({timeZone}:{timeZone:string}){
- const today=new Date(),[offset,setOffset]=useState(0);
- const shown=new Date(today.getFullYear(),today.getMonth()+offset,1);
- const yy=shown.getFullYear(),mm=shown.getMonth();
- const first=new Date(yy,mm,1).getDay(),count=new Date(yy,mm+1,0).getDate();
- const todayParts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(today).map(x=>[x.type,x.value]));
- return <div><div className="flex items-center justify-between gap-2"><span className="capitalize">{new Intl.DateTimeFormat('es-MX',{month:'long',year:'numeric'}).format(shown)}</span><div className="flex gap-1"><button aria-label="Mes anterior" type="button" onClick={()=>setOffset(v=>v-1)}>‹</button><button aria-label="Mes siguiente" type="button" onClick={()=>setOffset(v=>v+1)}>›</button></div></div>
- <div className="siii-calendar-days">{names.map((x,i)=><span className="siii-glass-muted" key={i}>{x}</span>)}{Array.from({length:first},(_,i)=><span key={'b'+i}/>)}{Array.from({length:count},(_,i)=>{const d=i+1,selected=Number(todayParts.year)===yy&&Number(todayParts.month)===mm+1&&Number(todayParts.day)===d;return <span key={d} className={selected?'siii-calendar-today':''}>{d}</span>})}</div>
- <p className="siii-glass-muted mt-3">Fechas de consulta; las convocatorias se publican en avisos institucionales.</p></div>;
+ const [offset,setOffset]=useState(0);
+ const now=new Date();
+ const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{
+  timeZone,year:'numeric',month:'2-digit',day:'2-digit'
+ }).formatToParts(now).map(part=>[part.type,part.value]));
+ const currentYear=Number(parts.year),currentMonth=Number(parts.month),currentDay=Number(parts.day);
+ const shown=new Date(Date.UTC(currentYear,currentMonth-1+offset,1,12));
+ const year=shown.getUTCFullYear(),month=shown.getUTCMonth();
+ const first=(shown.getUTCDay()+6)%7;
+ const length=new Date(Date.UTC(year,month+1,0)).getUTCDate();
+ const monthName=new Intl.DateTimeFormat('es-MX',{timeZone:'UTC',month:'long',year:'numeric'}).format(shown);
+ return <div className="siii-glass-calendar" aria-label="Calendario de referencia">
+  <div className="siii-calendar-header">
+   <strong className="capitalize">{monthName}</strong>
+   <div className="siii-calendar-controls">
+    <button type="button" aria-label="Mes anterior" onClick={()=>setOffset(value=>value-1)}>‹</button>
+    <button type="button" aria-label="Mes siguiente" onClick={()=>setOffset(value=>value+1)}>›</button>
+   </div>
+  </div>
+  <div className="siii-calendar-days">
+   {days.map((day,index)=><span className="siii-calendar-weekday" key={index} aria-label={['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][index]}>{day}</span>)}
+   {Array.from({length:first},(_,index)=><span key={'empty-'+index} aria-hidden="true"/>)}
+   {Array.from({length},(_,index)=>{
+    const day=index+1;
+    const isToday=year===currentYear&&month===currentMonth-1&&day===currentDay;
+    return <span key={day} className={isToday?'siii-calendar-today':''} aria-current={isToday?'date':undefined}
+     aria-label={new Intl.DateTimeFormat('es-MX',{timeZone:'UTC',dateStyle:'full'}).format(new Date(Date.UTC(year,month,day,12)))}>{day}</span>;
+   })}
+  </div>
+  <p className="siii-glass-muted mt-3">Las fechas académicas oficiales se comunican mediante avisos.</p>
+ </div>;
 }
