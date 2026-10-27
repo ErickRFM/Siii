@@ -633,7 +633,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-workspace-filters,.sii-catalog-form){
  min-width:0;border-radius:14px;
 }
-.sii-app.sii-ui .siii-glass-workspace :is(input:not([type=checkbox]),textarea,select,[role=combobox]){
+.sii-app.sii-ui .siii-glass-workspace :is(input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]){
  background:rgba(38,33,31,.35)!important;
  border:1px solid rgba(242,226,215,.16)!important;
  box-shadow:none!important;min-width:0;max-width:100%;
@@ -644,7 +644,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
  .sii-panel,.sii-catalog-summary,.sii-catalog-create
 ){background:rgba(255,250,243,.60)!important;color:#302b29}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
- input:not([type=checkbox]),textarea,select,[role=combobox]
+ input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]
 ){background:rgba(255,254,251,.72)!important;border-color:rgba(78,55,43,.2)!important;color:#342a25}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{
  color:#68564e;opacity:1;

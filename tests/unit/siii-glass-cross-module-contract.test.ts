@@ -41,6 +41,12 @@ describe('Smoked Glass cross-module design contract',()=>{
   expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassMetric');
   expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassPanel');
  });
+ it('does not apply text-field paint to radios, sliders, file upload or hidden controls',()=>{
+  const css=source('src/app/sii-glass.css');
+  expect(css).not.toContain('input:not([type=checkbox])');
+  for(const kind of ['radio','file','range','hidden','color'])expect(css).not.toContain('[type='+kind+']');
+  expect(css).toContain('input:is(:not([type]),[type=text]');
+ });
  it('uses its own decorative backdrop rather than a rasterized dashboard',()=>{
   expect(existsSync(resolve('public/visuals/siii-warm-architecture.svg'))).toBe(true);
   const svg=source('public/visuals/siii-warm-architecture.svg');
