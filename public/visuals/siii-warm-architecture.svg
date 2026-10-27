@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1040" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Fondo abstracto arquitectónico cálido">
+<defs>
+<linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60514a"/><stop offset=".46" stop-color="#3b3636"/><stop offset="1" stop-color="#333137"/></linearGradient>
+<linearGradient id="light" x1=".4" y1="0" x2=".8" y2="1"><stop stop-color="#e6b89b" stop-opacity=".70"/><stop offset=".44" stop-color="#aa8170" stop-opacity=".27"/><stop offset="1" stop-color="#332e2c" stop-opacity="0"/></linearGradient>
+<linearGradient id="window" x1="0" y1="0" x2=".5" y2="1"><stop stop-color="#c9a68d" stop-opacity=".64"/><stop offset=".4" stop-color="#b59681" stop-opacity=".20"/><stop offset="1" stop-color="#464046" stop-opacity=".35"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="19"/></filter>
+<filter id="haze"><feGaussianBlur stdDeviation="55"/></filter>
+</defs>
+<rect width="1600" height="1040" fill="url(#base)"/>
+<g opacity=".6" filter="url(#haze)"><ellipse cx="1150" cy="160" rx="445" ry="320" fill="#c59a7b"/><ellipse cx="340" cy="940" rx="370" ry="270" fill="#7d594c"/><ellipse cx="1120" cy="810" rx="490" ry="280" fill="#73574e"/></g>
+<g transform="skewY(-7)" filter="url(#soft)" opacity=".60">
+<path d="M390 205H1710V925H390Z" fill="#554b48"/>
+<rect x="520" y="255" width="150" height="470" fill="url(#window)"/>
+<rect x="710" y="238" width="173" height="510" fill="url(#window)"/>
+<rect x="936" y="210" width="183" height="530" fill="url(#window)"/>
+<rect x="1175" y="176" width="178" height="570" fill="url(#window)"/>
+<rect x="1400" y="163" width="210" height="585" fill="url(#window)"/>
+<path d="M420 210H1630V285H420Z" fill="#332d30"/>
+<path d="M420 710H1630V790H420Z" fill="#3b3738"/>
+<rect x="656" y="230" width="49" height="555" fill="#332f30"/>
+<rect x="890" y="230" width="47" height="555" fill="#332f30"/>
+<rect x="1125" y="180" width="52" height="610" fill="#302d30"/>
+<rect x="1360" y="180" width="50" height="610" fill="#302d30"/>
+</g>
+<g opacity=".35" filter="url(#haze)"><path d="M630 50H1650V100H630Z" fill="#efcfbb"/><ellipse cx="1120" cy="435" rx="220" ry="120" fill="#e0b38d"/></g>
+<rect width="1600" height="1040" fill="url(#light)"/>
+<rect width="1600" height="1040" fill="#292728" opacity=".19"/>
+</svg>

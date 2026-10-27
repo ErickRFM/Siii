@@ -743,3 +743,19 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-smal
  }
  .sii-app.sii-ui .siii-glass-workspace .sii-panel{padding-inline:clamp(12px,3vw,20px)}
 }
+
+
+/* Original lightweight architectural artwork; static, intentionally defocused.
+   The foreground panels remain real UI, never a rasterized dashboard. */
+.sii-app.sii-ui{
+ background:linear-gradient(108deg,rgba(44,39,38,.72) 0%,rgba(49,45,44,.42) 51%,rgba(46,43,47,.70) 100%),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui{
+ background:linear-gradient(108deg,rgba(244,235,223,.81),rgba(229,215,204,.67) 52%,rgba(239,226,216,.85)),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;
+}
+@media(max-width:768px){
+ .sii-app.sii-ui,html[data-sii-theme="light"] .sii-app.sii-ui{background-attachment:scroll!important}
+}
+@media(forced-colors:active){
+ .sii-app.sii-ui,html[data-sii-theme="light"] .sii-app.sii-ui{background:Canvas!important}
+}
