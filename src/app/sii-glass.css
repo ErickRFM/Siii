@@ -539,3 +539,14 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(4) 
 .sii-app.sii-ui .siii-overview-date strong{display:block;font-size:12px;font-weight:600}
 .sii-app.sii-ui .siii-overview-date small{display:block;opacity:.84;font-size:11px;margin-top:3px}
 .sii-app.sii-ui .siii-overview-date-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;margin-top:5px;background:#d7c7bd;box-shadow:none}
+
+/* Reused metric component; one surface and color contract for every authorized role. */
+.sii-app.sii-ui .siii-shared-glass-metric{display:grid;gap:6px;align-content:start}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="amber"] .siii-overview-metric-icon{background:rgba(195,148,104,.24);color:#f3d7b1}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="blue"] .siii-overview-metric-icon{background:rgba(116,144,220,.28);color:#c6d3ff}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="green"] .siii-overview-metric-icon{background:rgba(108,182,144,.22);color:#b8eacb}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="terracotta"] .siii-overview-metric-icon{background:rgba(203,135,91,.23);color:#f4c5a5}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="amber"] .siii-overview-metric-icon{color:#8b562c}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="blue"] .siii-overview-metric-icon{color:#3254a4}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="green"] .siii-overview-metric-icon{color:#246e48}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="terracotta"] .siii-overview-metric-icon{color:#a15426}

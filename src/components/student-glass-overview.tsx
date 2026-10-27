@@ -6,6 +6,7 @@ import type {PersonalSnapshot,PersonalView} from './use-personal-snapshot';
 import {institutionalStudentSummary} from './student-dashboard-metrics';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
+import {SiiiGlassMetric} from './ui/siii-glass-kit';
 import {BookOpen,CheckCircle2,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet} from 'lucide-react';
 
 type Destination=(section:string,academicView?:PersonalView)=>void;
@@ -30,30 +31,10 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <span className="siii-overview-watermark" aria-hidden="true"/>
    </header>
    <div className="siii-overview-metrics" aria-label="Resumen institucional">
-    <section className="siii-overview-panel siii-overview-metric">
-     <span className="siii-overview-metric-icon"><BookOpen size={21} aria-hidden="true"/></span>
-     <span>Promedio de notas publicadas</span>
-     <strong>{m.gradeMean===null?'—':m.gradeMean.toFixed(2)}</strong>
-     <small>No es el promedio oficial</small>
-    </section>
-    <section className="siii-overview-panel siii-overview-metric">
-     <span className="siii-overview-metric-icon"><GraduationCap size={21} aria-hidden="true"/></span>
-     <span>Créditos con nota publicada</span>
-     <strong>{m.creditsWithPublishedGrade}</strong>
-     <small>El plan oficial no está disponible</small>
-    </section>
-    <section className="siii-overview-panel siii-overview-metric">
-     <span className="siii-overview-metric-icon"><Wallet size={21} aria-hidden="true"/></span>
-     <span>Cargos por liquidar</span>
-     <strong>{outstandingLabel}</strong>
-     <small>{snapshot.orders.length?'Según el registro de Caja':'Sin movimientos registrados'}</small>
-    </section>
-    <section className="siii-overview-panel siii-overview-metric">
-     <span className="siii-overview-metric-icon"><FileText size={21} aria-hidden="true"/></span>
-     <span>Trámites activos</span>
-     <strong>{m.pendingCount}</strong>
-     <small>Solicitudes en seguimiento</small>
-    </section>
+    <SiiiGlassMetric label="Promedio de notas publicadas" value={m.gradeMean===null?'—':m.gradeMean.toFixed(2)} description="No es el promedio oficial" icon={<BookOpen size={21}/>} tone="amber"/>
+    <SiiiGlassMetric label="Créditos con nota publicada" value={m.creditsWithPublishedGrade} description="El plan oficial no está disponible" icon={<GraduationCap size={21}/>} tone="blue"/>
+    <SiiiGlassMetric label="Cargos por liquidar" value={outstandingLabel} description={snapshot.orders.length?'Según el registro de Caja':'Sin movimientos registrados'} icon={<Wallet size={21}/>} tone="green"/>
+    <SiiiGlassMetric label="Trámites activos" value={m.pendingCount} description="Solicitudes en seguimiento" icon={<FileText size={21}/>} tone="terracotta"/>
    </div>
    <div className="siii-overview-detail-grid">
     <section className="siii-overview-panel">

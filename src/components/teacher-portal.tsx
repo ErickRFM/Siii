@@ -7,6 +7,7 @@ import TeacherGradebook from './teacher-gradebook';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {PersonalTable} from './personal-table';
 import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
+import {SiiiGlassMetric} from './ui/siii-glass-kit';
 import {Button} from './ui/button';
 import {NativeSelect} from './ui/native-select';
 import {Card,CardHeader,CardTitle,CardContent} from './ui/card';
@@ -41,7 +42,11 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
    {profile&&<>
     {(view==='home'||view==='groups')&&<div className="flex flex-wrap items-end gap-4"><label className="min-w-0 flex-1 space-y-2 text-sm font-medium">Periodo académico<NativeSelect value={term} onChange={event=>setTerm(event.target.value)}><option value="">Todos los periodos asignados</option>{terms.map(([id,name])=><option key={id} value={id}>{name}</option>)}</NativeSelect></label>{view==='groups'&&<label className="min-w-0 flex-1 space-y-2 text-sm font-medium">Estado del grupo<NativeSelect value={state} onChange={event=>setState(event.target.value)}><option value="">Todos los estados</option>{Array.from(new Set(groups.map(group=>group.sectionStatus))).map(status=><option key={status} value={status}>{academicStatus[status]??status}</option>)}</NativeSelect></label>}</div>}
     <TabsContent value="home" className="space-y-5">
-     <div className="siii-teacher-metrics grid gap-4 sm:grid-cols-3">{[['Grupos asignados',inTerm.length],['Grupos con captura habilitada',inTerm.filter(group=>!group.published&&group.sectionStatus==='open'&&group.termStatus==='active').length],['Grupos con resultados publicados',inTerm.filter(group=>group.published).length]].map(([label,count])=><Card key={label} className="siii-teacher-metric"><CardContent className="space-y-2 p-5"><p className="text-sm text-muted-foreground">{label}</p><p className="text-3xl font-semibold tabular-nums">{count}</p></CardContent></Card>)}</div>
+     <div className="siii-teacher-metrics grid gap-4 sm:grid-cols-3">{[
+      ['Grupos asignados',inTerm.length],
+      ['Grupos con captura habilitada',inTerm.filter(group=>!group.published&&group.sectionStatus==='open'&&group.termStatus==='active').length],
+      ['Grupos con resultados publicados',inTerm.filter(group=>group.published).length]
+     ].map(([label,count],index)=><SiiiGlassMetric key={label} label={String(label)} value={count} tone={index===0?'amber':index===1?'blue':'green'} className="siii-teacher-metric"/>)}</div>
      <Card className="siii-teacher-work"><CardHeader><CardTitle role="heading" aria-level={2}>Trabajo académico</CardTitle></CardHeader><CardContent className="space-y-4">{inTerm.length?inTerm.map(group=><article key={group.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-4 last:border-0"><div className="min-w-0"><h3 className="break-words font-semibold">{group.courseName} · {group.sectionCode}</h3><p className="text-sm text-muted-foreground">{group.termName} · {evaluationState(group)}</p></div>{canEvaluate&&group.sectionStatus!=='archived'&&<Button variant="outline" onClick={()=>open(group.id,group.published?'results':'capture')}>{group.published?'Consultar resultados':'Abrir evaluación'}<span className="sr-only"> de {group.sectionCode}</span></Button>}</article>):<SiiEmptyView icon="grades" title="Sin asignaciones" description="No tienes grupos oficialmente asignados en este periodo. Solicita a coordinación revisar tu asignación."/>}<Button variant="outline" onClick={()=>setView('groups')}>Consultar mis grupos</Button></CardContent></Card>
      <p className="text-sm text-muted-foreground">Las notas guardadas en captura son borradores privados hasta la publicación. Las solicitudes de rectificación requieren un procedimiento autorizado por la institución.</p>
     </TabsContent>
