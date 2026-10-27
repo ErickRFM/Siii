@@ -74,4 +74,14 @@ Se inspeccionaron las capturas finales estudiantiles claro/oscuro a 360 px despu
 
 Reversión de aplicación: volver a desplegar el SHA anterior verificado `954b4fed…`; no se requiere rollback de datos para este bloque, porque no introduce DDL ni escrituras nuevas. Los clientes anteriores ignoran los nuevos headers; un cliente nuevo frente a un backend anterior falla cerrado y requiere recargar, sin reutilizar datos de otra sesión.
 
+## Entrega integrada y desplegada
+
+- [PR #117](https://github.com/ErickRFM/Siii/pull/117), head `0f217d7af3e3820cbd683fa4bba51b54460cebe0`, fusionado mediante squash autorizado a `main@7359662a7c042ce8b79e8e60715601c3cd187248`.
+- [CI del PR](https://github.com/ErickRFM/Siii/actions/runs/40447003066) aprobado: 926 unitarias; 636 integraciones + 35 omisiones existentes; ON 100 + una omisión existente; **169/169 de navegador**; contrato real Ktor/Mongo **27 casos, cero fallos/errores/omisiones**. El run de push también quedó verde.
+- [CI posterior de main](https://github.com/ErickRFM/Siii/actions/runs/40448396542) también aprobado sobre el SHA fusionado `7359662a…`.
+- Vercel Production `dpl_Ff2QwjEbuD5SKFsZnbqGMz3tm6et`, `READY`, alias `siii-three.vercel.app`, SHA **7359662a…**, comprobado por metadatos del alias después del merge.
+- Smoke posterior: `/api/health` 200, `/api/ready` 200 con base conectada/no-store, `/api/v1/auth/me` 401 sin sesión. No hubo escrituras de prueba en producción.
+
+Estado de este bloque: IMPLEMENTADO Y VALIDADO en CI/sintético, integrado y desplegado. No equivale a certificar todo V3 ni recorridos autenticados de usuarios institucionales reales. El siguiente incremento de solicitudes personales y la arquitectura documental se registra por separado.
+
 Evidencia local ignorada: `.p0-local/v3-portal/`; capturas sintéticas en `.p0-local/vnext-institutional/`. Los resultados locales no prueban disponibilidad de servicios externos ni datos académicos oficiales de producción.

@@ -4,14 +4,14 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {CollectionReadError,readCollection} from '@/shared/client/read-collection';
 import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
-import type {PersonalProfile,PersonalCourse,PersonalTeacher,PersonalSchedule,PersonalGrade,PersonalOrder,PersonalPayment,PersonalAnnouncement} from '@/modules/portal/contracts';
+import type {PersonalProfile,PersonalCourse,PersonalTeacher,PersonalSchedule,PersonalGrade,PersonalOrder,PersonalPayment,PersonalAnnouncement,PersonalServiceRequest,PersonalRequestEvent} from '@/modules/portal/contracts';
 
 export type PersonalView='home'|'courses'|'teachers'|'grades'|'orders'|'services'|'profile'|'groups'|'schedule';
-export type PersonalSnapshot={profile:PersonalProfile|null;courses:PersonalCourse[];teachers:PersonalTeacher[];schedule:PersonalSchedule[];grades:PersonalGrade[];orders:PersonalOrder[];payments:PersonalPayment[];groups:PersonalCourse[];announcements:PersonalAnnouncement[]};
-const empty:PersonalSnapshot={profile:null,courses:[],teachers:[],schedule:[],grades:[],orders:[],payments:[],groups:[],announcements:[]};
-const resources:Record<PersonalView,readonly Exclude<keyof PersonalSnapshot,'profile'>[]>={home:['orders','announcements'],courses:['courses','teachers'],teachers:['teachers'],grades:['grades'],orders:['orders','payments'],services:[],profile:[],groups:['groups'],schedule:['schedule']};
-type State={scope:string;view:PersonalView;snapshot:PersonalSnapshot|null;context:string;loading:boolean;error:string;updatedAt:string};
-const initial=(scope:string,view:PersonalView):State=>({scope,view,snapshot:null,context:'',loading:true,error:'',updatedAt:''});
+export type PersonalSnapshot={profile:PersonalProfile|null;courses:PersonalCourse[];teachers:PersonalTeacher[];schedule:PersonalSchedule[];grades:PersonalGrade[];orders:PersonalOrder[];payments:PersonalPayment[];groups:PersonalCourse[];announcements:PersonalAnnouncement[];requests:PersonalServiceRequest[];pendingRequests:PersonalServiceRequest[];requestHistory:PersonalRequestEvent[]};
+const empty:PersonalSnapshot={profile:null,courses:[],teachers:[],schedule:[],grades:[],orders:[],payments:[],groups:[],announcements:[],requests:[],pendingRequests:[],requestHistory:[]};
+const resources:Record<PersonalView,readonly Exclude<keyof PersonalSnapshot,'profile'>[]>={home:['orders','announcements','pendingRequests'],courses:['courses','teachers'],teachers:['teachers'],grades:['grades'],orders:['orders','payments'],services:['requests','requestHistory'],profile:[],groups:['groups'],schedule:['schedule']};
+type State={scope:string;view:PersonalView;snapshot:PersonalSnapshot|null;context:string;authority:string;accessChanged:boolean;loading:boolean;error:string;updatedAt:string};
+const initial=(scope:string,view:PersonalView):State=>({scope,view,snapshot:null,context:'',authority:'',accessChanged:false,loading:true,error:'',updatedAt:''});
 
 /** Per-mounted-view memory only. Every refresh checks the profile and every
  * collection page must carry the same server context before it can be committed. */
@@ -29,21 +29,23 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
   active.current?.abort();const controller=new AbortController();active.current=controller;
   setState(previous=>previous.scope===scope&&previous.view===view?{...previous,loading:true,error:''}:initial(scope,view));
   try{
-   if(!allowed){setState({...initial(scope,view),loading:permissions.loading,error:permissions.loading?'':'Tu acceso cambió. Actualiza los permisos o inicia sesión nuevamente.'});return}
+   if(!allowed){setState({...initial(scope,view),accessChanged:!permissions.loading&&Boolean(permissions.data),loading:permissions.loading,error:permissions.loading?'':'Tu acceso cambió. Actualiza los permisos o inicia sesión nuevamente.'});return}
    if(!navigator.onLine)throw new Error('OFFLINE');
    const base=`/api/v1/institutions/${institutionId}/portal/${kind}`;
    const response=await fetch(base+'/profile',{signal:controller.signal,cache:'no-store'});
    if(!response.ok)throw new CollectionReadError(response.status);
    const context=response.headers.get('x-siii-portal-context');
-   if(response.headers.get('x-siii-portal-actor')!==actorId||!context)throw new Error('CONTEXT_CHANGED');
+   const authority=response.headers.get('x-siii-portal-authority');
+   if(response.headers.get('x-siii-portal-actor')!==actorId)throw new Error('CONTEXT_CHANGED');
+   if(!context||!authority)throw new Error('PROFILE_CONTEXT_UNAVAILABLE');
    const profile=(await response.json()).data as PersonalProfile|null;
    if(controller.signal.aborted)return;
-   setState(previous=>previous.scope===scope&&previous.view===view&&previous.context===context?{...previous,snapshot:previous.snapshot?{...previous.snapshot,profile}:null}:{...initial(scope,view),context});
-   const check=(page:Response)=>{if(page.headers.get('x-siii-portal-context')!==context||page.headers.get('x-siii-portal-actor')!==actorId)throw new Error('CONTEXT_CHANGED')};
-   const entries=profile?await Promise.all(resources[view].map(async resource=>[resource,(await readCollection(base+'/'+resource,{signal:controller.signal},check)).data] as const)):[];
-   if(!controller.signal.aborted)setState({scope,view,context,snapshot:{...empty,...Object.fromEntries(entries),profile},loading:false,error:'',updatedAt:new Date().toLocaleString('es-MX')});
+   setState(previous=>previous.scope===scope&&previous.view===view&&previous.context===context?{...previous,authority,accessChanged:false,snapshot:previous.snapshot?{...previous.snapshot,profile}:null}:{...initial(scope,view),context,authority});
+   const check=(page:Response)=>{if(page.headers.get('x-siii-portal-authority')!==authority||page.headers.get('x-siii-portal-actor')!==actorId)throw new Error('CONTEXT_CHANGED');if(page.headers.get('x-siii-portal-context')!==context)throw new Error('PROFILE_CHANGED')};
+   const entries=profile?await Promise.all(resources[view].map(async resource=>[resource,(await readCollection(base+'/'+(resource==='requestHistory'?'request-history':resource==='pendingRequests'?'pending-requests':resource),{signal:controller.signal},check)).data] as const)):[];
+   if(!controller.signal.aborted)setState({scope,view,context,authority,accessChanged:false,snapshot:{...empty,...Object.fromEntries(entries),profile},loading:false,error:'',updatedAt:new Date().toLocaleString('es-MX')});
   }catch(cause){
-   if(!controller.signal.aborted){controller.abort();setState({...initial(scope,view),loading:false,error:!navigator.onLine?'Sin conexión. Reconecta para consultar información vigente.':cause instanceof CollectionReadError&&[401,403].includes(cause.status)||cause instanceof Error&&cause.message==='CONTEXT_CHANGED'?'Tu acceso o expediente cambió. Actualiza o inicia sesión nuevamente.':'No se pudo consultar esta sección. Reintenta para obtener información vigente.'})}
+   if(!controller.signal.aborted){const accessChanged=cause instanceof CollectionReadError&&[401,403].includes(cause.status)||cause instanceof Error&&cause.message==='CONTEXT_CHANGED';controller.abort();setState({...initial(scope,view),accessChanged,loading:false,error:!navigator.onLine?'Sin conexión. Reconecta para consultar información vigente.':accessChanged?'Tu acceso o expediente cambió. Actualiza o inicia sesión nuevamente.':cause instanceof Error&&cause.message==='PROFILE_CHANGED'?'La información cambió durante la consulta. Actualiza para comprobar tu acceso.':'No se pudo consultar esta sección. Reintenta para obtener información vigente.'})}
   }finally{if(active.current===controller)active.current=null}
  },[actorId,institutionId,kind,scope,view,allowed,permissions.loading]);
  useEffect(()=>{
@@ -61,5 +63,6 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
  },[refresh,scope,view]);
  // Props can change before effects run. Never paint the preceding actor/view's rows.
  const reload=()=>{if(!allowed)permissions.refresh();else void refresh()};
- return {...(state.scope===scope&&state.view===view?state:initial(scope,view)),refresh:reload};
+ const retire=()=>{active.current?.abort();active.current=null;setState({...initial(scope,view),loading:false,accessChanged:true,error:'Tu acceso cambió. Actualiza para consultar información vigente.'})};
+ return {...(state.scope===scope&&state.view===view?state:initial(scope,view)),refresh:reload,retire};
 }

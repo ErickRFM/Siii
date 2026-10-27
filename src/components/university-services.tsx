@@ -107,7 +107,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
  async function advance(row:RecordRow,status:string){
   let payload:Record<string,unknown>={id:row.id,status};
   if(tab==='requests'){
-   const reason=await ask({title:'Registrar decisión de trámite',description:`Confirma el cambio a ${status}. La decisión quedará auditada.`,reasonLabel:'Motivo de la decisión',minReasonLength:6,confirmLabel:'Registrar decisión',destructive:status==='REJECTED'});
+   const reason=await ask({title:'Registrar decisión de trámite',description:`Confirma el cambio a ${status}. La decisión quedará auditada y el motivo será visible para el estudiante.`,reasonLabel:'Motivo de la decisión',minReasonLength:6,confirmLabel:'Registrar decisión',destructive:status==='REJECTED'});
    if(!reason)return;
    payload={...payload,decisionReason:reason.trim()};
   }else if(!await ask({title:'Cambiar estado del servicio',description:`Se aplicará el estado ${status} y quedará registrado.`,confirmLabel:'Aplicar cambio',destructive:status==='ARCHIVED'||status==='CANCELLED'}))return;
