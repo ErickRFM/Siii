@@ -367,3 +367,9 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-sidepanel{background:
 .sii-app.sii-ui .siii-calendar-today{border-radius:9px;background:#cbbdb4;color:#2b2523;font-weight:700}
 .sii-app.sii-ui .siii-calendar-shell button{padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.08)}
 @media(min-width:1250px){.sii-app.sii-ui .siii-calendar-shell{grid-column:10/13}}
+
+/* Reference alignment: calm cards, responsive grids and accessible motion. */
+.sii-app.sii-ui .siii-student-glass{align-items:stretch}
+.sii-app.sii-ui .siii-student-sidepanel{box-shadow:none!important;border:0!important}
+.sii-app.sii-ui .siii-student-glass :is(.siii-student-panel,.siii-student-metric,.siii-student-sidepanel){overflow-wrap:anywhere}
+@media(max-width:980px){.sii-app.sii-ui .siii-student-sidepanel{grid-column:1/-1}}
