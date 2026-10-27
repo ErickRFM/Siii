@@ -8,11 +8,11 @@
 ## Inventario y clasificación
 | Módulo | Infraestructura previa | Entrega | Clasificación de alcance |
 |---|---|---|---|
-| Identidad/vínculo docente | teacher_account_links, institutional_teachers, sesión y capacidades | Reutilizados; consulta de número de empleado y datos institucionales | Implementado; validar pruebas finales |
-| Grupos propios | portal/teacher/groups, section_teachers, paginación y relación viva | Inicio, filtros por periodo/estado/materia, contador real y estado de captura | Implementado; validar pruebas finales |
-| Lista oficial | roster autorizado del gradebook | Vista de consulta mínima, sin edición de inscripciones ni exportación no autorizada | Implementado; validar pruebas finales |
-| Evaluación | Componentes ponderados, scores con revisión exacta, auditoría | Formularios adaptables por alumno, persistencia confirmada, revisión ponderada, cierre transaccional | Implementado; validar pruebas finales |
-| Publicación/resultados | grade_publications y final_grades | Resultados finales separados de captura, versiones e identidad de publicación | Implementado; validar pruebas finales |
+| Identidad/vínculo docente | teacher_account_links, institutional_teachers, sesión y capacidades | Reutilizados; consulta de número de empleado y datos institucionales | Implementado y validado local; CI final pendiente |
+| Grupos propios | portal/teacher/groups, section_teachers, paginación y relación viva | Inicio, filtros por periodo/estado/materia, contador real y estado de captura | Implementado y validado local; CI final pendiente |
+| Lista oficial | roster autorizado del gradebook | Vista de consulta mínima, sin edición de inscripciones ni exportación no autorizada | Implementado y validado local; CI final pendiente |
+| Evaluación | Componentes ponderados, scores con revisión exacta, auditoría | Formularios adaptables por alumno, persistencia confirmada, revisión ponderada, cierre transaccional | Implementado y validado local; CI final pendiente |
+| Publicación/resultados | grade_publications y final_grades | Resultados finales separados de captura, versiones e identidad de publicación | Implementado y validado local; CI final pendiente |
 | Acta certificada/documentos | No se encontró emisor documental docente | Consulta institucional; no se genera un PDF pretendidamente certificado | Parcial; certificación institucional pendiente |
 | Rectificación | No había procedimiento | Solicitud, evidencia privada, revisión, resolución, aplicación separada, devolución auditada a borrador | Infraestructura implementada; activación real bloqueada por configuración |
 | Perfil editable/trámites/tutorías | Sin contratos docentes autorizados de autoservicio | Perfil de consulta y seguridad; sin acciones fabricadas | No implementado: requiere contratos y asignaciones institucionales |
@@ -47,16 +47,19 @@ Antes de activar institucionalmente: el responsable debe aprobar la política y 
 ## Verificación en curso
 - Baseline: 926 unitarias.
 - Incremento: 931 unitarias y lint sin errores.
-- Contratos iniciales docentes/rectificación: 19 HTTP reales.
-- Recuperación y reglas extraordinarias: 15 HTTP de rectificación (incluye aprobación obsoleta devuelta a borrador y nuevo ciclo).
+- Contratos combinados finales docente/estudiante/solicitudes/rectificación: 43/43 HTTP reales.
+- Recuperación, contexto de lectura y reglas extraordinarias: 16 HTTP de rectificación (incluye aprobación obsoleta devuelta a borrador y nuevo ciclo).
 - Migración en base limpia: `MIGRATIONS_APPLIED`.
 - `npm audit`: 0 vulnerabilidades.
 - Integración integral local: 653 aprobadas y 35 omitidas; cinco expectativas históricas de total de migraciones/tablas detectadas y corregidas. Repetición PostgreSQL de ambos módulos: 45/45 aprobadas, conservando controles de datos, permisos, RLS, hash/perfil e idempotencia.
 - Regresión UI focal: 54 escenarios aprobados y repetición final de los tres ajustados, 3/3 aprobados. Incluye recorrido completo de rectificación con MFA y actores distintos, captura no guardada, retiro real y ambos temas.
+- Después de reconciliar: 29 escenarios UI aprobados y repetición del recorrido de ambos temas, 2/2 aprobados. Se desactivó la interpolación de color en las pestañas para conservar contraste durante el cambio de tema.
 - Reconciliación: se incorporó `main@8d7cc7d6` (solicitudes estudiantiles, PR #118). Se conservaron ambos flujos y se resolvieron cuatro conflictos semánticamente. El CI del resultado combinado sigue siendo el gate final.
 
 ## Revisión independiente
-Se corrigieron los casos detectados: capturas ocultas tras cierre; selección de otro grupo al solicitar uno no autorizado; aprobación obsoleta sin recuperación; envío de una solicitud con cambios visibles sin guardar. Los últimos dos tienen reproducción RED y validación GREEN parcial/pendiente de UI final.
+Se corrigieron los casos detectados: capturas ocultas tras cierre; selección de otro grupo al solicitar uno no autorizado; aprobación obsoleta sin recuperación; envío de una solicitud con cambios visibles sin guardar. Los cuatro tienen regresiones aprobadas. Una prueba HTTP adicional reprodujo la revocación de asignación entre páginas: el contexto opaco ahora incluye vínculos, asignaciones, grants y política vigentes, comprobados antes y después de leer; el cliente descarta páginas de contextos diferentes. No se utiliza ese hash como autorización.
+
+PR de entrega: [#119](https://github.com/ErickRFM/Siii/pull/119). El informe refleja la evidencia previa al gate final de CI; el cierre debe confirmar el SHA integrado y el despliegue.
 
 ## Producción e integración
 Vercel confirmó producción READY en `7359662a` al auditar, antes de estos cambios. No hay variables de rectificación en preview/production (sólo se inspeccionaron nombres). El SHA final, PR, CI, merge y despliegue se completarán en el cierre verificable. No se utilizarán expedientes reales para las pruebas.

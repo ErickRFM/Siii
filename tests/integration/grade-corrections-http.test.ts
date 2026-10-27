@@ -89,4 +89,13 @@ describe.sequential('grade corrections real institutional contracts',()=>{
   request=(await (await command({kind:'rebase',id:request.id,expectedRevision:request.revision})).json()).data;request=(await (await command({kind:'submit',id:request.id,expectedRevision:request.revision})).json()).data;request=(await (await command({kind:'review',id:request.id,expectedRevision:request.revision,note:'Nueva revisión contra la versión vigente'},reviewer)).json()).data;request=(await (await command({kind:'decide',id:request.id,expectedRevision:request.revision,decision:'approve',reason:'Nueva autorización tras comparar la publicación vigente'},approver)).json()).data;const applied=await command({kind:'apply',id:request.id,expectedRevision:request.revision},reviewer);expect(applied.status).toBe(200);expect((await applied.json()).data.status).toBe('APPLIED');
  });
 
+ it('changes the opaque read context when a teaching assignment is revoked between pages',async()=>{
+  const fixture=await portalFixture(sql),actor=fixture.secondTeacher;
+  const teacher=(await sql.query("INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) VALUES($1,'SECOND','Docente','Asignado') RETURNING id",[fixture.tenant])).rows[0].id;
+  await sql.query('INSERT INTO teacher_account_links(institution_id,teacher_id,membership_id) VALUES($1,$2,$3)',[fixture.tenant,teacher,actor.member]);await sql.query('INSERT INTO section_teachers(institution_id,teacher_id,section_id) VALUES($1,$2,$3)',[fixture.tenant,teacher,fixture.section]);
+  for(const studentId of [fixture.studentId,fixture.secondStudentId])expect((await command(draft(fixture,studentId),actor,fixture)).status).toBe(201);
+  const first=await list(actor,'?limit=1',fixture),before=first.headers.get('x-siii-correction-context'),body=await first.json();expect(body.data).toHaveLength(1);expect(body.page.nextCursor).toBeTruthy();
+  await sql.query('UPDATE section_teachers SET revoked_at=now() WHERE institution_id=$1 AND teacher_id=$2',[fixture.tenant,teacher]);const next=await list(actor,'?limit=1&cursor='+encodeURIComponent(body.page.nextCursor),fixture);expect(next.status).toBe(200);expect((await next.json()).data).toEqual([]);expect(next.headers.get('x-siii-correction-context')).not.toBe(before);
+ });
+
 });

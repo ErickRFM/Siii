@@ -111,11 +111,26 @@ export async function correctionWrite(context:Context,command:CorrectionCommand,
  });
 }
 
+/** Opaque transport discriminator only; it never authorizes a request.
+ * Bind every page to the same live grants, policy and teaching relations. */
+async function correctionAuthorityRevision(tx:Transaction,current:NonNullable<Awaited<ReturnType<typeof lockInstitutionContext>>>,policy:CorrectionPolicy|null){
+ const institutionId=current.access.institutionId,membershipId=current.access.membershipId;
+ const signatures=await tx.execute(sql`select
+  (select coalesce(jsonb_agg(to_jsonb(grant_row) order by grant_row.id),'[]'::jsonb) from role_assignments grant_row where grant_row.membership_id=${membershipId}) grants,
+  (select coalesce(jsonb_agg(jsonb_build_object('link',to_jsonb(link),'status',teacher.status,'assignment',to_jsonb(assignment)) order by link.id,assignment.id),'[]'::jsonb)
+   from teacher_account_links link inner join institutional_teachers teacher on teacher.id=link.teacher_id and teacher.institution_id=link.institution_id
+   left join section_teachers assignment on assignment.teacher_id=teacher.id and assignment.institution_id=${institutionId}
+   where link.institution_id=${institutionId} and link.membership_id=${membershipId}) teaching`);
+ const effective=current.access.grants.filter(grant=>grant.revokedAt===null&&(!grant.validUntil||grant.validUntil>new Date()));
+ return createHash('sha256').update(JSON.stringify({actor:current.subject.id,session:current.session.id,institutionId,membershipId,effective,assurance:current.assurance,policy,relations:signatures.rows[0]})).digest('hex');
+}
+
 export async function correctionList(context:Context,page:PageInput,scope:string,id?:string,candidate?:{sectionId:string;studentId:string;publicationId:string}){
  const institutionId=context.access.institutionId,policy=correctionPolicy(institutionId);
- if(!correctionsEnabled())return {available:false,data:[],page:{nextCursor:null},policy:policySummary(null)};
+ if(!correctionsEnabled())return {available:false,data:[],page:{nextCursor:null},policy:policySummary(null),authorityRevision:null};
  return domainTransaction(context,{capability:'institutions.read'},async tx=>{
   const current=await currentContext(tx,context),staff=correctionStaff(current.subject,institutionId,policy,current.now);
+  const authorityRevision=await correctionAuthorityRevision(tx,current,policy);
   const canOwn=can(current.subject,'grades.manage',{institutionId,status:'active',assignedUserIds:[current.subject.id]},current.now);
   if(!staff&&!canOwn)return reject('FORBIDDEN',403);
   const rows=await tx.select({request:requests,sectionCode:academicSections.code,sectionStatus:academicSections.status,termStatus:academicTerms.status,courseName:academicCourses.name,termName:academicTerms.name,enrollmentNumber:institutionalStudents.enrollmentNumber,firstName:institutionalStudents.firstName,lastName:institutionalStudents.lastName,cursorAt:cursorTimestamp(requests.createdAt)}).from(requests)
@@ -140,7 +155,8 @@ export async function correctionList(context:Context,page:PageInput,scope:string
    const history=id?await tx.select({id:events.id,actorId:events.actorId,action:events.action,status:events.status,note:events.note,createdAt:events.createdAt}).from(events).where(and(eq(events.institutionId,institutionId),eq(events.requestId,record.id))).orderBy(events.createdAt,events.id):[];
    data.push({...record,sectionCode:row.sectionCode,courseName:row.courseName,termName:row.termName,periodClosed:row.sectionStatus!=='open'||row.termStatus!=='active',enrollmentNumber:row.enrollmentNumber,firstName:row.firstName,lastName:row.lastName,evidence:attachments,history,actions:{return:other&&['SUBMITTED','IN_REVIEW','APPROVED'].includes(record.status)&&!!policy&&hasCorrectionRole(current.subject,institutionId,[...policy.reviewerRoles,...policy.approverRoles]),edit:mine&&record.status==='DRAFT',review:other&&record.status==='SUBMITTED'&&!!policy&&hasCorrectionRole(current.subject,institutionId,policy.reviewerRoles),decide:other&&record.status==='IN_REVIEW'&&!!policy?.approved&&hasCorrectionRole(current.subject,institutionId,policy.approverRoles),apply:other&&record.status==='APPROVED'&&!!policy?.approved&&policy.allowExecution&&hasCorrectionRole(current.subject,institutionId,policy.executorRoles)}});
   }
-  return {available:true,data,page:packed.page,policy:policySummary(policy),source:candidateSource};
+  if(authorityRevision!==await correctionAuthorityRevision(tx,current,policy))return reject('FORBIDDEN',403);
+  return {available:true,data,page:packed.page,policy:policySummary(policy),source:candidateSource,authorityRevision};
  });
 }
 
