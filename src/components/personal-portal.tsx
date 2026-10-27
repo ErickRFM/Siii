@@ -65,7 +65,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
  const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className="text-sm text-muted-foreground">Actualizando información…</p>:<SiiSkeleton label="Consultando tu información institucional"/>)}{snapshot&&!profile&&<SiiEmptyView icon="registry" title={'Expediente aún sin vincular'} description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
  function content(){
   if(!snapshot||!profile)return null;
-  if(view==='home')return <StudentGlassOverview snapshot={snapshot} profile={profile} institutionName={institutionName} onNavigate={(destination,academic)=>{if(academic)setAcademicView(academic);setSection(destination)}}/>;
+  if(view==='home')return <StudentGlassOverview snapshot={snapshot} profile={profile} institutionName={institutionName} onNavigate={(destination,academic)=>{if(academic)setAcademicView(academic);setSection(destination)}} onRefresh={()=>void refresh()} refreshing={loading}/>;
   if(view==='courses')return <PersonalEnrollments courses={snapshot.courses} teachers={snapshot.teachers}/>;
   if(view==='teachers')return <PersonalTable label="Docentes asignados" rows={snapshot.teachers} searchText={row=>row.firstName+' '+row.lastName+' '+row.courseName} columns={[{label:'Docente',render:row=><strong>{row.firstName} {row.lastName}</strong>},{label:'Materia',render:row=>row.courseName},{label:'Grupo',render:row=>row.sectionCode},{label:'Periodo',render:row=>row.termName}]}/>;
   if(view==='grades')return <PersonalHistory rows={snapshot.grades}/>;
@@ -75,7 +75,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   if(view==='schedule')return <Schedule rows={snapshot.schedule} teachers={snapshot.teachers} timeZone={profile.timeZone}/>;
   return null;
  }
- return <div className={'sii-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}><div className={section==='home'?'siii-home-visually-hidden':''}><SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/></div>
+ return <div className={'sii-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}><div className={section==='home'?'siii-home-visually-hidden':''}><SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={section==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/></div>
   <nav aria-label="Contexto del portal" className="siii-student-utility-links flex flex-wrap gap-3 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link></nav>
   <Tabs value={section} onValueChange={setSection} className={'min-w-0 space-y-5'+(section==='home'?' siii-home-tabs':'')}>
    <TabsList aria-label={'Navegación estudiantil'} className="sii-personal-navigation">

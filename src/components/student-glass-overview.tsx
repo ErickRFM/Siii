@@ -6,11 +6,11 @@ import type {PersonalSnapshot,PersonalView} from './use-personal-snapshot';
 import {institutionalStudentSummary} from './student-dashboard-metrics';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
-import {BookOpen,CheckCircle2,ChevronRight,FileText,GraduationCap,Wallet} from 'lucide-react';
+import {BookOpen,CheckCircle2,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet} from 'lucide-react';
 
 type Destination=(section:string,academicView?:PersonalView)=>void;
-export default function StudentGlassOverview({snapshot,profile,institutionName,onNavigate}:{
- snapshot:PersonalSnapshot;profile:PersonalProfile;institutionName:string;onNavigate:Destination;
+export default function StudentGlassOverview({snapshot,profile,institutionName,onNavigate,onRefresh,refreshing}:{
+ snapshot:PersonalSnapshot;profile:PersonalProfile;institutionName:string;onNavigate:Destination;onRefresh:()=>void;refreshing:boolean;
 }){
  const m=institutionalStudentSummary(snapshot);
  const outstandingLabel=m.currency?formatMoney(m.outstanding,m.currency):m.outstanding===0?'Sin cargos pendientes':'Ver desglose por moneda';
@@ -18,6 +18,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
  return <div className="siii-student-dashboard">
   <div className="siii-student-main">
    <header className="siii-overview-hero">
+    <button type="button" className="siii-overview-refresh" aria-label="Actualizar mi información" title="Actualizar mi información" disabled={refreshing} onClick={onRefresh}><RefreshCw size={16} aria-hidden="true"/></button>
     <span className="siii-overview-eyebrow">Buen día,</span>
     <h2>{profile.firstName}</h2>
     <p>{profile.programName||institutionName}</p>
