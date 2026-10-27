@@ -759,3 +759,20 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
 @media(forced-colors:active){
  .sii-app.sii-ui,html[data-sii-theme="light"] .sii-app.sii-ui{background:Canvas!important}
 }
+
+
+/* Form controls stay readable in native OS popovers and reduced-transparency modes. */
+.sii-app.sii-ui .siii-glass-workspace select option,
+.sii-app.sii-ui .siii-glass-workspace select optgroup{color:#312a27;background:#f1e9e1}
+.sii-app.sii-ui .siii-glass-workspace :is(input,select,textarea):disabled{opacity:.65;cursor:not-allowed}
+.sii-app.sii-ui .siii-glass-workspace :is(input,select,textarea):focus-visible{
+ outline:2px solid hsl(var(--ring))!important;outline-offset:2px;
+}
+@media(prefers-reduced-transparency:reduce){
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#514944!important;
+ }
+ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+  background:#f5eee5!important;color:#312a27!important;
+ }
+}

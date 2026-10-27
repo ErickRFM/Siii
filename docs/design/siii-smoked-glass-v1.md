@@ -30,3 +30,10 @@
 - Vercel Preview `READY` para el mismo commit que aprueba CI.
 - Comparación visual autenticada por perfil antes de integrar a main. Nada de afirmar un 100 % basándose solo en build.
 - Verificar navegación y acciones relevantes de Estudiante, Docente, Admisiones, Caja, Servicios Escolares, Dirección, Coordinación, Admin y Superadmin.
+
+## Transversalidad cerrada en código
+El selector `siii-glass-workspace` aplica el material compartido a Admisiones institucionales, catálogos, operación académica, registro escolar, Caja, roles, usuarios, administración, invitaciones, programación de clases, calificaciones y portales personales. La lógica, las consultas y las autorizaciones de cada módulo siguen en sus implementaciones originales.
+
+El tema oscuro se puede activar desde la barra superior y queda guardado. Para conservar el comportamiento del sistema y sus pruebas de navegación preexistentes, el estado inicial sin preferencia guardada sigue siendo claro. En cualquiera de los dos temas las superficies utilizan los mismos componentes y jerarquía de interfaz.
+
+El fondo `public/visuals/siii-warm-architecture.svg` es una composición vectorial original, estática y deliberadamente desenfocada; el diseño aprobado sigue siendo referencia de proporciones y materialidad, no un screenshot embebido.
