@@ -1,0 +1,14 @@
+node_modules/
+.next/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+dist/
+build/
+coverage/
+
+/.p0-local/
+/.superpowers/
+/.artifacts/
+/.idea/

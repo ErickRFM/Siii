@@ -1,0 +1,14 @@
+{
+  "project": "vsnrbjexusidlvhkhmqg",
+  "publicTables": 0,
+  "ledgerEntries": 0,
+  "unexecutedProfile": {
+    "profile": "supabase-v1",
+    "definition_hash": "f4caa0477a0000731be1c0d7ef907c6a3b81596891b4c78e628d9b3c4fda3b97"
+  },
+  "failure": "42501 provider default privileges",
+  "failedStatement": "1044060342fa0b20baff5856b78ef757c63db147ead132932ef0b2ac005e6169",
+  "correction": "Remove only this run failed registration after proving zero migration entries and zero public tables; subsequent registration will be atomic with migration",
+  "ledgerRewritten": false,
+  "productionChanged": false
+}

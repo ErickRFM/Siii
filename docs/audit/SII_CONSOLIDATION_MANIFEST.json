@@ -1,0 +1,199 @@
+{
+  "initialMain": "c7334cdfe524fe02d7c7090e0862884743008720",
+  "inventory": [
+    {
+      "pr": 9,
+      "ref": "feat/r1-r2-academic-operations",
+      "sha": "3e6a6fef1e128e806130e8c5a62b3514c476eb32"
+    },
+    {
+      "pr": 14,
+      "ref": "feat/r3-grading-drafts",
+      "sha": "8950c54b77427f1a02bfb9d1826c61a8107c254b"
+    },
+    {
+      "pr": 15,
+      "ref": "feat/r4-schedules-occurrences",
+      "sha": "f5a3922f6b46864c3bf9dc395284e6dcc5827883"
+    },
+    {
+      "pr": 16,
+      "ref": "feat/r4-companion-academic-read-api",
+      "sha": "fb0a54fe5bee0fe73a66314b5de70aaec9eedda4"
+    },
+    {
+      "pr": 18,
+      "ref": "feat/r5-university-services",
+      "sha": "fdbcef5a33673122d67256ff44fd3e6735865be8"
+    },
+    {
+      "pr": 19,
+      "ref": "feat/p0-hardening",
+      "sha": "755a4bb97460e0008b13cc28a0edbd50184ed12d"
+    },
+    {
+      "pr": 20,
+      "ref": "chore/p0-1-release-gates",
+      "sha": "ee6c39eccd97cbd4aff3b4040322b18cf6e6e714"
+    },
+    {
+      "pr": 21,
+      "ref": "feat/p1-mfa",
+      "sha": "8c824769e3ec778a2950eb942e08b65ee035d2ac"
+    },
+    {
+      "pr": 22,
+      "ref": "feat/p1-permission-scopes",
+      "sha": "d300ba755d34eceedc753c74d467665385b322e4"
+    },
+    {
+      "pr": 23,
+      "ref": "feat/p1-invitations",
+      "sha": "242092855736900b9e26c72ea96b69fc2cc5e103"
+    },
+    {
+      "pr": 24,
+      "ref": "codex/p1-user-management",
+      "sha": "e2180879aef284239997e3769e450d7a288893b4"
+    },
+    {
+      "pr": 25,
+      "ref": "codex/p1-institution-admin",
+      "sha": "dff8c2d9573e2aa3a337afaa09114195051a8088"
+    }
+  ],
+  "migrations": [
+    {
+      "tag": "0000_siii_foundation_identity",
+      "idx": 0,
+      "when": 1791900000000,
+      "sha256": "90f21da63a18a652828d86457f944bf75283b5f06a4561e32fbe2fbd98a7bb40"
+    },
+    {
+      "tag": "0001_academic_catalogs",
+      "idx": 1,
+      "when": 1791938000000,
+      "sha256": "d82b7540e77fa6952f9588b338a797d3681d93b1288025e13ad178bfb69417d7"
+    },
+    {
+      "tag": "0002_p0_hardening",
+      "idx": 2,
+      "when": 1791940000000,
+      "sha256": "dbee01de25ecf6326d2529ef60cc03200b003019282f75c403a6b0961407a86a"
+    },
+    {
+      "tag": "0003_p0_1_privacy",
+      "idx": 3,
+      "when": 1791999037864,
+      "sha256": "f78e7d227715c22a4d0ecfc79b426c825306216ffccd5393cb31654a8cd6de30"
+    },
+    {
+      "tag": "0004_p0_1_inherited_privileges",
+      "idx": 4,
+      "when": 1792000681637,
+      "sha256": "e6bbbfbef8fb62621183da97349b5d0340047803ec7cfe74b1794baf1fb9c4d9"
+    },
+    {
+      "tag": "0005_p0_1_runtime_upgrade",
+      "idx": 5,
+      "when": 1792001102854,
+      "sha256": "9dc43ac162027ba95074dc4091461e700bb6729647790f014a867073e5cbb534"
+    },
+    {
+      "tag": "0006_p1_mfa",
+      "idx": 6,
+      "when": 1792001310881,
+      "sha256": "4e5a588a3ba7175f00096405bfb9aae7b5eebdaa03aeeeb6f9b5da3dd01a8230"
+    },
+    {
+      "tag": "0007_p1_permission_scopes",
+      "idx": 7,
+      "when": 1792001500000,
+      "sha256": "6011bfdab8a8f4f4c1c6d62202bbb5ceaca459bc35fe9cc1af5ba2acba49627c"
+    },
+    {
+      "tag": "0008_p1_invitations",
+      "idx": 8,
+      "when": 1792017000000,
+      "sha256": "c0a7dca7509257527d2bcd0bb334d227c01c5d2590ec84a77bb27bf15ee81559"
+    },
+    {
+      "tag": "0009_p1_user_management",
+      "idx": 9,
+      "when": 1792085000000,
+      "sha256": "a7ca5a54c19a7370248e753bde04581ca48f24ac5e25ae0b12a10d73b825c099"
+    },
+    {
+      "tag": "0010_p1_institution_admin",
+      "idx": 10,
+      "when": 1792110000000,
+      "sha256": "e082937cd0326a2376e74e11505e8efd0dcbfe1b6d8b89baf095579947e7dd49"
+    },
+    {
+      "tag": "0011_school_registry",
+      "idx": 11,
+      "when": 1792111000000,
+      "sha256": "a476a7dbf8690f6b7b23c8fbe3f85906b0ed7ad27889210c6363001909ce7bb5"
+    },
+    {
+      "tag": "0012_grading_drafts",
+      "idx": 12,
+      "when": 1792111001000,
+      "sha256": "c24350c92707743cdcfb385466ca97b458694bc8372bbd9a06e5af3e25452889"
+    },
+    {
+      "tag": "0013_schedules",
+      "idx": 13,
+      "when": 1792111002000,
+      "sha256": "388ff053479875fbdc5ba67b3317d02f719bebec260aab542a4b25a1f56508a6"
+    },
+    {
+      "tag": "0014_university_services",
+      "idx": 14,
+      "when": 1792111003000,
+      "sha256": "69bd05f21cbf49f8c6b440513a22488a4a406c63ff9ec92fbea4e44959b43a80"
+    },
+    {
+      "tag": "0015_academic_runtime_security",
+      "idx": 15,
+      "when": 1792111004000,
+      "sha256": "658fb4cc5ac47b33a4a7227c9f5e0c1d9a1f4e4feaf9e53829627bdf7c18da0d"
+    }
+  ],
+  "historicalSecuritySqlUnchanged": true,
+  "productionSha": "7070a461bc9480bd34bb26902959188cfcbde35a",
+  "localCanonicalDatabase": "p0_sii_consolidation_lf_test",
+  "earlierLocalCrlfDatabase": "p0_sii_consolidation_test",
+  "lineEndingRehearsalsDistinguished": true,
+  "localVerification": {
+    "unit": {
+      "files": 30,
+      "passed": 708
+    },
+    "integrationFullEarlierCrlf": {
+      "files": 22,
+      "passed": 285,
+      "seconds": 467.06
+    },
+    "integrationCanonicalLf": {
+      "files": 3,
+      "passed": 41
+    },
+    "uiProductionBundle": {
+      "passed": 43,
+      "minutes": 2.9
+    },
+    "canonicalMigratorRuns": 2,
+    "typecheck": true,
+    "lint": true,
+    "build": true,
+    "auditVulnerabilities": 0,
+    "recovery": {
+      "tables": 41,
+      "ledgerEntries": 16,
+      "verified": true
+    },
+    "cloudMigrationApplied": false,
+    "remoteLoginVerified": false
+  }
+}

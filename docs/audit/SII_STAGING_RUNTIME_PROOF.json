@@ -1,0 +1,19 @@
+{
+  "project": "vsnrbjexusidlvhkhmqg",
+  "at": "2026-10-16T04:09:37.117Z",
+  "runtimeRole": "siii_staging_web_80f5c89b2ec2",
+  "inspection": {
+    "privileged": false,
+    "can_ddl": false,
+    "app_member": true,
+    "migrator_member": false,
+    "owns_objects": false,
+    "unsafe_dml": false,
+    "unsafe_rpc": false
+  },
+  "tlsAuthorized": true,
+  "credentialEncryptedAtSource": true,
+  "plaintextCredentialFiles": false,
+  "credentialEmitted": false,
+  "authorizedRecipient": "Siii backend on Vercel Preview/staging"
+}

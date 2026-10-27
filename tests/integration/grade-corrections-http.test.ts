@@ -1,0 +1,101 @@
+import {beforeAll,afterAll,describe,it,expect} from 'vitest';
+import pg from 'pg';
+import {randomUUID} from 'node:crypto';
+import {isolatedDatabaseUrl} from '../support/database-url';
+import type {CorrectionRecord} from '../../src/modules/grading/correction-contracts';
+import {portalFixture} from '../support/portal-fixture';
+import {sealMfaSecret} from '../../src/shared/auth/mfa-primitives';
+const sql=new pg.Client({connectionString:isolatedDatabaseUrl()}),base='http://127.0.0.1:3107';
+type Fixture=Awaited<ReturnType<typeof portalFixture>>;type Actor=Fixture['teacher'];
+let f:Fixture,reviewer:Actor,approver:Actor,row:CorrectionRecord;
+const endpoint=(fixture=f)=>`${base}/api/v1/institutions/${fixture.tenant}/grading/corrections`;
+const command=(data:Record<string,unknown>,actor=f.teacher,fixture=f)=>fetch(endpoint(fixture),{method:'POST',headers:{origin:base,cookie:actor.cookie,'content-type':'application/json'},body:JSON.stringify(data)});
+const list=(actor=f.teacher,query='',fixture=f)=>fetch(endpoint(fixture)+query,{headers:{cookie:actor.cookie}});
+async function detail(){const response=await list(f.teacher,'?id='+row.id);expect(response.status).toBe(200);row=(await response.json()).data[0];return row;}
+async function assure(actor:Actor){await sql.query("INSERT INTO auth_mfa_factors(user_id,secret_encrypted,enabled_at) VALUES($1,$2,now()-interval '1 minute') ON CONFLICT(user_id) DO NOTHING",[actor.id,sealMfaSecret('JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',actor.id)]);await sql.query('UPDATE auth_sessions SET mfa_verified_at=now(),step_up_at=now() WHERE id=$1',[actor.session]);}
+async function upload(actor=f.teacher,fixture=f,id=row.id,revision=row.revision,bytes=Buffer.from('%PDF-1.7 synthetic evidence\n%%EOF'),type='application/pdf'){return fetch(endpoint(fixture)+'/'+id+'/evidence',{method:'POST',headers:{origin:base,cookie:actor.cookie,'content-type':type,'x-file-name':encodeURIComponent('Evaluación justificativa.pdf'),'x-correction-revision':String(revision)},body:bytes});}
+const draft=(fixture=f,studentId=fixture.studentId,publicationId=fixture.publication)=>({kind:'draft',sectionId:fixture.section,studentId,publicationId,requestedScoreHundredths:925,reason:'Revisión documentada de la evaluación original',operationId:randomUUID()});
+describe.sequential('grade corrections real institutional contracts',()=>{
+ beforeAll(async()=>{await sql.connect();f=await portalFixture(sql,process.env.SIII_CORRECTION_TEST_TENANT);reviewer=await f.actor('control_escolar');approver=await f.actor('coordinator');await assure(reviewer)},30000);afterAll(async()=>{await sql.end()});
+ it('exposes configured availability without giving administrators implicit resolution powers',async()=>{const response=await list();expect(response.status).toBe(200);expect((await response.json()).policy).toMatchObject({approved:true,executionEnabled:true,requireEvidence:true});expect((await list(f.admin)).status).toBe(200);});
+ it('rejects unauthenticated, student, foreign-institution, unassigned and forged correction requests',async()=>{
+  expect((await fetch(endpoint())).status).toBe(401);expect((await command(draft(),f.student)).status).toBe(403);expect((await command(draft(),f.secondTeacher)).status).toBe(403);
+  expect((await fetch(`${base}/api/v1/institutions/${f.other}/grading/corrections`,{headers:{cookie:f.teacher.cookie}})).status).toBe(403);expect((await command({...draft(),status:'APPROVED'})).status).toBe(422);expect((await command({...draft(),reason:'x'.repeat(40000)})).status).toBe(413);const actorMismatch=await fetch(endpoint(),{method:'POST',headers:{origin:base,cookie:f.teacher.cookie,'content-type':'application/json','x-siii-expected-actor':f.secondTeacher.id},body:JSON.stringify(draft())});expect(actorMismatch.status).toBe(403);
+ });
+ it('creates a bound idempotent draft and prevents a duplicate active request for the same result',async()=>{
+  const payload=draft(),response=await command(payload);expect(response.status).toBe(201);row=(await response.json()).data;expect(row).toMatchObject({status:'DRAFT',originalScoreHundredths:850,requestedBy:f.teacher.id});expect((await (await command(payload)).json()).data.id).toBe(row.id);expect((await command(draft())).status).toBe(409);expect((await command({...payload,requestedScoreHundredths:900})).status).toBe(409);
+ });
+ it('requires evidence and enforces type, size, private access and audit before submission',async()=>{
+  expect((await command({kind:'submit',id:row.id,expectedRevision:row.revision})).status).toBe(422);expect((await upload(f.teacher,f,row.id,row.revision,Buffer.from('<script>'),'application/pdf')).status).toBe(422);expect((await upload(f.teacher,f,row.id,row.revision,Buffer.alloc(2097153),'image/png')).status).toBe(413);
+  expect((await upload()).status).toBe(201);await detail();expect(row.evidence).toHaveLength(1);expect((await upload()).status).toBe(409);
+  expect((await fetch(endpoint()+'/'+row.id+'/evidence',{headers:{cookie:f.secondTeacher.cookie}})).status).toBe(403);const file=await fetch(endpoint()+'/'+row.id+'/evidence',{headers:{cookie:f.teacher.cookie}});expect(file.status).toBe(200);expect(file.headers.get('content-disposition')).toContain('attachment;');expect(file.headers.get('cache-control')).toContain('no-store');expect(await file.text()).toContain('%PDF-1.7');
+ });
+ it('prevents lost edits with a revision and leaves only one concurrent change committed',async()=>{
+  const responses=await Promise.all([900,925].map(requestedScoreHundredths=>command({kind:'edit',id:row.id,expectedRevision:row.revision,requestedScoreHundredths,reason:'Motivo concurrente documentado de evaluación'})));expect(responses.map(r=>r.status).sort()).toEqual([200,409]);await detail();
+ });
+ it('submits and reviews without allowing the requester or a generic admin to review',async()=>{
+  let response=await command({kind:'submit',id:row.id,expectedRevision:row.revision});expect(response.status).toBe(200);row=(await response.json()).data;
+  expect((await command({kind:'review',id:row.id,expectedRevision:row.revision,note:'Revisión operativa documentada'},f.admin)).status).toBe(403);
+  response=await command({kind:'review',id:row.id,expectedRevision:row.revision,note:'Evidencia y datos oficiales revisados'},reviewer);expect(response.status).toBe(200);row=(await response.json()).data;expect(row.status).toBe('IN_REVIEW');
+ });
+ it('requires step-up and prevents self-approval even if the requester also holds the configured approver role',async()=>{
+  const payload={kind:'decide',id:row.id,expectedRevision:row.revision,decision:'approve',reason:'Autorización de rectificación documentada'};
+  expect((await command(payload,approver)).status).toBe(403);await assure(approver);
+  await sql.query("INSERT INTO role_assignments(membership_id,role) VALUES($1,'coordinator')",[f.teacher.member]);await assure(f.teacher);const own=await command(payload);expect(own.status).toBe(403);expect((await own.json()).error.code).toBe('CORRECTION_SELF_APPROVAL');
+  const response=await command(payload,approver);expect(response.status).toBe(200);row=(await response.json()).data;expect(row).toMatchObject({status:'APPROVED',approvedBy:approver.id,reviewedBy:reviewer.id,appliedPublicationId:null});
+  expect((await sql.query('SELECT score_hundredths FROM final_grades WHERE publication_id=$1 AND student_id=$2',[f.publication,f.studentId])).rows[0].score_hundredths).toBe(850);
+ });
+ it('applies exactly one new immutable version under replay, preserving originals and other student grades',async()=>{
+  const payload={kind:'apply',id:row.id,expectedRevision:row.revision},responses=await Promise.all([command(payload,reviewer),command(payload,reviewer)]);expect(responses.map(r=>r.status)).toEqual([200,200]);row=(await responses[0].json()).data;expect(row).toMatchObject({status:'APPLIED',executedBy:reviewer.id});
+  expect((await sql.query('SELECT version FROM grade_publications WHERE institution_id=$1 AND section_id=$2 ORDER BY version',[f.tenant,f.section])).rows).toEqual([{version:1},{version:2}]);
+  const before=(await sql.query('SELECT student_id,score_hundredths FROM final_grades WHERE publication_id=$1 ORDER BY student_id',[f.publication])).rows;expect(before.find(r=>r.student_id===f.studentId).score_hundredths).toBe(850);
+  const after=(await sql.query('SELECT student_id,score_hundredths FROM final_grades WHERE publication_id=$1',[row.appliedPublicationId])).rows;expect(after.find(r=>r.student_id===f.studentId).score_hundredths).toBe(row.requestedScoreHundredths);expect(after.find(r=>r.student_id===f.secondStudentId).score_hundredths).toBe(700);
+  const student=await fetch(`${base}/api/v1/institutions/${f.tenant}/portal/student/grades`,{headers:{cookie:f.student.cookie}});expect((await student.json()).data[0]).toMatchObject({version:2,scoreHundredths:row.requestedScoreHundredths});
+  await detail();expect(row.history.map((e:{status:string})=>e.status)).toContain('APPLIED');expect((await sql.query("SELECT count(*)::int n FROM security_audit_log WHERE institution_id=$1 AND action='grade.correction.apply'",[f.tenant])).rows[0].n).toBe(1);
+ });
+ it('allows rejection as a terminal resolution without applying another publication',async()=>{
+  const response=await command(draft(f,f.secondStudentId,row.appliedPublicationId!));expect(response.status).toBe(201);row=(await response.json()).data;expect((await upload()).status).toBe(201);await detail();row=(await (await command({kind:'submit',id:row.id,expectedRevision:row.revision})).json()).data;row=(await (await command({kind:'review',id:row.id,expectedRevision:row.revision,note:'Revisión de solicitud y evidencia'},reviewer)).json()).data;
+  const decision=await command({kind:'decide',id:row.id,expectedRevision:row.revision,decision:'reject',reason:'La evidencia no justifica el cambio solicitado'},approver);expect(decision.status).toBe(200);row=(await decision.json()).data;expect(row.status).toBe('REJECTED');expect((await command({kind:'apply',id:row.id,expectedRevision:row.revision},reviewer)).status).toBe(409);
+ });
+ it('blocks closed requests by default even when normal execution is authorized',async()=>{
+  await sql.query("UPDATE academic_terms SET status='inactive' WHERE id=$1",[f.term]);try{const latest=(await sql.query('SELECT id FROM grade_publications WHERE section_id=$1 ORDER BY version DESC LIMIT 1',[f.section])).rows[0].id;expect((await command(draft(f,f.studentId,latest))).status).toBe(409);}finally{await sql.query("UPDATE academic_terms SET status='active' WHERE id=$1",[f.term]);}
+ });
+ it('rejects stale source revisions and supports explicit rebase of a private draft',async()=>{
+  const other=await portalFixture(sql),response=await command(draft(other),other.teacher,other);expect(response.status).toBe(201);const draftRow=(await response.json()).data;
+  const publication=(await sql.query('INSERT INTO grade_publications(institution_id,section_id,operation_id,published_by,version) VALUES($1,$2,$3,$4,2) RETURNING id',[other.tenant,other.section,randomUUID(),other.teacher.id])).rows[0].id;await sql.query('INSERT INTO final_grades(institution_id,publication_id,student_id,score_hundredths) VALUES($1,$2,$3,875)',[other.tenant,publication,other.studentId]);
+  const stale=await command({kind:'submit',id:draftRow.id,expectedRevision:draftRow.revision},other.teacher,other);expect(stale.status).toBe(409);expect((await stale.json()).error.code).toBe('CORRECTION_SOURCE_CHANGED');const rebase=await command({kind:'rebase',id:draftRow.id,expectedRevision:draftRow.revision},other.teacher,other);expect(rebase.status).toBe(200);expect((await rebase.json()).data).toMatchObject({sourcePublicationId:publication,baseVersion:2,originalScoreHundredths:875,status:'DRAFT'});
+ });
+ it('keeps the Data API denied and historical evidence/events immutable for the application role',async()=>{
+  for(const table of ['grade_correction_requests','grade_correction_evidence','grade_correction_events']){const result=(await sql.query("SELECT relrowsecurity,relforcerowsecurity,has_table_privilege('anon',oid,'SELECT') anon,has_table_privilege('authenticated',oid,'SELECT') authenticated FROM pg_class WHERE relname=$1",[table])).rows[0];expect(result).toEqual({relrowsecurity:true,relforcerowsecurity:true,anon:false,authenticated:false});}
+  expect((await sql.query("SELECT has_table_privilege('siii_app','grade_correction_events','UPDATE') events_update,has_table_privilege('siii_app','grade_correction_evidence','DELETE') evidence_delete")).rows[0]).toEqual({events_update:false,evidence_delete:false});
+ });
+ it('requires explicit additional authority to approve and execute an extraordinary closed-period request',async()=>{
+  const closed=await portalFixture(sql,process.env.SIII_CORRECTION_CLOSED_TEST_TENANT),review=await closed.actor('control_escolar'),authorize=await closed.actor('coordinator');await assure(review);await assure(authorize);await sql.query("UPDATE academic_terms SET status='inactive' WHERE id=$1",[closed.term]);
+  let response=await command(draft(closed),closed.teacher,closed);expect(response.status).toBe(201);let request=(await response.json()).data;expect((await upload(closed.teacher,closed,request.id,request.revision)).status).toBe(201);request=(await (await list(closed.teacher,'?id='+request.id,closed)).json()).data[0];request=(await (await command({kind:'submit',id:request.id,expectedRevision:request.revision},closed.teacher,closed)).json()).data;request=(await (await command({kind:'review',id:request.id,expectedRevision:request.revision,note:'Revisión del expediente extraordinario'},review,closed)).json()).data;
+  const approve={kind:'decide',id:request.id,expectedRevision:request.revision,decision:'approve',reason:'Autorización extraordinaria documentada para periodo cerrado'};
+  response=await command(approve,authorize,closed);expect(response.status).toBe(403);expect((await response.json()).error.code).toBe('CORRECTION_CLOSED_AUTHORIZATION_REQUIRED');response=await command({...approve,closedAuthorization:true},authorize,closed);expect(response.status).toBe(200);request=(await response.json()).data;response=await command({kind:'apply',id:request.id,expectedRevision:request.revision},review,closed);expect(response.status).toBe(200);expect((await response.json()).data.status).toBe('APPLIED');
+ });
+ it('keeps an approved correction unapplied when execution is disabled in policy',async()=>{
+  const blocked=await portalFixture(sql,process.env.SIII_CORRECTION_BLOCKED_TEST_TENANT),review=await blocked.actor('control_escolar'),authorize=await blocked.actor('coordinator');await assure(review);await assure(authorize);
+  let request=(await (await command(draft(blocked),blocked.teacher,blocked)).json()).data;expect((await upload(blocked.teacher,blocked,request.id,request.revision)).status).toBe(201);request=(await (await list(blocked.teacher,'?id='+request.id,blocked)).json()).data[0];request=(await (await command({kind:'submit',id:request.id,expectedRevision:request.revision},blocked.teacher,blocked)).json()).data;request=(await (await command({kind:'review',id:request.id,expectedRevision:request.revision,note:'Revisión administrativa documentada'},review,blocked)).json()).data;request=(await (await command({kind:'decide',id:request.id,expectedRevision:request.revision,decision:'approve',reason:'Aprobación sin habilitación de ejecución'},authorize,blocked)).json()).data;expect(request.status).toBe('APPROVED');const response=await command({kind:'apply',id:request.id,expectedRevision:request.revision},review,blocked);expect(response.status).toBe(403);expect((await response.json()).error.code).toBe('CORRECTION_EXECUTION_DISABLED');expect((await sql.query('SELECT count(*)::int n FROM grade_publications WHERE institution_id=$1',[blocked.tenant])).rows[0].n).toBe(1);
+ });
+
+ it('returns a stale approval to draft with audit, requiring rebase, review and a new approval',async()=>{
+  const latest=(await sql.query('SELECT id FROM grade_publications WHERE section_id=$1 ORDER BY version DESC LIMIT 1',[f.section])).rows[0].id;
+  let request=(await (await command(draft(f,f.secondStudentId,latest))).json()).data;expect((await upload(f.teacher,f,request.id,request.revision)).status).toBe(201);request=(await (await list(f.teacher,'?id='+request.id)).json()).data[0];request=(await (await command({kind:'submit',id:request.id,expectedRevision:request.revision})).json()).data;request=(await (await command({kind:'review',id:request.id,expectedRevision:request.revision,note:'Revisión operativa de la solicitud'},reviewer)).json()).data;request=(await (await command({kind:'decide',id:request.id,expectedRevision:request.revision,decision:'approve',reason:'Autorización inicial de la rectificación'},approver)).json()).data;expect(request.status).toBe('APPROVED');
+  const publication=(await sql.query('INSERT INTO grade_publications(institution_id,section_id,operation_id,published_by,version) VALUES($1,$2,$3,$4,3) RETURNING id',[f.tenant,f.section,randomUUID(),f.teacher.id])).rows[0].id;await sql.query('INSERT INTO final_grades(institution_id,publication_id,student_id,score_hundredths) VALUES($1,$2,$3,875)',[f.tenant,publication,f.studentId]);
+  const stale=await command({kind:'apply',id:request.id,expectedRevision:request.revision},reviewer);expect(stale.status).toBe(409);expect((await stale.json()).error.code).toBe('CORRECTION_SOURCE_CHANGED');
+  const returned=await command({kind:'return',id:request.id,expectedRevision:request.revision,note:'Devolver para cotejar la nueva publicación y repetir aprobación'},reviewer);expect(returned.status).toBe(200);request=(await returned.json()).data;expect(request).toMatchObject({status:'DRAFT',approvedBy:null,reviewedBy:null,closedAuthorized:false});expect((await command({kind:'apply',id:request.id,expectedRevision:request.revision},reviewer)).status).toBe(409);
+  request=(await (await command({kind:'rebase',id:request.id,expectedRevision:request.revision})).json()).data;request=(await (await command({kind:'submit',id:request.id,expectedRevision:request.revision})).json()).data;request=(await (await command({kind:'review',id:request.id,expectedRevision:request.revision,note:'Nueva revisión contra la versión vigente'},reviewer)).json()).data;request=(await (await command({kind:'decide',id:request.id,expectedRevision:request.revision,decision:'approve',reason:'Nueva autorización tras comparar la publicación vigente'},approver)).json()).data;const applied=await command({kind:'apply',id:request.id,expectedRevision:request.revision},reviewer);expect(applied.status).toBe(200);expect((await applied.json()).data.status).toBe('APPLIED');
+ });
+
+ it('changes the opaque read context when a teaching assignment is revoked between pages',async()=>{
+  const fixture=await portalFixture(sql),actor=fixture.secondTeacher;
+  const teacher=(await sql.query("INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) VALUES($1,'SECOND','Docente','Asignado') RETURNING id",[fixture.tenant])).rows[0].id;
+  await sql.query('INSERT INTO teacher_account_links(institution_id,teacher_id,membership_id) VALUES($1,$2,$3)',[fixture.tenant,teacher,actor.member]);await sql.query('INSERT INTO section_teachers(institution_id,teacher_id,section_id) VALUES($1,$2,$3)',[fixture.tenant,teacher,fixture.section]);
+  for(const studentId of [fixture.studentId,fixture.secondStudentId])expect((await command(draft(fixture,studentId),actor,fixture)).status).toBe(201);
+  const first=await list(actor,'?limit=1',fixture),before=first.headers.get('x-siii-correction-context'),body=await first.json();expect(body.data).toHaveLength(1);expect(body.page.nextCursor).toBeTruthy();
+  await sql.query('UPDATE section_teachers SET revoked_at=now() WHERE institution_id=$1 AND teacher_id=$2',[fixture.tenant,teacher]);const next=await list(actor,'?limit=1&cursor='+encodeURIComponent(body.page.nextCursor),fixture);expect(next.status).toBe(200);expect((await next.json()).data).toEqual([]);expect(next.headers.get('x-siii-correction-context')).not.toBe(before);
+ });
+
+});

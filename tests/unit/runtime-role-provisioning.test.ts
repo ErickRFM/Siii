@@ -1,0 +1,6 @@
+import{describe,it,expect}from'vitest';import{runtimeRoleProvisioningSql}from'../../scripts/runtime-role-provisioning';
+describe('runtime credential provisioning boundary',()=>{
+ it('binds credentials to the intended environment and encrypts server-generated secrets',()=>{const sql=runtimeRoleProvisioningSql('staging','siii_staging_web_abcdef123456','-----BEGIN PGP PUBLIC KEY BLOCK-----\nPUBLIC');expect(sql).toContain('gen_random_bytes(48)');expect(sql).toContain('pgp_pub_encrypt');expect(sql).toContain('NOBYPASSRLS');expect(sql).toContain('GRANT siii_app');expect(sql).toContain('security_audit_log');expect(sql).toContain('RELEASE_RUNTIME_PREFLIGHT_FAILED')});
+ it('rejects invalid runtime environment values at the JavaScript boundary',()=>{expect(()=>runtimeRoleProvisioningSql('other' as 'staging','siii_other_web_abcdef123456','-----BEGIN PGP PUBLIC KEY BLOCK-----')).toThrow('RUNTIME_PROVISIONING_INPUT_INVALID')});
+ it('rejects cross-environment or injected role identifiers',()=>{expect(()=>runtimeRoleProvisioningSql('staging','siii_production_web_abcdef123456','-----BEGIN PGP PUBLIC KEY BLOCK-----')).toThrow('RUNTIME_PROVISIONING_INPUT_INVALID');expect(()=>runtimeRoleProvisioningSql('production','bad;DROP ROLE postgres','-----BEGIN PGP PUBLIC KEY BLOCK-----')).toThrow('RUNTIME_PROVISIONING_INPUT_INVALID')});
+});

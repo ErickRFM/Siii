@@ -1,0 +1,13 @@
+{
+  "name": "schema-isolation-v1",
+  "version": 1,
+  "entries": [
+    {
+      "idx": 17,
+      "tag": "0017_data_api_schema_isolation",
+      "when": 1792126000000,
+      "canonicalHash": "a8d3c2a3d6da65a77513e97cd2e9041136c57b0cb05ec67e852c0e92143a001f",
+      "executedHash": "68b2b137783f9523b28908594675cd2b70685163208f7caec4fb3f7052c6e296"
+    }
+  ]
+}

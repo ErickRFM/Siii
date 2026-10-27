@@ -1,0 +1,255 @@
+name: Verify SIS
+on:
+  push:
+    branches: [main, 'feat/**', 'fix/**', 'chore/p0-1-release-gates', 'codex/**']
+  pull_request:
+    branches: [main, 'feat/**', 'chore/p0-1-release-gates', 'codex/**']
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: university_sis_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      SIII_DATABASE_ENV: test
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reproducible install
+        run: npm ci --ignore-scripts
+      - name: Rebuild required native packages
+        run: npm rebuild argon2 esbuild
+      - name: Lockfile integrity
+        run: git diff --exit-code -- package-lock.json
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Prepare isolated Supabase API-role fixtures
+        run: node --import tsx scripts/prepare-test-api-roles.ts
+      - name: Migrate disposable database
+        run: npm run db:migrate
+      - name: Handler and baseline integration tests
+        run: npm run test:integration
+      - name: Academic assignment outbox enabled HTTP contracts
+        env:
+          SIII_ACADEMIC_OUTBOX_ENABLED: 'true'
+        run: npm run test:integration -- tests/integration/academic-assignment-outbox-http.test.ts tests/integration/registry-outbox-http.test.ts tests/integration/companion-authority-http.test.ts tests/integration/companion-operations-http.test.ts
+      - name: Production build
+        run: npm run build
+      - name: Dependency audit
+        run: npm audit
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: university_sis_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      SIII_DATABASE_ENV: test
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reproducible install
+        run: npm ci --ignore-scripts
+      - name: Rebuild required native packages
+        run: npm rebuild argon2 esbuild
+      - name: Lockfile integrity
+        run: git diff --exit-code -- package-lock.json
+      - name: Prepare isolated Supabase API-role fixtures
+        run: node --import tsx scripts/prepare-test-api-roles.ts
+      - name: Migrate disposable database
+        run: npm run db:migrate
+      - name: Browser runtime
+        run: npx playwright install --with-deps chromium
+      - name: Keyboard and accessibility flows
+        run: npm run test:ui
+      # UI teardown awaits its exact child; reuse that production bundle after port release.
+      - name: Financial legacy0024 HTTP and fail-closed migration
+        env:
+          SIII_HTTP_TEST_PRODUCTION: '1'
+        run: npm run test:financial-legacy
+      - name: Synthetic UI failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: synthetic-ui-failure-diagnostics
+          path: .superpowers/sdd/2026-10-13-p0-hardening/ui-results
+          if-no-files-found: ignore
+          include-hidden-files: true
+          retention-days: 3
+      - name: Synthetic UI viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: synthetic-ux-matrix
+          path: |
+            .p0-local/ux-matrix-*.png
+            .p0-local/c32-admissions-*.png
+            .p0-local/layout-polish/after-*.png
+            .p0-local/vnext/*.png
+            .p0-local/vnext-institutional/*-360.png
+            .p0-local/v3-services/requests-*-360.png
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 3
+  companion-live-contract:
+    name: Companion live contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: siii_chain_test
+        ports: ['127.0.0.1:55439:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d siii_chain_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mongo:
+        image: mongo:8.0.34
+        ports: ['127.0.0.1:27017:27017']
+        options: >-
+          --health-cmd "mongosh --host 127.0.0.1 --quiet --eval 'quit(db.adminCommand({ping:1}).ok===1?0:1)'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55439/siii_chain_test
+      INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55439/siii_chain_test
+      SIII_DATABASE_ENV: test
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: '1'
+      V12_TEST_MONGODB_URI: mongodb://127.0.0.1:27017
+      COMPANION_PUSH_PROBE_PROJECT_ROOT: ${{ github.workspace }}
+      COMPANION_CHAIN_PROBE_PROJECT_ROOT: ${{ github.workspace }}
+      COMPANION_CHAIN_PROBE_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55439/siii_chain_test
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install real sender dependencies
+        run: npm ci --ignore-scripts
+      - name: Rebuild required native packages
+        run: npm rebuild argon2 esbuild
+      - name: Prepare isolated source API-role fixtures
+        run: node --import tsx scripts/prepare-test-api-roles.ts
+      - name: Migrate disposable source database
+        run: npm run db:migrate
+      - name: Checkout fixed receiver contract
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ErickRFM/Compa-ero-de-esc
+          # Validate the merged attendance receiver.
+          ref: 127e7dfa1c6ac760652859f78df226b47d01f08e
+          path: .p0-local/companion-contract
+          persist-credentials: false
+      - name: Receiver Java 17 runtime
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Real source to outbox Ktor Mongo and authorized academic reads
+        working-directory: .p0-local/companion-contract
+        shell: bash
+        run: |
+          export COMPANION_PUSH_PROBE_NODE="$(command -v node)"
+          export COMPANION_CHAIN_PROBE_NODE="$(command -v node)"
+          ./gradlew :services:api:test --tests 'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.SiiiFullChainLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest' --tests 'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest' --tests 'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest' --rerun-tasks --no-build-cache --no-configuration-cache --no-parallel --max-workers=1 -Pkotlin.incremental=false -Pkotlin.compiler.execution.strategy=in-process --console=plain 2>&1 | tee "$GITHUB_WORKSPACE/.p0-local/companion-contract.log"
+      - name: Require live contract and receiver regressions without skips
+        if: always()
+        shell: bash
+        run: |
+          python3 - .p0-local/companion-contract/services/api/build/test-results/test <<'PY'
+          import sys
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          expected_suites = {
+              'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest': 1,
+              'org.companerodeescuela.api.integrations.academic.SiiiFullChainLiveContractTest': 1,
+              'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest': 9,
+              'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest': 11,
+              'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest': 5,
+          }
+          for name, count in expected_suites.items():
+              suite = ET.parse(Path(sys.argv[1]) / ('TEST-' + name + '.xml')).getroot()
+              counts = {key: int(suite.get(key, '-1')) for key in ('tests', 'failures', 'errors', 'skipped')}
+              expected = {'tests': count, 'failures': 0, 'errors': 0, 'skipped': 0}
+              cases = suite.findall('testcase')
+              if suite.tag != 'testsuite' or suite.get('name') != name or counts != expected:
+                  raise SystemExit(name + ': unexpected counts or unsuccessful suite')
+              if len(cases) != count or any(case.find(tag) is not None for case in cases for tag in ('skipped', 'failure', 'error')):
+                  raise SystemExit(name + ': testcase did not complete successfully')
+              print(name + ': tests=' + str(count) + ' failures=0 errors=0 skipped=0')
+          PY
+      - name: Receiver sources remain fixed and clean
+        if: always()
+        shell: bash
+        run: |
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '127e7dfa1c6ac760652859f78df226b47d01f08e'
+          test -z "$(git -C .p0-local/companion-contract status --porcelain)"
+      - name: Synthetic live contract evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: companion-live-contract
+          path: |
+            .p0-local/companion-contract.log
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.SiiiFullChainLiveContractTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest.xml
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 3
