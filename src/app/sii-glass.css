@@ -343,3 +343,15 @@ html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-t
 .sii-app.sii-ui .siii-student-panel .siii-glass-row{min-width:0}
 .sii-app.sii-ui .siii-student-panel .siii-glass-row strong{white-space:nowrap}
 @media(prefers-reduced-motion:reduce){.sii-app.sii-ui *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Accessibility correction: the cream theme must not inherit white sidebar text. */
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"],
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar :is(.sii-brand-name,.sii-brand-description,.sii-sidebar-status,[data-sidebar="menu-button"],[data-sidebar="group-label"]){
+ color:#302b29!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar :is(.text-sidebar-foreground,.text-sidebar-foreground\/70,.text-sidebar-foreground\/60){
+ color:#443a35!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar [data-sidebar="group-label"]{color:#554941!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-muted-foreground{color:#554941!important}
