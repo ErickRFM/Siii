@@ -235,3 +235,56 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
  .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card){border:1px solid CanvasText!important;background:Canvas!important}
  .sii-app.sii-ui{background:Canvas!important;color:CanvasText}
 }
+
+
+/* Smoked Glass v1 — cross-role surfaces and no luminous outlines.
+   CSS variable overrides apply only inside the authenticated application. */
+.sii-app.sii-ui {
+  --background:20 8% 21%;--foreground:28 34% 95%;
+  --card:20 8% 28%;--card-foreground:28 34% 95%;
+  --popover:20 8% 27%;--popover-foreground:28 34% 95%;
+  --primary:26 43% 79%;--primary-foreground:20 17% 14%;
+  --secondary:20 8% 33%;--secondary-foreground:28 34% 95%;
+  --muted:20 8% 34%;--muted-foreground:24 19% 80%;
+  --accent:20 9% 35%;--accent-foreground:28 34% 95%;
+  --border:20 12% 45%;--input:20 11% 43%;--ring:26 43% 79%;
+  --sidebar-background:20 9% 27%;--sidebar-foreground:28 34% 95%;
+  --sidebar-accent:20 10% 36%;--sidebar-accent-foreground:28 34% 95%;
+  --sidebar-primary:26 43% 79%;--sidebar-primary-foreground:20 17% 14%;
+}
+.sii-app.sii-ui :is(.sii-workspace .bg-card,.sii-workspace .bg-muted,.sii-kit-module-card,.sii-kit-metric,.sii-workspace-tabs,.sii-personal-navigation,.sii-teacher-navigation) {
+  background-color:rgba(120,109,103,.23)!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(12px);
+}
+.sii-app.sii-ui :is(.sii-workspace .text-card-foreground,.sii-kit-module-card) {color:#f5ece7!important}
+.sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) {border-radius:16px;gap:5px;padding:5px}
+.sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{
+  background:rgba(240,226,214,.18)!important;color:#fff!important;
+  border-radius:12px;box-shadow:none!important
+}
+.sii-app.sii-ui :is(input,select,textarea,[role=combobox]){accent-color:#d4bcaa}
+.sii-app.sii-ui :is(input,select,textarea,[role=combobox]):focus-visible{
+  outline:2px solid rgba(227,208,192,.78)!important;outline-offset:2px
+}
+.sii-app.sii-ui :is(.sii-workspace .border,.sii-workspace [class*=border-]){
+  border-color:rgba(241,225,214,.11)
+}
+.sii-app.sii-ui .sii-workspace :is([role=table],table){border-collapse:separate;border-spacing:0;min-width:0}
+.sii-app.sii-ui .sii-workspace :is(th,td){border-bottom-color:rgba(244,230,219,.09)}
+.sii-app.sii-ui .sii-workspace th{background:rgba(255,255,255,.035);font-weight:600}
+.sii-app.sii-ui .sii-workspace tr:hover td{background:rgba(255,255,255,.035)}
+.sii-app.sii-ui .sii-kit-skeleton-block {background:rgba(225,212,199,.14)!important}
+.sii-app.sii-ui button:focus-visible,.sii-app.sii-ui a:focus-visible{outline:2px solid #e3cbb7;outline-offset:3px}
+@media (max-width:640px){
+ .sii-app.sii-ui .sii-workspace{min-width:0}
+ .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation){overflow-x:auto;max-width:100%;scrollbar-width:thin}
+ .sii-app.sii-ui .sii-workspace :is(table,[role=table]){max-width:100%}
+}
+@media (prefers-reduced-transparency:reduce){
+ .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.siii-student-hero,.siii-student-panel,.siii-student-metric,.siii-student-wide){backdrop-filter:none;background:#514944!important}
+}
+@media (forced-colors:active){
+ .sii-app.sii-ui :is(.sii-workspace .bg-card,.sii-workspace .bg-muted,.sii-kit-module-card,.sii-kit-metric){background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important}
+}

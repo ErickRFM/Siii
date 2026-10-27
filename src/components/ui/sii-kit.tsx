@@ -29,7 +29,7 @@ export function SiiMetricTile({label,value,caption,icon,tone='rose',href,actionL
  label:string;value:ReactNode;caption?:string;icon:SiiNavIconName;tone?:'rose'|'amber'|'blue';href?:string;actionLabel?:string;
 }){
  const toneClass=tone==='amber'?'bg-amber-500/10 text-amber-700 dark:text-amber-300':tone==='blue'?'bg-sky-500/10 text-sky-700 dark:text-sky-300':'bg-primary-soft text-primary';
- return <Card className="sii-metric sii-kit-metric overflow-hidden">
+ return <Card className="sii-metric sii-kit-metric sii-glass-role-metric overflow-hidden">
    <CardContent className="flex h-full flex-col gap-2 p-5">
     <div className="flex items-start justify-between gap-3">
      <span className="text-xs font-semibold uppercase tracking-[.12em] text-muted-foreground">{label}</span>
@@ -74,7 +74,7 @@ export function SiiModuleTile({title,description,icon,href,disabledReason}:{
    </div>
  </>;
  return href
-  ? <Link href={href as Route} className="sii-module-card sii-kit-module-card block rounded-xl border bg-card p-5 text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">{content}</Link>
+  ? <Link href={href as Route} className="sii-module-card sii-kit-module-card sii-glass-role-module block rounded-xl border bg-card p-5 text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">{content}</Link>
   : <article className="sii-module-card sii-kit-module-card sii-kit-module-card--disabled block rounded-xl border border-dashed bg-card p-5 text-card-foreground" aria-label={title+': '+(disabledReason??'No disponible')}>{content}</article>;
 }
 export function SiiSkeleton({label='Cargando contenido'}:{label?:string}){
