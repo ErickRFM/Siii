@@ -863,3 +863,12 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-topbar-notices{background:rgb
   margin-top:14px;max-width:100%;overflow-x:auto;
  }
 }
+
+/* Consolidated modules: force matte panels with no inherited shadow */
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-metric,.sii-module-card),
+.sii-app.sii-ui .sii-workspace :is(.sii-panel,.sii-metric,.sii-module-card),
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card){
+  box-shadow:none !important;
+  text-shadow:none !important;
+  filter:none !important;
+}
