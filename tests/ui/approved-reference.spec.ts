@@ -127,6 +127,11 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
  await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
  for(const width of [1344,390]){
   await page.setViewportSize({width,height:896});await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
+  if(width===390&&theme==='light'){
+   const menu=page.getByRole('button',{name:'Abrir navegación',exact:true});
+   await expect(menu).toHaveCSS('background-color','rgb(73, 71, 67)');
+   await expect(menu.locator('svg')).toHaveCSS('color','rgb(247, 242, 234)');
+  }
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   const screenshot=await page.screenshot({path:`.p0-local/fidelity/${role}-${theme}-${width}.png`,animations:'disabled',fullPage:true});
   expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info);

@@ -49,6 +49,7 @@ html[data-sii-theme=dark] #siii-personal .siii-personal-account>div{background:v
 #siii-personal .siii-overview-primary{background:var(--siii-v5-button)}
 #siii-personal .siii-calendar-today{background:var(--siii-v5-calendar)}
 #siii-personal .siii-overview-grade{background:var(--siii-v5-chart)}
+html[data-sii-theme=light] #siii-personal .sii-menu-button{background:#494743!important;color:#f7f2ea!important}
 #siii-personal .siii-personal-nav-link:not([aria-disabled=true]):hover{background:var(--siii-v5-hover)}
 #siii-personal .siii-personal-nav-link[aria-disabled=true]{opacity:var(--siii-v5-disabled)}
 #siii-personal :is(a,button,summary):focus-visible{outline-color:var(--siii-v5-focus)}
