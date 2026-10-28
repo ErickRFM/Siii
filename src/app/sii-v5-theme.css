@@ -3,14 +3,14 @@
  --siii-v5-background:#383735;--siii-v5-panel:rgba(111,108,102,.30);--siii-v5-surface:#494743;
  --siii-v5-sidebar:#41403c;--siii-v5-text:#f1f0ec;--siii-v5-muted:#e2dcd4;
  --siii-v5-border:rgba(255,255,255,.055);--siii-v5-input:#514d49;--siii-v5-button:#d8cabe;
- --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#8ba997;--siii-v5-modal:#42423e;
+ --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#8ba99728;--siii-v5-modal:#42423e;
  --siii-v5-hover:rgba(215,209,195,.12);--siii-v5-focus:#eadac6;--siii-v5-disabled:.62;--siii-v5-loading:.75;
 }
 html[data-sii-theme=dark]{
  --siii-v5-background:#0D0F12;--siii-v5-panel:rgba(25,27,32,.94);--siii-v5-surface:#22252b;
  --siii-v5-sidebar:#111317;--siii-v5-text:#f3f4f6;--siii-v5-muted:#c4c6cb;
  --siii-v5-border:rgba(255,255,255,.08);--siii-v5-input:#22252b;--siii-v5-button:#d8cabe;
- --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#80b7a0;--siii-v5-modal:#191b20;
+ --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#8ba99728;--siii-v5-modal:#191b20;
  --siii-v5-hover:rgba(255,255,255,.08);--siii-v5-focus:#e7cabc;--siii-v5-disabled:.62;--siii-v5-loading:.75;
  --background:216 16% 6%;--card:223 12% 11%;--popover:223 12% 11%;--secondary:220 12% 15%;--muted:220 12% 15%;
  --border:220 10% 24%;--input:220 10% 29%;
@@ -46,6 +46,14 @@ html[data-sii-theme=dark] #siii-personal :is(.siii-overview-panel,.siii-overview
 html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:var(--siii-v5-panel)!important}
 html[data-sii-theme=dark] #siii-personal :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices,.siii-personal-account>summary){background:var(--siii-v5-surface)!important;color:var(--siii-v5-text)!important}
 html[data-sii-theme=dark] #siii-personal .siii-personal-account>div{background:var(--siii-v5-modal)}
+#siii-personal .siii-overview-primary{background:var(--siii-v5-button)}
+#siii-personal .siii-calendar-today{background:var(--siii-v5-calendar)}
+#siii-personal .siii-overview-grade{background:var(--siii-v5-chart)}
+#siii-personal .siii-personal-nav-link:not([aria-disabled=true]):hover{background:var(--siii-v5-hover)}
+#siii-personal .siii-personal-nav-link[aria-disabled=true]{opacity:var(--siii-v5-disabled)}
+#siii-personal :is(a,button,summary):focus-visible{outline-color:var(--siii-v5-focus)}
+.sii-login [aria-busy=true]{opacity:var(--siii-v5-loading)}
+html[data-sii-theme=dark] .sii-login input{background:var(--siii-v5-input)}
 .sii-login .sii-auth-story{background:linear-gradient(145deg,#50463f,#302e2d 70%,#292826);color:#f7f3ef}
 .sii-login .sii-auth-story::before{opacity:.035}
 .sii-login :is(.sii-auth-eyebrow,.sii-auth-story h1 em,.sii-story-feature-icon){color:#f1d8c8}
