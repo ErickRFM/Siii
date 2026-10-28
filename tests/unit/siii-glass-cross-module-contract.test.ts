@@ -12,7 +12,8 @@ describe('Smoked Glass cross-module design contract',()=>{
   expect(root).toContain('nonce={nonce}');
   expect(root).toContain('suppressHydrationWarning');
   expect(toggle).toContain("useState<Theme>('light')");
-  expect(toggle).toContain("saved==='dark'?'dark':'light'");
+  expect(toggle).toContain("saved==='dark'?'dark':saved==='light'?'light':defaultTheme");
+  expect(source('src/components/sii-app-shell.tsx')).toContain("defaultTheme={personalShell?'dark':'light'}");
   expect(toggle).toContain("window.localStorage.setItem('sii-theme',next)");
   expect(toggle).toContain("'Activar tema oscuro'");
   expect(toggle).toContain("'Activar tema claro'");
@@ -39,8 +40,8 @@ describe('Smoked Glass cross-module design contract',()=>{
   expect(kit).toContain('export function SiiiGlassPanel');
   expect(kit).toContain('export function SiiiGlassPanelHeading');
   expect(kit).toContain('export function SiiiGlassMetricsRow');
-  for(const file of ['student-glass-overview','teacher-portal','financial-workspace','admissions-workspace'])expect(source('src/components/'+file+'.tsx')).toContain('<SiiiGlassMetricsRow');
-  expect(source('src/components/teacher-portal.tsx')).toContain('<SiiiGlassMetric');
+  for(const file of ['student-glass-overview','teacher-glass-overview','financial-workspace','admissions-workspace'])expect(source('src/components/'+file+'.tsx')).toContain('<SiiiGlassMetricsRow');
+  expect(source('src/components/teacher-glass-overview.tsx')).toContain('<SiiiGlassMetric');
   expect(source('src/components/teacher-portal.tsx')).toContain('incompleteGroups');
   expect(source('src/components/student-glass-overview.tsx')).toContain('m.incomplete');
   expect(source('src/components/student-glass-overview.tsx')).toContain('<SiiiGlassMetric');
@@ -59,7 +60,7 @@ describe('Smoked Glass cross-module design contract',()=>{
   }
   const glass=source('src/app/sii-glass.css');
   for(const token of ['siii-student-glass','siii-student-hero','siii-student-metric','siii-student-panel','siii-student-sidepanel','siii-student-wide'])expect(glass).not.toContain(token);
-  expect(glass).toContain('.siii-student-dashboard');
+  expect(source('src/app/sii-personal-fidelity.css')).toContain('.siii-student-dashboard');
   expect(global).toContain('.password-form{');
   expect(global).toContain('.primary-button{');
   expect(global).toContain(':focus-visible{');

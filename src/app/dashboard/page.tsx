@@ -11,13 +11,30 @@ import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card,CardContent,CardHeader} from '@/components/ui/card';
 import {Separator} from '@/components/ui/separator';
+import {PERSONAL_ENTRY_ROLES,personalEntryAvailable,resolveDashboardEntry} from '@/shared/navigation/dashboard-entry';
+import {hasInstitutionManagementPageAccess} from '@/shared/institution-admin/access';
 
 export const dynamic='force-dynamic';
 
 export default async function Dashboard(){
  const user=await getIdentity();
  if(!user)redirect('/login');
+ if(user.mustChangePassword)return <div className="siii-glass-workspace space-y-8"><SiiPageIntro eyebrow="SEGURIDAD DE CUENTA" title="Protege tu cuenta" description="Actualiza tu contraseña institucional para continuar."/><section className="sii-security-notice" role="alert" aria-label="Actualización obligatoria de contraseña"><div className="sii-notice-header"><strong>Actualiza tu contraseña para continuar</strong><p>Por seguridad, las operaciones administrativas están restringidas hasta completar este cambio.</p></div><PasswordChange/></section></div>;
  const institutions=await getInstitutionAccess(user.id);
+ const managementAvailable=await hasInstitutionManagementPageAccess(user);
+ const personalDestination=managementAvailable?null:resolveDashboardEntry(institutions,user.mustChangePassword);
+ if(personalDestination)redirect(personalDestination as Route);
+ if(!managementAvailable&&!institutions.some(item=>item.roles.some(role=>!PERSONAL_ENTRY_ROLES.includes(role))))return <section className="siii-entry-chooser space-y-5" aria-label="Seleccionar contexto institucional">
+  <SiiPageIntro eyebrow="MI ESPACIO INSTITUCIONAL" title={`Hola, ${user.firstName}`} description="Elige la institución y el perfil que deseas consultar."/>
+  {institutions.length?institutions.map(inst=><Card key={inst.institutionId}><CardHeader><h2>{inst.institutionName}</h2></CardHeader><CardContent className="flex flex-wrap gap-3">
+   {personalEntryAvailable(inst,'student')&&<Link className="sii-outline-button" href={`/dashboard/institutions/${inst.institutionId}/student`}>Mi vida universitaria</Link>}
+   {personalEntryAvailable(inst,'teacher')&&<Link className="sii-outline-button" href={`/dashboard/institutions/${inst.institutionId}/teacher`}>Mi docencia</Link>}
+   {!personalEntryAvailable(inst,'student')&&!personalEntryAvailable(inst,'teacher')&&<p>Tu acceso está vigente. La institución debe habilitar el perfil correspondiente.</p>}
+   <Link className="sii-outline-button" href={`/dashboard/institutions/${inst.institutionId}`}>Consultar acceso institucional</Link>
+  </CardContent></Card>):<SiiEmptyView icon="institution" title="No tienes instituciones asignadas" description="Solicita a tu institución revisar tu membresía."/>}
+  {institutions.filter(inst=>!inst.roles.some(role=>role==='student'||role==='teacher')).map(inst=><InstitutionModuleDirectory key={inst.institutionId} institutionId={inst.institutionId} institutionName={inst.institutionName}/>)}
+  <Link className="sii-outline-button" href="/dashboard/security">Cuenta y seguridad</Link>
+ </section>;
  const roleNames=[...new Set(institutions.flatMap(item=>item.roles))].map(role=>ROLE_LABELS[role]);
  const personalOnly=institutions.length>0&&institutions.every(item=>item.roles.every(role=>['student','teacher','teacher_pending','workshop_participant','guest'].includes(role)));
 
@@ -26,12 +43,7 @@ export default async function Dashboard(){
    description="Tu espacio institucional, accesos vigentes y módulos autorizados en un solo lugar."
    actions={<SiiStatusPill live>Cuenta activa</SiiStatusPill>}/>
 
-  {user.mustChangePassword&&(
-   <section className="sii-security-notice" role="alert" aria-label="Actualización obligatoria de contraseña">
-    <div className="sii-notice-header"><span aria-hidden="true">⚠</span><div><strong>Actualiza tu contraseña para continuar</strong><p>Por seguridad, las operaciones administrativas están restringidas hasta completar este cambio.</p></div></div>
-    <PasswordChange/>
-   </section>
-  )}
+
 
   {!personalOnly&&<section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Resumen de tu acceso">
    <SiiMetricTile label="Instituciones asignadas" value={institutions.length} caption="Membresías con acceso vigente" icon="institution" tone="rose"/>

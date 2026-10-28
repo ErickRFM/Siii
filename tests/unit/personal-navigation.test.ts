@@ -9,7 +9,9 @@ describe('personal capabilities and multirole navigation',()=>{
   expect(hasOnlyPersonalRoles(['student','teacher'])).toBe(true);
  });
  it('offers a scoped personal link without granting financial or institutional administration',()=>{
-  expect(personalModuleLinks([],['student'],[{capabilities:['student.self.read']}]).map(item=>item.id)).toEqual(['student']);
+  expect(personalModuleLinks([],['student'],[{scopeType:'program',capabilities:['student.self.read']}]).map(item=>item.id)).toEqual(['student']);
+  expect(personalModuleLinks([],['student'],[{scopeType:'campus',capabilities:['student.self.read']}])).toEqual([]);
+  expect(personalModuleLinks([],['teacher'],[{scopeType:'program',capabilities:['teacher.self.read']}])).toEqual([]);
   expect(personalModuleLinks(['student.self.read','teacher.self.read'],['student','teacher']).map(item=>item.id)).toEqual(['student','teacher']);
   expect(personalModuleLinks(['student.self.read','teacher.self.read','institutions.manage'],['admin']).map(item=>item.id)).toEqual(['financials']);
  });

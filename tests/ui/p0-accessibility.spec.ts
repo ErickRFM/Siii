@@ -28,7 +28,7 @@ async function signIn(page:Page,name=username){
  await page.getByLabel('Usuario institucional').fill(name);
  await page.getByLabel('Contraseña',{exact:true}).fill(password);
  await page.getByRole('button',{name:'Entrar al sistema'}).click();
- await expect(page).toHaveURL(/\/dashboard$/);
+ await expect(page).toHaveURL(name===student?new RegExp(`/dashboard/institutions/${institutionId}/student$`):/\/dashboard$/);
 }
 async function catalog(page:Page,name=username){
  await signIn(page,name);await page.goto('/dashboard/institutions/'+institutionId+'/academic');

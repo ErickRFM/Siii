@@ -20,7 +20,7 @@ async function catalog(page:Page,role='coordinator',scoped=false){
   await sql.query("INSERT INTO curriculum_versions(institution_id,program_id,version) VALUES($1,$2,'OTRO-2026')",[tenant,other]);
   await sql.query("INSERT INTO role_assignments(membership_id,role,institution_id,scope_type,scope_program_id) VALUES($1,$2,$3,'program',$4)",[member,role,tenant,program]);
  }else await sql.query('INSERT INTO role_assignments(membership_id,role) VALUES($1,$2)',[member,role]);
- await page.goto('/login');await page.getByLabel('Usuario institucional').fill(username);await page.getByLabel('Contraseña',{exact:true}).fill(password);await page.getByRole('button',{name:'Entrar al sistema'}).click();await expect(page).toHaveURL(/\/dashboard$/);
+ await page.goto('/login');await page.getByLabel('Usuario institucional').fill(username);await page.getByLabel('Contraseña',{exact:true}).fill(password);await page.getByRole('button',{name:'Entrar al sistema'}).click();await expect(page).toHaveURL(role==='student'?new RegExp(`/dashboard/institutions/${tenant}/student$`):/\/dashboard$/);
  await page.goto('/dashboard/institutions/'+tenant+'/academic');return tenant;
 }
 test('empty setup opens the existing form, persists a campus and survives reload',async({page})=>{

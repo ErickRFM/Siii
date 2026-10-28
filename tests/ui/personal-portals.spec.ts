@@ -1,3 +1,4 @@
+import {personalNavigate} from '../support/personal-navigation';
 import {test,expect,type Page} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
@@ -14,12 +15,12 @@ async function login(page:Page,actor=f.student){
  let recovery='';if(actor===f.admin){const factor=(await sql.query('SELECT id FROM auth_mfa_factors WHERE user_id=$1',[actor.id])).rows[0].id;recovery=randomBytes(16).toString('hex').toUpperCase();await sql.query('INSERT INTO auth_mfa_recovery_codes(user_id,factor_id,code_hash) VALUES($1,$2,$3)',[actor.id,factor,digestRecoveryCode(recovery,actor.id)])}
  await page.goto('/login');await page.getByLabel('Usuario institucional').fill(actor.username);await page.getByLabel('Contraseña',{exact:true}).fill(portalPassword);await page.getByRole('button',{name:'Entrar al sistema'}).click();
  if(recovery){await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();await page.getByLabel('Código de recuperación',{exact:true}).fill(recovery);await page.getByRole('button',{name:'Verificar y entrar'}).click()}
- await expect(page).toHaveURL(/\/dashboard$/);
+ await expect(page).toHaveURL(actor===f.admin?/\/dashboard$/:new RegExp(`/dashboard/institutions/${f.tenant}/(?:student|teacher)`));
 }
 test('student consults official own academic records in both themes across all requested widths',async({page})=>{
  test.setTimeout(180000);await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);
- await expect(page.getByRole('heading',{name:'Mi vida universitaria.'})).toBeVisible();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
- await page.getByRole('tab',{name:'Académico',exact:true}).click();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Alumna propia Sintético'})).toBeVisible();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
+ await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Mis docentes',exact:true}).click();await expect(page.getByRole('cell').getByText('Docente oficial Asignado',{exact:true})).toBeVisible();await expect(page.getByRole('tabpanel').last()).not.toContainText('private-teacher');
  await page.getByRole('tab',{name:'Calificaciones e historial',exact:true}).click();await expect(page.getByRole('tabpanel').last()).toContainText('8.50');await expect(page.getByRole('tabpanel').last()).not.toContainText('9.99');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Descargar historial informativo'}).click();expect((await download).suggestedFilename()).toMatch(/historial-informativo.*\.csv$/);
@@ -55,14 +56,14 @@ test('V3 student home stays institutional and loads only dashboard resources',as
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await expect(page.getByText('Próximas clases registradas',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Mi horario',exact:true})).toHaveCount(0);
- await expect(page.getByRole('tab',{name:'Académico',exact:true})).toBeVisible();
+ await expect(page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Carga académica',exact:true})).toBeVisible();
  expect(resources).not.toContain('schedule');expect(resources).toContain('grades');expect(resources).toContain('payments');
- await page.getByRole('tab',{name:'Académico',exact:true}).click();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
+ await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Calificaciones e historial',exact:true}).click();await expect(page.getByRole('tabpanel').last()).toContainText('8.50');
 });
 test('student sidebar opens real academic and finance sections without duplicating operational schedules',async({page})=>{
  await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
- await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Calificaciones e historial'}).click();
+ await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Calificaciones',exact:true}).click();
  await expect(page.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
  await expect(page.getByRole('tab',{name:'Calificaciones e historial',exact:true})).toHaveAttribute('data-state','active');
  await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Estado de cuenta'}).click();
@@ -75,7 +76,7 @@ test('V3 revalidation preserves displayed records and search while a valid profi
  try{await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();await expect(page.getByRole('status').filter({hasText:'Actualizando'})).toBeVisible()}finally{release()}
 });
 test('V3 refresh keeps the academic search and a denied collection removes all private content',async({page})=>{
- await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await page.getByRole('tab',{name:'Académico',exact:true}).click();
+ await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(page,'Académico');
  const search=page.getByRole('searchbox',{name:'Buscar en inscripciones'});await search.fill('Álgebra');
  await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();await expect(search).toHaveValue('Álgebra');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.route('**/portal/student/courses',route=>route.fulfill({status:403,json:{error:'FORBIDDEN'}}));
@@ -85,7 +86,7 @@ test('V3 rejects a different actor response and a different context on a later c
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await page.route('**/portal/student/profile',async route=>{const response=await route.fetch();await route.fulfill({response,headers:{...response.headers(),'x-siii-portal-actor':f.secondStudent.id}})});
  await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.locator('main [role="alert"]')).toContainText('acceso');await expect(page.getByText('Alumna propia Sintético',{exact:true})).toHaveCount(0);
- await page.unroute('**/portal/student/profile');await page.getByRole('tab',{name:'Académico',exact:true}).click();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
+ await page.unroute('**/portal/student/profile');await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.route('**/portal/student/courses*',async route=>{const response=await route.fetch();if(new URL(route.request().url()).searchParams.has('cursor'))await route.fulfill({response,headers:{...response.headers(),'x-siii-portal-context':'another-context'}});else{const body=await response.json();await route.fulfill({response,json:{...body,page:{nextCursor:'synthetic-next-page'}}})}});
  // Route the synthetic cursor through the real authorized first page, changing
  // only transport metadata. The consumer must reject before using its body.
@@ -94,8 +95,10 @@ test('V3 rejects a different actor response and a different context on a later c
 });
 test('V3 mobile destinations remain keyboard accessible and clear records offline',async({page,context})=>{
  await page.setViewportSize({width:360,height:800});await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
- const navigation=page.getByRole('tablist',{name:'Navegación estudiantil'});await expect(navigation.getByRole('tab')).toHaveCount(5);
- await navigation.getByRole('tab',{name:'Inicio',exact:true}).focus();await page.keyboard.press('ArrowRight');await expect(navigation.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
+ await page.getByRole('button',{name:'Abrir navegación',exact:true}).focus();await page.keyboard.press('Enter');
+ const drawer=page.getByRole('dialog');await expect(drawer).toBeVisible();
+ const academic=drawer.getByRole('link',{name:'Carga académica',exact:true});await academic.focus();await page.keyboard.press('Enter');await expect(drawer).toHaveCount(0);
+ const navigation=page.getByRole('tablist',{name:'Navegación estudiantil'});await expect(navigation.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
  await expect(page.getByRole('searchbox',{name:'Buscar en inscripciones'})).toBeVisible();await expect(page.getByRole('cell')).toHaveCount(0);
  for(const name of ['Inicio','Académico','Finanzas','Servicios','Perfil']){const box=await navigation.getByRole('tab',{name,exact:true}).boundingBox();expect(box?.height).toBeGreaterThanOrEqual(44);expect(box?.width).toBeGreaterThanOrEqual(44)}
  await context.setOffline(true);await expect(page.locator('main [role="alert"]')).toContainText('Sin conexión');await expect(page.getByText('Alumna propia Sintético',{exact:true})).toHaveCount(0);await context.setOffline(false);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
@@ -128,9 +131,9 @@ for(const departure of ['hidden','blur'] as const)test(`V3 return after ${depart
  try{await page.evaluate(()=>{Object.defineProperty(document,'visibilityState',{configurable:true,get:()=> 'visible'});document.dispatchEvent(new Event('visibilitychange'));window.dispatchEvent(new Event('focus'))});await expect(page.getByText('Expediente al volver Sintético',{exact:true})).toBeVisible();release();await finished;await expect(page.getByText('Alumna propia Sintético',{exact:true})).toHaveCount(0)}finally{release();await sql.query('UPDATE student_account_links SET student_id=$1 WHERE membership_id=$2',[f.studentId,f.student.member])}
 });
 test('teacher sees only assigned groups and can open the existing real gradebook',async({page})=>{
- await login(page,f.teacher);await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await expect(page.getByRole('heading',{name:'Mi docencia.'})).toBeVisible();
+ await login(page,f.teacher);await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await expect(page.getByRole('heading',{name:'Docente oficial Asignado'})).toBeVisible();
  await expect(page.getByRole('tabpanel')).toContainText('SYS-101');await expect(page.getByRole('tabpanel')).not.toContainText('SYS-202');
- await page.getByRole('tab',{name:'Mis grupos',exact:true}).click();await page.getByRole('button',{name:'Evaluar SYS-101'}).click();await expect(page.getByRole('heading',{name:'Libro de calificaciones'})).toBeVisible();
+ await personalNavigate(page,'Mis grupos');await page.getByRole('button',{name:'Evaluar SYS-101'}).click();await expect(page.getByRole('heading',{name:'Libro de calificaciones'})).toBeVisible();
 });
 test('cashier records an external payment once and student sees its persistent statement',async({page,browser})=>{
  await login(page,f.admin);await page.goto(`/dashboard/institutions/${f.tenant}/financials`);await expect(page.getByRole('heading',{name:'Caja y finanzas.'})).toBeVisible();
@@ -140,7 +143,7 @@ test('cashier records an external payment once and student sees its persistent s
  await page.getByRole('button',{name:'Revisar pago',exact:true}).click();await page.getByRole('button',{name:'Confirmar registro del pago',exact:true}).click();
  await expect(page.getByRole('status').filter({hasText:'Pago registrado'})).toBeVisible();await expect(row).toContainText('Pagada');
  expect((await sql.query('SELECT count(*)::int AS n FROM payment_transactions WHERE order_id=$1',[f.orderId])).rows[0].n).toBe(1);
- const context=await browser.newContext();try{const student=await context.newPage();await login(student);await student.goto(`/dashboard/institutions/${f.tenant}/student`);await student.getByRole('tab',{name:'Finanzas',exact:true}).click();await expect(student.getByRole('tabpanel')).toContainText('Pagada');await expect(student.getByRole('tabpanel')).toContainText('BANK-VNEXT-UI')}finally{await context.close()}
+ const context=await browser.newContext();try{const student=await context.newPage();await login(student);await student.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(student,'Finanzas');await expect(student.getByRole('tabpanel')).toContainText('Pagada');await expect(student.getByRole('tabpanel')).toContainText('BANK-VNEXT-UI')}finally{await context.close()}
 });
 test('revoked personal membership clears displayed data on revalidation and offers an honest error',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
@@ -153,7 +156,7 @@ test('teacher deep link selects the requested authorized group instead of the re
  await sql.query('INSERT INTO section_teachers(institution_id,section_id,teacher_id) VALUES($1,$2,$4),($1,$3,$4)',[f.tenant,f.section,f.otherSection,teacher]);
  await login(page,f.secondTeacher);await page.goto(`/dashboard/institutions/${f.tenant}/grading`);
  const remembered=await page.getByLabel('Materia y grupo asignado').inputValue();const requested=remembered===f.section?f.otherSection:f.section,code=requested===f.section?'SYS-101':'SYS-202';
- await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await page.getByRole('tab',{name:'Mis grupos',exact:true}).click();await page.getByRole('button',{name:'Evaluar '+code}).click();await expect(page.getByLabel('Materia y grupo asignado')).toHaveValue(requested);
+ await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await personalNavigate(page,'Mis grupos');await page.getByRole('button',{name:'Evaluar '+code}).click();await expect(page.getByLabel('Materia y grupo asignado')).toHaveValue(requested);
 });
 test('late movements response cannot fill the drawer of another order',async({page})=>{
  await login(page,f.admin);const numbers=(await sql.query('SELECT id,order_number FROM payment_orders WHERE id=ANY($1::uuid[])',[[f.orderId,f.otherOrderId]])).rows;

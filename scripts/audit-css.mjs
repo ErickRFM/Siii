@@ -1,22 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const cssFiles = [
-  'src/app/academic-v2.css',
-  'src/app/globals.css',
-  'src/app/sii-glass.css',
-  'src/app/sii-interactions.css',
-  'src/app/sii-kit-components.css',
-  'src/app/sii-motion-polish.css',
-  'src/app/sii-premium-kit.css',
-  'src/app/sii-system-coherence.css',
-  'src/app/sii-tailwind.css',
-  'src/app/sii-ux-refinement.css',
-  'src/app/sii-v2.css',
-  'src/app/sii-workspaces.css',
-  'src/components/institution-admin.css',
-  'src/components/institution-users.css'
-];
+function stylesheets(directory){
+ return fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>{
+  const file=path.join(directory,entry.name);
+  return entry.isDirectory()?stylesheets(file):entry.isFile()&&file.endsWith('.css')?[file.replaceAll('\\','/')]:[];
+ });
+}
+const cssFiles=stylesheets('src').sort();
 
 function stripComments(s){ return s.replace(/\/\*[\s\S]*?\*\//g,''); }
 function getRules(css){
@@ -32,7 +23,7 @@ function getRules(css){
   return out;
 }
 
-const report = [];
+export const report = [];
 for (const f of cssFiles){
   const full = path.resolve(f);
   if(!fs.existsSync(full)) continue;
@@ -59,7 +50,7 @@ for (const f of cssFiles){
   const duplicateSelectors = Object.values(selectorCounts).filter(v=>v>1).length;
   report.push({
     file: f,
-    bytes: Buffer.byteLength(raw,'utf8'),
+    bytes: Buffer.byteLength(raw.replaceAll('\r\n','\n'),'utf8'),
     rules: rules.length,
     classes: classes.size,
     orphanCandidates: 0,
@@ -69,9 +60,9 @@ for (const f of cssFiles){
 }
 
 console.table(report);
-const totalBytes = report.reduce((a,b)=>a+b.bytes,0);
-const totalImportant = report.reduce((a,b)=>a+b.important,0);
-const totalDup = report.reduce((a,b)=>a+b.duplicateSelectors,0);
+export const totalBytes = report.reduce((a,b)=>a+b.bytes,0);
+export const totalImportant = report.reduce((a,b)=>a+b.important,0);
+export const totalDup = report.reduce((a,b)=>a+b.duplicateSelectors,0);
 const baselinePath=path.resolve('scripts/css-audit-baseline.json');
 if(!fs.existsSync(baselinePath)){
  console.error('CSS budget baseline missing: '+baselinePath);

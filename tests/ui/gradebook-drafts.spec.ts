@@ -1,3 +1,4 @@
+import {openAccount} from '../support/personal-navigation';
 import {test,expect,type Page,type TestInfo,type Route} from '@playwright/test';
 import {randomBytes,randomUUID} from 'node:crypto';
 import pg from 'pg';
@@ -39,11 +40,11 @@ async function fixture(){
  return {institution,section,students,username,codes,teacher,course,term,user};
 }
 type Fixture=Awaited<ReturnType<typeof fixture>>;
-async function login(page:Page,f:Fixture){
+async function login(page:Page,f:Fixture,personal=true){
  await page.goto('/login');await page.getByLabel('Usuario institucional').fill(f.username);await page.getByLabel('Contraseña',{exact:true}).fill(password);
  const logged=page.waitForResponse(r=>r.url().endsWith('/api/v1/auth/login')&&r.request().method()==='POST');await page.getByRole('button',{name:'Entrar al sistema'}).click();expect((await logged).status()).toBe(200);
  await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();await page.getByLabel('Código de recuperación',{exact:true}).fill(f.codes[0]);
- const challenge=page.waitForResponse(r=>r.url().endsWith('/api/v1/auth/mfa/challenge'));await page.getByRole('button',{name:'Verificar y entrar'}).click();expect((await challenge).status()).toBe(200);await page.waitForURL('**/dashboard');
+ const challenge=page.waitForResponse(r=>r.url().endsWith('/api/v1/auth/mfa/challenge'));await page.getByRole('button',{name:'Verificar y entrar'}).click();expect((await challenge).status()).toBe(200);await expect(page).toHaveURL(personal?new RegExp(`/dashboard/institutions/${f.institution}/teacher$`):/\/dashboard$/);
 }
 const endpoint=(f:Fixture)=>'/api/v1/institutions/'+f.institution+'/grading';
 async function prepare(page:Page,f:Fixture){
@@ -219,7 +220,7 @@ test('forbidden refresh retires drafts and recovery reloads assigned section met
 test('real logout with drafts clears private data without a cancellable departure warning',async({page})=>{
  const f=await fixture();await prepare(page,f);await page.getByLabel('DRAFT001 · Parcial uno',{exact:true}).fill('8.85');
  const warnings:string[]=[];page.on('dialog',dialog=>{warnings.push(dialog.type());void dialog.dismiss();});
- const leaving=page.getByRole('button',{name:'Salir',exact:true}).click({noWaitAfter:true}).catch(()=>null);
+ await openAccount(page);const leaving=page.getByRole('button',{name:'Salir',exact:true}).click({noWaitAfter:true}).catch(()=>null);
  await expect(page).toHaveURL(/\/login$/,{timeout:5000});expect(warnings).toEqual([]);
  await leaving;await expect(page.getByLabel('DRAFT001 · Parcial uno',{exact:true})).toHaveCount(0);expect((await page.request.get('/api/v1/auth/me')).status()).toBe(401);
 });
@@ -230,7 +231,7 @@ test('real withdrawal keeps excluded capture visible until explicit confirmed di
  await sql.query("INSERT INTO role_assignments(institution_id,membership_id,role,scope_type) VALUES($1,$2,'admin','institution')",[f.institution,membership]);
  const adminContext=await browser.newContext({baseURL:new URL(page.url()).origin});
  try{
-  const adminPage=await adminContext.newPage();await login(adminPage,administrator);
+  const adminPage=await adminContext.newPage();await login(adminPage,administrator,false);
   const enrollment=(await sql.query('SELECT id FROM section_enrollments WHERE institution_id=$1 AND section_id=$2 AND student_id=$3',[f.institution,f.section,f.students[0].id])).rows[0].id;
   expect((await adminPage.request.patch('/api/v1/institutions/'+f.institution+'/enrollments',{headers:{origin:new URL(adminPage.url()).origin},data:{id:enrollment,status:'withdrawn'}})).status()).toBe(200);
   await a.locator('..').locator('..').getByRole('button',{name:'Guardar',exact:true}).click();await expect(page.locator('.sii-academic').getByRole('alert')).toBeVisible();
@@ -252,6 +253,7 @@ test('populated drafts retain focus with keyboard and have accessible light and 
  const f=await fixture();await prepare(page,f);const a=page.getByLabel('DRAFT001 · Parcial uno',{exact:true}),b=page.getByLabel('DRAFT002 · Parcial uno',{exact:true});await a.fill('9.10');await b.fill('8.70');
  await a.focus();await page.keyboard.press('Tab');await expect(a.locator('..').locator('..').getByRole('button',{name:'Guardar',exact:true})).toBeFocused();
  await page.keyboard.press('Enter');await expect(page.getByRole('status').filter({hasText:'Operación guardada'})).toBeVisible();await expect(b).toHaveValue('8.70');
+ if(await page.locator('html').getAttribute('data-sii-theme')!=='light')await page.getByRole('button',{name:'Activar tema claro',exact:true}).click();
  await b.focus();await page.screenshot({path:resolve('.p0-local/ux-matrix-gradebook-drafts-light-desktop.png'),fullPage:true});
  expect((await new AxeBuilder({page}).include('.sii-academic').analyze()).violations).toEqual([]);
  await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Activar tema oscuro',exact:true}).click();await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');await b.focus();await b.scrollIntoViewIfNeeded();
@@ -288,7 +290,7 @@ test('a valid real step-up invalidates then restores the same private capture',a
 });
 test('logout outside grading retires retained drafts and a fresh login starts empty',async({page})=>{
  const f=await fixture();await prepare(page,f);await page.getByLabel('DRAFT001 · Parcial uno',{exact:true}).fill('8.87');await quickNavigate(page,'Cuenta y seguridad');await expect(page).toHaveURL(/\/security$/);
- const warnings:string[]=[];page.on('dialog',d=>{warnings.push(d.type());void d.dismiss();});await Promise.all([page.waitForURL('**/login'),page.getByRole('button',{name:'Salir',exact:true}).click()]);expect(warnings).toEqual([]);expect((await page.request.get('/api/v1/auth/me')).status()).toBe(401);
+ const warnings:string[]=[];page.on('dialog',d=>{warnings.push(d.type());void d.dismiss();});await openAccount(page);await Promise.all([page.waitForURL('**/login'),page.getByRole('button',{name:'Salir',exact:true}).click()]);expect(warnings).toEqual([]);expect((await page.request.get('/api/v1/auth/me')).status()).toBe(401);
  // Fixture has a second unused recovery code; login consumes it through the real UI.
  await login(page,{...f,codes:[f.codes[1]]});await page.goto('/dashboard/institutions/'+f.institution+'/grading');await expect(page.getByLabel('DRAFT001 · Parcial uno',{exact:true})).toHaveValue('');
 });
@@ -321,7 +323,7 @@ test('a different real actor cannot restore the previous actor capture in a reta
  await sql.query("INSERT INTO role_assignments(institution_id,membership_id,role,scope_type) VALUES($1,$2,'teacher','institution')",[f.institution,member]);
  const teacher=(await sql.query("INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) VALUES($1,'T-OTHER','Synthetic','Other') RETURNING id",[f.institution])).rows[0].id;
  await sql.query('INSERT INTO teacher_account_links(institution_id,teacher_id,membership_id) VALUES($1,$2,$3)',[f.institution,teacher,member]);await sql.query('INSERT INTO section_teachers(institution_id,section_id,teacher_id) VALUES($1,$2,$3)',[f.institution,f.section,teacher]);
- const another=await context.newPage();try{await another.request.post('/api/v1/auth/logout',{headers:{origin:new URL(page.url()).origin}});await login(another,other);await page.bringToFront();await quickNavigate(page,'Cuenta y seguridad');await page.goBack();await expect(page.getByLabel('DRAFT001 · Parcial uno',{exact:true})).toHaveCount(0);expect((await page.request.get('/api/v1/auth/me')).status()).toBe(200);}finally{await another.close();}
+ const another=await context.newPage();try{await another.request.post('/api/v1/auth/logout',{headers:{origin:new URL(page.url()).origin}});await login(another,other,false);await page.bringToFront();await quickNavigate(page,'Cuenta y seguridad');await page.goBack();await expect(page.getByLabel('DRAFT001 · Parcial uno',{exact:true})).toHaveCount(0);expect((await page.request.get('/api/v1/auth/me')).status()).toBe(200);}finally{await another.close();}
 });
 test('a blocked old private read cannot repopulate capture after navigation and revocation',async({page})=>{
  const f=await fixture();await prepare(page,f);const a=page.getByLabel('DRAFT001 · Parcial uno',{exact:true});await a.fill('8.57');await quickNavigate(page,'Catálogo académico');
@@ -356,7 +358,7 @@ for(const newer of [false,true])test('a committed save after SPA departure ackno
 test('an old committed response cannot delete a new provider revision after own logout and same-actor login',async({page})=>{
  const f=await fixture();await prepare(page,f);const a=page.getByLabel('DRAFT001 · Parcial uno',{exact:true});await a.fill('7.50');const held=await holdGradebookResponse(page,f);
  try{await a.locator('..').locator('..').getByRole('button',{name:'Guardar',exact:true}).click();await held.observed;expect((await sql.query('SELECT score_hundredths FROM assessment_scores WHERE institution_id=$1',[f.institution])).rows).toEqual([{score_hundredths:750}]);
-  await quickNavigate(page,'Cuenta y seguridad');await Promise.all([page.waitForURL('**/login'),page.getByRole('button',{name:'Salir',exact:true}).click()]);
+  await quickNavigate(page,'Cuenta y seguridad');await openAccount(page);await Promise.all([page.waitForURL('**/login'),page.getByRole('button',{name:'Salir',exact:true}).click()]);
   await login(page,{...f,codes:[f.codes[1]]});await page.goto('/dashboard/institutions/'+f.institution+'/grading');await expect(a).toHaveValue('7.50');await a.fill('6.39');held.release();expect(['fulfilled','aborted']).toContain(await held.delivered);
   await expect(a).toHaveValue('6.39');await expect(page.getByRole('status').filter({hasText:/Hay .* notas sin guardar en este grupo/})).toHaveCount(1);
  }finally{held.release();await held.dispose();}

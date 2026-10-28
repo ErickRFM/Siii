@@ -15,7 +15,7 @@ export default function SiiiGlassCalendar({timeZone}:{timeZone:string}){
  const year=shown.getUTCFullYear(),month=shown.getUTCMonth();
  const first=(shown.getUTCDay()+6)%7;
  const length=new Date(Date.UTC(year,month+1,0)).getUTCDate();
- const monthName=new Intl.DateTimeFormat('es-MX',{timeZone:'UTC',month:'long',year:'numeric'}).format(shown);
+ const monthName=new Intl.DateTimeFormat('es-MX',{timeZone:'UTC',month:'long'}).format(shown)+' '+year;
  return <div className="siii-glass-calendar" aria-label="Calendario de referencia">
   <div className="siii-calendar-header">
    <strong className="capitalize">{monthName}</strong>
