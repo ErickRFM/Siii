@@ -37,3 +37,7 @@ El selector `siii-glass-workspace` aplica el material compartido a Admisiones in
 El tema oscuro se puede activar desde la barra superior y queda guardado. Para conservar el comportamiento del sistema y sus pruebas de navegación preexistentes, el estado inicial sin preferencia guardada sigue siendo claro. En cualquiera de los dos temas las superficies utilizan los mismos componentes y jerarquía de interfaz.
 
 El fondo `public/visuals/siii-warm-architecture.svg` es una composición vectorial original, estática y deliberadamente desenfocada; el diseño aprobado sigue siendo referencia de proporciones y materialidad, no un screenshot embebido.
+
+## Visibilidad del primer viewport
+
+La portada del Estudiante debe mostrar el hero y las tarjetas antes de la navegación auxiliar. El portal conserva el encabezado semántico, las pestañas y los accesos de seguridad para lectores de pantalla y flujos existentes, pero desplaza sus controles auxiliares bajo el dashboard mediante `siii-student-home-shell`. El botón de actualización permanece disponible dentro del hero. La campana del shell navega únicamente a los avisos autorizados del propio estudiante, sin contar notificaciones inexistentes.

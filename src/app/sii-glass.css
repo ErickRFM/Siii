@@ -850,3 +850,37 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-panel{
 .sii-app.sii-ui .siii-topbar-notices:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-topbar-notices{background:rgba(93,75,60,.09)}
 @media(prefers-reduced-motion:reduce){.sii-app.sii-ui .siii-sidebar-disclosure svg{transition:none}}
+
+/* Student first viewport follows the approved screenshot. Navigation still works
+   below the dashboard; no duplicated intro or identity card pushes the hero down. */
+.sii-app.sii-ui .siii-student-home-shell{
+ display:flex;flex-direction:column;gap:0;min-width:0;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-visually-hidden{
+ position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;
+ clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;
+ margin:-1px!important;padding:0!important;border:0!important;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs{
+ order:0;display:flex;flex-direction:column;gap:0;min-width:0;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tabpanel"]{
+ order:0;margin-top:0;min-width:0;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tablist"]{
+ order:1;margin-top:20px;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>.siii-student-identity-card{
+ order:2;margin-top:14px;background:var(--sii-glass-panel)!important;border:0!important;box-shadow:none!important;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-student-utility-links{
+ order:1;margin-top:15px;
+}
+.sii-app.sii-ui .siii-student-home-shell>p:last-child{order:3}
+.sii-app.sii-ui .siii-overview-calendar,
+.sii-app.sii-ui #avisos{scroll-margin-top:85px}
+@media(max-width:680px){
+ .sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tablist"]{
+  margin-top:14px;max-width:100%;overflow-x:auto;
+ }
+}
