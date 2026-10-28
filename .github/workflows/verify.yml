@@ -134,6 +134,10 @@ jobs:
             .p0-local/vnext/*.png
             .p0-local/vnext-institutional/*-360.png
             .p0-local/pr120-evidence/*.png
+            .p0-local/fidelity/*.png
+            .p0-local/fidelity/*-geometry.json
+            .p0-local/fidelity/reference-comparison.json
+            docs/design/reference/siii-glass-approved.png
             .p0-local/v3-services/requests-*-360.png
           if-no-files-found: error
           include-hidden-files: true

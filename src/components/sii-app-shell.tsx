@@ -6,6 +6,7 @@ import {usePathname} from 'next/navigation';
 import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation/dashboard-location';
 import {useEffect,useId,useRef,useState,type ReactNode} from 'react';
 import {Bell,ChevronDown,Menu,PanelLeftClose,PanelLeftOpen,X} from 'lucide-react';
+import SiiiPersonalNavigation from './siii-personal-navigation';
 import {SiiBrand,SiiMark} from './sii-brand';
 import {SiiNavIcon,type SiiNavIconName} from './sii-nav-icon';
 import SiiQuickSwitch,{type SiiQuickLink} from './sii-quick-switch';
@@ -31,29 +32,33 @@ function iconForModule(id:string):SiiNavIconName {
   }
 }
 
-export default function SiiAppShell({actorId,firstName,fullName,defaultInstitutionId,initialSidebarOpen=true,children}:{
- actorId:string; firstName:string; fullName:string; defaultInstitutionId?:string; initialSidebarOpen?:boolean; children:ReactNode;
+export default function SiiAppShell({actorId,firstName,fullName,defaultInstitutionId,institutionLabels={},personalAccount=false,initialSidebarOpen=true,children}:{
+ actorId:string; firstName:string; fullName:string; defaultInstitutionId?:string;institutionLabels?:Record<string,string>;personalAccount?:boolean; initialSidebarOpen?:boolean; children:ReactNode;
 }){
  const pathname=usePathname();
  const {active,institutionId}=resolveDashboardLocation(pathname,defaultInstitutionId);
- const [sidebarOpen,setSidebarOpen]=useState(initialSidebarOpen);
+ const isPersonal=personalAccount||active==='student'||active==='teacher';
+ const [sidebarOpen,setSidebarOpen]=useState(isPersonal||initialSidebarOpen);
+ useEffect(()=>{if(isPersonal)setSidebarOpen(true)},[isPersonal]);
  const updateSidebar=(open:boolean)=>{
   setSidebarOpen(open);
  };
  return <GradebookDraftsProvider key={actorId} actorId={actorId}><InstitutionCapabilitiesProvider key={institutionId??'personal'} institutionId={institutionId}>
-  <SidebarProvider open={sidebarOpen} onOpenChange={updateSidebar} className={'sii-app sii-ui flex min-h-svh w-full'+(sidebarOpen?'':' sii-app--collapsed')}>
+  <SidebarProvider id={isPersonal?'siii-personal':undefined} open={sidebarOpen} onOpenChange={updateSidebar} className={'sii-app sii-ui flex min-h-svh w-full'+(sidebarOpen?'':' sii-app--collapsed')+(isPersonal?' siii-personal-shell':'')}>
    <Shell firstName={firstName} fullName={fullName} active={active} institutionId={institutionId}
+     personalShell={isPersonal} institutionName={institutionId?institutionLabels[institutionId]:undefined}
      institutionAdministrationAvailable={active==='administration'}>{children}</Shell>
   </SidebarProvider>
  </InstitutionCapabilitiesProvider></GradebookDraftsProvider>;
 }
 
-function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;children:ReactNode}) {
+function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,personalShell,institutionName,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;personalShell:boolean;institutionName?:string;children:ReactNode}) {
  const {data,loading,error}=useInstitutionCapabilities();
  const verifying=Boolean(institutionId && loading && !data);
  const unavailableLabel=!institutionId?'Selecciona institución':verifying?'Verificando…':error?'No disponible':'Restringido';
  const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
  const personal=data&&!data.restricted?personalModuleLinks(data.capabilities,data.roles,data.scopedCapabilities):[];
+ const personalRole=active==='student'||active==='teacher'?active:'context';
  const personalOnly=Boolean(data&&hasOnlyPersonalRoles(data.roles));
  const [studentSection,setStudentSection]=useState('inicio');
  useEffect(()=>{
@@ -92,8 +97,10 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  }
  const crumb=personal.find(module=>module.id===active)?.label??(activeModule?activeModule.label:active==='overview'?'Inicio':active==='security'?'Seguridad':active==='academic'?'Catálogo académico':active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución');
  return <>
-  <Sidebar collapsible="icon" className="border-sidebar-border bg-sidebar">
+  {personalShell&&<div className="siii-personal-backdrop" aria-hidden="true"/>}
+  <Sidebar collapsible="icon" className={'border-sidebar-border bg-sidebar'+(personalShell?' siii-personal-rail':'')}>
    <nav aria-label="Navegación institucional" className="flex h-full min-h-0 flex-col">
+   {personalShell?<SiiiPersonalNavigation role={personalRole} institutionId={institutionId} institutionName={institutionName} allowed={Boolean(data&&!data.restricted&&personal.some(module=>module.id===personalRole))}/>:<>
    <SidebarHeader className="border-b border-sidebar-border px-3 py-4 group-data-[collapsible=icon]:px-1">
     <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col">
      <div className="group-data-[collapsible=icon]:hidden"><SiiBrand light/></div>
@@ -151,12 +158,14 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     </div>
     <p className="mt-2 hidden items-center gap-2 px-1 text-[10px] text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden"><span className="size-1.5 rounded-full bg-emerald-400"/>Plataforma institucional · Acceso protegido</p>
    </SidebarFooter>
+   </>}
    </nav>
   </Sidebar>
   <div className="sii-main flex min-w-0 flex-1 flex-col">
    <header className="sii-topbar">
     <div className="sii-topbar-start">
      <MobileTrigger/>
+     {personalShell&&<PersonalSidebarRestore/>}
      <Breadcrumb>
       <BreadcrumbList>
        <BreadcrumbItem className="hidden sm:block"><Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground">SII</Link></BreadcrumbItem>
@@ -168,14 +177,14 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     </div>
     <div className="sii-topbar-actions">
      <Badge variant="secondary" className="hidden gap-1.5 md:inline-flex"><span className="sii-online-dot"/>Sesión autenticada</Badge>
-     <SiiThemeToggle/>
+     <SiiThemeToggle defaultTheme={personalShell?'dark':'light'}/>
      {institutionId&&personal.some(module=>module.id==='student')&&<Link
       href={('/dashboard/institutions/'+institutionId+'/student#avisos') as Route}
       aria-label="Ver avisos institucionales" title="Avisos institucionales"
       className="siii-topbar-notices" onClick={()=>window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:'avisos'}))}>
       <Bell size={19} aria-hidden="true"/>
      </Link>}
-     <div className="siii-account-chip hidden items-center gap-2 sm:flex"><Avatar className="size-9"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar><span className="hidden min-w-0 lg:block"><strong className="block max-w-36 truncate text-xs">{fullName}</strong><small className="block text-[11px] text-muted-foreground">Cuenta institucional</small></span></div>
+     {personalShell?<details className="siii-personal-account"><summary><Avatar className="size-9"><AvatarFallback>{fullName.split(' ').filter(Boolean).map(part=>part[0]).slice(0,2).join('')}</AvatarFallback></Avatar><span><strong>{fullName}</strong><small>{active==='student'?'Estudiante':active==='teacher'?'Docente':'Cuenta institucional'}</small></span><ChevronDown size={14}/></summary><div><Link href="/dashboard">Cambiar contexto</Link><Link href="/dashboard/security">Cuenta y seguridad</Link><form action="/api/v1/auth/logout" method="post"><button type="submit">Salir</button></form></div></details>:<div className="siii-account-chip hidden items-center gap-2 sm:flex"><Avatar className="size-9"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar><span className="hidden min-w-0 lg:block"><strong className="block max-w-36 truncate text-xs">{fullName}</strong><small className="block text-[11px] text-muted-foreground">Cuenta institucional</small></span></div>}
      <form action="/api/v1/auth/logout" method="post"><Button type="submit" variant="outline" size="sm" className="gap-1.5">Salir <span aria-hidden="true">↗</span></Button></form>
     </div>
    </header>
@@ -196,6 +205,11 @@ function StudentSidebarDisclosure({label,children}:{label:string;children:ReactN
   </SidebarGroupLabel>
   <SidebarGroupContent id={contentId} hidden={!expanded}>{children}</SidebarGroupContent>
  </>;
+}
+
+function PersonalSidebarRestore(){
+ const {open,isMobile,toggleSidebar}=useSidebar();
+ return !open&&!isMobile?<Button type="button" variant="ghost" size="icon" aria-label="Mostrar navegación" onClick={toggleSidebar}><PanelLeftOpen/></Button>:null;
 }
 
 function CollapseButton(){

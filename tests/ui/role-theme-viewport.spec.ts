@@ -39,7 +39,7 @@ async function login(page:Page,role:Profile){
  await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();
  await page.getByLabel('Código de recuperación',{exact:true}).fill(actors[role].recovery);
  await page.getByRole('button',{name:'Verificar y entrar'}).click();
- await expect(page).toHaveURL(/\/dashboard$/);
+ await expect(page).toHaveURL(role==='teacher'||role==='student'?new RegExp(`/dashboard/institutions/${institutionId}/${role}$`):/\/dashboard$/);
 }
 for(const role of roles){
  test('institution role and responsive theme audit: '+role,async({page})=>{

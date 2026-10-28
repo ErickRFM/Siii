@@ -5,18 +5,18 @@ import {Moon,Sun} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 
 type Theme='light'|'dark';
-export default function SiiThemeToggle(){
+export default function SiiThemeToggle({defaultTheme='light'}:{defaultTheme?:Theme}){
  const [theme,setTheme]=useState<Theme>('light');
  useEffect(()=>{
   try{
    const saved=window.localStorage.getItem('sii-theme');
-   const resolved:Theme=saved==='dark'?'dark':'light';
+   const resolved:Theme=saved==='dark'?'dark':saved==='light'?'light':defaultTheme;
    document.documentElement.dataset.siiTheme=resolved;
    setTheme(resolved);
   }catch{
-   document.documentElement.dataset.siiTheme='light';
+   document.documentElement.dataset.siiTheme=defaultTheme;setTheme(defaultTheme);
   }
- },[]);
+ },[defaultTheme]);
  const toggle=()=>{
   const next:Theme=theme==='light'?'dark':'light';
   setTheme(next);

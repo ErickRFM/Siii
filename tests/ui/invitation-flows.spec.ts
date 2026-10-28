@@ -27,7 +27,7 @@ test.beforeEach(async()=>{
 async function login(page:Page,name=username,mfa=false){
  await page.goto('/login');await page.getByLabel('Usuario institucional').fill(name);await page.getByLabel('Contraseña',{exact:true}).fill(password);await page.getByRole('button',{name:'Entrar al sistema'}).click();
  if(mfa){await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();await page.getByLabel('Código de recuperación',{exact:true}).fill(loginRecovery);const result=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/mfa/challenge'));await page.getByRole('button',{name:'Verificar y entrar'}).click();expect((await result).status()).toBe(200);}
- await expect(page).toHaveURL(/\/dashboard$/);
+ await expect(page).toHaveURL(new RegExp(`/dashboard(?:/institutions/${institutionId}/(?:student|teacher))?$`));
 }
 async function administrator(page:Page){await login(page,username,true);await page.goto('/dashboard/security');await page.getByLabel('Contraseña actual para confirmar').fill(password);await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();await page.getByLabel('Código de recuperación para confirmar').fill(stepRecovery);await page.getByRole('button',{name:'Confirmar identidad',exact:true}).click();await expect(page.getByRole('button',{name:'Renovar códigos de recuperación',exact:true})).toBeEnabled();await page.goto(`/dashboard/institutions/${institutionId}/invitations`);await expect(page.getByRole('heading',{name:'Invitaciones.'})).toBeVisible();}
 async function create(page:Page,email:string,role='student',scoped=false){

@@ -1,7 +1,9 @@
 import {test,expect,type Page} from '@playwright/test';import AxeBuilder from '@axe-core/playwright';import pg from 'pg';import argon2 from 'argon2';import {randomBytes,randomUUID} from 'node:crypto';import {isolatedDatabaseUrl} from '../support/database-url';import {sealMfaSecret,digestRecoveryCode} from '../../src/shared/auth/mfa-primitives';
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()}),password='Synthetic-module-browser-2026!';let hash:string,tenant:string,username:string,recovery:string;
 test.beforeAll(async()=>{await sql.connect();hash=await argon2.hash(password,{type:argon2.argon2id,memoryCost:65536,timeCost:3,parallelism:1})});test.afterAll(async()=>{await sql.end()});
+let profile='super_admin';
 async function fixture(role='super_admin'){
+ profile=role;
  await sql.query('DELETE FROM auth_throttle');const suffix=randomUUID().slice(0,8);username='module-'+suffix;
  tenant=(await sql.query(`INSERT INTO institutions(name,code) VALUES('QA consolidación',$1) RETURNING id`,['MOD'+suffix])).rows[0].id;
  const person=(await sql.query(`INSERT INTO people(first_name,last_name) VALUES('QA','Consolidación') RETURNING id`)).rows[0].id;
@@ -16,7 +18,7 @@ async function login(page:Page){
  const signedIn=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/login')&&response.request().method()==='POST');await page.getByRole('button',{name:'Entrar al sistema'}).click();expect((await signedIn).status()).toBe(200);
  await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();await page.getByLabel('Código de recuperación',{exact:true}).fill(recovery);
  const verified=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/mfa/challenge')&&response.request().method()==='POST');await page.getByRole('button',{name:'Verificar y entrar'}).click();expect((await verified).status()).toBe(200);
- const session=(await page.context().cookies()).find(cookie=>cookie.name==='__Host-siii_session');expect(session).toMatchObject({secure:true,httpOnly:true,sameSite:'Lax',path:'/'});await page.waitForURL('**/dashboard');await expect(page).toHaveURL(/\/dashboard$/);await page.goto('/dashboard/institutions/'+tenant);
+ const session=(await page.context().cookies()).find(cookie=>cookie.name==='__Host-siii_session');expect(session).toMatchObject({secure:true,httpOnly:true,sameSite:'Lax',path:'/'});await expect(page).toHaveURL(profile==='teacher'?new RegExp(`/dashboard/institutions/${tenant}/teacher$`):/\/dashboard$/);await page.goto('/dashboard/institutions/'+tenant);
 }
 test('super administrator navigates every integrated module through effective permissions',async({page})=>{
  await fixture();await login(page);

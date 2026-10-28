@@ -27,6 +27,11 @@ export function managementVisibility(userId:string,sessionId:string,institutionI
    sql`${session.expiresAt}>clock_timestamp()`,sql`${session.lastSeenAt}>clock_timestamp()-(${SESSION_IDLE_MS}*interval '1 millisecond')`,
    isNull(factor.revokedAt),sql`${factor.enabledAt} IS NOT NULL`,sql`${session.mfaVerifiedAt}>=${factor.enabledAt}`,sql`${session.mfaVerifiedAt}<=clock_timestamp()`)));
 }
+/** Landing-page projection; identical authority to the paginated management discovery. */
+export async function hasInstitutionManagementPageAccess(identity:{id:string;sessionId:string}){
+ const [row]=await db.select({id:institutions.id}).from(institutions).where(managementVisibility(identity.id,identity.sessionId,institutions.id)).limit(1);
+ return Boolean(row);
+}
 export async function managementIdentity(institutionId:string){
  if(!uuid.safeParse(institutionId).success)return null;
  const identity=await getIdentity();

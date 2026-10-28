@@ -1,3 +1,4 @@
+import {personalNavigate} from '../support/personal-navigation';
 import {test,expect,type Page} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
@@ -6,11 +7,11 @@ import {portalFixture,portalPassword} from '../support/portal-fixture';
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()});
 let f:Awaited<ReturnType<typeof portalFixture>>;
 test.beforeAll(async()=>{await sql.connect();f=await portalFixture(sql)});test.afterAll(async()=>{await sql.end()});test.beforeEach(async()=>{await sql.query('DELETE FROM auth_throttle')});
-async function open(page:Page){await page.goto('/login');await page.getByLabel('Usuario institucional').fill(f.student.username);await page.getByLabel('Contraseña',{exact:true}).fill(portalPassword);await page.getByRole('button',{name:'Entrar al sistema'}).click();await expect(page).toHaveURL(/\/dashboard$/);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await page.getByRole('tab',{name:'Servicios',exact:true}).click();await expect(page.getByRole('heading',{name:'Nueva solicitud'})).toBeVisible()}
+async function open(page:Page){await page.goto('/login');await page.getByLabel('Usuario institucional').fill(f.student.username);await page.getByLabel('Contraseña',{exact:true}).fill(portalPassword);await page.getByRole('button',{name:'Entrar al sistema'}).click();await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/student`));await page.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(page,'Servicios');await expect(page.getByRole('heading',{name:'Nueva solicitud'})).toBeVisible()}
 test('student submits an own request, reloads its folio and reads the real administrative resolution',async({page})=>{
  await open(page);const summary='Solicito una constancia para entregar en mi institución de prácticas.';await page.getByLabel('Descripción de la solicitud').fill(summary);await page.getByRole('button',{name:'Revisar solicitud',exact:true}).click();await expect(page.getByRole('region',{name:'Revisar solicitud'})).toContainText(summary);await page.getByRole('button',{name:'Enviar solicitud',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Solicitud registrada'})).toBeVisible();
  const rows=(await sql.query('SELECT id,student_id FROM student_service_requests WHERE institution_id=$1 AND summary=$2',[f.tenant,summary])).rows;expect(rows).toHaveLength(1);expect(rows[0].student_id).toBe(f.studentId);const id=rows[0].id;
- await page.reload();await page.getByRole('tab',{name:'Servicios',exact:true}).click();await expect(page.getByText('Folio: '+id,{exact:true})).toBeVisible();
+ await page.reload();await personalNavigate(page,'Servicios');await expect(page.getByText('Folio: '+id,{exact:true})).toBeVisible();
  const origin=new URL(page.url()).origin;for(const status of ['IN_REVIEW','APPROVED']){const response=await page.request.patch(`${origin}/api/v1/institutions/${f.tenant}/requests`,{headers:{origin,cookie:f.admin.cookie.replace('siii_session=','__Host-siii_session=')},data:{id,status,decisionReason:status==='APPROVED'?'Resolución de Control Escolar para la solicitud.':'Revisión documental en curso.'}});expect(response.status()).toBe(200)}
  await page.getByRole('button',{name:'Actualizar mi información'}).click();const record=page.locator('details').filter({hasText:'Folio: '+id});await expect(record).toContainText('Aprobada');await record.locator('summary').click();await expect(record).toContainText('Resolución de Control Escolar para la solicitud.');await expect(record).toContainText('Recibida');await expect(record).toContainText('En revisión');
 });

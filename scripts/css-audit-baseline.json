@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-10-28T05:06:51.545Z",
-  "totalBytes": 189604,
-  "totalImportant": 210,
-  "totalDup": 339,
+  "generatedAt": "2026-10-28T19:01:37.209Z",
+  "review": "Reference-fidelity personal shell for student/teacher. Removed obsolete personal rules; new scoped sheet is fully inventoried. LF-normalized exact limits reviewed independently; no stylesheet exceptions.",
+  "totalBytes": 206060,
+  "totalImportant": 242,
+  "totalDup": 371,
   "files": [
     {
       "file": "src/app/academic-v2.css",
-      "bytes": 5263,
+      "bytes": 5209,
       "rules": 56,
       "classes": 28,
       "orphanCandidates": 0,
@@ -15,7 +16,7 @@
     },
     {
       "file": "src/app/globals.css",
-      "bytes": 1487,
+      "bytes": 1477,
       "rules": 16,
       "classes": 2,
       "orphanCandidates": 0,
@@ -24,16 +25,16 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 53863,
-      "rules": 344,
-      "classes": 142,
+      "bytes": 42913,
+      "rules": 261,
+      "classes": 116,
       "orphanCandidates": 0,
-      "important": 168,
-      "duplicateSelectors": 104
+      "important": 147,
+      "duplicateSelectors": 91
     },
     {
       "file": "src/app/sii-interactions.css",
-      "bytes": 1755,
+      "bytes": 1710,
       "rules": 8,
       "classes": 10,
       "orphanCandidates": 0,
@@ -42,7 +43,7 @@
     },
     {
       "file": "src/app/sii-kit-components.css",
-      "bytes": 19218,
+      "bytes": 18977,
       "rules": 189,
       "classes": 65,
       "orphanCandidates": 0,
@@ -51,7 +52,7 @@
     },
     {
       "file": "src/app/sii-motion-polish.css",
-      "bytes": 13586,
+      "bytes": 13339,
       "rules": 108,
       "classes": 46,
       "orphanCandidates": 0,
@@ -59,8 +60,17 @@
       "duplicateSelectors": 19
     },
     {
+      "file": "src/app/sii-personal-fidelity.css",
+      "bytes": 29375,
+      "rules": 261,
+      "classes": 84,
+      "orphanCandidates": 0,
+      "important": 53,
+      "duplicateSelectors": 45
+    },
+    {
       "file": "src/app/sii-premium-kit.css",
-      "bytes": 28549,
+      "bytes": 28112,
       "rules": 210,
       "classes": 113,
       "orphanCandidates": 0,
@@ -69,7 +79,7 @@
     },
     {
       "file": "src/app/sii-system-coherence.css",
-      "bytes": 10210,
+      "bytes": 10052,
       "rules": 82,
       "classes": 30,
       "orphanCandidates": 0,
@@ -78,7 +88,7 @@
     },
     {
       "file": "src/app/sii-tailwind.css",
-      "bytes": 7640,
+      "bytes": 7431,
       "rules": 41,
       "classes": 21,
       "orphanCandidates": 0,
@@ -87,7 +97,7 @@
     },
     {
       "file": "src/app/sii-ux-refinement.css",
-      "bytes": 8927,
+      "bytes": 8810,
       "rules": 85,
       "classes": 45,
       "orphanCandidates": 0,
@@ -96,7 +106,7 @@
     },
     {
       "file": "src/app/sii-v2.css",
-      "bytes": 22460,
+      "bytes": 22216,
       "rules": 225,
       "classes": 119,
       "orphanCandidates": 0,
@@ -105,7 +115,7 @@
     },
     {
       "file": "src/app/sii-workspaces.css",
-      "bytes": 13044,
+      "bytes": 12874,
       "rules": 97,
       "classes": 45,
       "orphanCandidates": 0,
@@ -114,7 +124,7 @@
     },
     {
       "file": "src/components/institution-admin.css",
-      "bytes": 2990,
+      "bytes": 2960,
       "rules": 33,
       "classes": 12,
       "orphanCandidates": 0,
@@ -123,7 +133,7 @@
     },
     {
       "file": "src/components/institution-users.css",
-      "bytes": 612,
+      "bytes": 605,
       "rules": 8,
       "classes": 2,
       "orphanCandidates": 0,
