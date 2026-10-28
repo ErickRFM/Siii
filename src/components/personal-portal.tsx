@@ -47,7 +47,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
     inicio:{section:'home'},inscripciones:{section:'academic',academic:'courses'},
     calificaciones:{section:'academic',academic:'grades'},
     docentes:{section:'academic',academic:'teachers'},
-    finanzas:{section:'orders'},tramites:{section:'services'},perfil:{section:'profile'}
+    finanzas:{section:'orders'},tramites:{section:'services'},avisos:{section:'home'},perfil:{section:'profile'}
    };
    const selected=map[destination];
    if(selected){if(selected.academic)setAcademicView(selected.academic);setSection(selected.section)}

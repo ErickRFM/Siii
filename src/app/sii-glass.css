@@ -838,3 +838,15 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-panel{
   box-shadow:none!important;
  }
 }
+
+/* Accessible student accordion and real announcement navigation. */
+.sii-app.sii-ui .siii-sidebar-disclosure{display:flex;width:100%;align-items:center;justify-content:space-between;background:transparent;border:0;color:inherit;text-align:left;cursor:pointer}
+.sii-app.sii-ui .siii-sidebar-disclosure svg{width:14px;height:14px;transition:transform .18s ease}
+.sii-app.sii-ui .siii-sidebar-disclosure svg.siii-disclosure-collapsed{transform:rotate(-90deg)}
+.sii-app.sii-ui .siii-sidebar-disclosure:focus-visible{outline:2px solid hsl(var(--sidebar-ring));outline-offset:2px}
+.sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="group-content"][hidden]{display:none!important}
+.sii-app.sii-ui .siii-topbar-notices{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:12px;background:rgba(208,192,179,.12);color:inherit}
+.sii-app.sii-ui .siii-topbar-notices:hover{background:rgba(208,192,179,.23)}
+.sii-app.sii-ui .siii-topbar-notices:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-topbar-notices{background:rgba(93,75,60,.09)}
+@media(prefers-reduced-motion:reduce){.sii-app.sii-ui .siii-sidebar-disclosure svg{transition:none}}
