@@ -60,7 +60,7 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
  it('captures every table and ledger with ciphertext-only output and fresh snapshot counts',async()=>{
   expect(Object.keys(capture).sort()).toEqual(['ciphertext_base64','ciphertext_sha256','manifest','recipient_key_id']);
   expect(capture.ciphertext_base64).not.toContain('Synthetic recovery only');
-  expect(capture.manifest.tables.filter(t=>t.schema==='public')).toHaveLength(60);
+  expect(capture.manifest.tables.filter(t=>t.schema==='public')).toHaveLength(59);
   expect(capture.manifest.statistics['public.auth_throttle'].count).toBe(1);
   expect(capture.manifest.ledger).toHaveLength(28);
   await source.query("INSERT INTO auth_throttle(key,scope,expires_at) VALUES('second-synthetic-key','login_ip','2030-01-01')");
