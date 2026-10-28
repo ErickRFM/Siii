@@ -50,6 +50,15 @@ describe('Smoked Glass cross-module design contract',()=>{
   for(const kind of ['radio','file','range','hidden','color'])expect(css).not.toContain('[type='+kind+']');
   expect(css).toContain('input:is(:not([type]),[type=text]');
  });
+ it('removes orphaned classic page skins but preserves account password controls',()=>{
+  const global=source('src/app/globals.css');
+  for(const selector of ['.login-shell{','.dashboard-shell{','.module-grid{','.sidebar{','.login-intro{']){
+   expect(global).not.toContain(selector);
+  }
+  expect(global).toContain('.password-form{');
+  expect(global).toContain('.primary-button{');
+  expect(global).toContain(':focus-visible{');
+ });
  it('uses its own decorative backdrop rather than a rasterized dashboard',()=>{
   expect(existsSync(resolve('public/visuals/siii-warm-architecture.svg'))).toBe(true);
   const svg=source('public/visuals/siii-warm-architecture.svg');
