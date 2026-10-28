@@ -273,7 +273,7 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
  .sii-app.sii-ui .sii-workspace :is(table,[role=table]){max-width:100%}
 }
 @media (prefers-reduced-transparency:reduce){
- .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.siii-student-hero,.siii-student-panel,.siii-student-metric,.siii-student-wide){backdrop-filter:none;background:#514944!important}
+ .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card){backdrop-filter:none;background:#514944!important}
 }
 @media (forced-colors:active){
  .sii-app.sii-ui :is(.sii-workspace .bg-card,.sii-workspace .bg-muted,.sii-kit-module-card,.sii-kit-metric){background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important}
@@ -315,7 +315,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar{background:rgba(255,249,242,.48)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,250,243,.57)!important;color:#302b29!important}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-glass :is(.siii-student-hero,.siii-student-metric,.siii-student-panel,.siii-student-wide),
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-teacher-metric,.siii-teacher-work){background:rgba(255,251,246,.57)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-muted{color:#675a53}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-link{color:#342f2e}
@@ -323,8 +322,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-pill{color:#342f2e;back
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-row{border-bottom-color:rgba(52,47,46,.09)}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{background:rgba(92,72,60,.17)!important;color:#302b29!important}
 
-.sii-app.sii-ui .siii-student-glass :is(button,a):focus-visible{outline:2px solid #e5d5c8;outline-offset:3px}
-@media(max-width:720px){.sii-app.sii-ui .siii-student-glass :is(.siii-student-hero,.siii-student-panel,.siii-student-wide){grid-column:1/-1}}
 
 /* Surface finishing shared by admissions, finance, directorate and administration. */
 .sii-app.sii-ui :is(.sii-workspace,.sii-access-panel,.sii-institution-item){min-width:0}
@@ -346,9 +343,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar :is(.text-sidebar-fore
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar [data-sidebar="group-label"]{color:#554941!important}
 html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-muted-foreground{color:#554941!important}
 
-@media(min-width:1250px){.sii-app.sii-ui .siii-student-sidepanel{grid-column:10/13}}
-@media(max-width:1249px){}
-@media(max-width:650px){}
 
 .sii-app.sii-ui .siii-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:14px;text-align:center;font-size:.78rem}
 .sii-app.sii-ui .siii-calendar-days span{display:grid;place-items:center;min-height:28px}
