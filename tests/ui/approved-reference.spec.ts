@@ -26,6 +26,7 @@ test('student entry and approved composition at exactly 1344 by 896',async({page
  const initialUrl=page.url();
  if(process.env.SIII_FIDELITY_BASELINE==='1')await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await expect(page.locator('.siii-student-dashboard')).toBeVisible();await expect(page.locator('.siii-overview-detail-grid').getByText('Matemáticas Discretas',{exact:true})).toBeVisible();
+ await expect(page.locator('.siii-calendar-header strong')).toHaveText('octubre 2026');
  await page.evaluate(async()=>{await document.fonts.ready});
  const directory='.p0-local/fidelity';mkdirSync(directory,{recursive:true});const name=process.env.SIII_FIDELITY_BASELINE==='1'?'before':'student-approved-1344';
  await page.screenshot({path:`${directory}/${name}.png`,animations:'disabled'});

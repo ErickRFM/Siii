@@ -571,7 +571,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-cata
  background:rgba(121,106,95,.13)!important;border:0!important;box-shadow:none!important;border-radius:13px;max-width:100%;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab--active,[data-state=active]){
- background:rgba(225,206,193,.18)!important;box-shadow:none!important;
+ background:rgba(225,206,193,.18)!important;color:#fff!important;box-shadow:none!important;
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab--active,[data-state=active]){
  background:rgba(91,70,58,.15)!important;color:#302b29!important

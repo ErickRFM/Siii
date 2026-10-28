@@ -239,3 +239,7 @@ html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-s
 #siii-personal #avisos .siii-overview-listrow small{padding-right:54px}
 #siii-personal #avisos .siii-overview-listrow time{position:absolute;right:0;bottom:7px;font-size:9px;line-height:12px;color:var(--siii-personal-muted)}
 html[data-sii-theme=dark] #siii-personal .sii-command-trigger kbd{color:#f7f2ea}
+#siii-personal .siii-calendar-header>strong{font-size:14px}
+#siii-personal .siii-overview-motto small{width:130px;max-width:130px;white-space:normal;overflow:visible;line-height:13px}
+@media(min-width:768px) and (min-height:850px){#siii-personal .siii-personal-nav-content{scrollbar-width:none}#siii-personal .siii-personal-nav-content::-webkit-scrollbar{display:none}}
+#siii-personal .siii-overview-watermark{opacity:.42}
