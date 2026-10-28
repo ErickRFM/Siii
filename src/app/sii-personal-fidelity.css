@@ -230,3 +230,7 @@ html[data-sii-theme=dark] #siii-personal .sii-catalog-code{color:#f4d5c8}
 html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel{background:rgba(84,82,78,.23)!important}
 html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:linear-gradient(145deg,rgba(118,111,101,.26),rgba(55,54,51,.32))!important}
 @media(max-width:767px){#siii-personal .siii-overview-hero h2{font-size:34px}#siii-personal .siii-overview-term{grid-template-columns:minmax(90px,1fr) minmax(60px,1.5fr) 27px}}
+#siii-personal .siii-overview-term-bars{align-self:start;margin-top:2px}
+html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:radial-gradient(ellipse at 65% 15%,rgba(176,153,132,.12),transparent 45%),linear-gradient(145deg,rgba(118,111,101,.26),rgba(55,54,51,.32))!important}
+html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(140deg,rgba(118,108,96,.32),rgba(84,82,78,.24))!important}
+@media(max-width:767px){#siii-personal .siii-overview-term-bars{align-self:auto;margin-top:0}}

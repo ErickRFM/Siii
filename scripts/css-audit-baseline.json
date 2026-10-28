@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-28T19:01:37.209Z",
+  "generatedAt": "2026-10-28T19:05:15.453Z",
   "review": "Reference-fidelity personal shell for student/teacher. Removed obsolete personal rules; new scoped sheet is fully inventoried. LF-normalized exact limits reviewed independently; no stylesheet exceptions.",
-  "totalBytes": 206060,
-  "totalImportant": 242,
-  "totalDup": 371,
+  "totalBytes": 206703,
+  "totalImportant": 244,
+  "totalDup": 372,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -61,12 +61,12 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 29375,
-      "rules": 261,
+      "bytes": 30018,
+      "rules": 265,
       "classes": 84,
       "orphanCandidates": 0,
-      "important": 53,
-      "duplicateSelectors": 45
+      "important": 55,
+      "duplicateSelectors": 46
     },
     {
       "file": "src/app/sii-premium-kit.css",
