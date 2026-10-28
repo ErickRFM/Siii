@@ -88,7 +88,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
    </SiiiGlassPanel>
    <SiiiGlassPanel id="avisos" aria-label="Avisos institucionales">
     <SiiiGlassPanelHeading title="Avisos institucionales"/>
-    {snapshot.announcements.slice(0,3).map(notice=><article key={notice.id} className="siii-overview-listrow"><CheckCircle2 size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div></article>)}
+    {snapshot.announcements.map(notice=><article key={notice.id} className="siii-overview-listrow"><CheckCircle2 size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div></article>)}
     {!snapshot.announcements.length&&<p className="siii-overview-empty">No hay avisos vigentes.</p>}
    </SiiiGlassPanel>
    <SiiiGlassPanel >

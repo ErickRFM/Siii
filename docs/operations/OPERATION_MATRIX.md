@@ -276,3 +276,9 @@ Informe de alcance, límites y puertas: [SIII_COMPANION_CONNECTION_2026-10-24.md
 | Aplicación de rectificación | Aprobación distinta de ejecución, MFA/step-up, fuente y política vigentes, versión nueva inmutable; extraordinaria exige habilitación y autoridad adicional | Contratos de idempotencia, rechazo, fuente obsoleta, cierre y allowExecution=false | INFRAESTRUCTURA; sin ejecución productiva |
 
 Informe y límites: [SIII_TEACHER_V3_2026-10-26.md](../audits/SIII_TEACHER_V3_2026-10-26.md).
+
+## Recuperación lógica V2 — 28 octubre 2026
+
+| Operación | Autoridad y garantías | Evidencia | Estado |
+|---|---|---|---|
+| `restoreApplicationBackup` (operación local, sin endpoint HTTP) | Cliente explícito loopback y DB `p0_*` vacía; roles seguros sin membresías; lock/transacción; migraciones confiables, CHECK/PK activos, barrido de FK, igualdad exacta de hashes/ledger/perfil y JSON preciso; rechaza sobrescritura y sanitiza errores | `tests/integration/application-recovery.test.ts`: 15/15 con PostgreSQL 17 aislado, incluyendo corrupción, rollback y membresía centinela; [evidencia PR120](../qa/PR120_CI_RECOVERY_2026-10-28.md) | LOCAL VERIFICADO; CI versionado en PR #120 |

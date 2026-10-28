@@ -62,7 +62,7 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
   expect(capture.ciphertext_base64).not.toContain('Synthetic recovery only');
   expect(capture.manifest.tables.filter(t=>t.schema==='public')).toHaveLength(59);
   expect(capture.manifest.statistics['public.auth_throttle'].count).toBe(1);
-  expect(capture.manifest.ledger).toHaveLength(28);
+  expect(capture.manifest.ledger).toEqual(readMigrationFiles({migrationsFolder:'db/migrations'}).map((migration,index)=>({id:index+1,hash:migration.hash,created_at:String(migration.folderMillis)})));
   await source.query("INSERT INTO auth_throttle(key,scope,expires_at) VALUES('second-synthetic-key','login_ip','2030-01-01')");
   const [fresh]=await encrypt(source,plan);expect(fresh.manifest.statistics['public.auth_throttle'].count).toBe(2);
   await source.query("DELETE FROM auth_throttle WHERE key='second-synthetic-key'");
@@ -83,6 +83,25 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
   try{await expect(restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest})).rejects.toThrow('LOCAL_RECOVERY_ONLY')}finally{endpoint.host=original}
   expect(await empty(target)).toBe(true);
  });
+ it('rejects local connections to databases outside the disposable recovery namespace',async()=>{
+  const endpoint=target as pg.Client&{database:string};const original=endpoint.database;endpoint.database='production';
+  try{await expect(restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest})).rejects.toThrow('LOCAL_RECOVERY_ONLY')}finally{endpoint.database=original}
+  expect(await empty(target)).toBe(true);
+ });
+ it('preserves pre-existing objects in every schema instead of overwriting them',async()=>{
+  const destination=await database('occupied');await destination.query('CREATE SCHEMA existing; CREATE TABLE existing.keep(value text); INSERT INTO existing.keep VALUES(\'synthetic sentinel\')');
+  await expect(restoreApplicationBackup(destination,raw,{expectedManifest:capture.manifest})).rejects.toThrow('EMPTY_RECOVERY_DATABASE_REQUIRED');
+  expect((await destination.query('SELECT value FROM existing.keep')).rows).toEqual([{value:'synthetic sentinel'}]);
+ });
+ it('rejects inherited cluster roles without revoking memberships used by other databases',async()=>{
+  const destination=await database('unsafe_roles'),parent=prefix+'_parent';await admin.query('CREATE ROLE '+parent+' NOLOGIN');
+  try{
+   await admin.query('GRANT '+parent+' TO siii_app');
+   await expect(restoreApplicationBackup(destination,raw,{expectedManifest:capture.manifest})).rejects.toThrow('RECOVERY_ROLES_UNSAFE');
+   expect((await admin.query("SELECT pg_has_role('siii_app',$1,'MEMBER') AS member",[parent])).rows[0].member).toBe(true);
+   expect(await empty(destination)).toBe(true);
+  }finally{await admin.query('REVOKE '+parent+' FROM siii_app');await admin.query('DROP ROLE '+parent)}
+ });
  it('rejects omitted tables, columns and tampered hashes with atomic rollback',async()=>{
   for(const changed of [await alter("$1::jsonb #- '{records,public.people}'"),await alter("jsonb_set($1::jsonb,'{records,public.auth_throttle,0}',($1::jsonb#>'{records,public.auth_throttle,0}')-'scope')"),await alter("jsonb_set($1::jsonb,'{records,public.auth_throttle,0,failures}','99')")]){
    await expect(restoreApplicationBackup(target,changed,{expectedManifest:capture.manifest})).rejects.toThrow();expect(await empty(target)).toBe(true);
@@ -98,11 +117,22 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
   const corrupted=await alter("jsonb_set($1::jsonb,'{records,public.auth_throttle,0,failures}','-1')");const manifest=await manifestFor(corrupted);
   await expect(restoreApplicationBackup(target,await withManifest(corrupted,manifest),{expectedManifest:manifest})).rejects.toThrow('RECOVERY_DATABASE_OPERATION_FAILED');expect(await empty(target)).toBe(true);
  });
+ it('rejects duplicate primary keys even when their archive checksum is authentic',async()=>{
+  const corrupted=await alter("jsonb_set($1::jsonb,'{records,public.auth_throttle}',($1::jsonb#>'{records,public.auth_throttle}')||($1::jsonb#>'{records,public.auth_throttle}'))");
+  const manifest=await manifestFor(corrupted);
+  await expect(restoreApplicationBackup(target,await withManifest(corrupted,manifest),{expectedManifest:manifest})).rejects.toThrow('RECOVERY_DATABASE_OPERATION_FAILED');expect(await empty(target)).toBe(true);
+ });
+ it('rejects authentic checksums whose stored ledger differs from the trusted manifest',async()=>{
+  const corrupted=await alter("jsonb_set($1::jsonb,'{records,drizzle.__drizzle_migrations,0,hash}','\"forged\"')");const manifest=await manifestFor(corrupted);
+  await expect(restoreApplicationBackup(target,await withManifest(corrupted,manifest),{expectedManifest:manifest})).rejects.toThrow('RESTORED_HISTORY_MISMATCH');expect(await empty(target)).toBe(true);
+ });
  it('restores all values including JSON precision, key PK and migration history',async()=>{
-  const result=await restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest});expect(result.tables).toBe(60);expect(result.allRowsEqual).toBe(true);expect(result.historyEqual).toBe(true);
+  const result=await restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest});expect(result.tables).toBe(61);expect(result.tables).toBe(capture.manifest.tables.length);expect(result.allRowsEqual).toBe(true);expect(result.historyEqual).toBe(true);
   expect((await target.query("SELECT details->>'integer' AS value,details#>>'{nested,fraction}' AS fraction FROM security_audit_log")).rows).toEqual([{value:'9007199254740993123456789',fraction:'0.12345678901234567890'}]);
   expect((await target.query('SELECT key FROM auth_throttle')).rows).toEqual([{key:'synthetic-key'}]);
   expect((await target.query('SELECT statements FROM supabase_migrations.schema_migrations')).rows[0].statements).toEqual(["SELECT 'history only; never execute'"]);
+  expect((await target.query('SELECT last_value::int AS value FROM drizzle.__drizzle_migrations_id_seq')).rows[0].value).toBe(Math.max(...capture.manifest.ledger.map(row=>row.id)));
+  expect((await target.query('SHOW session_replication_role')).rows[0].session_replication_role).toBe('origin');
  });
  it('refuses overwrite of a recovered database',async()=>{await expect(restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest})).rejects.toThrow('EMPTY_RECOVERY_DATABASE_REQUIRED')});
  it('restores the exact managed prefix, profile and appendix',async()=>{

@@ -46,6 +46,7 @@ test('approved glass student overview stays readable and without overflow on mob
    await page.setViewportSize({width,height:900});
    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
    await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+   if(width===390||width===1440)await page.screenshot({path:`.p0-local/pr120-evidence/student-${theme}-${width}.png`,fullPage:true});
   }
  }
 });
@@ -179,6 +180,7 @@ test('teacher and treasury personal workspaces remain usable across both themes 
    if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
    for(const width of [360,390,768,1024,1366,1600,1920]){
     await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+    if(kind==='teacher'&&(width===390||width===1366))await page.screenshot({path:`.p0-local/pr120-evidence/teacher-${theme}-${width}.png`,fullPage:true});
     if(width===360){expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);await page.screenshot({path:`.p0-local/vnext-institutional/${kind}-${theme}-${width}.png`,fullPage:true})}
    }
   }
