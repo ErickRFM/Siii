@@ -55,6 +55,9 @@ describe('Smoked Glass cross-module design contract',()=>{
   for(const selector of ['.login-shell{','.dashboard-shell{','.module-grid{','.sidebar{','.login-intro{']){
    expect(global).not.toContain(selector);
   }
+  const glass=source('src/app/sii-glass.css');
+  for(const token of ['siii-student-glass','siii-student-hero','siii-student-metric','siii-student-panel','siii-student-sidepanel','siii-student-wide'])expect(glass).not.toContain(token);
+  expect(glass).toContain('.siii-student-dashboard');
   expect(global).toContain('.password-form{');
   expect(global).toContain('.primary-button{');
   expect(global).toContain(':focus-visible{');
