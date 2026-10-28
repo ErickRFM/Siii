@@ -31,7 +31,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
   <SidebarHeader className="siii-personal-brand"><Link href={(role==='context'?base:base+'#inicio') as Route} aria-label="SIII, ir al inicio institucional" onClick={()=>{
    if(role!=='context'){window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:'inicio'}));setSelected('inicio');if(isMobile)setOpenMobile(false)}
   }}>
-   <span className="siii-personal-mark" aria-hidden="true"><svg viewBox="0 0 34 40" fill="none"><path d="m22 4-13 9 8 6-10 8 9 9 13-10-9-7 10-8-8-7Z" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round"/></svg></span>
+   <span className="siii-personal-mark" aria-hidden="true"><svg viewBox="0 0 34 40" fill="none"><path d="M22 5 10 13c-2 1.4-2 3.7.2 5.2l5.8 4-7.3 5.4c-2.2 1.7-2.3 4.1-.3 5.8l2.7 2.1c1.3 1.1 3 1.1 4.4.1l11.8-8.3c2.1-1.5 2.1-3.9 0-5.4l-5.7-4 7.4-5.5c2-1.6 2-4 .1-5.5L26 5c-1.2-.9-2.7-.9-4 0Z" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round"/></svg></span>
    <span><strong>SIII</strong><small>{institutionName??'Sistema Institucional Integral'}</small></span>
   </Link></SidebarHeader>
   <SidebarContent className="siii-personal-nav-content">

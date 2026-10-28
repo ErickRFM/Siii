@@ -234,3 +234,9 @@ html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:linea
 html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:radial-gradient(ellipse at 65% 15%,rgba(176,153,132,.12),transparent 45%),linear-gradient(145deg,rgba(118,111,101,.26),rgba(55,54,51,.32))!important}
 html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(140deg,rgba(118,108,96,.32),rgba(84,82,78,.24))!important}
 @media(max-width:767px){#siii-personal .siii-overview-term-bars{align-self:auto;margin-top:0}}
+#siii-personal .siii-personal-nav-group>div>.siii-personal-nav-link{padding-left:22px;padding-right:5px;gap:10px;white-space:nowrap}
+#siii-personal .siii-overview-term-bars{margin-top:-4px}
+@media(max-width:767px){#siii-personal .siii-overview-term-bars{margin-top:0}}
+#siii-personal #avisos .siii-overview-listrow{position:relative}
+#siii-personal #avisos .siii-overview-listrow small{padding-right:54px}
+#siii-personal #avisos .siii-overview-listrow time{position:absolute;right:0;bottom:7px;font-size:9px;line-height:12px;color:var(--siii-personal-muted)}

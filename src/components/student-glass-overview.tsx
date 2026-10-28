@@ -8,9 +8,14 @@ import SiiiHeroRibbon from './siii-hero-ribbon';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
 import {SiiiGlassMetric,SiiiGlassPanel,SiiiGlassPanelHeading,SiiiGlassMetricsRow} from './ui/siii-glass-kit';
-import {BookOpen,CheckCircle2,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet,Code2,Network,SquareRadical,Receipt,LibraryBig} from 'lucide-react';
+import {BookOpen,BellRing,BadgeCheck,Sparkles,Database,ChartNoAxesCombined,Mail,Contact,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet,Code2,Network,SquareRadical,Receipt,LibraryBig} from 'lucide-react';
 
 type Destination=(section:string,academicView?:PersonalView)=>void;
+function publishedAge(value:string|null){
+ if(!value)return null;const timestamp=Date.parse(value),now=Date.now();if(!Number.isFinite(timestamp)||timestamp>now)return null;
+ const minutes=Math.floor((now-timestamp)/60000);
+ return minutes<1?'ahora':minutes<60?`hace ${minutes} min`:minutes<1440?`hace ${Math.floor(minutes/60)} h`:`hace ${Math.floor(minutes/1440)} día${minutes>=2880?'s':''}`;
+}
 export default function StudentGlassOverview({snapshot,profile,institutionName,onNavigate,onRefresh,refreshing,unlinked=false}:{
  snapshot:PersonalSnapshot;profile:PersonalProfile|null;institutionName:string;onNavigate:Destination;onRefresh:()=>void;refreshing:boolean;unlinked?:boolean;
 }){
@@ -43,7 +48,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
    <div className="siii-overview-detail-grid">
     <SiiiGlassPanel >
      <SiiiGlassPanelHeading title="Calificaciones recientes" action={quick('Ver todas','academic','grades')}/>
-     {m.published.slice(0,4).map((grade,index)=>{const Icon=[BookOpen,Code2,Network,SquareRadical][index];return <div key={grade.sectionId} className="siii-overview-listrow">
+     {m.published.slice(0,4).map((grade,index)=>{const Icon=/datos/i.test(grade.courseName)?Database:[BookOpen,Code2,Network,SquareRadical][index];return <div key={grade.sectionId} className="siii-overview-listrow">
       <span className="siii-reference-row-icon" data-tone={['blue','terracotta','amber','violet'][index]} aria-hidden="true"><Icon size={23}/></span>
       <div><strong>{grade.courseName}</strong><small>Publicado · {new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(grade.publishedAt))}</small></div>
       <b className="siii-overview-grade">{(grade.scoreHundredths/100).toFixed(2)}</b>
@@ -61,7 +66,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     </SiiiGlassPanel>
     <SiiiGlassPanel >
      <SiiiGlassPanelHeading title="Mis trámites" action={quick('Ver todos','services')}/>
-     {snapshot.pendingRequests.slice(0,4).map((request,index)=><div key={request.id} className="siii-overview-listrow"><span className="siii-reference-row-icon" data-tone={['green','blue','violet','terracotta'][index]} aria-hidden="true"><FileText size={23}/></span><div><strong title={request.summary}>{request.summary}</strong><small>{requestTypeLabel[request.requestType]||request.requestType}</small></div><span className="siii-overview-status">{requestStatusLabel[request.status]||request.status}</span></div>)}
+     {snapshot.pendingRequests.slice(0,4).map((request,index)=>{const Icon=/historial/i.test(request.summary)?ChartNoAxesCombined:/kárdex|kardex/i.test(request.summary)?Mail:/inscripci[oó]n/i.test(request.summary)?Contact:FileText;return <div key={request.id} className="siii-overview-listrow"><span className="siii-reference-row-icon" data-tone={['green','blue','violet','terracotta'][index]} aria-hidden="true"><Icon size={23}/></span><div><strong title={request.summary}>{request.summary}</strong><small>{requestTypeLabel[request.requestType]||request.requestType}</small></div><span className="siii-overview-status">{requestStatusLabel[request.status]||request.status}</span></div>})}
      {!snapshot.pendingRequests.length&&<p className="siii-overview-empty">{profile?'No hay trámites pendientes.':'Vincula tu expediente para consultar tus trámites.'}</p>}
     </SiiiGlassPanel>
    </div>
@@ -92,7 +97,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
    </SiiiGlassPanel>
    <SiiiGlassPanel id="avisos" aria-label="Avisos institucionales">
     <SiiiGlassPanelHeading title="Avisos institucionales"/>
-    {snapshot.announcements.map(notice=><article key={notice.id} className="siii-overview-listrow"><CheckCircle2 size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div></article>)}
+    {snapshot.announcements.map(notice=>{const Icon=/reinscrip|inscripci[oó]n/i.test(notice.title)?BadgeCheck:/convocatoria/i.test(notice.title)?Sparkles:BellRing;const age=publishedAge(notice.publishedAt);return <article key={notice.id} className="siii-overview-listrow"><Icon size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div>{age&&<time dateTime={notice.publishedAt!}>{age}</time>}</article>})}
     {!snapshot.announcements.length&&<p className="siii-overview-empty">{profile?'No hay avisos vigentes.':'Los avisos estarán disponibles después de validar tu acceso.'}</p>}
    </SiiiGlassPanel>
    <SiiiGlassPanel >
