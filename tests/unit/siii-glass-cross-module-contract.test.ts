@@ -8,6 +8,9 @@ describe('Smoked Glass cross-module design contract',()=>{
   const root=source('src/app/layout.tsx');
   const toggle=source('src/components/sii-theme-toggle.tsx');
   expect(root).toContain('data-sii-theme="light"');
+  expect(root).toContain('siii-theme-bootstrap');
+  expect(root).toContain('nonce={nonce}');
+  expect(root).toContain('suppressHydrationWarning');
   expect(toggle).toContain("useState<Theme>('light')");
   expect(toggle).toContain("saved==='dark'?'dark':'light'");
   expect(toggle).toContain("window.localStorage.setItem('sii-theme',next)");
