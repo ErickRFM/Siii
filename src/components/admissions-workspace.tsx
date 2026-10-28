@@ -8,6 +8,7 @@ import {Input} from '@/components/ui/input';
 import {NativeSelect} from '@/components/ui/native-select';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
 import {SiiEmptyView,SiiStatusPill} from '@/components/ui/sii-kit';
+import {SiiiGlassMetric,SiiiGlassMetricsRow} from './ui/siii-glass-kit';
 import SiiScrollRegion from './sii-scroll-region';
 
 export type AdmissionListItem={
@@ -28,12 +29,17 @@ export default function AdmissionsWorkspace({institutionId,applications}:{instit
  const filtered=applications.filter(row=>(!status||row.status===status)&&(!program||row.programId===program)&&(!normalized||[row.applicationNumber,row.applicantFirstName,row.applicantLastName,row.applicantEmail].join(' ').toLocaleLowerCase('es-MX').includes(normalized)));
  function clearFilters(){setQuery('');setStatus('');setProgram('');setSelectedId(null);}
  function close(){setSelectedId(null);window.requestAnimationFrame(()=>returnFocus.current?.focus());}
- return <div className="sii-workspace sii-workspace--admissions">
+ return <div className="sii-workspace sii-workspace--admissions siii-glass-workspace">
   <div className="sii-catalog-toolbar">
    <h2>Solicitudes de ingreso</h2>
    <span className="sii-small-count" role="status">{filtered.length} de {applications.length} solicitudes</span>
    <Button variant="outline" className="sii-outline-button" type="button" disabled={refreshing} onClick={()=>startRefresh(()=>router.refresh())}>{refreshing?'Actualizando…':'Actualizar solicitudes'}</Button>
   </div>
+  <SiiiGlassMetricsRow aria-label="Resumen de Admisiones" className="siii-admissions-metrics">
+   <SiiiGlassMetric label="Solicitudes consultadas" value={applications.length} description="Expedientes en este ámbito" tone="amber"/>
+   <SiiiGlassMetric label="En revisión" value={applications.filter(row=>row.status==='under_review').length} description="Solicitudes en estudio" tone="blue"/>
+   <SiiiGlassMetric label="Admitidas" value={applications.filter(row=>row.status==='admitted').length} description="Dictámenes registrados" tone="green"/>
+  </SiiiGlassMetricsRow>
   <div className="sii-catalog-form sii-workspace-filters" role="search" aria-label="Filtros de admisiones">
    <label>Buscar solicitudes<Input ref={searchInput} type="search" value={query} placeholder="Folio, nombre o correo" onChange={event=>{setQuery(event.target.value);setSelectedId(null);}}/></label>
    <label>Estado de solicitud<NativeSelect value={status} onChange={event=>{setStatus(event.target.value);setSelectedId(null);}}><option value="">Todos los estados</option>{Object.entries(statuses).map(([value,label])=><option key={value} value={value}>{label}</option>)}</NativeSelect></label>

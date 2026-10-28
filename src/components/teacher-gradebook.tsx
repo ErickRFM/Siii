@@ -178,7 +178,7 @@ export default function TeacherGradebook({institutionId,initialSectionId,initial
  const incomplete=review.some(student=>student.score===null);
  const publication=snapshot?.publications.find(row=>row.id===publicationId)??snapshot?.publications[0];
  const results=snapshot?.results?.filter(result=>result.publicationId===publication?.id)??[];
- return <div className="sii-academic min-w-0 space-y-5">
+ return <div className="sii-academic siii-glass-workspace min-w-0 space-y-5">
  {confirmation}
   <SiiSectionHeader workspace eyebrow="DOCENCIA · EVALUACIÓN" title="Libro de calificaciones" description="Captura privada, revisión y resultados oficiales. Escala institucional de 0 a 10."/>
   {(error||identityError)&&<div className="sii-catalog-error" role="alert"><p>{error||identityError}</p><Button variant="outline" type="button" onClick={()=>{if(!identityReady)void revalidateIdentity();else if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</Button></div>}

@@ -40,7 +40,9 @@ function executeGate(mutate?: (file: string, name: string, count: number) => voi
 describe('full Companion live contract CI gate', () => {
   it('uses only disposable loopback database services and prepares the source before receiver tests', () => {
     expect(job.services.postgres).toMatchObject({image: 'postgres:17', ports: ['127.0.0.1:55439:5432'], env: {POSTGRES_USER: 'postgres', POSTGRES_PASSWORD: 'postgres', POSTGRES_DB: 'siii_chain_test'}});
-    expect(job.services.mongo).toMatchObject({image: 'mongo:8.0.34', ports: ['127.0.0.1:27017:27017']});
+    expect(job.services.mongo).toMatchObject({image: 'mongo:7.0.45@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4', ports: ['127.0.0.1:27017:27017']});
+    expect(job.services.mongo.options).toContain('--health-start-period 20s');
+    expect(job.services.mongo.options).toContain('db.adminCommand({ping:1})');
     const database = 'postgresql://postgres:postgres@127.0.0.1:55439/siii_chain_test';
     expect(job.env).toMatchObject({DATABASE_URL: database, INTEGRATION_DATABASE_URL: database, SIII_DATABASE_ENV: 'test', COMPANION_CHAIN_PROBE_DATABASE_URL: database, COMPANION_CHAIN_PROBE_PROJECT_ROOT: '${{ github.workspace }}', V12_TEST_MONGODB_URI: 'mongodb://127.0.0.1:27017'});
     const commands = steps().map(step => step.run ?? '');
@@ -67,6 +69,7 @@ describe('full Companion live contract CI gate', () => {
     const artifact = steps().find(step => step.name === 'Synthetic live contract evidence')!.with!;
     expect((artifact.path as string).trim().split('\n').sort()).toEqual([
       '.p0-local/companion-contract.log',
+      '.p0-local/companion-services.log',
       ...Object.keys(expectedSuites).map(name => '.p0-local/companion-contract/services/api/build/test-results/test/TEST-' + name + '.xml'),
     ].sort());
     expect(JSON.stringify(job.env)).not.toMatch(/HOLD|JWT|TOKEN|SECRET/);
@@ -97,6 +100,7 @@ describe('full Companion live contract CI gate', () => {
         else writeFileSync(file, readFileSync(file, 'utf8').replace(variant === 'skipped' ? 'skipped="0"' : '<testcase name="case-0"/>', variant === 'skipped' ? 'skipped="1"' : ''));
       });
       expect(result.status, variant).not.toBe(0);
+      if (variant === 'missing') expect(result.stderr).toContain('missing XML; contract did not run');
     }
   });
 });

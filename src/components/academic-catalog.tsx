@@ -215,7 +215,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
   if(permissionsLoading||permissionsError||access?.restricted)return <CapabilityState returnTo={`/dashboard/institutions/${institutionId}/academic`}/>;
   if(!access||availableTabs.length===0)return <p className="sii-info-banner">No tienes acceso a catálogos académicos.</p>;
   return (
-    <div className="sii-academic">
+    <div className="sii-academic siii-glass-workspace">
  {confirmation}
       {hasManagement&&<AcademicSetupChecklist institutionId={institutionId} revision={setupRevision} disabled={saving} onOpen={resource=>{choose(resource);requestAnimationFrame(()=>document.getElementById('catalog-tab-'+resource)?.focus());}}/>}
       <div className="sii-catalog-tabs" role="tablist" aria-label="Áreas del catálogo académico">

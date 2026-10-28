@@ -21,7 +21,7 @@ export default async function InstitutionPage({ params }: PageProps) {
       <div className="sii-page-heading"><div><h1>{access.institutionName}<span className="sii-welcome-period">.</span></h1><p>Tu perfil y permisos vigentes en esta institución.</p></div>
         <Link href="/dashboard" className="sii-outline-button sii-back-link">← Mis instituciones</Link>
       </div>
-      <div className="sii-security-layout">
+      <div className="sii-security-layout siii-glass-workspace">
         <section className="sii-panel sii-security-card">
           <span className="sii-section-kicker">INSTITUCIÓN AUTORIZADA</span>
           <h2>{access.institutionName}</h2><p>Clave institucional: {access.institutionCode}</p>

@@ -4,8 +4,8 @@ import Link from 'next/link';
 import type {Route} from 'next';
 import {usePathname} from 'next/navigation';
 import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation/dashboard-location';
-import {useEffect,useRef,useState,type ReactNode} from 'react';
-import {Menu,PanelLeftClose,PanelLeftOpen,X} from 'lucide-react';
+import {useEffect,useId,useRef,useState,type ReactNode} from 'react';
+import {Bell,ChevronDown,Menu,PanelLeftClose,PanelLeftOpen,X} from 'lucide-react';
 import {SiiBrand,SiiMark} from './sii-brand';
 import {SiiNavIcon,type SiiNavIconName} from './sii-nav-icon';
 import SiiQuickSwitch,{type SiiQuickLink} from './sii-quick-switch';
@@ -55,6 +55,21 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
  const personal=data&&!data.restricted?personalModuleLinks(data.capabilities,data.roles,data.scopedCapabilities):[];
  const personalOnly=Boolean(data&&hasOnlyPersonalRoles(data.roles));
+ const [studentSection,setStudentSection]=useState('inicio');
+ useEffect(()=>{
+  if(active!=='student')return;
+  const fromHash=()=>setStudentSection(window.location.hash.slice(1)||'inicio');
+  const onSelected=(event:Event)=>setStudentSection((event as CustomEvent<string>).detail||'inicio');
+  fromHash();
+  window.addEventListener('hashchange',fromHash);
+  window.addEventListener('siii:student-navigation',onSelected);
+  window.addEventListener('siii:student-active-section',onSelected);
+  return()=>{
+   window.removeEventListener('hashchange',fromHash);
+   window.removeEventListener('siii:student-navigation',onSelected);
+   window.removeEventListener('siii:student-active-section',onSelected);
+  };
+ },[active]);
  const activeModule=allAcademicModuleLinks.find(module=>module.id===active);
  const academicAvailable=['programs','courses','curricula','terms','campuses'].some(resource=>hasInstitutionCapability(data,`${resource}.read`));
  const quickLinks:SiiQuickLink[]=[
@@ -88,6 +103,18 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
    </SidebarHeader>
    <SidebarContent className="px-2 py-3">
     {institutionId&&personal.length>0&&<SidebarGroup><SidebarGroupLabel>Mi espacio</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{personal.map(module=><ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}`} label={module.label} icon={module.icon} active={active===module.id}/>)}</SidebarMenu></SidebarGroupContent></SidebarGroup>}
+    {institutionId&&personal.some(item=>item.id==='student')&&<SidebarGroup className="siii-student-sidebar-group group-data-[collapsible=icon]:hidden">
+      <StudentSidebarDisclosure label="Académico"><SidebarMenu>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inicio'} label="Inicio estudiantil" icon="home" active={active==='student'&&studentSection==='inicio'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inscripciones'} label="Mis inscripciones" icon="book" active={active==='student'&&studentSection==='inscripciones'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#calificaciones'} label="Calificaciones e historial" icon="grades" active={active==='student'&&studentSection==='calificaciones'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#docentes'} label="Mis docentes" icon="users" active={active==='student'&&studentSection==='docentes'}/>
+      </SidebarMenu></StudentSidebarDisclosure>
+      <StudentSidebarDisclosure label="Financiero y servicios"><SidebarMenu>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#finanzas'} label="Estado de cuenta" icon="registry" active={active==='student'&&studentSection==='finanzas'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#tramites'} label="Mis trámites" icon="services" active={active==='student'&&studentSection==='tramites'}/>
+      </SidebarMenu></StudentSidebarDisclosure>
+    </SidebarGroup>}
     <SidebarGroup>
      <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
      <SidebarGroupContent>
@@ -137,17 +164,37 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
        <BreadcrumbItem><BreadcrumbPage className="font-semibold">{crumb}</BreadcrumbPage></BreadcrumbItem>
       </BreadcrumbList>
      </Breadcrumb>
+     <SiiQuickSwitch links={quickLinks}/>
     </div>
     <div className="sii-topbar-actions">
-     <SiiQuickSwitch links={quickLinks}/>
      <Badge variant="secondary" className="hidden gap-1.5 md:inline-flex"><span className="sii-online-dot"/>Sesión autenticada</Badge>
      <SiiThemeToggle/>
-     <Avatar className="hidden size-9 sm:flex"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
+     {institutionId&&personal.some(module=>module.id==='student')&&<Link
+      href={('/dashboard/institutions/'+institutionId+'/student#avisos') as Route}
+      aria-label="Ver avisos institucionales" title="Avisos institucionales"
+      className="siii-topbar-notices" onClick={()=>window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:'avisos'}))}>
+      <Bell size={19} aria-hidden="true"/>
+     </Link>}
+     <div className="siii-account-chip hidden items-center gap-2 sm:flex"><Avatar className="size-9"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar><span className="hidden min-w-0 lg:block"><strong className="block max-w-36 truncate text-xs">{fullName}</strong><small className="block text-[11px] text-muted-foreground">Cuenta institucional</small></span></div>
      <form action="/api/v1/auth/logout" method="post"><Button type="submit" variant="outline" size="sm" className="gap-1.5">Salir <span aria-hidden="true">↗</span></Button></form>
     </div>
    </header>
    <main id="main-content" tabIndex={-1} className="sii-page">{children}</main>
   </div>
+ </>;
+}
+
+function StudentSidebarDisclosure({label,children}:{label:string;children:ReactNode}){
+ const [expanded,setExpanded]=useState(true);
+ const contentId=useId();
+ return <>
+  <SidebarGroupLabel asChild>
+   <button type="button" className="siii-sidebar-disclosure" aria-expanded={expanded}
+    aria-controls={contentId} onClick={()=>setExpanded(value=>!value)}>
+    <span>{label}</span><ChevronDown className={expanded?'':'siii-disclosure-collapsed'} aria-hidden="true"/>
+   </button>
+  </SidebarGroupLabel>
+  <SidebarGroupContent id={contentId} hidden={!expanded}>{children}</SidebarGroupContent>
  </>;
 }
 
@@ -183,7 +230,7 @@ function MobileTrigger(){
 function ShellLink({href,label,icon,active}:{href:Route|string;label:string;icon:SiiNavIconName;active:boolean}){
  return <SidebarMenuItem>
   <SidebarMenuButton asChild isActive={active} tooltip={label} className="h-10 gap-3 text-[13px] font-semibold">
-   <Link href={href as Route} aria-current={active?'page':undefined}>
+   <Link href={href as Route} aria-current={active?'page':undefined} onClick={()=>{const hash=String(href).split('#')[1];if(String(href).includes('/student#')&&hash)window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:hash}))}}>
     <SiiNavIcon name={icon}/><span>{label}</span>
    </Link>
   </SidebarMenuButton>

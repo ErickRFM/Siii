@@ -32,15 +32,41 @@ test('student consults official own academic records in both themes across all r
   }
  }
 });
-test('V3 student home stays institutional and loads secondary resources on demand',async({page})=>{
+test('approved glass student overview stays readable and without overflow on mobile and desktop',async({page})=>{
+ await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Calificaciones recientes'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Estado de cuenta'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Mis trámites'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Calendario'})).toBeVisible();
+ for(const theme of ['dark','light']){
+  const current=await page.locator('html').getAttribute('data-sii-theme');
+  if(current!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro'}).click();
+  for(const width of [320,390,768,1440]){
+   await page.setViewportSize({width,height:900});
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+   await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+   if(width===390||width===1440)await page.screenshot({path:`.p0-local/pr120-evidence/student-${theme}-${width}.png`,fullPage:true});
+  }
+ }
+});
+test('V3 student home stays institutional and loads only dashboard resources',async({page})=>{
  const resources:string[]=[];page.on('request',request=>{const match=request.url().match(/\/portal\/student\/([^?]+)/);if(match)resources.push(match[1])});
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await expect(page.getByText('Próximas clases registradas',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Mi horario',exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Académico',exact:true})).toBeVisible();
- expect(resources).not.toContain('schedule');expect(resources).not.toContain('grades');expect(resources).not.toContain('payments');
+ expect(resources).not.toContain('schedule');expect(resources).toContain('grades');expect(resources).toContain('payments');
  await page.getByRole('tab',{name:'Académico',exact:true}).click();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.getByRole('tab',{name:'Calificaciones e historial',exact:true}).click();await expect(page.getByRole('tabpanel').last()).toContainText('8.50');
+});
+test('student sidebar opens real academic and finance sections without duplicating operational schedules',async({page})=>{
+ await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Calificaciones e historial'}).click();
+ await expect(page.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
+ await expect(page.getByRole('tab',{name:'Calificaciones e historial',exact:true})).toHaveAttribute('data-state','active');
+ await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Estado de cuenta'}).click();
+ await expect(page.getByRole('tab',{name:'Finanzas',exact:true})).toHaveAttribute('data-state','active');
 });
 test('V3 revalidation preserves displayed records and search while a valid profile is checked',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
@@ -154,6 +180,7 @@ test('teacher and treasury personal workspaces remain usable across both themes 
    if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
    for(const width of [360,390,768,1024,1366,1600,1920]){
     await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+    if(kind==='teacher'&&(width===390||width===1366))await page.screenshot({path:`.p0-local/pr120-evidence/teacher-${theme}-${width}.png`,fullPage:true});
     if(width===360){expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);await page.screenshot({path:`.p0-local/vnext-institutional/${kind}-${theme}-${width}.png`,fullPage:true})}
    }
   }

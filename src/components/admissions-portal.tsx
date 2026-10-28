@@ -132,7 +132,7 @@ export default function AdmissionsPortal({
 
   if(!sessionReady)return <section className="sii-panel" aria-label="Portal de admisiones"><p role="status">Comprobando sesión de aspirante…</p></section>;
   return (
-    <div className="sii-panel" aria-label="Portal de admisiones">
+    <div className="sii-panel siii-glass-public-panel" aria-label="Portal de admisiones">
       <div className="sii-panel-top">
         <div>
           <span className="sii-section-kicker">ADMISIONES E INGRESO</span>

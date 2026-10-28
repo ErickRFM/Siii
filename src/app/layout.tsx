@@ -7,7 +7,6 @@ import {applicantFragmentBootstrap} from '@/shared/admissions-fragment';
 import './globals.css';
 import './sii-v2.css';
 import './academic-v2.css';
-import './sii-glass.css';
 import './sii-ux-refinement.css';
 import './sii-motion-polish.css';
 import './sii-system-coherence.css';
@@ -16,9 +15,12 @@ import './sii-kit-components.css';
 import './sii-interactions.css';
 import './sii-tailwind.css';
 import './sii-workspaces.css';
+// Final scoped paint layer: shared glass tokens override legacy visual skins without altering their behavior.
+import './sii-glass.css';
 export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'SII · Sistema Institucional Integral',description:'Plataforma institucional de gestión académica'};
+const siiThemeBootstrap="(function(){try{var stored=window.localStorage.getItem('sii-theme');document.documentElement.dataset.siiTheme=stored==='dark'?'dark':'light'}catch(_){document.documentElement.dataset.siiTheme='light'}})();";
 export default async function RootLayout({children}:{children:React.ReactNode}){
  const nonce=(await headers()).get('x-nonce')??undefined;
- return <html lang="es-MX"><body className="sii-ui"><Script id="siii-invitation-fragment" strategy="beforeInteractive" nonce={nonce}>{invitationFragmentBootstrap}</Script><Script id="siii-password-reset-fragment" strategy="beforeInteractive" nonce={nonce}>{passwordResetFragmentBootstrap}</Script><Script id="siii-applicant-fragment" strategy="beforeInteractive" nonce={nonce}>{applicantFragmentBootstrap}</Script><a className="sii-skip-link" href="#main-content">Saltar al contenido principal</a>{children}</body></html>;
+ return <html lang="es-MX" data-sii-theme="light" suppressHydrationWarning><body className="sii-ui"><Script id="siii-theme-bootstrap" nonce={nonce} strategy="beforeInteractive">{siiThemeBootstrap}</Script><Script id="siii-invitation-fragment" strategy="beforeInteractive" nonce={nonce}>{invitationFragmentBootstrap}</Script><Script id="siii-password-reset-fragment" strategy="beforeInteractive" nonce={nonce}>{passwordResetFragmentBootstrap}</Script><Script id="siii-applicant-fragment" strategy="beforeInteractive" nonce={nonce}>{applicantFragmentBootstrap}</Script><a className="sii-skip-link" href="#main-content">Saltar al contenido principal</a>{children}</body></html>;
 }

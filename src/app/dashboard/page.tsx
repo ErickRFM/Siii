@@ -21,7 +21,7 @@ export default async function Dashboard(){
  const roleNames=[...new Set(institutions.flatMap(item=>item.roles))].map(role=>ROLE_LABELS[role]);
  const personalOnly=institutions.length>0&&institutions.every(item=>item.roles.every(role=>['student','teacher','teacher_pending','workshop_participant','guest'].includes(role)));
 
- return <div className="space-y-8">
+ return <div className="siii-glass-workspace space-y-8">
   <SiiPageIntro hero eyebrow="CENTRO DE OPERACIONES" title={`Bienvenido, ${user.firstName}`}
    description="Tu espacio institucional, accesos vigentes y módulos autorizados en un solo lugar."
    actions={<SiiStatusPill live>Cuenta activa</SiiStatusPill>}/>

@@ -1,0 +1,134 @@
+{
+  "generatedAt": "2026-10-28T05:06:51.545Z",
+  "totalBytes": 189604,
+  "totalImportant": 210,
+  "totalDup": 339,
+  "files": [
+    {
+      "file": "src/app/academic-v2.css",
+      "bytes": 5263,
+      "rules": 56,
+      "classes": 28,
+      "orphanCandidates": 0,
+      "important": 1,
+      "duplicateSelectors": 7
+    },
+    {
+      "file": "src/app/globals.css",
+      "bytes": 1487,
+      "rules": 16,
+      "classes": 2,
+      "orphanCandidates": 0,
+      "important": 0,
+      "duplicateSelectors": 2
+    },
+    {
+      "file": "src/app/sii-glass.css",
+      "bytes": 53863,
+      "rules": 344,
+      "classes": 142,
+      "orphanCandidates": 0,
+      "important": 168,
+      "duplicateSelectors": 104
+    },
+    {
+      "file": "src/app/sii-interactions.css",
+      "bytes": 1755,
+      "rules": 8,
+      "classes": 10,
+      "orphanCandidates": 0,
+      "important": 5,
+      "duplicateSelectors": 3
+    },
+    {
+      "file": "src/app/sii-kit-components.css",
+      "bytes": 19218,
+      "rules": 189,
+      "classes": 65,
+      "orphanCandidates": 0,
+      "important": 4,
+      "duplicateSelectors": 30
+    },
+    {
+      "file": "src/app/sii-motion-polish.css",
+      "bytes": 13586,
+      "rules": 108,
+      "classes": 46,
+      "orphanCandidates": 0,
+      "important": 5,
+      "duplicateSelectors": 19
+    },
+    {
+      "file": "src/app/sii-premium-kit.css",
+      "bytes": 28549,
+      "rules": 210,
+      "classes": 113,
+      "orphanCandidates": 0,
+      "important": 12,
+      "duplicateSelectors": 64
+    },
+    {
+      "file": "src/app/sii-system-coherence.css",
+      "bytes": 10210,
+      "rules": 82,
+      "classes": 30,
+      "orphanCandidates": 0,
+      "important": 2,
+      "duplicateSelectors": 24
+    },
+    {
+      "file": "src/app/sii-tailwind.css",
+      "bytes": 7640,
+      "rules": 41,
+      "classes": 21,
+      "orphanCandidates": 0,
+      "important": 0,
+      "duplicateSelectors": 8
+    },
+    {
+      "file": "src/app/sii-ux-refinement.css",
+      "bytes": 8927,
+      "rules": 85,
+      "classes": 45,
+      "orphanCandidates": 0,
+      "important": 4,
+      "duplicateSelectors": 14
+    },
+    {
+      "file": "src/app/sii-v2.css",
+      "bytes": 22460,
+      "rules": 225,
+      "classes": 119,
+      "orphanCandidates": 0,
+      "important": 7,
+      "duplicateSelectors": 36
+    },
+    {
+      "file": "src/app/sii-workspaces.css",
+      "bytes": 13044,
+      "rules": 97,
+      "classes": 45,
+      "orphanCandidates": 0,
+      "important": 2,
+      "duplicateSelectors": 20
+    },
+    {
+      "file": "src/components/institution-admin.css",
+      "bytes": 2990,
+      "rules": 33,
+      "classes": 12,
+      "orphanCandidates": 0,
+      "important": 0,
+      "duplicateSelectors": 8
+    },
+    {
+      "file": "src/components/institution-users.css",
+      "bytes": 612,
+      "rules": 8,
+      "classes": 2,
+      "orphanCandidates": 0,
+      "important": 0,
+      "duplicateSelectors": 0
+    }
+  ]
+}

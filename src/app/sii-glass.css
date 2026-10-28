@@ -137,3 +137,730 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 @media (prefers-reduced-motion:reduce) {
   .sii-app :is(.sii-module-card,.sii-metric,.sii-institution-item){transition:none!important;transform:none!important}
 }
+
+
+/* SIII Smoked Glass v1 — shared matte material, based on the approved student reference.
+   No artificial glow, no redesign of business logic or permission boundaries. */
+.sii-app.sii-ui {
+  --sii-bg:#342f2e;
+  --sii-surface:rgba(98,88,83,.46);
+  --sii-text:#f7f1ec;
+  --sii-muted:#d0c4bd;
+  --sii-line:rgba(255,255,255,.055);
+  --sii-glass-panel:rgba(110,100,95,.34);
+  --sii-glass-soft:rgba(124,113,107,.25);
+  --sii-glass-header:rgba(105,96,90,.32);
+  --sii-glass-edge:transparent;
+  --sii-glass-depth:none;
+  --sii-glass-hover:none;
+  color:#f7f1ec;
+  background:linear-gradient(120deg,rgba(58,48,45,.82),rgba(51,48,48,.92)),radial-gradient(ellipse at 72% 8%,#ac8572,#342f2e 62%)!important;
+  background-attachment:fixed!important;
+}
+.sii-app.sii-ui .sii-sidebar {
+  background:rgba(102,93,87,.34)!important;
+  border:0!important;
+  border-radius:17px;
+  box-shadow:none!important;
+  backdrop-filter:blur(19px) saturate(112%);
+}
+.sii-app.sii-ui .sii-topbar {
+  background:rgba(108,98,92,.26)!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px);
+}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .rounded-xl.border.bg-card,.sii-workspace .rounded-xl.border) {
+  background:var(--sii-glass-panel)!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(17px) saturate(108%);
+  border-radius:17px;
+}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-sidebar,.sii-topbar) {
+  outline:0!important;
+}
+.sii-app.sii-ui .sii-nav-item--active {
+  background:rgba(222,204,190,.19)!important;
+  box-shadow:none!important;
+}
+.sii-app.sii-ui :is(.sii-nav-item,.sii-module-card) {
+  transition:background-color .18s ease,transform .18s ease!important;
+}
+.sii-app.sii-ui :is(.sii-catalog-form input,.sii-catalog-form select,.sii-catalog-edit input) {
+  background:rgba(255,255,255,.09)!important;
+  border-color:rgba(255,255,255,.10)!important;
+}
+
+
+
+
+
+
+
+
+
+.sii-student-portal .siii-glass-title{font-weight:650;letter-spacing:-.015em;font-size:1rem;margin-bottom:16px}
+.sii-student-portal .siii-glass-muted{color:rgba(243,233,225,.72);font-size:.84rem}
+.sii-student-portal .siii-glass-number{font-size:clamp(1.4rem,2.2vw,2rem);font-weight:650;line-height:1.2;letter-spacing:-.035em}
+.sii-student-portal .siii-glass-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.085)}
+.sii-student-portal .siii-glass-row:last-child{border-bottom:0}
+.sii-student-portal .siii-glass-link{display:inline-flex;align-items:center;gap:6px;color:#ede3da;text-decoration:underline;text-underline-offset:4px;font-size:.84rem}
+.sii-student-portal .siii-glass-pill{display:inline-flex;align-items:center;border-radius:999px;background:rgba(218,204,191,.14);padding:5px 11px;color:#f5eae0;font-size:.78rem}
+@media(max-width:1100px){
+
+
+}
+@media(max-width:650px){
+ .sii-app.sii-ui .sii-sidebar{border-radius:0}
+
+
+
+
+}
+@media(prefers-reduced-motion:reduce){
+ .sii-app.sii-ui :is(.sii-nav-item,.sii-module-card){transition:none!important}
+}
+@media(forced-colors:active){
+ .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card){border:1px solid CanvasText!important;background:Canvas!important}
+ .sii-app.sii-ui{background:Canvas!important;color:CanvasText}
+}
+
+
+/* Smoked Glass v1 — cross-role surfaces and no luminous outlines.
+   CSS variable overrides apply only inside the authenticated application. */
+.sii-app.sii-ui {
+  --background:20 8% 21%;--foreground:28 34% 95%;
+  --card:20 8% 28%;--card-foreground:28 34% 95%;
+  --popover:20 8% 27%;--popover-foreground:28 34% 95%;
+  --primary:26 43% 79%;--primary-foreground:20 17% 14%;
+  --secondary:20 8% 33%;--secondary-foreground:28 34% 95%;
+  --muted:20 8% 34%;--muted-foreground:24 19% 80%;
+  --accent:20 9% 35%;--accent-foreground:28 34% 95%;
+  --border:20 12% 45%;--input:20 11% 43%;--ring:26 43% 79%;
+  --sidebar-background:20 9% 27%;--sidebar-foreground:28 34% 95%;
+  --sidebar-accent:20 10% 36%;--sidebar-accent-foreground:28 34% 95%;
+  --sidebar-primary:26 43% 79%;--sidebar-primary-foreground:20 17% 14%;
+}
+.sii-app.sii-ui :is(.sii-workspace .bg-card,.sii-workspace .bg-muted,.sii-kit-module-card,.sii-kit-metric,.sii-workspace-tabs,.sii-personal-navigation,.sii-teacher-navigation) {
+  background-color:rgba(120,109,103,.23)!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(12px);
+}
+.sii-app.sii-ui :is(.sii-workspace .text-card-foreground,.sii-kit-module-card) {color:#f5ece7!important}
+.sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) {border-radius:16px;gap:5px;padding:5px}
+.sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{
+  background:rgba(240,226,214,.18)!important;color:#fff!important;
+  border-radius:12px;box-shadow:none!important
+}
+.sii-app.sii-ui :is(input,select,textarea,[role=combobox]){accent-color:#d4bcaa}
+.sii-app.sii-ui :is(input,select,textarea,[role=combobox]):focus-visible{
+  outline:2px solid rgba(227,208,192,.78)!important;outline-offset:2px
+}
+.sii-app.sii-ui :is(.sii-workspace .border,.sii-workspace [class*=border-]){
+  border-color:rgba(241,225,214,.11)
+}
+.sii-app.sii-ui .sii-workspace :is([role=table],table){border-collapse:separate;border-spacing:0;min-width:0}
+.sii-app.sii-ui .sii-workspace :is(th,td){border-bottom-color:rgba(244,230,219,.09)}
+.sii-app.sii-ui .sii-workspace th{background:rgba(255,255,255,.035);font-weight:600}
+.sii-app.sii-ui .sii-workspace tr:hover td{background:rgba(255,255,255,.035)}
+.sii-app.sii-ui .sii-kit-skeleton-block {background:rgba(225,212,199,.14)!important}
+.sii-app.sii-ui button:focus-visible,.sii-app.sii-ui a:focus-visible{outline:2px solid #e3cbb7;outline-offset:3px}
+@media (max-width:640px){
+ .sii-app.sii-ui .sii-workspace{min-width:0}
+ .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation){overflow-x:auto;max-width:100%;scrollbar-width:thin}
+ .sii-app.sii-ui .sii-workspace :is(table,[role=table]){max-width:100%}
+}
+@media (prefers-reduced-transparency:reduce){
+ .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card){backdrop-filter:none;background:#514944!important}
+}
+@media (forced-colors:active){
+ .sii-app.sii-ui :is(.sii-workspace .bg-card,.sii-workspace .bg-muted,.sii-kit-module-card,.sii-kit-metric){background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important}
+}
+
+/* Teaching dashboard reuses the approved material, not student business widgets. */
+.sii-app.sii-ui .siii-teacher-metric,
+.sii-app.sii-ui .siii-teacher-work{
+  background:rgba(111,101,96,.30)!important;
+  border:0!important;border-radius:17px;
+  box-shadow:none!important;backdrop-filter:blur(15px) saturate(108%);
+}
+.sii-app.sii-ui .siii-teacher-metrics{gap:14px}
+.sii-app.sii-ui .siii-teacher-metric p.tabular-nums{letter-spacing:-.04em}
+@media(max-width:650px){
+ .sii-app.sii-ui .siii-teacher-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .sii-app.sii-ui .siii-teacher-metrics>*:first-child{grid-column:1/-1}
+}
+
+/* Light cream variant of the approved smoked-glass design. */
+html[data-sii-theme="light"] .sii-app.sii-ui{
+  --background:32 37% 93%;--foreground:24 15% 15%;
+  --card:30 30% 95%;--card-foreground:24 15% 15%;
+  --popover:30 30% 96%;--popover-foreground:24 15% 15%;
+  --primary:21 23% 29%;--primary-foreground:30 35% 97%;
+  --secondary:30 23% 89%;--secondary-foreground:24 15% 15%;
+  --muted:30 22% 89%;--muted-foreground:25 12% 32%;
+  --accent:30 25% 88%;--accent-foreground:24 15% 15%;
+  --border:25 18% 79%;--input:25 18% 77%;--ring:21 23% 29%;
+  --sidebar-background:30 27% 93%;--sidebar-foreground:24 15% 15%;
+  --sidebar-accent:30 22% 85%;--sidebar-accent-foreground:24 15% 15%;
+  --sii-text:#302b29;--sii-muted:#615750;
+  --sii-glass-panel:rgba(255,251,245,.59);
+  --sii-glass-soft:rgba(255,249,241,.52);
+  --sii-glass-header:rgba(255,251,245,.68);
+  color:#302b29;
+  background:linear-gradient(125deg,rgba(239,229,218,.78),rgba(218,203,191,.75)),radial-gradient(ellipse at 72% 9%,#f5ece3,#d0b9a6 68%)!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar{background:rgba(255,249,242,.48)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,250,243,.57)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-teacher-metric,.siii-teacher-work){background:rgba(255,251,246,.57)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-muted{color:#675a53}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-link{color:#342f2e}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-pill{color:#342f2e;background:rgba(92,72,60,.10)}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-row{border-bottom-color:rgba(52,47,46,.09)}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{background:rgba(92,72,60,.17)!important;color:#302b29!important}
+
+
+/* Surface finishing shared by admissions, finance, directorate and administration. */
+.sii-app.sii-ui :is(.sii-workspace,.sii-access-panel,.sii-institution-item){min-width:0}
+.sii-app.sii-ui :is(.sii-workspace input,.sii-workspace select,.sii-workspace textarea){max-width:100%}
+.sii-app.sii-ui :is(.sii-workspace .overflow-x-auto,.sii-workspace [data-slot=table-container]){max-width:100%;overscroll-behavior-inline:contain}
+
+
+@media(prefers-reduced-motion:reduce){.sii-app.sii-ui *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Accessibility correction: the cream theme must not inherit white sidebar text. */
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"],
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar :is(.sii-brand-name,.sii-brand-description,.sii-sidebar-status,[data-sidebar="menu-button"],[data-sidebar="group-label"]){
+ color:#302b29!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar :is(.text-sidebar-foreground,.text-sidebar-foreground\/70,.text-sidebar-foreground\/60){
+ color:#443a35!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar [data-sidebar="group-label"]{color:#554941!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-muted-foreground{color:#554941!important}
+
+
+.sii-app.sii-ui .siii-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:14px;text-align:center;font-size:.78rem}
+.sii-app.sii-ui .siii-calendar-days span{display:grid;place-items:center;min-height:28px}
+.sii-app.sii-ui .siii-calendar-today{border-radius:9px;background:#cbbdb4;color:#2b2523;font-weight:700}
+.sii-app.sii-ui .siii-calendar-shell button{padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.08)}
+@media(min-width:1250px){.sii-app.sii-ui .siii-calendar-shell{grid-column:10/13}}
+
+
+@media(max-width:980px){}
+
+/* Fidelity-focused student workspace: translucent smoked glass with calm inner contrast. */
+.sii-app.sii-ui .siii-student-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,24%);gap:14px;align-items:start;width:100%;min-width:0}
+.sii-app.sii-ui .siii-student-main,.sii-app.sii-ui .siii-student-aside{display:grid;align-content:start;gap:14px;min-width:0}
+.sii-app.sii-ui .siii-overview-panel,.sii-app.sii-ui .siii-overview-hero{
+ --siii-surface:rgba(120,110,104,.32);
+ background:var(--siii-surface);border:0;box-shadow:none;border-radius:17px;
+ padding:20px;min-width:0;backdrop-filter:blur(16px) saturate(108%);-webkit-backdrop-filter:blur(16px) saturate(108%);
+}
+.sii-app.sii-ui .siii-overview-hero{min-height:182px;position:relative;overflow:hidden;background:linear-gradient(115deg,rgba(143,123,108,.22),rgba(113,104,99,.19));padding:24px}
+.sii-app.sii-ui .siii-overview-hero>*:not(.siii-overview-watermark){position:relative;z-index:1}
+.sii-app.sii-ui .siii-overview-hero h2{font-size:clamp(28px,3.2vw,42px);letter-spacing:-.045em;font-weight:650;margin:5px 0}
+.sii-app.sii-ui .siii-overview-hero p{font-size:clamp(13px,1.2vw,16px)}
+.sii-app.sii-ui .siii-overview-watermark{position:absolute;right:-5%;top:30px;width:60%;height:190px;border:1px solid rgba(224,211,200,.20);border-radius:50%;transform:rotate(-24deg);pointer-events:none}
+.sii-app.sii-ui .siii-overview-watermark:after{content:"";position:absolute;inset:30px -35px;border:1px solid rgba(224,211,200,.11);border-radius:50%}
+.sii-app.sii-ui .siii-overview-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sii-app.sii-ui .siii-overview-tags>span{background:rgba(255,255,255,.095);border-radius:999px;padding:5px 11px;font-size:12px}
+.sii-app.sii-ui .siii-overview-eyebrow,.sii-app.sii-ui .siii-overview-subtle,.sii-app.sii-ui .siii-overview-empty{font-size:13px;opacity:.83}
+.sii-app.sii-ui .siii-overview-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sii-app.sii-ui .siii-overview-metric{padding:18px;display:grid;gap:6px;align-content:start}
+.sii-app.sii-ui .siii-overview-metric>svg{color:#d8bca5;margin-bottom:4px}
+.sii-app.sii-ui .siii-overview-metric>span{font-size:12px}
+.sii-app.sii-ui .siii-overview-metric>strong{font-size:clamp(20px,1.7vw,27px);font-weight:650;letter-spacing:-.03em;overflow-wrap:anywhere}
+.sii-app.sii-ui .siii-overview-metric>small{font-size:11px;line-height:1.35;opacity:.83}
+.sii-app.sii-ui .siii-overview-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sii-app.sii-ui .siii-overview-detail-grid>.siii-overview-panel{min-height:280px;display:flex;flex-direction:column}
+.sii-app.sii-ui .siii-overview-panel h3{font-size:15px;font-weight:650;margin:0}
+.sii-app.sii-ui .siii-overview-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:15px;min-width:0}
+.sii-app.sii-ui .siii-overview-heading>h3{min-width:0}
+.sii-app.sii-ui .siii-overview-quick{display:inline-flex;align-items:center;justify-content:space-between;gap:5px;min-width:0;padding:7px 0;border:0;background:transparent;font-size:12px;text-align:left}
+.sii-app.sii-ui .siii-overview-listrow{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.09);padding:11px 0;min-width:0}
+.sii-app.sii-ui .siii-overview-listrow:last-child{border-bottom:0}
+.sii-app.sii-ui .siii-overview-listrow>div{min-width:0}
+.sii-app.sii-ui .siii-overview-listrow strong{font-weight:550;font-size:12px;display:block;overflow-wrap:anywhere}
+.sii-app.sii-ui .siii-overview-listrow small,.sii-app.sii-ui .siii-overview-progress-summary small{display:block;font-size:11px;opacity:.77;line-height:1.45;overflow-wrap:anywhere}
+.sii-app.sii-ui .siii-overview-listrow>b{font-size:13px;white-space:nowrap}
+.sii-app.sii-ui .siii-overview-grade{border-radius:9px;background:rgba(137,200,167,.19);padding:8px 10px}
+.sii-app.sii-ui .siii-overview-status{font-size:10px;border-radius:8px;padding:4px 7px;background:rgba(137,200,167,.18)}
+.sii-app.sii-ui .siii-overview-balance{font-size:27px;font-weight:650;letter-spacing:-.04em;margin:8px 0}
+.sii-app.sii-ui .siii-overview-primary{width:100%;min-height:42px;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:11px;margin-top:auto;background:#e3d0c2;color:#302721;font-weight:600;font-size:12px;padding:10px}
+.sii-app.sii-ui .siii-overview-progress{min-height:210px}
+.sii-app.sii-ui .siii-overview-progress-body{display:grid;grid-template-columns:minmax(200px,.9fr) minmax(0,1.5fr);gap:20px;margin-top:10px}
+.sii-app.sii-ui .siii-overview-progress-summary{display:flex;align-items:center;gap:13px}
+.sii-app.sii-ui .siii-overview-progress-summary strong{display:block;font-size:23px;letter-spacing:-.02em}
+.sii-app.sii-ui .siii-overview-term-bars{display:grid;gap:10px}
+.sii-app.sii-ui .siii-overview-term-bars>p{font-size:12px}
+.sii-app.sii-ui .siii-overview-term-bars>small{opacity:.77;font-size:10px;line-height:1.4}
+.sii-app.sii-ui .siii-overview-term{display:grid;grid-template-columns:minmax(90px,1fr) minmax(55px,2fr) 24px;align-items:center;gap:7px;font-size:11px}
+.sii-app.sii-ui .siii-overview-term b{text-align:right;font-variant-numeric:tabular-nums}
+.sii-app.sii-ui .siii-overview-track{height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden}
+.sii-app.sii-ui .siii-overview-track>span{display:block;height:100%;background:linear-gradient(90deg,#82bfa5,#a9b8eb);border-radius:99px}
+.sii-app.sii-ui .siii-student-aside>.siii-overview-panel{padding:18px}
+.sii-app.sii-ui .siii-student-aside>.siii-overview-panel>h3{margin-bottom:15px}
+.sii-app.sii-ui .siii-overview-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.sii-app.sii-ui .siii-overview-shortcuts>.siii-overview-quick{padding:12px 10px;border-radius:12px;background:rgba(255,255,255,.075);font-size:11px;min-height:60px}
+.sii-app.sii-ui .siii-overview-panel button:focus-visible{outline:2px solid #e8d8c8;outline-offset:2px}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-panel,
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-hero{--siii-surface:rgba(255,251,246,.62);color:#302b29}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-primary{background:#584c46;color:#fff}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow{border-bottom-color:rgba(60,43,32,.11)}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-track{background:rgba(55,42,34,.12)}
+@media(max-width:1320px){.sii-app.sii-ui .siii-student-dashboard{grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .siii-student-aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:990px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr 1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:1/-1}}
+@media(max-width:720px){.sii-app.sii-ui .siii-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sii-app.sii-ui .siii-overview-progress-body{grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .siii-student-aside{grid-template-columns:1fr}}
+@media(max-width:520px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:auto}.sii-app.sii-ui .siii-overview-panel{padding:15px}.sii-app.sii-ui .siii-overview-metric{padding:13px}.sii-app.sii-ui .siii-overview-hero{padding:19px}.sii-app.sii-ui .siii-overview-term{grid-template-columns:minmax(70px,1fr) minmax(40px,1.5fr) 18px}}
+@media(prefers-reduced-motion:reduce){.sii-app.sii-ui .siii-overview-panel *, .sii-app.sii-ui .siii-overview-hero *{transition:none!important;animation:none!important}}
+
+/* Application shell final paint pass: preserve business behaviors and keyboard focus. */
+.sii-app.sii-ui{--sii-kit-bg:#342f2e;--sii-kit-surface:rgba(115,103,96,.33);--sii-kit-elevated:#544a45;--sii-kit-border:rgba(255,255,255,.075);--sii-kit-border-strong:rgba(255,255,255,.11);--sii-kit-muted:#d4c6bd;--sii-kit-accent:#d8bbab;--sii-kit-accent-strong:#eed9c9;--sii-kit-gradient:none;--sii-kit-shadow:none;--sii-kit-shadow-hover:none}
+html[data-sii-theme="light"] .sii-app.sii-ui{--sii-kit-bg:#e9dcd0;--sii-kit-surface:rgba(255,250,242,.62);--sii-kit-elevated:#f6efe7;--sii-kit-border:rgba(65,47,36,.10);--sii-kit-border-strong:rgba(65,47,36,.18);--sii-kit-muted:#5e514b;--sii-kit-accent:#56453c;--sii-kit-accent-strong:#45372f}
+.sii-app.sii-ui .sii-main{min-width:0;background:transparent}
+.sii-app.sii-ui .sii-page{min-width:0}
+.sii-app.sii-ui [data-sidebar="sidebar"]{color:hsl(var(--sidebar-foreground));border:0!important;background:var(--sii-glass-panel)!important}
+.sii-app.sii-ui [data-sidebar="menu-button"]{border-radius:11px;min-height:38px;transition:background .16s ease,color .16s ease}
+.sii-app.sii-ui [data-sidebar="menu-button"][data-active="true"]{background:rgba(224,205,190,.18)!important;box-shadow:none!important}
+.sii-app.sii-ui [data-sidebar="group-label"]{color:hsl(var(--sidebar-foreground) / .76)!important;letter-spacing:.04em}
+.sii-app.sii-ui .sii-topbar{border:0!important;border-radius:14px;box-shadow:none!important;margin:14px 16px 0;min-height:60px}
+.sii-app.sii-ui .sii-topbar .sii-topbar-actions{min-width:0;gap:9px}
+.sii-app.sii-ui .sii-sidebar,.sii-app.sii-ui [data-sidebar="sidebar"]{box-shadow:none!important}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-access-panel,.sii-institution-item){border:0!important;box-shadow:none!important}
+.sii-app.sii-ui .sii-workspace :is(button,a,input,select,textarea):focus-visible{outline:2px solid hsl(var(--ring))!important;outline-offset:2px}
+.sii-app.sii-ui :is(.sii-workspace,.sii-topbar,.sii-sidebar) *{overflow-wrap:break-word}
+.sii-app.sii-ui .sii-kit-page-heading h1{letter-spacing:-.035em}
+@media(max-width:760px){.sii-app.sii-ui .sii-topbar{margin:9px 9px 0;border-radius:12px}.sii-app.sii-ui .siii-student-dashboard{gap:11px}.sii-app.sii-ui .siii-student-main,.sii-app.sii-ui .siii-student-aside{gap:11px}}
+@media(prefers-contrast:more){.sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero){background:hsl(var(--card))!important;border:1px solid hsl(var(--border))!important}}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero){background:#514a46}}
+
+/* Institutional student sidebar navigation; permission-filtered at render time. */
+.sii-app.sii-ui .siii-student-sidebar-group{margin:0 7px;padding-block:4px;border-radius:13px;background:rgba(255,255,255,.035)}
+.sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="menu-button"]{font-size:12px;font-weight:500;min-height:34px}
+.sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="group-label"]{font-size:10px}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-student-sidebar-group{background:rgba(73,53,40,.045)}
+
+/* Sidebar contrast is rooted at shadcn's real data-sidebar node, not a legacy .sii-sidebar class. */
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"]{
+ --sidebar-foreground:24 15% 16%;--sidebar-accent-foreground:24 15% 16%;
+ --sidebar-primary-foreground:24 15% 16%;
+ background:rgba(255,250,242,.73)!important;color:#302b29!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] :is(
+ .sii-brand-name,.sii-brand-description,
+ .text-sidebar-foreground,.text-sidebar-foreground\/60,.text-sidebar-foreground\/50,
+ [data-sidebar="menu-button"],[data-sidebar="group-label"]
+){color:#332a26!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#4d3f38!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="opacity-60"]{opacity:.83}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric>small,
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-empty,
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow small{opacity:1;color:#5d5049}
+
+.sii-app.sii-ui .siii-overview-track svg{display:block;width:100%;height:8px}
+
+
+/* WCAG AA: use attribute selectors rather than escaping Tailwind's slash classes. */
+html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#efe6df!important}
+html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#43362f!important}
+.sii-app.sii-ui [data-sidebar="sidebar"] [data-sidebar="group-label"]{opacity:1}
+
+/* Screenshot-aligned command search and compact authenticated identity. */
+.sii-app.sii-ui .sii-topbar .sii-topbar-start{min-width:0;display:flex;align-items:center;gap:15px;flex:1}
+.sii-app.sii-ui .sii-topbar .sii-command-trigger{
+ width:min(420px,42vw);height:44px;justify-content:flex-start;gap:12px;
+ background:rgba(201,190,183,.13)!important;border:0!important;
+ border-radius:14px;box-shadow:none!important;color:hsl(var(--foreground));
+ font-size:12px;font-weight:400;
+}
+.sii-app.sii-ui .sii-topbar .sii-command-trigger-label{flex:1;text-align:left;opacity:.84}
+.sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{
+ border:0!important;background:rgba(255,255,255,.1)!important;border-radius:7px;padding:5px 9px
+}
+.sii-app.sii-ui .siii-account-chip{background:rgba(196,182,172,.10);padding:5px 11px;border-radius:14px;max-width:230px;min-width:0}
+.sii-app.sii-ui .siii-account-chip small{color:hsl(var(--foreground) / .8)!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger{background:rgba(255,248,241,.57)!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-account-chip{background:rgba(255,249,242,.5)}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{background:rgba(69,48,32,.09)!important}
+@media(max-width:1070px){
+ .sii-app.sii-ui .sii-topbar .sii-command-trigger{width:44px;flex:0 0 44px;padding:11px;justify-content:center}
+ .sii-app.sii-ui .sii-topbar .sii-command-trigger-label,.sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{display:none!important}
+ .sii-app.sii-ui .sii-topbar .sii-topbar-start{gap:8px}
+}
+@media(max-width:640px){.sii-app.sii-ui .sii-topbar .sii-topbar-start{flex:0 1 auto}.sii-app.sii-ui .sii-topbar .sii-command-trigger{height:38px;width:38px;flex-basis:38px}.sii-app.sii-ui .siii-account-chip{padding:0;background:transparent}}
+
+/* A real, accessible refresh affordance belongs in the hero, not in duplicate toolbar chrome. */
+.sii-app.sii-ui .siii-overview-hero .siii-overview-refresh{
+ position:absolute;right:16px;top:16px;z-index:2;width:35px;height:35px;
+ border:0;border-radius:10px;background:rgba(255,255,255,.075);
+ display:grid;place-items:center;color:inherit;cursor:pointer;
+}
+.sii-app.sii-ui .siii-overview-hero .siii-overview-refresh:hover{background:rgba(255,255,255,.17)}
+.sii-app.sii-ui .siii-overview-hero .siii-overview-refresh:disabled{opacity:.55;cursor:not-allowed}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-hero .siii-overview-refresh{background:rgba(88,66,47,.08)}
+
+/* Restrained reference icon colors; visible without heavy outlines or glow. */
+.sii-app.sii-ui .siii-overview-metric-icon{width:43px;height:43px;border-radius:12px;display:grid;place-items:center;margin-bottom:1px;background:rgba(195,148,104,.24);color:#f3d7b1}
+.sii-app.sii-ui .siii-overview-metric:nth-child(2) .siii-overview-metric-icon{background:rgba(116,144,220,.28);color:#c6d3ff}
+.sii-app.sii-ui .siii-overview-metric:nth-child(3) .siii-overview-metric-icon{background:rgba(108,182,144,.22);color:#b8eacb}
+.sii-app.sii-ui .siii-overview-metric:nth-child(4) .siii-overview-metric-icon{background:rgba(203,135,91,.23);color:#f4c5a5}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric-icon{color:#8b562c}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(2) .siii-overview-metric-icon{color:#3254a4}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(3) .siii-overview-metric-icon{color:#246e48}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(4) .siii-overview-metric-icon{color:#a15426}
+.sii-app.sii-ui .siii-overview-date{display:flex;gap:11px;min-width:0;margin-top:15px}
+.sii-app.sii-ui .siii-overview-date>div{min-width:0;overflow-wrap:anywhere}
+.sii-app.sii-ui .siii-overview-date strong{display:block;font-size:12px;font-weight:600}
+.sii-app.sii-ui .siii-overview-date small{display:block;opacity:.84;font-size:11px;margin-top:3px}
+.sii-app.sii-ui .siii-overview-date-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;margin-top:5px;background:#d7c7bd;box-shadow:none}
+
+/* Reused metric component; one surface and color contract for every authorized role. */
+.sii-app.sii-ui .siii-shared-glass-metric{display:grid;gap:6px;align-content:start}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="amber"] .siii-overview-metric-icon{background:rgba(195,148,104,.24);color:#f3d7b1}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="blue"] .siii-overview-metric-icon{background:rgba(116,144,220,.28);color:#c6d3ff}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="green"] .siii-overview-metric-icon{background:rgba(108,182,144,.22);color:#b8eacb}
+.sii-app.sii-ui .siii-shared-glass-metric[data-tone="terracotta"] .siii-overview-metric-icon{background:rgba(203,135,91,.23);color:#f4c5a5}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="amber"] .siii-overview-metric-icon{color:#8b562c}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="blue"] .siii-overview-metric-icon{color:#3254a4}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="green"] .siii-overview-metric-icon{color:#246e48}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone="terracotta"] .siii-overview-metric-icon{color:#a15426}
+
+/* Shared matte-glass surface contract across Student, Teacher, Services, Administration and Directorate. */
+.sii-app.sii-ui .siii-glass-surface{
+ background:var(--sii-glass-panel)!important;
+ border:0!important;border-radius:17px!important;
+ box-shadow:none!important;
+ backdrop-filter:blur(12px) saturate(106%);
+ -webkit-backdrop-filter:blur(12px) saturate(106%);
+}
+.sii-app.sii-ui .siii-teacher-profile-hero{
+ background:linear-gradient(115deg,rgba(166,144,127,.27),rgba(102,93,89,.25))!important;
+ position:relative;overflow:hidden;min-height:136px;
+}
+.sii-app.sii-ui .siii-teacher-profile-hero h2{font-size:clamp(24px,2.7vw,36px);letter-spacing:-.035em;line-height:1.2}
+.sii-app.sii-ui .siii-teacher-profile-hero p{color:var(--sii-text);opacity:.86}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-surface{background:rgba(255,250,243,.60)!important;color:#302b29}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero{background:linear-gradient(115deg,rgba(255,249,241,.72),rgba(231,216,202,.48))!important}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:#51453f}
+@media(max-width:768px){
+ .sii-app.sii-ui .siii-glass-surface,
+ .sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero,.siii-teacher-profile-hero){
+  backdrop-filter:blur(8px) saturate(103%);
+  -webkit-backdrop-filter:blur(8px) saturate(103%);
+ }
+ .sii-app.sii-ui{background-attachment:scroll!important}
+}
+@media(prefers-reduced-transparency:reduce){
+ .sii-app.sii-ui :is(.siii-glass-surface,.siii-overview-panel,.siii-overview-hero){
+  background:#4b433f!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important
+ }
+ html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-glass-surface,.siii-overview-panel,.siii-overview-hero){
+  background:#f8eee3!important;color:#302b29
+ }
+}
+
+/* Exact metric hierarchy from reference: icon on left, value/label on right. */
+.sii-app.sii-ui .siii-shared-glass-metric{
+ display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;
+ padding:16px;min-height:102px;
+}
+.sii-app.sii-ui .siii-shared-glass-metric>.siii-overview-metric-icon{margin:0;align-self:center}
+.sii-app.sii-ui .siii-shared-metric-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sii-app.sii-ui .siii-shared-metric-copy>span{font-size:12px;line-height:1.3;overflow-wrap:break-word}
+.sii-app.sii-ui .siii-shared-metric-copy>strong{
+ font-size:clamp(20px,1.75vw,27px);font-weight:650;letter-spacing:-.025em;line-height:1.2;overflow-wrap:anywhere
+}
+.sii-app.sii-ui .siii-shared-metric-copy>small{font-size:11px;line-height:1.3;opacity:.83;overflow-wrap:anywhere}
+@media(max-width:660px){.sii-app.sii-ui .siii-shared-glass-metric{grid-template-columns:minmax(0,1fr);align-content:start;gap:7px;min-height:135px}.sii-app.sii-ui .siii-shared-glass-metric>.siii-overview-metric-icon{align-self:start}}
+@media(prefers-reduced-motion:no-preference){.sii-app.sii-ui .siii-overview-track rect{transition:width .2s ease}}
+
+
+/*
+ * Smoked Glass shared workspaces. A single material class on the existing
+ * academic/financial/administrative surfaces; business features are untouched.
+ * Form controls remain opaque enough for legibility and keyboard focus.
+ */
+.sii-app.sii-ui .siii-glass-workspace{min-width:0;max-width:100%;isolation:isolate}
+.sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-panel,.sii-catalog-summary,.sii-workspace-toolbar,
+ .sii-catalog-toolbar,.sii-workspace-filters,.sii-catalog-form,
+ .sii-workspace-tabs,.sii-catalog-tabs,
+ .sii-catalog-create,.sii-workspace-drawer,.sii-services-list
+){
+ --glass-tint:rgba(123,111,103,.27);
+ border-color:transparent;
+ box-shadow:none;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+ background:var(--sii-glass-panel)!important;
+ border:0!important;border-radius:17px!important;
+ box-shadow:none!important;
+ backdrop-filter:blur(12px) saturate(106%);
+ -webkit-backdrop-filter:blur(12px) saturate(106%);
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar,.sii-workspace-toolbar){
+ gap:12px;min-width:0;align-items:center;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar h2,.sii-workspace-toolbar h2){
+ font-size:clamp(16px,1.5vw,21px);font-weight:650;letter-spacing:-.025em;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-workspace-filters,.sii-catalog-form){
+ min-width:0;border-radius:14px;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]){
+ background:rgba(38,33,31,.35)!important;
+ border:1px solid rgba(242,226,215,.16)!important;
+ box-shadow:none!important;min-width:0;max-width:100%;
+ color:#fff6ee;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{color:#dccfc5;opacity:.78}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-panel,.sii-catalog-summary,.sii-catalog-create
+){background:rgba(255,250,243,.60)!important;color:#302b29}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]
+){background:rgba(255,254,251,.72)!important;border-color:rgba(78,55,43,.2)!important;color:#342a25}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{
+ color:#68564e;opacity:1;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table,.sii-workspace table){
+ min-width:0;border-collapse:separate;border-spacing:0;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table th,.sii-workspace th){
+ background:rgba(245,232,219,.055);
+ border-bottom:1px solid rgba(245,232,219,.13);
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table td,.sii-workspace td){
+ border-bottom:1px solid rgba(245,232,219,.08);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table th,.sii-workspace th){
+ background:rgba(72,52,42,.06);border-bottom-color:rgba(72,52,42,.13)
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table td,.sii-workspace td){
+ border-bottom-color:rgba(72,52,42,.1)
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tabs,.sii-workspace-tabs){
+ background:rgba(121,106,95,.13)!important;border:0!important;box-shadow:none!important;border-radius:13px;max-width:100%;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab--active,[data-state=active]){
+ background:rgba(225,206,193,.18)!important;box-shadow:none!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab--active,[data-state=active]){
+ background:rgba(91,70,58,.15)!important;color:#302b29!important
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-tab,.sii-workspace-tabs [role=tab]):focus-visible{
+ outline:2px solid hsl(var(--ring))!important;outline-offset:2px;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-layout,.sii-workspace-grid,.sii-services-list){
+ min-width:0;max-width:100%;
+}
+@media(max-width:760px){
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+ }
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-layout,.sii-workspace-grid){max-width:100%}
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar,.sii-workspace-toolbar){flex-wrap:wrap}
+}
+@media(prefers-contrast:more),(forced-colors:active){
+ .sii-app.sii-ui .siii-glass-workspace .sii-panel{background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important;backdrop-filter:none!important}
+}
+
+
+/* Institutional modules use one surface system, not module-specific palettes. */
+.sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-administration-summary,.sii-administration-links,.sii-administration-card,
+ .sii-calendar-panel,.sii-operation-table,.sii-administration-discovery
+){
+ background:var(--sii-glass-panel)!important;
+ border:0!important;
+ border-radius:17px!important;
+ box-shadow:none!important;
+ backdrop-filter:blur(11px) saturate(106%);
+ -webkit-backdrop-filter:blur(11px) saturate(106%);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-administration-summary,.sii-administration-links,.sii-administration-card,
+ .sii-calendar-panel,.sii-operation-table
+){background:rgba(255,250,243,.6)!important;color:#302b29}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-administration-links,.sii-workspace-section-nav){
+ gap:10px;border:0;max-width:100%;min-width:0;
+}
+.sii-app.sii-ui .siii-glass-workspace .sii-administration-links a{
+ background:rgba(222,204,191,.09);border:0;box-shadow:none;
+ border-radius:12px;min-height:45px;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-administration-links a{
+ background:rgba(81,62,52,.065);color:#302b29
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-workspace-grid,.sii-catalog-layout,.sii-workspace-tabs){
+ min-width:0;max-width:100%;
+}
+.sii-app.sii-ui .siii-glass-workspace .sii-panel{
+ min-width:0;max-width:100%;overflow-wrap:break-word;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-small-count,.sii-tab-count){
+ background:rgba(255,255,255,.09);color:inherit;
+ border:0;border-radius:999px;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-small-count,.sii-tab-count){
+ background:rgba(70,51,39,.07);color:#3a302b;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-workspace-toolbar,.sii-catalog-toolbar,.sii-section-kicker){
+ color:inherit;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-info-banner,.sii-catalog-error,.sii-catalog-notice){
+ border-radius:12px;
+}
+@media(max-width:680px){
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-workspace-tabs,.sii-catalog-tabs){
+  max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;
+ }
+ .sii-app.sii-ui .siii-glass-workspace .sii-panel{padding-inline:clamp(12px,3vw,20px)}
+}
+
+
+/* Original lightweight architectural artwork; static, intentionally defocused.
+   The foreground panels remain real UI, never a rasterized dashboard. */
+.sii-app.sii-ui{
+ background:linear-gradient(108deg,rgba(44,39,38,.72) 0%,rgba(49,45,44,.42) 51%,rgba(46,43,47,.70) 100%),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui{
+ background:linear-gradient(108deg,rgba(244,235,223,.81),rgba(229,215,204,.67) 52%,rgba(239,226,216,.85)),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;
+}
+@media(max-width:768px){
+ .sii-app.sii-ui,html[data-sii-theme="light"] .sii-app.sii-ui{background-attachment:scroll!important}
+}
+@media(forced-colors:active){
+ .sii-app.sii-ui,html[data-sii-theme="light"] .sii-app.sii-ui{background:Canvas!important}
+}
+
+
+/* Form controls stay readable in native OS popovers and reduced-transparency modes. */
+.sii-app.sii-ui .siii-glass-workspace select option,
+.sii-app.sii-ui .siii-glass-workspace select optgroup{color:#312a27;background:#f1e9e1}
+.sii-app.sii-ui .siii-glass-workspace :is(input,select,textarea):disabled{opacity:.65;cursor:not-allowed}
+.sii-app.sii-ui .siii-glass-workspace :is(input,select,textarea):focus-visible{
+ outline:2px solid hsl(var(--ring))!important;outline-offset:2px;
+}
+@media(prefers-reduced-transparency:reduce){
+ .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#514944!important;
+ }
+ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
+  background:#f5eee5!important;color:#312a27!important;
+ }
+}
+
+
+/* Institution landing and directorate/coordinator overview share the same glass grammar. */
+.sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
+){
+ background:var(--sii-glass-panel)!important;
+ border:0!important;border-radius:17px!important;box-shadow:none!important;
+ backdrop-filter:blur(12px) saturate(106%);
+ -webkit-backdrop-filter:blur(12px) saturate(106%);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
+ .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
+){background:rgba(255,250,243,.6)!important;color:#302b29}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside) h2{
+ font-weight:650;letter-spacing:-.025em
+}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-item{border-radius:11px;padding-inline:10px}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(255,255,255,.05)}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(76,55,45,.07)}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-monogram{box-shadow:none;border-radius:12px}
+@media(max-width:760px){.sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel){backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}}
+
+
+/* Shared responsive metric bands for admissions, finance and personal role portals. */
+.sii-app.sii-ui .siii-glass-metrics-grid{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));
+ gap:12px;min-width:0;max-width:100%;
+}
+.sii-app.sii-ui .siii-glass-metrics-grid .siii-shared-glass-metric{
+ min-width:0;max-width:100%;height:100%;
+}
+@media(max-width:540px){
+ .sii-app.sii-ui .siii-glass-metrics-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ }
+ .sii-app.sii-ui .siii-glass-metrics-grid .siii-shared-glass-metric{min-height:118px}
+}
+@media(max-width:340px){
+ .sii-app.sii-ui :is(.siii-finance-metrics,.siii-admissions-metrics){
+  grid-template-columns:minmax(0,1fr);
+ }
+}
+
+
+/* Unified institutional matte surfaces. This rule intentionally has greater
+   specificity than legacy .sii-panel shadows and edges; avoid glowing frames. */
+.sii-app.sii-ui .siii-glass-workspace .sii-panel{
+ background:var(--sii-glass-panel)!important;
+ border:0!important;
+ border-radius:17px!important;
+ box-shadow:none!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-panel{
+ background:rgba(255,250,243,.6)!important;color:#302b29;
+}
+@media(forced-colors:active),(prefers-contrast:more){
+ .sii-app.sii-ui .siii-glass-workspace .sii-panel{
+  border:1px solid CanvasText!important;background:Canvas!important;color:CanvasText!important;
+  box-shadow:none!important;
+ }
+}
+
+/* Accessible student accordion and real announcement navigation. */
+.sii-app.sii-ui .siii-sidebar-disclosure{display:flex;width:100%;align-items:center;justify-content:space-between;background:transparent;border:0;color:inherit;text-align:left;cursor:pointer}
+.sii-app.sii-ui .siii-sidebar-disclosure svg{width:14px;height:14px;transition:transform .18s ease}
+.sii-app.sii-ui .siii-sidebar-disclosure svg.siii-disclosure-collapsed{transform:rotate(-90deg)}
+.sii-app.sii-ui .siii-sidebar-disclosure:focus-visible{outline:2px solid hsl(var(--sidebar-ring));outline-offset:2px}
+.sii-app.sii-ui .siii-student-sidebar-group [data-sidebar="group-content"][hidden]{display:none!important}
+.sii-app.sii-ui .siii-topbar-notices{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:12px;background:rgba(208,192,179,.12);color:inherit}
+.sii-app.sii-ui .siii-topbar-notices:hover{background:rgba(208,192,179,.23)}
+.sii-app.sii-ui .siii-topbar-notices:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-topbar-notices{background:rgba(93,75,60,.09)}
+@media(prefers-reduced-motion:reduce){.sii-app.sii-ui .siii-sidebar-disclosure svg{transition:none}}
+
+/* Student first viewport follows the approved screenshot. Navigation still works
+   below the dashboard; no duplicated intro or identity card pushes the hero down. */
+.sii-app.sii-ui .siii-student-home-shell{
+ display:flex;flex-direction:column;gap:0;min-width:0;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-visually-hidden{
+ position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;
+ clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;
+ margin:-1px!important;padding:0!important;border:0!important;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs{
+ order:0;display:flex;flex-direction:column;gap:0;min-width:0;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tabpanel"]{
+ order:0;margin-top:0;min-width:0;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tablist"]{
+ order:1;margin-top:20px;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>.siii-student-identity-card{
+ order:2;margin-top:14px;background:var(--sii-glass-panel)!important;border:0!important;box-shadow:none!important;
+}
+.sii-app.sii-ui .siii-student-home-shell>.siii-student-utility-links{
+ order:1;margin-top:15px;
+}
+.sii-app.sii-ui .siii-student-home-shell>p:last-child{order:3}
+.sii-app.sii-ui .siii-overview-calendar,
+.sii-app.sii-ui #avisos{scroll-margin-top:85px}
+@media(max-width:680px){
+ .sii-app.sii-ui .siii-student-home-shell>.siii-home-tabs>[role="tablist"]{
+  margin-top:14px;max-width:100%;overflow-x:auto;
+ }
+}
+

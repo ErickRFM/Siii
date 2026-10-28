@@ -204,3 +204,6 @@
 @media (prefers-contrast:more) {
   .sii-auth .sii-auth-card {box-shadow:none;border:2px solid var(--sii-text)}
 }
+
+/* Cream mode tokens for public/auth pages remain unchanged; the authenticated
+   Smoked Glass design is scoped in sii-glass.css to prevent leaking into login. */

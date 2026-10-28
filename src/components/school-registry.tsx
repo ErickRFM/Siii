@@ -115,7 +115,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   finally{setSaving(false)}
  }
  const filtered=rows.filter(r=>[r.firstName,r.lastName,r.enrollmentNumber,r.employeeNumber].join(' ').toLowerCase().includes(search.toLowerCase()));
- return <div className="sii-academic sii-workspace sii-workspace--registry">
+ return <div className="sii-academic sii-workspace sii-workspace--registry siii-glass-workspace">
  {confirmation}
   <div className="sii-catalog-tabs" role="tablist" aria-label="Control escolar">
    {(['students','teachers'] as Kind[]).map(k=><Button variant="ghost" type="button" role="tab" key={k} id={"registry-tab-"+k} aria-controls="registry-panel" tabIndex={kind===k?0:-1} onKeyDown={e=>navigateTabs(e,k)} aria-selected={kind===k} disabled={saving||loading||!!editing} className={kind===k?'sii-catalog-tab sii-catalog-tab--active':'sii-catalog-tab'} onClick={()=>{setKind(k);setSearch('');setError('');setNotice('')}}>{k==='students'?'Estudiantes':'Docentes'}</Button>)}
