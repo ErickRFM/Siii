@@ -26,6 +26,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
  const [selection,setSelection]=useState<{id?:string;mode:'roster'|'capture'|'results'}>({mode:'capture'});
  const {snapshot,loading,error,updatedAt,refresh}=usePersonalSnapshot(institutionId,'teacher',actorId,'groups');
  const profile=snapshot?.profile,groups=snapshot?.groups??[],permissions=useInstitutionCapabilities();
+ const incompleteGroups=snapshot?.truncatedResources?.groups===true;
  const canEvaluate=profile?.status==='active'&&hasAnyCapability(permissions.data,'grades.manage');
  const terms=Array.from(new Map(groups.map(group=>[group.termId,group.termName])).entries());
  const inTerm=groups.filter(group=>!term||group.termId===term),visible=inTerm.filter(group=>!state||group.sectionStatus===state);
@@ -33,6 +34,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
  return <div className="sii-workspace siii-glass-workspace sii-teacher-portal sii-glass-role min-w-0 space-y-6">
   <SiiPageIntro eyebrow="PORTAL DOCENTE" title="Mi docencia" description={institutionName} actions={<Button variant="outline" disabled={loading} onClick={()=>refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
   <nav aria-label="Contexto del portal" className="flex flex-wrap gap-4 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link><Link className="font-semibold text-primary underline" href={{pathname:`/dashboard/institutions/${institutionId}/grading/corrections`}}>Mis rectificaciones</Link></nav>
+  {incompleteGroups&&<p role="status" className="text-sm text-muted-foreground">La consulta de grupos está incompleta. Los indicadores totales se ocultan hasta recuperar todo el registro.</p>}
   {error&&<div role="alert" className="sii-catalog-error">{error}<Button variant="outline" onClick={()=>refresh()}>Reintentar consulta</Button></div>}
   {loading&&(snapshot?<p role="status">Actualizando información institucional…</p>:<SiiSkeleton label="Consultando tu información docente"/>)}
   {snapshot&&!profile&&<SiiEmptyView icon="registry" title="Perfil docente aún sin vincular" description="Tu cuenta tiene acceso al portal. Solicita a la institución vincularla con tu registro docente oficial. No puedes consultar grupos ni calificaciones hasta completar el vínculo."/>}
@@ -46,7 +48,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
       ['Grupos asignados',inTerm.length],
       ['Grupos con captura habilitada',inTerm.filter(group=>!group.published&&group.sectionStatus==='open'&&group.termStatus==='active').length],
       ['Grupos con resultados publicados',inTerm.filter(group=>group.published).length]
-     ].map(([label,count],index)=><SiiiGlassMetric key={label} label={String(label)} value={count} tone={index===0?'amber':index===1?'blue':'green'} className="siii-teacher-metric"/>)}</SiiiGlassMetricsRow>
+     ].map(([label,count],index)=><SiiiGlassMetric key={label} label={String(label)} value={incompleteGroups?'—':count} tone={index===0?'amber':index===1?'blue':'green'} className="siii-teacher-metric"/>)}</SiiiGlassMetricsRow>
      <Card className="siii-teacher-work siii-glass-surface"><CardHeader><CardTitle role="heading" aria-level={2}>Trabajo académico</CardTitle></CardHeader><CardContent className="space-y-4">{inTerm.length?inTerm.map(group=><article key={group.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-4 last:border-0"><div className="min-w-0"><h3 className="break-words font-semibold">{group.courseName} · {group.sectionCode}</h3><p className="text-sm text-muted-foreground">{group.termName} · {evaluationState(group)}</p></div>{canEvaluate&&group.sectionStatus!=='archived'&&<Button variant="outline" onClick={()=>open(group.id,group.published?'results':'capture')}>{group.published?'Consultar resultados':'Abrir evaluación'}<span className="sr-only"> de {group.sectionCode}</span></Button>}</article>):<SiiEmptyView icon="grades" title="Sin asignaciones" description="No tienes grupos oficialmente asignados en este periodo. Solicita a coordinación revisar tu asignación."/>}<Button variant="outline" onClick={()=>setView('groups')}>Consultar mis grupos</Button></CardContent></Card>
      <p className="text-sm text-muted-foreground">Las notas guardadas en captura son borradores privados hasta la publicación. Las solicitudes de rectificación requieren un procedimiento autorizado por la institución.</p>
     </TabsContent>
