@@ -75,7 +75,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <div className="siii-overview-progress-body">
      <div className="siii-overview-progress-summary">
       <SiiiProgressRing value={!m.incomplete.courses&&!m.incomplete.grades&&profile?m.publicationRatio:null} label="Proporción de inscripciones consultadas con calificación publicada" size={140}/>
-      <div><small>Créditos con nota publicada</small><strong>{!profile?'—':m.incomplete.courses||m.incomplete.grades?'—':m.creditsWithPublishedGrade}</strong><small>{profile?`${m.publishedEnrolledSections} de ${m.enrolledSections} inscripciones consultadas`:'Sin datos vinculados'}</small></div>
+      <div><small>Créditos con nota publicada</small><strong>{!profile?'—':m.incomplete.courses||m.incomplete.grades?'—':m.creditsWithPublishedGrade}</strong><small>{!profile?'Sin datos vinculados':m.incomplete.courses||m.incomplete.grades?'Datos incompletos':`${m.publishedEnrolledSections} de ${m.enrolledSections} inscripciones consultadas`}</small></div>
      </div>
      <div className="siii-overview-term-bars">
       <p>Resultados publicados · escala de 0 a 10</p>

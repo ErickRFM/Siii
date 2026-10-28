@@ -30,7 +30,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
  const canEvaluate=profile?.status==='active'&&hasAnyCapability(permissions.data,'grades.manage');
  useEffect(()=>{
   const sections:Record<string,View>={inicio:'home',grupos:'groups',evaluaciones:'evaluations',perfil:'profile'};
-  const apply=(hash:string)=>{const next=sections[hash.replace(/^#/,'')];if(next&&(next!=='evaluations'||canEvaluate))setView(next)};
+  const apply=(hash:string)=>{const next=sections[hash.replace(/^#/,'')||'inicio'];if(next&&(next!=='evaluations'||canEvaluate))setView(next)};
   const fromHash=()=>apply(window.location.hash);const onNavigate=(event:Event)=>apply((event as CustomEvent<string>).detail);
   fromHash();window.addEventListener('hashchange',fromHash);window.addEventListener('siii:teacher-navigation',onNavigate);
   return()=>{window.removeEventListener('hashchange',fromHash);window.removeEventListener('siii:teacher-navigation',onNavigate)};

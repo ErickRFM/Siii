@@ -44,7 +44,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   const apply=(raw:string)=>{
    const destination=decodeURIComponent(raw.replace(/^#/,''));
    const map:Record<string,{section:string;academic?:PersonalView}>={
-    inicio:{section:'home'},inscripciones:{section:'academic',academic:'courses'},
+    '':{section:'home'},inicio:{section:'home'},inscripciones:{section:'academic',academic:'courses'},
     calificaciones:{section:'academic',academic:'grades'},historial:{section:'academic',academic:'grades'},
     docentes:{section:'academic',academic:'teachers'},
     finanzas:{section:'orders'},ordenes:{section:'orders'},comprobantes:{section:'orders'},tramites:{section:'services'},solicitudes:{section:'services'},documentos:{section:'services'},avisos:{section:'home'},perfil:{section:'profile'}

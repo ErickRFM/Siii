@@ -64,6 +64,15 @@ test('personal first paint defaults to the approved dark theme and respects an e
  await page.reload();await expect(page.locator('html')).toHaveAttribute('data-sii-theme','light');
 });
 
+test('browser back restores the personal home after navigating to a section',async({page})=>{
+ for(const [kind,actor,label,link]of [['student',f.student,'Académico','Carga académica'],['teacher',f.teacher,'Mis grupos','Mis grupos']] as const){
+  await login(page,actor.username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${kind}$`));
+  const nav=page.getByRole('navigation',{name:'Navegación institucional',exact:true});await expect(nav.getByRole('link',{name:link,exact:true})).not.toHaveAttribute('aria-disabled','true');
+  await personalNavigate(page,label);await expect(page).toHaveURL(/#(?:inscripciones|grupos)$/);await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${kind}$`));await expect(page.locator(kind==='student'?'.siii-student-dashboard':'.siii-teacher-dashboard')).toBeVisible();
+ }
+});
+
 for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page})=>{
  test.setTimeout(120000);await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
  await login(page,f[role].username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${role}`));

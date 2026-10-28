@@ -26,3 +26,10 @@ it('shows elapsed publication time only for a valid, non-future institutional no
  const clock=vi.spyOn(Date,'now').mockReturnValue(Date.parse('2026-10-26T18:00:00Z'));
  try{const html=renderToStaticMarkup(<StudentGlassOverview snapshot={snapshot} profile={profile} institutionName="Institución sintética" onNavigate={()=>{}} onRefresh={()=>{}} refreshing={false}/>);expect(html).toContain('hace 1 h');expect((html.match(/<time /g)||[])).toHaveLength(1)}finally{clock.mockRestore()}
 });
+
+it('does not display a complete-looking enrollment count when the collection is truncated',()=>{
+ const profile={id:'student',firstName:'Estudiante',lastName:'Sintético',status:'active',institutionalEmail:null,verifiedEmail:null,timeZone:'UTC'};
+ const snapshot:PersonalSnapshot={profile,courses:[],teachers:[],schedule:[],grades:[],orders:[],payments:[],groups:[],requests:[],pendingRequests:[],requestHistory:[],announcements:[],truncatedResources:{courses:true}};
+ const html=renderToStaticMarkup(<StudentGlassOverview snapshot={snapshot} profile={profile} institutionName="Institución sintética" onNavigate={()=>{}} onRefresh={()=>{}} refreshing={false}/>);
+ expect(html).toContain('Datos incompletos');expect(html).not.toContain('0 de 0 inscripciones consultadas');
+});
