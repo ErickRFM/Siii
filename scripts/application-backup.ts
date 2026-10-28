@@ -128,7 +128,7 @@ export function buildApplicationBackupSql({plan,publicKey,recipientKeyId}:{plan:
  if(!/^[A-Fa-f0-9]{16}$/.test(recipientKeyId))fail('BACKUP_RECIPIENT_INVALID');
  const cryptoSchema=plan.pgcrypto_schema;
  if(cryptoSchema!=='public'&&cryptoSchema!=='extensions')fail('BACKUP_CRYPTO_SCHEMA_INVALID');
- const crypto=ident(cryptoSchema),metadata={signature:plan.signature,tables:plan.tables,ledger:plan.ledger,release_profile:plan.release_profile,release_appendix:plan.release_appendix,pgcrypto_schema:plan.pgcrypto_schema,unsupported:plan.unsupported};
+ const crypto=ident(cryptoSchema??fail('BACKUP_CRYPTO_SCHEMA_INVALID')),metadata={signature:plan.signature,tables:plan.tables,ledger:plan.ledger,release_profile:plan.release_profile,release_appendix:plan.release_appendix,pgcrypto_schema:plan.pgcrypto_schema,unsupported:plan.unsupported};
  return `BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
  SET LOCAL timezone='UTC';
  SET LOCAL search_path=pg_catalog,public;
