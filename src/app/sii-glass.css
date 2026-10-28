@@ -819,3 +819,22 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institut
   grid-template-columns:minmax(0,1fr);
  }
 }
+
+
+/* Unified institutional matte surfaces. This rule intentionally has greater
+   specificity than legacy .sii-panel shadows and edges; avoid glowing frames. */
+.sii-app.sii-ui .siii-glass-workspace .sii-panel{
+ background:var(--sii-glass-panel)!important;
+ border:0!important;
+ border-radius:17px!important;
+ box-shadow:none!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-panel{
+ background:rgba(255,250,243,.6)!important;color:#302b29;
+}
+@media(forced-colors:active),(prefers-contrast:more){
+ .sii-app.sii-ui .siii-glass-workspace .sii-panel{
+  border:1px solid CanvasText!important;background:Canvas!important;color:CanvasText!important;
+  box-shadow:none!important;
+ }
+}
