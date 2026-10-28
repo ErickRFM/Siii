@@ -44,6 +44,8 @@ jobs:
         run: npm rebuild argon2 esbuild
       - name: Lockfile integrity
         run: git diff --exit-code -- package-lock.json
+      - name: CSS source usage audit (read-only)
+        run: node scripts/audit-css.mjs
       - name: Lint
         run: npm run lint
       - name: Typecheck
