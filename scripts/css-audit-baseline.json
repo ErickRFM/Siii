@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-28T05:05:04.488Z",
-  "totalBytes": 189596,
+  "generatedAt": "2026-10-28T05:06:10.995Z",
+  "totalBytes": 189604,
   "totalImportant": 210,
   "totalDup": 339,
   "files": [
@@ -24,7 +24,7 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 53855,
+      "bytes": 53863,
       "rules": 344,
       "classes": 142,
       "orphanCandidates": 0,
