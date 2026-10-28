@@ -97,7 +97,6 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  }
  const crumb=personal.find(module=>module.id===active)?.label??(activeModule?activeModule.label:active==='overview'?'Inicio':active==='security'?'Seguridad':active==='academic'?'Catálogo académico':active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución');
  return <>
-  {personalShell&&<div className="siii-personal-backdrop" aria-hidden="true"/>}
   <Sidebar collapsible="icon" className={'border-sidebar-border bg-sidebar'+(personalShell?' siii-personal-rail':'')}>
    <nav aria-label="Navegación institucional" className="flex h-full min-h-0 flex-col">
    {personalShell?<SiiiPersonalNavigation role={personalRole} institutionId={institutionId} institutionName={institutionName} allowed={Boolean(data&&!data.restricted&&personal.some(module=>module.id===personalRole))}/>:<>

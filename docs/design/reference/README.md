@@ -12,6 +12,6 @@ Imagen aprobada: `siii-glass-approved.png`
 
 ## Recursos de implementación
 
-- `public/visuals/siii-campus-reference.png`: fondo decorativo reconstruido con `image_gen` a partir de esta referencia. Instrucción: retirar toda la interfaz, textos e iconos, conservar encuadre y paleta del campus desenfocado. No contiene controles ni datos de la aplicación; no es el original del fondo y su reconstrucción sigue siendo una diferencia revisable.
+- Por indicación del usuario se omite temporalmente la fotografía de fondo; el dashboard usa un fondo neutro. La imagen aprobada permanece como referencia inmutable.
 - `public/fonts/siii-inter.woff2`: Inter Variable v4.1, fuente local para estabilizar capturas; licencia en `public/fonts/INTER-LICENSE.txt`, procedencia [Inter v4.1](https://github.com/rsms/inter/tree/v4.1).
 - `scripts/compare-approved-reference.mjs`: verifica el hash inmutable, exige dimensiones idénticas y genera diff, overlay y métricas. El porcentaje de píxeles distintos no se presenta como porcentaje de fidelidad. El umbral de comparación completa no se modifica para aceptar una captura nueva.
