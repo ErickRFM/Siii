@@ -4,4 +4,5 @@ Estas capturas se revisaron a partir de sesiones y datos sintéticos aislados. L
 
 La referencia original de composición sigue siendo `docs/design/reference/siii-glass-approved.png` y conserva su comparador independiente. La fotografía de campus continúa omitida por indicación del usuario.
 
-Las cuatro referencias móviles con sufijo `-linux` se revisaron desde la ejecución real de GitHub Actions: su altura difiere de Windows por la composición tipográfica. Se comparan sin recortes y con el mismo umbral; las demás capturas usan la referencia compartida.
+Las referencias con sufijo `-linux` se revisaron desde la ejecución real de GitHub Actions: su altura puede diferir de Windows por la composición tipográfica. Se comparan sin recortes y con el mismo umbral; las demás capturas usan la referencia compartida.
+
