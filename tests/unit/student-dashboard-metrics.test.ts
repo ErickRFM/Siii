@@ -18,6 +18,10 @@ describe('student dashboard metrics',()=>{
   expect(m.publicationRatio).toBe(50);
   expect(m.creditsWithPublishedGrade).toBe(10);
  });
+ it('reports truncated collections to prevent incomplete dashboard totals',()=>{
+  const m=institutionalStudentSummary({...empty,truncatedResources:{grades:true,courses:true,orders:true,pendingRequests:true}});
+  expect(m.incomplete).toEqual({grades:true,courses:true,orders:true,pendingRequests:true,announcements:false});
+ });
  it('does not aggregate incomparable currencies',()=>{
   const m=institutionalStudentSummary({...empty,orders:[{id:'a',orderNumber:'1',feeTypeName:'Fee',totalAmountCents:1000,paidAmountCents:250,currency:'MXN',status:'pending',dueDate:null},{id:'b',orderNumber:'2',feeTypeName:'Fee2',totalAmountCents:500,paidAmountCents:0,currency:'USD',status:'pending',dueDate:null}]});
   expect(m.currency).toBeNull();

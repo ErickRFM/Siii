@@ -55,6 +55,21 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
  const personal=data&&!data.restricted?personalModuleLinks(data.capabilities,data.roles,data.scopedCapabilities):[];
  const personalOnly=Boolean(data&&hasOnlyPersonalRoles(data.roles));
+ const [studentSection,setStudentSection]=useState('inicio');
+ useEffect(()=>{
+  if(active!=='student')return;
+  const fromHash=()=>setStudentSection(window.location.hash.slice(1)||'inicio');
+  const onSelected=(event:Event)=>setStudentSection((event as CustomEvent<string>).detail||'inicio');
+  fromHash();
+  window.addEventListener('hashchange',fromHash);
+  window.addEventListener('siii:student-navigation',onSelected);
+  window.addEventListener('siii:student-active-section',onSelected);
+  return()=>{
+   window.removeEventListener('hashchange',fromHash);
+   window.removeEventListener('siii:student-navigation',onSelected);
+   window.removeEventListener('siii:student-active-section',onSelected);
+  };
+ },[active]);
  const activeModule=allAcademicModuleLinks.find(module=>module.id===active);
  const academicAvailable=['programs','courses','curricula','terms','campuses'].some(resource=>hasInstitutionCapability(data,`${resource}.read`));
  const quickLinks:SiiQuickLink[]=[
@@ -90,14 +105,14 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     {institutionId&&personal.length>0&&<SidebarGroup><SidebarGroupLabel>Mi espacio</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{personal.map(module=><ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}`} label={module.label} icon={module.icon} active={active===module.id}/>)}</SidebarMenu></SidebarGroupContent></SidebarGroup>}
     {institutionId&&personal.some(item=>item.id==='student')&&<SidebarGroup className="siii-student-sidebar-group group-data-[collapsible=icon]:hidden">
       <StudentSidebarDisclosure label="Académico"><SidebarMenu>
-       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inicio'} label="Inicio estudiantil" icon="home" active={false}/>
-       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inscripciones'} label="Mis inscripciones" icon="book" active={false}/>
-       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#calificaciones'} label="Calificaciones e historial" icon="grades" active={false}/>
-       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#docentes'} label="Mis docentes" icon="users" active={false}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inicio'} label="Inicio estudiantil" icon="home" active={active==='student'&&studentSection==='inicio'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inscripciones'} label="Mis inscripciones" icon="book" active={active==='student'&&studentSection==='inscripciones'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#calificaciones'} label="Calificaciones e historial" icon="grades" active={active==='student'&&studentSection==='calificaciones'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#docentes'} label="Mis docentes" icon="users" active={active==='student'&&studentSection==='docentes'}/>
       </SidebarMenu></StudentSidebarDisclosure>
       <StudentSidebarDisclosure label="Financiero y servicios"><SidebarMenu>
-       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#finanzas'} label="Estado de cuenta" icon="registry" active={false}/>
-       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#tramites'} label="Mis trámites" icon="services" active={false}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#finanzas'} label="Estado de cuenta" icon="registry" active={active==='student'&&studentSection==='finanzas'}/>
+       <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#tramites'} label="Mis trámites" icon="services" active={active==='student'&&studentSection==='tramites'}/>
       </SidebarMenu></StudentSidebarDisclosure>
     </SidebarGroup>}
     <SidebarGroup>

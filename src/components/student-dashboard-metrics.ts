@@ -2,6 +2,13 @@ import type {PersonalSnapshot} from './use-personal-snapshot';
 
 /** A dashboard must not confuse partial published grades with official transcript KPIs. */
 export function institutionalStudentSummary(snapshot:PersonalSnapshot){
+ const incomplete={
+  grades:snapshot.truncatedResources?.grades===true,
+  courses:snapshot.truncatedResources?.courses===true,
+  orders:snapshot.truncatedResources?.orders===true,
+  pendingRequests:snapshot.truncatedResources?.pendingRequests===true,
+  announcements:snapshot.truncatedResources?.announcements===true
+ };
  const grades=new Map<string,(typeof snapshot.grades)[number]>();
  for(const row of snapshot.grades){
   const key=row.sectionId||row.id;
@@ -23,7 +30,7 @@ export function institutionalStudentSummary(snapshot:PersonalSnapshot){
  const byTerm=new Map<string,number>();
  for(const row of published)byTerm.set(row.termName,(byTerm.get(row.termName)||0)+1);
  return {
-  published,gradeMean,creditsWithPublishedGrade,
+  incomplete,published,gradeMean,creditsWithPublishedGrade,
   enrolledSections:available,
   publishedEnrolledSections:gradedEnrolled,
   publicationRatio:available?100*gradedEnrolled/available:null,

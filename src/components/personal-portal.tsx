@@ -60,6 +60,10 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
  },[]);
 
  const view:PersonalView=section==='academic'?academicView:section as PersonalView;
+ useEffect(()=>{
+  const map:Partial<Record<PersonalView,string>>={home:'inicio',courses:'inscripciones',grades:'calificaciones',teachers:'docentes',orders:'finanzas',services:'tramites',profile:'perfil'};
+  window.dispatchEvent(new CustomEvent('siii:student-active-section',{detail:map[view]||'inicio'}));
+ },[view]);
  const {snapshot,loading,error,updatedAt,refresh,authority,accessChanged,retire}=usePersonalSnapshot(institutionId,'student',actorId,view),profile=snapshot?.profile;
  const permissions=useInstitutionCapabilities();
  const [requestDraft,setRequestDraft]=useState<{authority:string;value:PersonalRequestDraft}|null>(null);

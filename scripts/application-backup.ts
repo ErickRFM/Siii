@@ -2,9 +2,8 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {readMigrationFiles} from 'drizzle-orm/migrator';
 import type pg from 'pg';
-import {SCHEMA_SIGNATURE_SQL,schemaSignature} from '../db/schema-signature';
+import {SCHEMA_SIGNATURE_SQL} from '../db/schema-signature';
 import {readReleaseMigrations,releaseAppendixHash,releaseDefinitionHash} from '../db/release-profile';
-import {assertLocalRecoveryEndpoint} from './baseline-recovery';
 
 const FORMAT='SIII_APPLICATION_LOGICAL_BACKUP_V2';
 const PROJECTS=['kkjzbqsaummyralqjqrb','vsnrbjexusidlvhkhmqg'];
@@ -127,8 +126,9 @@ export function buildApplicationBackupSql({plan,publicKey,recipientKeyId}:{plan:
  checkedPlan(plan);
  if(!/^-----BEGIN PGP PUBLIC KEY BLOCK-----\r?\n[\s\S]+\r?\n-----END PGP PUBLIC KEY BLOCK-----\s*$/.test(publicKey)||publicKey.includes('PRIVATE KEY')||publicKey.includes('SECRET KEY')||publicKey.includes('\0'))fail('BACKUP_PUBLIC_KEY_REQUIRED');
  if(!/^[A-Fa-f0-9]{16}$/.test(recipientKeyId))fail('BACKUP_RECIPIENT_INVALID');
- if(!plan.pgcrypto_schema||!['public','extensions'].includes(plan.pgcrypto_schema))fail('BACKUP_CRYPTO_SCHEMA_INVALID');
- const crypto=ident(plan.pgcrypto_schema),metadata={signature:plan.signature,tables:plan.tables,ledger:plan.ledger,release_profile:plan.release_profile,release_appendix:plan.release_appendix,pgcrypto_schema:plan.pgcrypto_schema,unsupported:plan.unsupported};
+ const cryptoSchema=plan.pgcrypto_schema;
+ if(cryptoSchema!=='public'&&cryptoSchema!=='extensions')fail('BACKUP_CRYPTO_SCHEMA_INVALID');
+ const crypto=ident(cryptoSchema),metadata={signature:plan.signature,tables:plan.tables,ledger:plan.ledger,release_profile:plan.release_profile,release_appendix:plan.release_appendix,pgcrypto_schema:plan.pgcrypto_schema,unsupported:plan.unsupported};
  return `BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
  SET LOCAL timezone='UTC';
  SET LOCAL search_path=pg_catalog,public;

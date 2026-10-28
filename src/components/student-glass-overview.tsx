@@ -14,7 +14,8 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
  snapshot:PersonalSnapshot;profile:PersonalProfile;institutionName:string;onNavigate:Destination;onRefresh:()=>void;refreshing:boolean;
 }){
  const m=institutionalStudentSummary(snapshot);
- const outstandingLabel=m.currency?formatMoney(m.outstanding,m.currency):m.outstanding===0?'Sin cargos pendientes':'Ver desglose por moneda';
+ const partial=Object.values(m.incomplete).some(Boolean);
+ const outstandingLabel=m.incomplete.orders?'Datos incompletos':m.currency?formatMoney(m.outstanding,m.currency):m.outstanding===0?'Sin cargos pendientes':'Ver desglose por moneda';
  const deadlines=snapshot.orders.filter(o=>['pending','partially_paid'].includes(o.status)&&o.dueDate&&Number.isFinite(Date.parse(o.dueDate))&&Date.parse(o.dueDate)>=Date.now()-86400000).sort((a,b)=>Date.parse(a.dueDate!)-Date.parse(b.dueDate!)).slice(0,3);
  const quick=(label:string,section:string,academicView?:PersonalView)=><button className="siii-overview-quick" key={label} type="button" onClick={()=>onNavigate(section,academicView)}>{label}<ChevronRight size={15} aria-hidden="true"/></button>;
  return <div className="siii-student-dashboard">
@@ -30,11 +31,12 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     </div>
     <span className="siii-overview-watermark" aria-hidden="true"/>
    </header>
+   {partial&&<p role="status" className="siii-overview-empty">Parte de tu expediente supera los límites de consulta. Los indicadores afectados se ocultan para evitar cifras engañosas.</p>}
    <SiiiGlassMetricsRow className="siii-overview-metrics" aria-label="Resumen institucional">
-    <SiiiGlassMetric label="Promedio de notas publicadas" value={m.gradeMean===null?'—':m.gradeMean.toFixed(2)} description="No es el promedio oficial" icon={<BookOpen size={21}/>} tone="amber"/>
-    <SiiiGlassMetric label="Créditos con nota publicada" value={m.creditsWithPublishedGrade} description="El plan oficial no está disponible" icon={<GraduationCap size={21}/>} tone="blue"/>
+    <SiiiGlassMetric label="Promedio de notas publicadas" value={m.incomplete.grades||m.gradeMean===null?'—':m.gradeMean.toFixed(2)} description={m.incomplete.grades?'Consulta parcial de calificaciones':'No es el promedio oficial'} icon={<BookOpen size={21}/>} tone="amber"/>
+    <SiiiGlassMetric label="Créditos con nota publicada" value={m.incomplete.grades?'—':m.creditsWithPublishedGrade} description={m.incomplete.grades?'Consulta parcial de créditos':'El plan oficial no está disponible'} icon={<GraduationCap size={21}/>} tone="blue"/>
     <SiiiGlassMetric label="Cargos por liquidar" value={outstandingLabel} description={snapshot.orders.length?'Según el registro de Caja':'Sin movimientos registrados'} icon={<Wallet size={21}/>} tone="green"/>
-    <SiiiGlassMetric label="Trámites activos" value={m.pendingCount} description="Solicitudes en seguimiento" icon={<FileText size={21}/>} tone="terracotta"/>
+    <SiiiGlassMetric label="Trámites activos" value={m.incomplete.pendingRequests?'—':m.pendingCount} description={m.incomplete.pendingRequests?'Consulta parcial de trámites':'Solicitudes en seguimiento'} icon={<FileText size={21}/>} tone="terracotta"/>
    </SiiiGlassMetricsRow>
    <div className="siii-overview-detail-grid">
     <SiiiGlassPanel >
@@ -63,17 +65,17 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <SiiiGlassPanelHeading title="Mi progreso académico registrado" action={quick('Historial','academic','grades')}/>
     <div className="siii-overview-progress-body">
      <div className="siii-overview-progress-summary">
-      {m.publicationRatio!==null?<SiiiProgressRing value={m.publicationRatio} label="Proporción de inscripciones consultadas con calificación publicada" size={120}/>:<GraduationCap size={45} aria-hidden="true"/>}
-      <div><strong>{m.publishedEnrolledSections} de {m.enrolledSections}</strong><small>Inscripciones consultadas con nota publicada</small></div>
+      {!m.incomplete.courses&&!m.incomplete.grades&&m.publicationRatio!==null?<SiiiProgressRing value={m.publicationRatio} label="Proporción de inscripciones consultadas con calificación publicada" size={120}/>:<GraduationCap size={45} aria-hidden="true"/>}
+      <div><strong>{m.incomplete.courses||m.incomplete.grades?'Datos incompletos':m.publishedEnrolledSections+' de '+m.enrolledSections}</strong><small>Inscripciones consultadas con nota publicada</small></div>
      </div>
      <div className="siii-overview-term-bars">
       <p>Calificaciones publicadas por periodo</p>
-      {m.terms.map(term=><div className="siii-overview-term" key={term.name}>
+      {!m.incomplete.grades&&m.terms.map(term=><div className="siii-overview-term" key={term.name}>
        <span>{term.name}</span>
        <div className="siii-overview-track"><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect width={m.published.length?100*term.count/m.published.length:0} height="8" rx="4" fill="#8bc6ad"/></svg></div>
        <b>{term.count}</b>
       </div>)}
-      {!m.terms.length&&<p className="siii-overview-empty">No existen resultados publicados para graficar.</p>}
+      {(!m.terms.length||m.incomplete.grades)&&<p className="siii-overview-empty">{m.incomplete.grades?'La consulta de calificaciones está incompleta.':'No existen resultados publicados para graficar.'}</p>}
       <small>Estos indicadores describen los registros disponibles; no sustituyen el avance oficial del plan de estudios.</small>
      </div>
     </div>
