@@ -7,6 +7,7 @@ import {approvedReferenceFixture} from '../support/approved-reference-fixture';
 import AxeBuilder from '@axe-core/playwright';
 import {compareApprovedReference} from '../../scripts/compare-approved-reference.mjs';
 import {personalNavigate} from '../support/personal-navigation';
+import {expectVisualBaseline} from '../support/visual-baseline';
 
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()});
 let f:Awaited<ReturnType<typeof approvedReferenceFixture>>;
@@ -21,7 +22,7 @@ async function login(page:Page,username:string,theme:'light'|'dark'|null='dark')
 test('student entry and approved composition at exactly 1344 by 896',async({page})=>{
  const errors:string[]=[];page.on('pageerror',error=>{errors.push(error.stack??error.message);writeFileSync('.p0-local/fidelity/browser-errors.json',JSON.stringify(errors,null,2))});page.on('console',message=>{if(message.type()==='error'){errors.push(message.text());writeFileSync('.p0-local/fidelity/browser-errors.json',JSON.stringify(errors,null,2))}});
  await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
- await login(page,f.student.username);
+ await login(page,f.student.username,'light');
  if(process.env.SIII_FIDELITY_BASELINE!=='1')await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/student`),{timeout:30000});
  const initialUrl=page.url();
  if(process.env.SIII_FIDELITY_BASELINE==='1')await page.goto(`/dashboard/institutions/${f.tenant}/student`);
@@ -74,7 +75,50 @@ test('browser back restores the personal home after navigating to a section',asy
  }
 });
 
-for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page})=>{
+test('theme preference persists through login, section navigation, reload and logout',async({page})=>{
+ await page.setViewportSize({width:1366,height:900});await page.goto('/login');
+ await page.getByRole('button',{name:'Activar tema oscuro'}).click();
+ await page.getByLabel('Usuario institucional').fill(f.student.username);await page.getByLabel('Contraseña',{exact:true}).fill(portalPassword);await page.getByRole('button',{name:'Entrar al sistema'}).click();
+ await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/student`));await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');
+ await personalNavigate(page,'Académico');await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');await page.reload();await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');
+ await page.locator('.siii-personal-account summary').click();await page.locator('.siii-personal-account').getByRole('button',{name:'Salir'}).click();
+ await expect(page).toHaveURL(/\/login/);await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');expect(await page.evaluate(()=>localStorage.getItem('sii-theme'))).toBe('dark');
+});
+
+for(const role of ['student','teacher'] as const)test(`${role}: both themes remain within all requested viewport widths`,async({page})=>{
+ test.setTimeout(120000);await login(page,f[role].username,'light');
+ for(const theme of ['light','dark'] as const){
+  if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:'Activar tema oscuro'}).click();
+  for(const width of [360,390,412,430,768,1024,1366,1440]){
+   await page.setViewportSize({width,height:900});await expect(page.locator(role==='student'?'.siii-student-dashboard':'.siii-teacher-dashboard')).toBeVisible();
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth),`${role} ${theme} ${width}`).toBeLessThanOrEqual(width);
+  }
+ }
+});
+
+test('personal home honors increased contrast in both themes',async({page})=>{
+ await page.setViewportSize({width:390,height:900});await login(page,f.student.username,'light');
+ await page.emulateMedia({contrast:'more'});
+ for(const theme of ['light','dark'] as const){
+  if(theme==='dark')await page.getByRole('button',{name:'Activar tema oscuro'}).click();
+  const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations;
+  expect(violations).toEqual([]);
+ }
+ await personalNavigate(page,'Académico');
+ expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);
+});
+
+test('personal surfaces become opaque with reduced transparency and honor forced colors',async({page})=>{
+ await page.setViewportSize({width:390,height:900});await login(page,f.student.username,'dark');
+ const session=await page.context().newCDPSession(page);
+ await session.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+ const material=await page.locator('#avisos').evaluate(el=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter}));
+ expect(material).toEqual({background:'rgb(25, 27, 32)',blur:'none'});
+ await page.emulateMedia({forcedColors:'active'});
+ expect(await page.locator('#avisos').evaluate(el=>getComputedStyle(el).backdropFilter)).toBe('none');
+});
+
+for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page},info)=>{
  test.setTimeout(120000);await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
  await login(page,f[role].username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${role}`));
  await expect(page.locator('.siii-overview-hero h2')).toContainText(role==='student'?'Alejandra':'Docente oficial');
@@ -83,8 +127,14 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
  await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
  for(const width of [1344,390]){
   await page.setViewportSize({width,height:896});await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
+  if(width===390&&theme==='light'){
+   const menu=page.getByRole('button',{name:'Abrir navegación',exact:true});
+   await expect(menu).toHaveCSS('background-color','rgb(73, 71, 67)');
+   await expect(menu.locator('svg')).toHaveCSS('color','rgb(247, 242, 234)');
+  }
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-  await page.screenshot({path:`.p0-local/fidelity/${role}-${theme}-${width}.png`,animations:'disabled',fullPage:true});
+  const screenshot=await page.screenshot({path:`.p0-local/fidelity/${role}-${theme}-${width}.png`,animations:'disabled',fullPage:true});
+  expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info);
   const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations;
   expect(violations).toEqual([]);
  }

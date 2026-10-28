@@ -110,7 +110,7 @@ export default function LoginPage(){
   </div>
  ):null;
 
- return <main id="main-content" tabIndex={-1} className="sii-auth sii-ui bg-background">
+ return <main id="main-content" tabIndex={-1} className="sii-auth sii-login sii-ui bg-background">
   <section className="sii-auth-story bg-[#2b0e1b]" aria-label="Presentación de SII">
    <div className="sii-auth-story-top"><SiiBrand light/><Badge variant="outline" className="border-white/25 bg-white/5 text-[10px] tracking-[.18em] text-white">UNIVERSITY OS</Badge></div>
    <div className="sii-auth-story-content">

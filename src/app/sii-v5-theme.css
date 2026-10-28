@@ -1,0 +1,81 @@
+/* Shared material tokens. The warm day composition remains intentionally smoked. */
+:root{
+ --siii-v5-background:#383735;--siii-v5-panel:rgba(111,108,102,.30);--siii-v5-surface:#494743;
+ --siii-v5-sidebar:#41403c;--siii-v5-text:#f1f0ec;--siii-v5-muted:#e2dcd4;
+ --siii-v5-border:rgba(255,255,255,.055);--siii-v5-input:#514d49;--siii-v5-button:#d8cabe;
+ --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#8ba99728;--siii-v5-modal:#42423e;
+ --siii-v5-hover:rgba(215,209,195,.12);--siii-v5-focus:#eadac6;--siii-v5-disabled:.62;--siii-v5-loading:.75;
+}
+html[data-sii-theme=dark]{
+ --siii-v5-background:#0D0F12;--siii-v5-panel:rgba(25,27,32,.94);--siii-v5-surface:#22252b;
+ --siii-v5-sidebar:#111317;--siii-v5-text:#f3f4f6;--siii-v5-muted:#c4c6cb;
+ --siii-v5-border:rgba(255,255,255,.08);--siii-v5-input:#22252b;--siii-v5-button:#d8cabe;
+ --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#8ba99728;--siii-v5-modal:#191b20;
+ --siii-v5-hover:rgba(255,255,255,.08);--siii-v5-focus:#e7cabc;--siii-v5-disabled:.62;--siii-v5-loading:.75;
+ --background:216 16% 6%;--card:223 12% 11%;--popover:223 12% 11%;--secondary:220 12% 15%;--muted:220 12% 15%;
+ --border:220 10% 24%;--input:220 10% 29%;
+}
+#siii-personal{background:var(--siii-v5-background)!important;--siii-personal-panel:var(--siii-v5-panel);--siii-personal-edge:var(--siii-v5-border);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);--sii-bg:var(--siii-v5-background);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted)}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)){background:var(--siii-v5-background)!important;--siii-personal-panel:var(--siii-v5-panel);--siii-personal-edge:var(--siii-v5-border);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);color:var(--siii-v5-text);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted)}
+/* Interior modules keep their accessible light cards within the same warm shell. */
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))){background:var(--siii-v5-background)!important;--sii-bg:var(--siii-v5-background);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);color:var(--siii-v5-text)}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)))>.group.peer>div.fixed{background:var(--siii-v5-background)}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) [data-sidebar=sidebar]{background:#494642!important;color:var(--siii-v5-text)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.siii-personal-nav-link,.siii-personal-nav-group summary,.sii-page-eyebrow,.sii-page-heading h1,.sii-page-heading p,nav[aria-label="Contexto del portal"] a){color:var(--siii-v5-text)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices,.siii-personal-account>summary){background:#494743!important;color:var(--siii-v5-text)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-command-trigger kbd,.siii-personal-account summary [class*=rounded-full]){color:var(--siii-v5-text)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) [role=tabpanel]{background:#eee9e2!important;color:#302b29!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) .sii-workspace-tabs [role=tab]{color:#302b29!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-student-portal,.siii-teacher-home-shell)>p:last-child{color:var(--siii-v5-muted)!important}
+html[data-sii-theme=dark] #siii-personal>.group.peer>div.fixed,html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))>.group.peer>div.fixed{background:var(--siii-v5-background)}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) [data-sidebar=sidebar]{background:radial-gradient(ellipse at 65% 15%,rgba(176,153,132,.12),transparent 45%),linear-gradient(145deg,rgba(118,111,101,.26),rgba(55,54,51,.32))!important;color:var(--siii-v5-text)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(.siii-personal-nav-link,.siii-personal-nav-group summary){color:var(--siii-v5-text)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-overview-hero{background:rgba(83,81,76,.14)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-overview-motto{color:#ded9cc}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-personal-account>div{background:var(--siii-v5-modal);color:var(--siii-v5-text)}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices){color:#f1f0ec!important;background:rgba(123,119,109,.18)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(.sii-command-trigger kbd,.siii-personal-account>summary,.siii-personal-account summary [class*=rounded-full],.siii-overview-quick,.siii-overview-shortcuts>a,.siii-overview-shortcuts>button,.siii-calendar-controls button){color:#f7f2ea!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-overview-status{color:#b8e3ce;background:#67c39523}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .text-muted-foreground{color:#fff9f1!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(a,button,summary):focus-visible{outline-color:var(--siii-v5-focus)}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>.siii-overview-panel{background:rgba(84,82,78,.23)!important}
+html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>#avisos,html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(140deg,rgba(118,108,96,.32),rgba(84,82,78,.24))!important}
+html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal-muted:#e2dcd4;background:#45463f!important;color:#f1f0ec!important}
+html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar],html[data-sii-theme=dark] .siii-personal-rail[data-mobile=true]{background:var(--siii-v5-sidebar)!important;color:var(--siii-v5-text)!important}
+html[data-sii-theme=dark] #siii-personal :is(.siii-overview-panel,.siii-overview-hero,.siii-student-aside>.siii-overview-panel){background:var(--siii-v5-panel)!important;border-color:var(--siii-v5-border)!important}
+html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:var(--siii-v5-panel)!important}
+html[data-sii-theme=dark] #siii-personal :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices,.siii-personal-account>summary){background:var(--siii-v5-surface)!important;color:var(--siii-v5-text)!important}
+html[data-sii-theme=dark] #siii-personal .siii-personal-account>div{background:var(--siii-v5-modal)}
+#siii-personal .siii-overview-primary{background:var(--siii-v5-button)}
+#siii-personal .siii-calendar-today{background:var(--siii-v5-calendar)}
+#siii-personal .siii-overview-grade{background:var(--siii-v5-chart)}
+html[data-sii-theme=light] #siii-personal .sii-menu-button{background:#494743!important;color:#f7f2ea!important}
+#siii-personal .siii-personal-nav-link:not([aria-disabled=true]):hover{background:var(--siii-v5-hover)}
+#siii-personal .siii-personal-nav-link[aria-disabled=true]{opacity:var(--siii-v5-disabled)}
+#siii-personal :is(a,button,summary):focus-visible{outline-color:var(--siii-v5-focus)}
+.sii-login [aria-busy=true]{opacity:var(--siii-v5-loading)}
+html[data-sii-theme=dark] .sii-login input{background:var(--siii-v5-input)}
+.sii-login .sii-auth-story{background:linear-gradient(145deg,#50463f,#302e2d 70%,#292826);color:#f7f3ef}
+.sii-login .sii-auth-story::before{opacity:.035}
+.sii-login :is(.sii-auth-eyebrow,.sii-auth-story h1 em,.sii-story-feature-icon){color:#f1d8c8}
+.sii-login :is(.sii-auth-story-content>p,.sii-story-features strong,.sii-auth-story-bottom){color:#e3d8cf}
+.sii-login .sii-eyebrow-line{background:#d7bdaa}
+html[data-sii-theme=light] .sii-login .sii-auth-access{background:#ebe6df}
+html[data-sii-theme=light] .sii-login .sii-auth-card{background:#fbf8f4;border-color:#d9d1ca}
+html[data-sii-theme=dark] .sii-login .sii-auth-story{background:linear-gradient(145deg,#202124,#111317)}
+html[data-sii-theme=dark] .sii-login .sii-auth-access{background:var(--siii-v5-background)}
+html[data-sii-theme=dark] .sii-login .sii-auth-card{background:var(--siii-v5-panel);border-color:var(--siii-v5-border)}
+@media(max-width:840px){
+ .sii-login .sii-auth-story{min-height:0;padding:20px max(20px,env(safe-area-inset-left)) 12px}
+ .sii-login .sii-auth-story-content,.sii-login .sii-auth-story-bottom{display:none}
+ .sii-login .sii-auth-access{padding:12px max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(.siii-overview-panel,.siii-overview-hero,[data-sidebar=sidebar]){background:#45413d!important;color:#fff!important;backdrop-filter:none!important;border-color:#ffffff70!important}
+ html[data-sii-theme=dark] #siii-personal :is(.siii-overview-panel,.siii-overview-hero,[data-sidebar=sidebar]){background:#191b20!important;color:#fff!important;backdrop-filter:none!important;border-color:#ffffff70!important}
+ html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>#avisos,html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>.siii-overview-panel:nth-child(3){background:#45413d!important}
+ html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:#191b20!important}
+}
+@media(forced-colors:active){
+ html[data-sii-theme] #siii-personal :is(.siii-overview-panel,.siii-overview-hero,[data-sidebar=sidebar]){background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important;backdrop-filter:none!important}
+}
