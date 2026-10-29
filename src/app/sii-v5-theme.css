@@ -7,7 +7,7 @@
  --siii-v5-hover:rgba(215,209,195,.12);--siii-v5-focus:#eadac6;--siii-v5-disabled:.62;--siii-v5-loading:.75;
 }
 html[data-sii-theme=dark]{
- --siii-v5-background:#0D0F12;--siii-v5-panel:rgba(25,27,32,.82);--siii-v5-surface:#22252b;
+ --siii-v5-background:#0D0F12;--siii-v5-panel:rgba(25,27,32,.52);--siii-v5-surface:#22252b;
  --siii-v5-sidebar:#111317;--siii-v5-text:#f3f4f6;--siii-v5-muted:#c4c6cb;
  --siii-v5-border:rgba(255,255,255,.08);--siii-v5-input:#22252b;--siii-v5-button:#d8cabe;
  --siii-v5-calendar:#d5c2ad;--siii-v5-chart:#8ba99728;--siii-v5-modal:#191b20;
@@ -15,7 +15,7 @@ html[data-sii-theme=dark]{
  --background:216 16% 6%;--card:223 12% 11%;--popover:223 12% 11%;--secondary:220 12% 15%;--muted:220 12% 15%;
  --border:220 10% 24%;--input:220 10% 29%;
 }
-#siii-personal{background:var(--siii-v5-background)!important;--siii-personal-panel:var(--siii-v5-panel);--siii-personal-edge:var(--siii-v5-border);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);--sii-bg:var(--siii-v5-background);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted)}
+#siii-personal{background:radial-gradient(ellipse at 16% 9%,rgba(180,142,112,.16),transparent 52%),radial-gradient(ellipse at 88% 82%,rgba(124,143,157,.13),transparent 51%),var(--siii-v5-background)!important;--siii-personal-panel:var(--siii-v5-panel);--siii-personal-edge:var(--siii-v5-border);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);--sii-bg:var(--siii-v5-background);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted)}
 html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)){background:var(--siii-v5-background)!important;--siii-personal-panel:var(--siii-v5-panel);--siii-personal-edge:var(--siii-v5-border);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);color:var(--siii-v5-text);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted)}
 /* Interior modules keep their accessible light cards within the same warm shell. */
 html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))){background:var(--siii-v5-background)!important;--sii-bg:var(--siii-v5-background);--sii-text:var(--siii-v5-text);--sii-muted:var(--siii-v5-muted);--siii-personal-text:var(--siii-v5-text);--siii-personal-muted:var(--siii-v5-muted);color:var(--siii-v5-text)}
@@ -42,8 +42,8 @@ html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-
 html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>#avisos,html[data-sii-theme=light] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(140deg,rgba(118,108,96,.32),rgba(84,82,78,.24))!important}
 html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal-muted:#e2dcd4;background:#45463f!important;color:#f1f0ec!important}
 html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar],html[data-sii-theme=dark] .siii-personal-rail[data-mobile=true]{background:var(--siii-v5-sidebar)!important;color:var(--siii-v5-text)!important}
-html[data-sii-theme=dark] #siii-personal :is(.siii-overview-panel,.siii-overview-hero,.siii-student-aside>.siii-overview-panel){background:var(--siii-v5-panel)!important;border-color:var(--siii-v5-border)!important}
-html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:var(--siii-v5-panel)!important}
+html[data-sii-theme=dark] #siii-personal :is(.siii-overview-panel,.siii-overview-hero,.siii-student-aside>.siii-overview-panel){background:linear-gradient(145deg,rgba(255,255,255,.085),transparent 65%),var(--siii-v5-panel)!important;border-color:rgba(255,255,255,.15)!important;box-shadow:0 12px 30px rgba(0,0,0,.19),inset 0 1px rgba(255,255,255,.08)!important;backdrop-filter:blur(22px) saturate(1.12)}
+html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(145deg,rgba(255,255,255,.055),transparent),var(--siii-v5-panel)!important}
 html[data-sii-theme=dark] #siii-personal :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices,.siii-personal-account>summary){background:var(--siii-v5-surface)!important;color:var(--siii-v5-text)!important}
 html[data-sii-theme=dark] #siii-personal .siii-personal-account>div{background:var(--siii-v5-modal)}
 #siii-personal .siii-overview-primary{background:var(--siii-v5-button)}
