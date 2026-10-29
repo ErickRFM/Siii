@@ -2,7 +2,7 @@ import {personalNavigate} from '../support/personal-navigation';
 import {test,expect,type Page} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
-import {randomBytes} from 'node:crypto';
+import {createHash,randomBytes} from 'node:crypto';
 import {isolatedDatabaseUrl} from '../support/database-url';
 import {portalFixture,portalPassword} from '../support/portal-fixture';
 import {digestRecoveryCode} from '../../src/shared/auth/mfa-primitives';
@@ -17,6 +17,31 @@ async function login(page:Page,actor=f.student){
  if(recovery){await page.getByRole('button',{name:'Usar código de recuperación',exact:true}).click();await page.getByLabel('Código de recuperación',{exact:true}).fill(recovery);await page.getByRole('button',{name:'Verificar y entrar'}).click()}
  await expect(page).toHaveURL(actor===f.admin?/\/dashboard$/:new RegExp(`/dashboard/institutions/${f.tenant}/(?:student|teacher)`));
 }
+test('student opens personal attendance and sees unavailable service distinctly from empty history',async({page})=>{
+ await sql.query('INSERT INTO academic_section_versions(institution_id,section_id,source_version) VALUES($1,$2,1) ON CONFLICT DO NOTHING',[f.tenant,f.section]);
+ await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);
+ await personalNavigate(page,'Académico');await page.getByRole('link',{name:'Mi historial de asistencia',exact:true}).click();
+ await expect(page.getByRole('heading',{name:/^Mi historial de asistencia/})).toBeVisible();
+ await expect(page.getByRole('region',{name:'Consulta personal de asistencia'}).getByRole('alert')).toContainText('no está disponible');
+ await expect(page.getByText('No hay asistencias disponibles')).toHaveCount(0);
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
+ expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);
+});
+test('personal attendance discards a response completed after logout submission',async({page})=>{
+ await sql.query('INSERT INTO academic_section_versions(institution_id,section_id,source_version) VALUES($1,$2,1) ON CONFLICT DO NOTHING',[f.tenant,f.section]);
+ await login(page);
+ const token=(await page.context().cookies()).find(cookie=>cookie.name==='siii_session'||cookie.name==='__Host-siii_session')!.value;
+ const session=(await sql.query('SELECT id FROM auth_sessions WHERE token_hash=$1',[createHash('sha256').update(token).digest('hex')])).rows[0].id;
+ const discriminator=createHash('sha256').update(f.student.id+':'+session).digest('hex');
+ let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve});let requested!:()=>void;const received=new Promise<void>(resolve=>{requested=resolve});
+ await page.route('**/companion-attendance/mine',async route=>{requested();await held;await route.fulfill({status:200,headers:{'content-type':'application/json','cache-control':'no-store','x-siii-attendance-session':discriminator},body:JSON.stringify({data:{contract:'siii.attendance_history.v1',observedAtEpochSeconds:Math.floor(Date.now()/1000),sampleLimit:100,records:[{auditRecordId:'a'.repeat(64),sessionId:'synthetic',sectionId:f.section,occurrenceDate:'2026-10-26',status:'review_required',disposition:null}]}})}).catch(()=>{})});
+ await page.goto(`/dashboard/institutions/${f.tenant}/student/attendance`);await received;
+ // Keep this page mounted while native logout navigation is pending.
+ await page.route('**/api/v1/auth/logout',async()=>{});
+ await page.evaluate(()=>{const form=document.createElement('form');form.method='post';form.action='/api/v1/auth/logout';document.body.append(form);form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
+ release();await expect(page.getByRole('button',{name:'Actualizar asistencia'})).toBeEnabled();
+ await expect(page.getByRole('region',{name:'Consulta personal de asistencia'}).getByText('Revisión pendiente',{exact:true})).toHaveCount(0);
+});
 test('student consults official own academic records in both themes across all requested widths',async({page})=>{
  test.setTimeout(180000);await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await expect(page.getByRole('heading',{name:'Alumna propia Sintético'})).toBeVisible();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();

@@ -1,5 +1,30 @@
 # Consulta institucional de asistencia de Compañero
 
+## Autoservicio del alumno
+
+`GET /api/v1/institutions/:institutionId/companion-attendance/mine` resuelve el
+expediente exclusivamente desde la sesión y student_account_links vigente.
+Exige `student.self.read` sobre el propietario y programa reales; no concede
+`academic.manage` ni acepta IDs, matrícula o destino en query. Revalida sesión,
+grant, vínculo, matrícula, inscripción, versión de grupo y ocurrencias después
+de consultar Compañero. Auditoría `companion.attendance.self.read` solo con
+cantidad y request ID. Todas las respuestas son no-store. No requiere migración.
+
+La página `/dashboard/institutions/:institutionId/student/attendance` se abre desde
+Académico → Mi historial de asistencia. Diferencia servicio no disponible de
+historial vacío y explica el límite de100 registros y revisión pendiente. Un
+discriminador opaco liga la respuesta a la sesión; el cliente aborta/retira datos
+en logout, salida, cambio de permisos, institución, sesión o pérdida de red.
+
+Validación local:1025 unitarias,15 HTTP focales y2 browser (incluido móvil+axe y
+respuesta tardía al iniciar logout), lint/typecheck y audit sin errores. La
+batería HTTP completa y CI del incremento se informan en el PR. El probe de
+laboratorio compara la consulta personal con la institucional sobre el mismo
+registro persistido, y ambas deben negar la lectura tras retirar inscripción.
+Esto no certifica datos ni FCM productivos.
+
+## Consulta de operación institucional
+
 `GET /api/v1/institutions/:institutionId/companion-attendance/:studentId` consulta
 Compañero desde el servidor SIII. Requiere sesión vigente y `academic.manage`
 institucional, con las comprobaciones MFA y de alcance existentes. El UUID del

@@ -25,7 +25,7 @@ const sql=new pg.Client({connectionString:database});
 const base='http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107);
 const emit=(data:unknown)=>process.stdout.write(JSON.stringify(data)+'\n');
 let stop:(()=>Promise<void>)|undefined,pool:pg.Pool|undefined;
-let cookie='',sectionId='',assignmentId='',enrollmentId='',occurrenceId='';
+let cookie='',studentCookie='',sectionId='',assignmentId='',enrollmentId='',occurrenceId='';
 let studentId='',teacherId='',roomId='';
 let attendanceOrigin:string|undefined,attendanceRelay:Server|undefined;
 const suffix=randomBytes(5).toString('hex').toUpperCase();
@@ -74,6 +74,13 @@ async function initialize(){
  sectionId=(await request('sections','POST',{termId:term,courseId:course,code:'SC_'+suffix,capacity:20},201)).id;
  studentId=(await request('registry/students','POST',{enrollmentNumber:studentExternal,programId:program,firstName:'Synthetic',lastName:'Student'},201)).id;
  teacherId=(await request('registry/teachers','POST',{employeeNumber:teacherExternal,firstName:'Synthetic',lastName:'Teacher'},201)).id;
+ const studentPerson=(await sql.query("INSERT INTO people(first_name,last_name) VALUES('Synthetic','Personal attendance reader') RETURNING id")).rows[0].id;
+ const studentUser=(await sql.query('INSERT INTO platform_users(person_id,username) VALUES($1,$2) RETURNING id',[studentPerson,'personal-chain-'+randomUUID()])).rows[0].id;
+ const studentMember=(await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id',[institution,studentUser])).rows[0].id;
+ await sql.query("INSERT INTO role_assignments(institution_id,membership_id,role,scope_type) VALUES($1,$2,'student','institution')",[institution,studentMember]);
+ await sql.query('INSERT INTO student_account_links(institution_id,membership_id,student_id,linked_by) VALUES($1,$2,$3,$4)',[institution,studentMember,studentId,user]);
+ const studentToken=randomBytes(32).toString('base64url');
+ await sql.query("INSERT INTO auth_sessions(user_id,token_hash,expires_at) VALUES($1,$2,now()+interval '1 hour')",[studentUser,createHash('sha256').update(studentToken).digest('hex')]);studentCookie='siii_session='+studentToken;
  process.env.DATABASE_URL=JSON.parse(readFileSync('.superpowers/sdd/2026-10-13-p0-hardening/app-connection.json','utf8')).connectionString;
  const connection=await import('../../src/infrastructure/database');pool=connection.pool;
  await connection.assertApplicationRole();
@@ -105,8 +112,14 @@ async function command(action:string,input:Record<string,unknown>){
    assert.equal(typeof input.origin,'string');assert.match(String(input.origin),/^http:\/\/127\.0\.0\.1:[1-9][0-9]*$/);
    attendanceOrigin=String(input.origin);
    const response=await fetch(base+'/api/v1/institutions/'+institution+'/companion-attendance/'+studentId,{headers:{origin:base,cookie},signal:AbortSignal.timeout(30000)});
-   if(response.status!==200){await response.body?.cancel();return {historyStatus:response.status};}
-   assert.equal(response.headers.get('cache-control'),'no-store');return {history:(await response.json()).data};
+   const personal=await fetch(base+'/api/v1/institutions/'+institution+'/companion-attendance/mine',{headers:{origin:base,cookie:studentCookie},signal:AbortSignal.timeout(30000)});
+   assert.equal(personal.status,response.status,'PERSONAL_HISTORY_AUTHORITY_MISMATCH');
+   if(response.status!==200){await response.body?.cancel();await personal.body?.cancel();return {historyStatus:response.status};}
+   assert.equal(response.headers.get('cache-control'),'no-store');assert.equal(personal.headers.get('cache-control'),'no-store');
+   assert.match(personal.headers.get('x-siii-attendance-session')??'',/^[0-9a-f]{64}$/);
+   const history=(await response.json()).data,own=(await personal.json()).data;
+   assert.deepEqual(own.records,history.records);assert.equal(own.contract,history.contract);
+   return {history,personalHistoryVerified:true};
   }
   case 'deliver':return delivery();
   case 'projection-status':{

@@ -5,10 +5,12 @@ import {isolatedDatabaseUrl} from '../support/database-url';
 import {sealMfaSecret} from '@/shared/auth/mfa-primitives';
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()}),base='http://127.0.0.1:'+(process.env.SIII_TEST_PORT||3107);
 let tenant:string,foreign:string,admin:string,studentActor:string,noMfa:string,studentId:string,foreignStudent:string;
+let studentMembership:string;
 async function actor(role:string,mfa=true){
  const person=(await sql.query("INSERT INTO people(first_name,last_name) VALUES('Synthetic','Attendance operator') RETURNING id")).rows[0].id;
  const user=(await sql.query('INSERT INTO platform_users(person_id,username) VALUES($1,$2) RETURNING id',[person,'attendance-'+randomUUID()])).rows[0].id;
  const member=(await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id',[tenant,user])).rows[0].id;
+ if(role==='student')studentMembership=member;
  await sql.query("INSERT INTO role_assignments(institution_id,membership_id,role,scope_type) VALUES($1,$2,$3,'institution')",[tenant,member,role]);
  if(mfa)await sql.query("INSERT INTO auth_mfa_factors(user_id,secret_encrypted,enabled_at) VALUES($1,$2,now()-interval '1 minute')",[user,sealMfaSecret('JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',user)]);
  const token=randomBytes(32).toString('base64url');await sql.query("INSERT INTO auth_sessions(user_id,token_hash,expires_at,mfa_verified_at) VALUES($1,$2,now()+interval '1 hour',$3)",[user,createHash('sha256').update(token).digest('hex'),mfa?new Date():null]);return 'siii_session='+token;
@@ -27,6 +29,29 @@ function get(cookie=admin,institution=tenant,id=studentId,query='',origin=base){
 beforeAll(async()=>{
  await sql.connect();const rows=(await sql.query("INSERT INTO institutions(code,name) VALUES($1,'Synthetic attendance'),($2,'Synthetic foreign') RETURNING id",['AR'+randomUUID(),'AF'+randomUUID()])).rows;
  tenant=rows[0].id;foreign=rows[1].id;admin=await actor('admin');studentActor=await actor('student');noMfa=await actor('admin',false);studentId=await fixture(tenant);foreignStudent=await fixture(foreign);
+ await sql.query('INSERT INTO student_account_links(institution_id,membership_id,student_id,linked_by) SELECT $1,$2,$3,user_id FROM institution_memberships WHERE id=$2',[tenant,studentMembership,studentId]);
+});
+function mine(cookie=studentActor,institution=tenant,query=''){
+ return fetch(base+'/api/v1/institutions/'+institution+'/companion-attendance/mine'+query,{headers:{cookie,origin:base},signal:AbortSignal.timeout(30000)});
+}
+describe.sequential('personal Companion attendance HTTP boundary',()=>{
+ it('uses the student self capability and trusted link, reaching the unavailable provider',async()=>{
+  const response=await mine();expect(response.status).toBe(503);expect(await response.json()).toEqual({error:{code:'COMPANION_ATTENDANCE_UNAVAILABLE'}});expect(response.headers.get('cache-control')).toBe('no-store');
+ });
+ it.each(['anonymous','admin','foreign-institution'] as const)('denies personal reading for %s',async mode=>{expect((await mine(mode==='anonymous'?'':mode==='admin'?admin:studentActor,mode==='foreign-institution'?foreign:tenant)).status).toBe(mode==='admin'?404:403)});
+ it('does not accept student, matrícula or destination overrides',async()=>{for(const query of ['?studentId='+foreignStudent,'?studentExternalId=OTHER','?origin=https://foreign.invalid'])expect((await mine(studentActor,tenant,query)).status).toBe(422)});
+ it('denies a revoked account link',async()=>{
+  await sql.query('UPDATE student_account_links SET revoked_at=now() WHERE institution_id=$1 AND membership_id=$2',[tenant,studentMembership]);
+  try{expect((await mine()).status).toBe(404)}finally{await sql.query('UPDATE student_account_links SET revoked_at=null WHERE institution_id=$1 AND membership_id=$2',[tenant,studentMembership])}
+ });
+ it('denies a program scoped role outside the linked program',async()=>{
+  const program=(await sql.query('SELECT program_id FROM institutional_students WHERE id=$1',[foreignStudent])).rows[0].program_id;
+  // A valid same-tenant program, different from the linked record.
+  const other=(await sql.query("INSERT INTO academic_programs(institution_id,code,name,level,modality) VALUES($1,$2,'Other synthetic program','licenciatura','presencial') RETURNING id",[tenant,'OTHER'+randomUUID()])).rows[0].id;
+  expect(program).not.toBe(other);
+  await sql.query("UPDATE role_assignments SET scope_type='program',scope_program_id=$3 WHERE institution_id=$1 AND membership_id=$2",[tenant,studentMembership,other]);
+  try{expect((await mine()).status).toBe(403)}finally{await sql.query("UPDATE role_assignments SET scope_type='institution',scope_program_id=null WHERE institution_id=$1 AND membership_id=$2",[tenant,studentMembership])}
+ });
 });
 afterAll(async()=>{await sql.end();});
 describe.sequential('institutional Companion attendance HTTP boundary',()=>{

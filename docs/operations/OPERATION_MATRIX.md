@@ -282,6 +282,7 @@ Informe y límites: [SIII_TEACHER_V3_2026-10-26.md](../audits/SIII_TEACHER_V3_20
 | Operación | Autoridad y garantías | Evidencia | Estado |
 |---|---|---|---|
 | GET institutions/:institutionId/companion-attendance/:studentId | academic.manage institucional vigente; alumno, inscripción, versión y ocurrencia antes/después; HMAC exclusivo attendance:read, sin reutilizar group:write; no-store; auditoría de cantidad y request ID sin registros ni matrícula | companion-attendance-history.test.ts; companion-attendance-route.test.ts; companion-attendance-http.test.ts; laboratorio opt-in companion-chain-live-probe.ts | INCREMENTO LOCAL; CI y habilitación privada pendientes; [configuración](COMPANION_ATTENDANCE_HISTORY.md) |
+| GET institutions/:institutionId/companion-attendance/mine; página student/attendance | student.self.read sobre propietario/programa resueltos por vínculo vigente; sin selector de alumno; revalidación antes/después, no-store, auditoría mínima, retiro de datos al iniciar logout | personal-attendance-route.test.ts; personal-attendance.test.ts; companion-attendance-http.test.ts; personal-portals.spec.ts; companion-chain-live-probe.ts | VALIDADO LOCAL; CI y activación productiva pendientes; [operación](COMPANION_ATTENDANCE_HISTORY.md) |
 
 ## Recuperación lógica V2 — 28 octubre 2026
 
