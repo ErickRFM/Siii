@@ -9,14 +9,14 @@ import {APPLICATION_ROLE_QUERY,assertRoleInspection,type ApplicationRoleInspecti
 // five connections per instance exhausted the session pooler's 15-slot limit.
 // Keep serverless instances small; use Supabase's transaction pooler for
 // DATABASE_URL when available and retain a separate direct URL for migrations.
-const defaultMax=process.env.VERCEL==='1'?2:5;
+const defaultMax=process.env.VERCEL==='1'?1:5;
 const requested=Number(process.env.SIII_POOL_MAX ?? defaultMax);
 if(!Number.isInteger(requested)||requested<1||requested>20)throw new Error('INVALID_POOL_SIZE');
-const configured=process.env.VERCEL==='1'?Math.min(requested,2):requested;
+const configured=process.env.VERCEL==='1'?Math.min(requested,1):requested;
 
 type DatabaseState={pool:pg.Pool;roleCheck?:Promise<void>};
 const globalState=globalThis as typeof globalThis & {__siiiDatabaseState?:DatabaseState};
-const state=globalState.__siiiDatabaseState ?? (() => {
+const state:DatabaseState=globalState.__siiiDatabaseState ?? (() : DatabaseState => {
  const instancePool=new pg.Pool({
   ...databaseConnectionOptions(process.env.DATABASE_URL,process.env.SIII_DATABASE_CA),
   max:configured,
