@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-10-28T22:13:42.714Z",
   "review": "Reviewed V7 in-place visual-only smoked glass layering. Original accessibility and role rules retained; CSS byte and duplicate budgets updated after source-level audit.",
-  "totalBytes": 220415,
+  "totalBytes": 220444,
   "totalImportant": 301,
   "totalDup": 392,
   "files": [
@@ -61,7 +61,7 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 30401,
+      "bytes": 30390,
       "rules": 273,
       "classes": 83,
       "orphanCandidates": 0,
@@ -115,7 +115,7 @@
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 13308,
+      "bytes": 13348,
       "rules": 59,
       "classes": 41,
       "orphanCandidates": 0,
