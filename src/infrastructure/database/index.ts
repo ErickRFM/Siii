@@ -16,7 +16,7 @@ const configured=process.env.VERCEL==='1'?Math.min(requested,1):requested;
 
 type DatabaseState={pool:pg.Pool;roleCheck?:Promise<void>};
 const globalState=globalThis as typeof globalThis & {__siiiDatabaseState?:DatabaseState};
-const state:DatabaseState=globalState.__siiiDatabaseState ?? (() : DatabaseState => {
+const state:DatabaseState=(process.env.VERCEL==='1'?globalState.__siiiDatabaseState:undefined) ?? (() : DatabaseState => {
  const instancePool=new pg.Pool({
   ...databaseConnectionOptions(process.env.DATABASE_URL,process.env.SIII_DATABASE_CA),
   max:configured,
@@ -31,7 +31,7 @@ const state:DatabaseState=globalState.__siiiDatabaseState ?? (() : DatabaseState
  instancePool.on('error',()=>{logger.error({code:'DATABASE_IDLE_CLIENT_ERROR'},'Database idle client failed')});
  return {pool:instancePool};
 })();
-globalState.__siiiDatabaseState=state;
+if(process.env.VERCEL==='1')globalState.__siiiDatabaseState=state;
 export const pool=state.pool;
 export const db=drizzle(pool,{schema});
 
