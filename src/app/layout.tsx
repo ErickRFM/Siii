@@ -19,7 +19,6 @@ import './sii-workspaces.css';
 import './sii-glass.css';
 import './sii-personal-fidelity.css';
 import './sii-v5-theme.css';
-import './sii-glass-material-v6.css';
 export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'SII Â· Sistema Institucional Integral',description:'Plataforma institucional de gestiÃ³n acadÃ©mica'};
 const siiThemeBootstrap="(function(){var personal=/^\\/dashboard\\/institutions\\/[^/]+\\/(student|teacher)(\\/|$)/.test(window.location.pathname),stored=null;try{stored=window.localStorage.getItem('sii-theme')}catch(_){}document.documentElement.dataset.siiTheme=stored==='light'?'light':stored==='dark'||personal?'dark':'light'})();";
