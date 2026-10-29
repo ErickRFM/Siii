@@ -21,7 +21,7 @@ export default function DashboardError({
     <h1 className="mt-3 text-2xl font-semibold tracking-tight">No pudimos cargar este espacio</h1>
     <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
      Ocurrió un problema temporal al consultar tu información institucional.
-     Tus datos no se han modificado. Puedes intentar cargar de nuevo.
+     Puedes intentar cargar de nuevo. Si el problema continúa, comparte la referencia de soporte.
     </p>
     <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
      <button type="button" onClick={reset} className="sii-outline-button">Volver a intentar</button>
