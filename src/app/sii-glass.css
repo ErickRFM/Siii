@@ -147,14 +147,14 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   --sii-text:#f7f1ec;
   --sii-muted:#d0c4bd;
   --sii-line:rgba(255,255,255,.055);
-  --sii-glass-panel:rgba(110,100,95,.34);
-  --sii-glass-soft:rgba(124,113,107,.25);
-  --sii-glass-header:rgba(105,96,90,.32);
+  --sii-glass-panel:rgba(105,95,90,.32);
+  --sii-glass-soft:rgba(120,110,104,.24);
+  --sii-glass-header:rgba(102,93,87,.30);
   --sii-glass-edge:transparent;
   --sii-glass-depth:none;
   --sii-glass-hover:none;
   color:#f7f1ec;
-  background:linear-gradient(120deg,rgba(58,48,45,.82),rgba(51,48,48,.92)),radial-gradient(ellipse at 72% 8%,#ac8572,#342f2e 62%)!important;
+  background:linear-gradient(120deg,rgba(58,48,45,.82),rgba(51,48,48,.92)),radial-gradient(ellipse at 72% 8%,#9f7967,#342f2e 58%)!important;
   background-attachment:fixed!important;
 }
 .sii-app.sii-ui .sii-sidebar {
