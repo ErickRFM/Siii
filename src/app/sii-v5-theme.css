@@ -61,11 +61,11 @@ html[data-sii-theme=dark] .sii-login input{background:var(--siii-v5-input)}
 .sii-login :is(.sii-auth-eyebrow,.sii-auth-story h1 em,.sii-story-feature-icon){color:#f1d8c8}
 .sii-login :is(.sii-auth-story-content>p,.sii-story-features strong,.sii-auth-story-bottom){color:#e3d8cf}
 .sii-login .sii-eyebrow-line{background:#d7bdaa}
-html[data-sii-theme=light] .sii-login .sii-auth-access{background:#ebe6df}
-html[data-sii-theme=light] .sii-login .sii-auth-card{background:#fbf8f4;border-color:#d9d1ca}
+html[data-sii-theme=light] .sii-login .sii-auth-access{background:radial-gradient(ellipse at 88% 12%,rgba(255,255,255,.46),transparent 54%),linear-gradient(140deg,#e2dad2,#d7d3d0 60%,#d5dbe0)}
+html[data-sii-theme=light] .sii-login .sii-auth-card{background:linear-gradient(155deg,rgba(255,255,255,.49),rgba(246,241,236,.29)),rgba(255,255,255,.25);border-color:rgba(255,255,255,.24);box-shadow:0 20px 54px rgba(58,48,44,.15),inset 0 1px rgba(255,255,255,.45);backdrop-filter:blur(22px) saturate(1.08);-webkit-backdrop-filter:blur(22px) saturate(1.08)}
 html[data-sii-theme=dark] .sii-login .sii-auth-story{background:linear-gradient(145deg,#202124,#111317)}
 html[data-sii-theme=dark] .sii-login .sii-auth-access{background:var(--siii-v5-background)}
-html[data-sii-theme=dark] .sii-login .sii-auth-card{background:var(--siii-v5-panel);border-color:var(--siii-v5-border)}
+html[data-sii-theme=dark] .sii-login .sii-auth-card{background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(35,39,43,.18)),rgba(30,32,37,.47);border-color:rgba(255,255,255,.09);box-shadow:0 20px 54px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.06);backdrop-filter:blur(22px) saturate(1.08);-webkit-backdrop-filter:blur(22px) saturate(1.08)}
 @media(max-width:840px){
  .sii-login .sii-auth-story{min-height:0;padding:20px max(20px,env(safe-area-inset-left)) 12px}
  .sii-login .sii-auth-story-content,.sii-login .sii-auth-story-bottom{display:none}
