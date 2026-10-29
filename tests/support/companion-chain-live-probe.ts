@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {createInterface} from 'node:readline';
+import {createServer,type Server} from 'node:http';
 import pg from 'pg';
 import setup from './http-setup';
 import {isolatedDatabaseUrl} from './database-url';
@@ -26,6 +27,7 @@ const emit=(data:unknown)=>process.stdout.write(JSON.stringify(data)+'\n');
 let stop:(()=>Promise<void>)|undefined,pool:pg.Pool|undefined;
 let cookie='',sectionId='',assignmentId='',enrollmentId='',occurrenceId='';
 let studentId='',teacherId='',roomId='';
+let attendanceOrigin:string|undefined,attendanceRelay:Server|undefined;
 const suffix=randomBytes(5).toString('hex').toUpperCase();
 const studentExternal='ST_'+suffix,teacherExternal='TC_'+suffix;
 async function request(resource:string,method:string,body:unknown,status:number){
@@ -34,6 +36,25 @@ async function request(resource:string,method:string,body:unknown,status:number)
  return (await response.json()).data;
 }
 async function initialize(){
+ const readKey=required('ATTENDANCE_KEY_ID'),readSecret=required('ATTENDANCE_SECRET_BASE64');
+ assert.match(readKey,/^[A-Za-z0-9_-]{1,64}$/);assert.equal(Buffer.from(readSecret,'base64').length,32);
+ assert.equal(Buffer.from(readSecret,'base64').toString('base64'),readSecret);
+ assert.notEqual(readKey,keyId);assert.notEqual(readSecret,secret);
+ process.env.SIII_COMPANION_ATTENDANCE_TARGETS_JSON=JSON.stringify({[institution]:{origin:'https://companion-chain.invalid',keyId:readKey,secretBase64:readSecret}});
+ attendanceRelay=createServer(async(req,res)=>{
+  try{
+   assert.equal(req.method,'POST');assert.equal(req.url,'/integration/v1/attendance-history');assert.ok(attendanceOrigin);
+   const chunks:Buffer[]=[];let length=0;
+   for await(const chunk of req){length+=chunk.length;assert.ok(length<=4096);chunks.push(Buffer.from(chunk));}
+   const response=await fetch(attendanceOrigin+req.url,{method:'POST',headers:{'content-type':'application/json',
+    'x-integration-key-id':String(req.headers['x-integration-key-id']??''),'x-integration-timestamp':String(req.headers['x-integration-timestamp']??''),
+    'x-integration-nonce':String(req.headers['x-integration-nonce']??''),'x-integration-signature':String(req.headers['x-integration-signature']??'')},body:Buffer.concat(chunks),signal:AbortSignal.timeout(10000)});
+   res.writeHead(response.status,{'content-type':'application/json','cache-control':'no-store'});res.end(Buffer.from(await response.arrayBuffer()));
+  }catch{res.writeHead(503);res.end();}
+ });
+ await new Promise<void>(resolve=>attendanceRelay!.listen(0,'127.0.0.1',resolve));
+ const address=attendanceRelay.address();assert.ok(address&&typeof address!=='string');
+ process.env.SIII_TEST_ATTENDANCE_RELAY='http://127.0.0.1:'+address.port;
  await sql.connect();stop=await setup();
  // The control harness seeds only isolated synthetic prerequisites; every scenario mutation uses HTTP.
  await sql.query("INSERT INTO institutions(id,code,name,timezone) VALUES($1,$2,'Synthetic cross-repository lab','America/Mexico_City')",[institution,'CH_'+suffix]);
@@ -78,8 +99,15 @@ async function delivery(){
  const events=(await sql.query('SELECT event_id AS "eventId",source_version::int AS "sourceVersion",state,attempts,failure_code AS "failureCode" FROM academic_section_outbox WHERE institution_id=$1 ORDER BY source_version',[institution])).rows;
  return {totals,events};
 }
-async function command(action:string){
+async function command(action:string,input:Record<string,unknown>){
  switch(action){
+  case 'history':{
+   assert.equal(typeof input.origin,'string');assert.match(String(input.origin),/^http:\/\/127\.0\.0\.1:[1-9][0-9]*$/);
+   attendanceOrigin=String(input.origin);
+   const response=await fetch(base+'/api/v1/institutions/'+institution+'/companion-attendance/'+studentId,{headers:{origin:base,cookie},signal:AbortSignal.timeout(30000)});
+   if(response.status!==200){await response.body?.cancel();return {historyStatus:response.status};}
+   assert.equal(response.headers.get('cache-control'),'no-store');return {history:(await response.json()).data};
+  }
   case 'deliver':return delivery();
   case 'projection-status':{
    const {readProjectionStatus}=await import('../../src/integrations/companion/projection-status');
@@ -119,9 +147,9 @@ async function main(){
  try{
   emit({ok:true,...await initialize()});
   for await(const line of input){
-   const action=JSON.parse(line).action;if(action==='stop')break;
-   emit({ok:true,...await command(action)});
+   const message=JSON.parse(line),action=message.action;if(action==='stop')break;
+   emit({ok:true,...await command(action,message)});
   }
- }finally{input.close();await pool?.end();await stop?.();await sql.end();}
+ }finally{input.close();await pool?.end();await stop?.();await sql.end();await new Promise<void>(resolve=>attendanceRelay?attendanceRelay.close(()=>resolve()):resolve());}
 }
 await main().catch(()=>{process.stderr.write('COMPANION_CHAIN_PROBE_FAILED\n');process.exitCode=1});

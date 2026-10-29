@@ -200,8 +200,8 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: ErickRFM/Compa-ero-de-esc
-          # Validate the merged attendance receiver.
-          ref: 127e7dfa1c6ac760652859f78df226b47d01f08e
+          # Fixed V20 receiver: scoped attendance read and source revocation contract.
+          ref: 5a9b5cc9c95a10fb62a6c5f5cb5e0fd84a44b917
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -215,7 +215,7 @@ jobs:
         run: |
           export COMPANION_PUSH_PROBE_NODE="$(command -v node)"
           export COMPANION_CHAIN_PROBE_NODE="$(command -v node)"
-          ./gradlew :services:api:test --tests 'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.SiiiFullChainLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest' --tests 'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest' --tests 'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest' --rerun-tasks --no-build-cache --no-configuration-cache --no-parallel --max-workers=1 -Pkotlin.incremental=false -Pkotlin.compiler.execution.strategy=in-process --console=plain 2>&1 | tee "$GITHUB_WORKSPACE/.p0-local/companion-contract.log"
+          ./gradlew :services:api:test --tests 'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.SiiiFullChainLiveContractTest' --tests 'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest' --tests 'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest' --tests 'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest' --tests 'org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest' --rerun-tasks --no-build-cache --no-configuration-cache --no-parallel --max-workers=1 -Pkotlin.incremental=false -Pkotlin.compiler.execution.strategy=in-process --console=plain 2>&1 | tee "$GITHUB_WORKSPACE/.p0-local/companion-contract.log"
       - name: Require live contract and receiver regressions without skips
         if: always()
         shell: bash
@@ -230,6 +230,7 @@ jobs:
               'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest': 9,
               'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest': 11,
               'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest': 5,
+              'org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest': 7,
           }
           problems = []
           for name, count in expected_suites.items():
@@ -257,7 +258,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '127e7dfa1c6ac760652859f78df226b47d01f08e'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '5a9b5cc9c95a10fb62a6c5f5cb5e0fd84a44b917'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Disposable service diagnostics
         if: always()
@@ -290,6 +291,7 @@ jobs:
             .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest.xml
             .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest.xml
             .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest.xml
+            .p0-local/companion-contract/services/api/build/test-results/test/TEST-org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest.xml
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 3
