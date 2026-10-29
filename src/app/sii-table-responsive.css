@@ -59,8 +59,8 @@
   }
   /* Natural per-module minimums preserve readable columns on narrow screens. */
   .sii-app.sii-ui:not(#siii-personal) .sii-catalog-table {
-    width:max-content;
-    min-width:100%;
+    width:100%;
+    min-width:max(100%,470px);
   }
   .sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table) :is(th,td) {
     padding:10px 12px;
@@ -76,5 +76,33 @@
 @media(forced-colors:active){
   .sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table) :is(th,td){
     border-bottom:1px solid CanvasText;
+  }
+}
+
+/* Responsive editor/table grids: use container width, not device width alone. */
+.sii-app.sii-ui:not(#siii-personal) .sii-catalog-layout,
+.sii-app.sii-ui:not(#siii-personal) .sii-workspace-grid {
+  min-width:0;
+}
+@container workspace (max-width:799px) {
+  .sii-app.sii-ui:not(#siii-personal) .sii-workspace > .sii-catalog-layout > *,
+  .sii-app.sii-ui:not(#siii-personal) .sii-workspace > .sii-workspace-grid > * {
+    grid-column:1/-1;
+    min-width:0;
+  }
+}
+.sii-app.sii-ui:not(#siii-personal) .sii-catalog-table :is(th,td) :is(input,select,textarea) {
+  max-width:100%;
+  min-width:0;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-scroll,[data-slot="table-container"]) {
+  scrollbar-gutter:stable;
+}
+@media(max-width:600px){
+  .sii-app.sii-ui:not(#siii-personal) .sii-catalog-pagination {
+    justify-content:space-between;
+  }
+  .sii-app.sii-ui:not(#siii-personal) .sii-catalog-pagination > * {
+    max-width:100%;
   }
 }
