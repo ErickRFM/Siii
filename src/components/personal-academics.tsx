@@ -11,10 +11,10 @@ import {academicStatus} from '@/modules/portal/contracts';
 
 export function PersonalEnrollments({courses,teachers}:{courses:PersonalCourse[];teachers:PersonalTeacher[]}){
  return <div className="space-y-4"><p className="text-sm text-muted-foreground">Inscripciones oficiales por periodo. Los cambios de inscripción requieren autorización de Control Escolar.</p><PersonalTable rows={courses} label="Inscripciones" searchText={row=>[row.courseCode,row.courseName,row.sectionCode,row.termName].join(' ')} columns={[
-  {label:'Materia',render:row=><><strong>{row.courseName}</strong><p className="text-sm text-muted-foreground">{row.courseCode} · {row.credits} créditos registrados</p></>},
-  {label:'Grupo / periodo',render:row=><>{row.sectionCode}<p className="text-sm text-muted-foreground">{row.termName}</p></>},
+  {label:'Materia',sortValue:row=>row.courseName,render:row=><><strong>{row.courseName}</strong><p className="text-sm text-muted-foreground">{row.courseCode} · {row.credits} créditos registrados</p></>},
+  {label:'Grupo / periodo',sortValue:row=>row.termName+' '+row.sectionCode,render:row=><>{row.sectionCode}<p className="text-sm text-muted-foreground">{row.termName}</p></>},
   {label:'Docente asignado',render:row=>teachers.filter(teacher=>teacher.sectionId===row.sectionId).map(teacher=>`${teacher.firstName} ${teacher.lastName}`).join(', ')||'Sin asignación vigente'},
-  {label:'Inscripción',render:row=>academicStatus[row.enrollmentStatus??'']??row.enrollmentStatus},
+  {label:'Inscripción',sortValue:row=>row.enrollmentStatus??'',render:row=>academicStatus[row.enrollmentStatus??'']??row.enrollmentStatus},
   {label:'Estado del grupo',render:row=>academicStatus[row.sectionStatus]??row.sectionStatus},
  ]}/></div>;
 }
@@ -34,7 +34,7 @@ export function PersonalHistory({rows}:{rows:PersonalGrade[]}){
   <div className="grid gap-4 sm:grid-cols-2"><label className="space-y-2 text-sm font-medium">Buscar en historial académico<Input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Materia, clave o grupo"/></label><label className="space-y-2 text-sm font-medium">Periodo académico<NativeSelect value={term} onChange={event=>setTerm(event.target.value)}><option value="">Todos los periodos</option>{periods.map(period=><option key={period.id} value={period.id}>{period.name}</option>)}</NativeSelect></label></div>
   <Button variant="outline" disabled={!filtered.length} onClick={()=>downloadHistory(filtered)}>Descargar historial informativo</Button>
   {periods.filter(period=>filtered.some(row=>row.termId===period.id)).map(period=><details key={period.id} open className="rounded-xl border bg-card p-4"><summary className="min-h-11 cursor-pointer font-semibold">{period.name}</summary><div className="mt-3"><PersonalTable label={`Resultados de ${period.name}`} rows={filtered.filter(row=>row.termId===period.id)} columns={[
-   {label:'Materia',render:row=><>{row.courseCode} · {row.courseName}</>},{label:'Grupo',render:row=>row.sectionCode},{label:'Créditos registrados',render:row=>row.credits},{label:'Calificación publicada',render:row=><strong>{(row.scoreHundredths/100).toFixed(2)}</strong>},{label:'Publicación',render:row=>`v${row.version} · ${new Date(row.publishedAt).toLocaleDateString('es-MX')}`},
+   {label:'Materia',sortValue:row=>row.courseName,render:row=><>{row.courseCode} · {row.courseName}</>},{label:'Grupo',sortValue:row=>row.sectionCode,render:row=>row.sectionCode},{label:'Créditos registrados',sortValue:row=>row.credits,render:row=>row.credits},{label:'Calificación publicada',sortValue:row=>row.scoreHundredths,render:row=><strong>{(row.scoreHundredths/100).toFixed(2)}</strong>},{label:'Publicación',sortValue:row=>row.publishedAt,render:row=>`v${row.version} · ${new Date(row.publishedAt).toLocaleDateString('es-MX')}`},
   ]}/></div></details>)}
   {!filtered.length&&<SiiEmptyView icon="grades" title={query||term?'Sin resultados para estos filtros':'Sin calificaciones publicadas'} description={query||term?'Cambia la búsqueda o el periodo.':'Las calificaciones aparecerán cuando la institución las publique.'}/>}
  </div>;
