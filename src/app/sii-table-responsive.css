@@ -1,0 +1,80 @@
+/* Shared operational table sizing / responsive guardrails.
+   Keep real columns and actions accessible instead of hiding data on mobile. */
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-workspace,.siii-glass-workspace,.sii-catalog-layout,.sii-catalog-table-panel,.sii-operation-table) {
+  min-width:0;
+  max-width:100%;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-scroll,[data-slot="table-container"],.sii-operation-table,.overflow-x-auto):has(table) {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-scroll,[data-slot="table-container"],.sii-operation-table):has(table) table {
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table,[data-slot="table-container"] table) :is(th,td){
+  padding:clamp(9px,.85vw,13px) clamp(10px,1vw,15px);
+  vertical-align:middle;
+  line-height:1.45;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table,[data-slot="table-container"] table) th {
+  font-size:clamp(11px,.8vw,12px);
+  font-weight:650;
+  white-space:nowrap;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table,[data-slot="table-container"] table) td {
+  font-size:clamp(12px,.9vw,14px);
+  overflow-wrap:break-word;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table) td :is(button,a,[role="button"]) {
+  white-space:nowrap;
+  max-width:100%;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-pagination,.sii-catalog-toolbar,.sii-workspace-filters) {
+  min-width:0;
+  max-width:100%;
+}
+.sii-app.sii-ui:not(#siii-personal) .sii-catalog-pagination {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-form,.sii-catalog-edit,.sii-workspace-filters) :is(input,select,textarea) {
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+}
+@media(max-width:767px){
+  .sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-scroll,[data-slot="table-container"],.sii-operation-table):has(table) {
+    margin-inline:0;
+    border-radius:12px;
+  }
+  /* Natural per-module minimums preserve readable columns on narrow screens. */
+  .sii-app.sii-ui:not(#siii-personal) .sii-catalog-table {
+    width:max-content;
+    min-width:100%;
+  }
+  .sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table) :is(th,td) {
+    padding:10px 12px;
+  }
+  .sii-app.sii-ui:not(#siii-personal) .sii-catalog-toolbar {
+    min-width:0;
+    flex-wrap:wrap;
+  }
+  .sii-app.sii-ui:not(#siii-personal) .sii-catalog-pagination button {
+    min-height:40px;
+  }
+}
+@media(forced-colors:active){
+  .sii-app.sii-ui:not(#siii-personal) :is(.sii-catalog-table,.sii-operation-table table) :is(th,td){
+    border-bottom:1px solid CanvasText;
+  }
+}
