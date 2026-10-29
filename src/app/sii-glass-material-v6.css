@@ -1,0 +1,125 @@
+/*
+ * SIII V6 — Matte Glass Material
+ * Purely presentational.
+ * No authorization or data behavior changes.
+ */
+
+:root {
+  --siii-material-blur: 18px;
+  --siii-material-saturation: 115%;
+  --siii-material-panel: rgba(82, 78, 74, .76);
+  --siii-material-edge: rgba(255,255,255,.12);
+  --siii-material-highlight: rgba(255,255,255,.045);
+  --siii-material-shadow:
+    0 12px 36px rgba(20,16,14,.16),
+    inset 0 1px 0 rgba(255,255,255,.045);
+}
+
+html[data-sii-theme="dark"] {
+  --siii-material-panel: rgba(25,27,32,.82);
+  --siii-material-edge: rgba(255,255,255,.085);
+  --siii-material-highlight: rgba(255,255,255,.025);
+  --siii-material-shadow:
+    0 16px 42px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+/* Existing student and teacher glass panels */
+#siii-personal .siii-overview-panel {
+  background:
+    linear-gradient(
+      145deg,
+      var(--siii-material-highlight),
+      transparent 58%
+    ),
+    var(--siii-material-panel);
+
+  border: 1px solid var(--siii-material-edge);
+  box-shadow: var(--siii-material-shadow);
+
+  -webkit-backdrop-filter:
+    blur(var(--siii-material-blur))
+    saturate(var(--siii-material-saturation));
+
+  backdrop-filter:
+    blur(var(--siii-material-blur))
+    saturate(var(--siii-material-saturation));
+
+  background-clip: padding-box;
+}
+
+/* Controlled microinteractions */
+#siii-personal .siii-overview-panel {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+#siii-personal .siii-overview-panel:hover {
+  border-color: rgba(255,255,255,.15);
+}
+
+/* Metric cards */
+#siii-personal .siii-overview-metric {
+  min-width: 0;
+  overflow: hidden;
+}
+
+#siii-personal .siii-overview-metric strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Prevent long text from breaking the composition */
+#siii-personal .siii-student-dashboard,
+#siii-personal .siii-teacher-dashboard,
+#siii-personal .siii-student-main,
+#siii-personal .siii-overview-panel {
+  min-width: 0;
+}
+
+#siii-personal .siii-overview-panel p,
+#siii-personal .siii-overview-panel small {
+  overflow-wrap: anywhere;
+}
+
+/* Accessible controls */
+#siii-personal button:focus-visible,
+#siii-personal a:focus-visible,
+#siii-personal input:focus-visible,
+#siii-personal select:focus-visible {
+  outline: 2px solid var(--siii-v5-focus);
+  outline-offset: 3px;
+}
+
+/* Keep mobile content within the viewport */
+@media (max-width: 640px) {
+  :root {
+    --siii-material-blur: 12px;
+  }
+
+  #siii-personal .siii-overview-panel {
+    max-width: 100%;
+  }
+
+  #siii-personal .siii-overview-heading {
+    min-width: 0;
+  }
+}
+
+/* Accessibility: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  #siii-personal .siii-overview-panel {
+    transition: none;
+  }
+}
+
+/* Fallback for devices without backdrop-filter */
+@supports not (
+  (backdrop-filter: blur(1px)) or
+  (-webkit-backdrop-filter: blur(1px))
+) {
+  #siii-personal .siii-overview-panel {
+    background: var(--siii-v5-surface);
+  }
+}
