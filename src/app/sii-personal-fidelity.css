@@ -54,7 +54,7 @@
 .siii-personal-nav-footer .siii-personal-nav-link{min-height:35px}
 #siii-personal :is(.siii-student-main,.siii-student-aside){display:grid;min-width:0;align-content:start;gap:14px;grid-template-columns:minmax(0,1fr)}
 #siii-personal .siii-student-aside{gap:13px}
-#siii-personal :is(.siii-overview-panel,.siii-overview-hero){border-radius:15px!important;background:var(--siii-personal-panel)!important;border:1px solid transparent!important;box-shadow:0 14px 32px rgba(0,0,0,.13),inset 0 1px rgba(255,255,255,.07)!important;padding:16px;backdrop-filter:blur(16px) saturate(.75);color:var(--siii-personal-text);min-width:0}
+#siii-personal :is(.siii-overview-panel,.siii-overview-hero){border-radius:15px!important;background:var(--siii-personal-panel)!important;border:1px solid var(--siii-personal-edge)!important;box-shadow:inset 0 1px rgba(255,255,255,.025)!important;padding:16px;backdrop-filter:blur(16px) saturate(.75);color:var(--siii-personal-text);min-width:0}
 #siii-personal .siii-overview-hero .siii-overview-eyebrow{font-size:20px;font-weight:330;line-height:27px;opacity:.78}
 #siii-personal .siii-overview-hero h2{font-size:40px;font-weight:510;line-height:48px;letter-spacing:-.025em;margin:2px 0 0}
 #siii-personal .siii-overview-hero>p:not(.siii-overview-motto){font-size:14px;line-height:23px;font-weight:350;margin:0}
