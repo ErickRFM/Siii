@@ -42,10 +42,22 @@ test('approved glass student overview stays readable and without overflow on mob
  for(const theme of ['dark','light']){
   const current=await page.locator('html').getAttribute('data-sii-theme');
   if(current!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro'}).click();
-  for(const width of [320,390,768,1440]){
+  for(const width of [320,390,768,1440,1666]){
    await page.setViewportSize({width,height:900});
    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
    await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+   if(width===1440||width===1666){
+    const geometry=await page.locator('.siii-student-dashboard').evaluate(node=>{
+     const dashboard=node.getBoundingClientRect();
+     const main=node.closest('.sii-main')?.getBoundingClientRect();
+     const columns=Array.from(node.children).map(el=>el.getBoundingClientRect());
+     return {leftGap:main?dashboard.left-main.left:999,rightGap:main?main.right-dashboard.right:999,
+       primaryTop:columns[0]?.top??0,railTop:columns[1]?.top??999};
+    });
+    expect(geometry.leftGap).toBeLessThan(64);
+    expect(geometry.rightGap).toBeLessThan(64);
+    expect(Math.abs(geometry.railTop-geometry.primaryTop)).toBeLessThan(12);
+   }
    if(width===390||width===1440)await page.screenshot({path:`.p0-local/pr120-evidence/student-${theme}-${width}.png`,fullPage:true});
   }
  }

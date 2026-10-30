@@ -353,8 +353,14 @@ html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-mute
 
 @media(max-width:980px){}
 
+/* Student home fills its available workspace instead of inheriting the standard
+   capped page width. Other institutional modules keep their own readable limits. */
+.sii-app.sii-ui .sii-page:has(.siii-student-home-shell){
+ width:100%;max-width:none;margin-inline:0;
+ padding-inline:clamp(12px,1.5vw,26px);
+}
 /* Fidelity-focused student workspace: translucent smoked glass with calm inner contrast. */
-.sii-app.sii-ui .siii-student-dashboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,24%);gap:14px;align-items:start;width:100%;min-width:0}
+.sii-app.sii-ui .siii-student-dashboard{display:grid;grid-template-columns:minmax(0,1fr) clamp(260px,24%,345px);gap:14px;align-items:start;width:100%;min-width:0}
 .sii-app.sii-ui .siii-student-main,.sii-app.sii-ui .siii-student-aside{display:grid;align-content:start;gap:14px;min-width:0}
 .sii-app.sii-ui .siii-overview-panel,.sii-app.sii-ui .siii-overview-hero{
  --siii-surface:rgba(120,110,104,.32);
@@ -413,10 +419,12 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-hero{--siii-surface:
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-primary{background:#584c46;color:#fff}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow{border-bottom-color:rgba(60,43,32,.11)}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-track{background:rgba(55,42,34,.12)}
-@media(max-width:1320px){.sii-app.sii-ui .siii-student-dashboard{grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .siii-student-aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:990px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr 1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:1/-1}}
+/* Break at the available content width, not the browser width: the sidebar can
+   collapse, and the same viewport can then fit the full two-column dashboard. */
+@container (max-width:1090px){.sii-app.sii-ui .siii-student-dashboard{grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .siii-student-aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (max-width:900px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr 1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:1/-1}}
 @media(max-width:720px){.sii-app.sii-ui .siii-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sii-app.sii-ui .siii-overview-progress-body{grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .siii-student-aside{grid-template-columns:1fr}}
-@media(max-width:520px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:auto}.sii-app.sii-ui .siii-overview-panel{padding:15px}.sii-app.sii-ui .siii-overview-metric{padding:13px}.sii-app.sii-ui .siii-overview-hero{padding:19px}.sii-app.sii-ui .siii-overview-term{grid-template-columns:minmax(70px,1fr) minmax(40px,1.5fr) 18px}}
+@container (max-width:520px){.sii-app.sii-ui .siii-overview-detail-grid{grid-template-columns:1fr}.sii-app.sii-ui .siii-overview-detail-grid>*:first-child{grid-column:auto}.sii-app.sii-ui .siii-overview-panel{padding:15px}.sii-app.sii-ui .siii-overview-metric{padding:13px}.sii-app.sii-ui .siii-overview-hero{padding:19px}.sii-app.sii-ui .siii-overview-term{grid-template-columns:minmax(70px,1fr) minmax(40px,1.5fr) 18px}}
 @media(prefers-reduced-motion:reduce){.sii-app.sii-ui .siii-overview-panel *, .sii-app.sii-ui .siii-overview-hero *{transition:none!important;animation:none!important}}
 
 /* Application shell final paint pass: preserve business behaviors and keyboard focus. */
@@ -833,7 +841,8 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-topbar-notices{background:rgb
 /* Student first viewport follows the approved screenshot. Navigation still works
    below the dashboard; no duplicated intro or identity card pushes the hero down. */
 .sii-app.sii-ui .siii-student-home-shell{
- display:flex;flex-direction:column;gap:0;min-width:0;
+ display:flex;flex-direction:column;gap:0;min-width:0;width:100%;
+ container-type:inline-size;container-name:student-home;
 }
 .sii-app.sii-ui .siii-student-home-shell>.siii-home-visually-hidden{
  position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;
