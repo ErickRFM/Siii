@@ -68,10 +68,24 @@ test('approved glass student overview stays readable and without overflow on mob
  for(const theme of ['dark','light']){
   const current=await page.locator('html').getAttribute('data-sii-theme');
   if(current!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro'}).click();
-  for(const width of [320,390,768,1440]){
+  for(const width of [320,390,768,1440,1666]){
    await page.setViewportSize({width,height:900});
    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
    await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+   if(width===1440||width===1666){
+    const geometry=await page.locator('.siii-student-dashboard').evaluate(node=>{
+     const layout=node.getBoundingClientRect();
+     const shell=node.closest('.sii-main')?.getBoundingClientRect();
+     const primary=node.querySelector('.siii-student-main')?.getBoundingClientRect();
+     const rail=node.querySelector('.siii-student-aside')?.getBoundingClientRect();
+     return {left: shell?layout.left-shell.left:999,right:shell?shell.right-layout.right:999,
+       aligned:primary&&rail?Math.abs(primary.top-rail.top):999,columns:getComputedStyle(node).gridTemplateColumns.split(' ').length};
+    });
+    expect(geometry.left).toBeLessThan(65);
+    expect(geometry.right).toBeLessThan(65);
+    expect(geometry.aligned).toBeLessThan(12);
+    expect(geometry.columns).toBe(2);
+   }
    if(width===390||width===1440)await page.screenshot({path:`.p0-local/pr120-evidence/student-${theme}-${width}.png`,fullPage:true});
   }
  }
