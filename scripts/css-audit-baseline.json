@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-30T12:30:00.000Z",
-  "review": "PR #137 and #139 integration: operational table responsiveness and account-security glass coherence.",
-  "totalBytes": 233049,
+  "generatedAt": "2026-10-30T16:14:00-06:00",
+  "review": "Existing PR #137/#139 baseline plus explicitly reviewed +785-byte student dashboard container-responsiveness fix (PR #140). No change to !important budget.",
+  "totalBytes": 233834,
   "totalImportant": 338,
-  "totalDup": 414,
+  "totalDup": 415,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,12 +70,12 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 30388,
+      "bytes": 31173,
       "rules": 273,
       "classes": 83,
       "orphanCandidates": 0,
       "important": 55,
-      "duplicateSelectors": 50
+      "duplicateSelectors": 51
     },
     {
       "file": "src/app/sii-premium-kit.css",
