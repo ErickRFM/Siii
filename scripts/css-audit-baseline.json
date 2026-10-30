@@ -1,8 +1,8 @@
 {
   "generatedAt": "2026-10-28T22:13:42.714Z",
-  "review": "Reviewed V7 in-place visual-only smoked glass layering. Original accessibility and role rules retained; CSS byte and duplicate budgets updated after source-level audit.",
-  "totalBytes": 221054,
-  "totalImportant": 301,
+  "review": "Account-security matte glass: reviewed added scoped styles; no auth logic changes.",
+  "totalBytes": 223344,
+  "totalImportant": 309,
   "totalDup": 392,
   "files": [
     {
@@ -25,11 +25,11 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 42934,
+      "bytes": 45224,
       "rules": 261,
       "classes": 116,
       "orphanCandidates": 0,
-      "important": 148,
+      "important": 156,
       "duplicateSelectors": 91
     },
     {
