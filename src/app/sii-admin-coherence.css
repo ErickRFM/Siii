@@ -1,0 +1,89 @@
+/* SIII administration visual coherence, 2026-10-29.
+   Operational workspace only. Personal student/teacher views are untouched.
+   Do not affect routing, permissions, or document content. */
+.sii-app.sii-ui:has(.siii-glass-workspace) {
+  --siii-admin-radius:18px;
+  --siii-admin-gap:20px;
+  --siii-admin-edge:rgba(84,66,68,.09);
+  --siii-admin-panel:rgba(255,252,249,.69);
+  --siii-admin-soft:rgba(255,252,249,.5);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui:has(.siii-glass-workspace) {
+  background:
+    radial-gradient(ellipse 65% 58% at 90% 10%,rgba(148,104,118,.10),transparent 80%),
+    linear-gradient(115deg,#efe8e3,#e5dedb 58%,#eee7e5)!important;
+}
+.sii-app.sii-ui .siii-glass-workspace {
+  width:min(100%,1280px);
+  margin-inline:auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:var(--siii-admin-gap,20px);
+}
+.sii-app.sii-ui .siii-glass-workspace > * {min-width:0}
+.sii-app.sii-ui .siii-glass-workspace > :is(section,div) {margin-block:0}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel,.sii-security-card,.sii-security-aside){
+  background:var(--siii-admin-panel)!important;
+  border:1px solid var(--siii-admin-edge)!important;
+  border-radius:var(--siii-admin-radius)!important;
+  box-shadow:0 10px 32px rgba(53,39,46,.045)!important;
+  backdrop-filter:blur(17px) saturate(108%);
+  -webkit-backdrop-filter:blur(17px) saturate(108%);
+}
+.sii-app.sii-ui .siii-glass-workspace .sii-metric {
+  min-width:0;
+  height:100%;
+  padding:clamp(20px,2.2vw,28px)!important;
+}
+.sii-app.sii-ui .siii-glass-workspace .sii-metric :is(h2,h3,p){overflow-wrap:anywhere}
+.sii-app.sii-ui .siii-glass-workspace .sii-institutions-panel {padding:clamp(18px,2vw,28px)!important}
+.sii-app.sii-ui .siii-glass-workspace .sii-institution-item {
+  min-width:0;
+  border-radius:13px!important;
+  padding:14px 16px!important;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item {
+  background:rgba(255,255,255,.71)!important;
+  border:1px solid rgba(75,59,68,.07)!important;
+}
+.sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institution-item) {
+  transition:background-color .18s ease,border-color .18s ease;
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar {
+  background:rgba(249,245,241,.77)!important;
+  border:1px solid rgba(81,62,67,.08)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(16px) saturate(105%);
+  -webkit-backdrop-filter:blur(16px) saturate(105%);
+}
+html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar {
+  background:rgba(252,249,245,.94)!important;
+  border-right:1px solid rgba(74,53,62,.11)!important;
+  box-shadow:none!important;
+}
+html[data-sii-theme="dark"] .sii-app.sii-ui:has(.siii-glass-workspace){
+  --siii-admin-panel:rgba(30,36,47,.74);
+  --siii-admin-edge:rgba(210,216,230,.10);
+}
+html[data-sii-theme="dark"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel) {
+  background:var(--siii-admin-panel)!important;
+  border:1px solid var(--siii-admin-edge)!important;
+  border-radius:var(--siii-admin-radius)!important;
+}
+@media(max-width:767px) {
+  .sii-app.sii-ui .siii-glass-workspace {gap:14px}
+  .sii-app.sii-ui .siii-glass-workspace .sii-metric {padding:18px!important}
+  .sii-app.sii-ui .siii-glass-workspace .sii-institutions-panel {padding:16px!important}
+  .sii-app.sii-ui .siii-glass-workspace .sii-institution-item {padding:12px!important}
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active){
+  .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel){
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+}
+@media(forced-colors:active){
+  .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel) {
+    background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important;
+  }
+}

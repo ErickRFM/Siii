@@ -1,0 +1,139 @@
+/* Shared operational table sizing / responsive guardrails.
+   Keep real columns and actions accessible instead of hiding data on mobile. */
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-workspace,.siii-glass-workspace,.sii-catalog-layout,.sii-catalog-table-panel,.sii-operation-table) {
+  min-width:0;
+  max-width:100%;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-scroll,[data-slot="table-container"],.sii-operation-table,.overflow-x-auto):has(table) {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-scroll,[data-slot="table-container"],.sii-operation-table):has(table) table {
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table,.sii-operation-table table,[data-slot="table-container"] table) :is(th,td){
+  padding:clamp(9px,.85vw,13px) clamp(10px,1vw,15px);
+  vertical-align:middle;
+  line-height:1.45;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table,.sii-operation-table table,[data-slot="table-container"] table) th {
+  font-size:clamp(11px,.8vw,12px);
+  font-weight:650;
+  white-space:nowrap;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table,.sii-operation-table table,[data-slot="table-container"] table) td {
+  font-size:clamp(12px,.9vw,14px);
+  overflow-wrap:break-word;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table,.sii-operation-table table) td :is(button,a,[role="button"]) {
+  white-space:nowrap;
+  max-width:100%;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-pagination,.sii-catalog-toolbar,.sii-workspace-filters) {
+  min-width:0;
+  max-width:100%;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-pagination {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-form,.sii-catalog-edit,.sii-workspace-filters) :is(input,select,textarea) {
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+}
+@media(max-width:767px){
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-scroll,[data-slot="table-container"],.sii-operation-table):has(table) {
+    margin-inline:0;
+    border-radius:12px;
+  }
+  /* Natural per-module minimums preserve readable columns on narrow screens. */
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-table {
+    width:100%;
+    min-width:max(100%,470px);
+  }
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table,.sii-operation-table table) :is(th,td) {
+    padding:10px 12px;
+  }
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-toolbar {
+    min-width:0;
+    flex-wrap:wrap;
+  }
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-pagination button {
+    min-height:40px;
+  }
+}
+@media(forced-colors:active){
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table,.sii-operation-table table) :is(th,td){
+    border-bottom:1px solid CanvasText;
+  }
+}
+
+/* Responsive editor/table grids: use container width, not device width alone. */
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-layout,
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-workspace-grid {
+  min-width:0;
+}
+@container workspace (max-width:799px) {
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-workspace > .sii-catalog-layout > *,
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-workspace > .sii-workspace-grid > * {
+    grid-column:1/-1;
+    min-width:0;
+  }
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-table :is(th,td) :is(input,select,textarea) {
+  max-width:100%;
+  min-width:0;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-scroll,[data-slot="table-container"]) {
+  scrollbar-gutter:stable;
+  outline-offset:2px;
+}
+@media(max-width:600px){
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-pagination {
+    justify-content:space-between;
+  }
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-pagination > * {
+    max-width:100%;
+  }
+}
+
+/* Consistent reading and action affordances at high browser zoom. */
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-table tbody tr:focus-within {
+  outline:2px solid hsl(var(--ring) / .5);
+  outline-offset:-2px;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-toolbar,.sii-workspace-filters) label {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(.sii-catalog-table-panel,.sii-catalog-create,.sii-security-card) {
+  max-width:100%;
+  min-width:0;
+}
+@media (max-width:480px) {
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-pagination {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-pagination > span {
+    grid-column:1/-1;
+    text-align:center;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-table tbody tr {
+    transition:none!important;
+  }
+}
