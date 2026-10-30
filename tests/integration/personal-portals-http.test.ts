@@ -42,7 +42,7 @@ describe.sequential('personal portal real HTTP ownership and publication contrac
   let response=await read('grades');expect(response.status).toBe(200);expect((await response.json()).data).toEqual([expect.objectContaining({scoreHundredths:850,version:1})]);
   const publication=(await sql.query('INSERT INTO grade_publications(institution_id,section_id,operation_id,published_by,version) VALUES($1,$2,$3,$4,2) RETURNING id',[f.tenant,f.section,randomUUID(),f.teacher.id])).rows[0].id;
   await sql.query('INSERT INTO final_grades(institution_id,publication_id,student_id,score_hundredths) VALUES($1,$2,$3,900)',[f.tenant,publication,f.studentId]);
-  response=await read('grades');const data=(await response.json()).data;expect(data).toHaveLength(1);expect(data[0]).toMatchObject({scoreHundredths:900,version:2});expect(JSON.stringify(data)).not.toContain('999');
+  response=await read('grades');const data=(await response.json()).data;expect(data).toHaveLength(1);expect(data[0]).toMatchObject({scoreHundredths:900,version:2});expect(data.some((item:{scoreHundredths:number})=>item.scoreHundredths===999)).toBe(false);
   const unaffected=await read('grades','student',f.secondStudent.cookie);expect((await unaffected.json()).data).toEqual([expect.objectContaining({scoreHundredths:700,version:1})]);
  });
  it('reads only own orders; rejects IDOR query parameters and foreign contexts',async()=>{

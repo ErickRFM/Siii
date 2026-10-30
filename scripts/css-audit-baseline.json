@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-28T22:13:42.714Z",
-  "review": "Reviewed V7 in-place visual-only smoked glass layering. Original accessibility and role rules retained; CSS byte and duplicate budgets updated after source-level audit.",
-  "totalBytes": 230761,
-  "totalImportant": 330,
-  "totalDup": 409,
+  "generatedAt": "2026-10-30T12:30:00.000Z",
+  "review": "PR #137 and #139 integration: operational table responsiveness and account-security glass coherence.",
+  "totalBytes": 233049,
+  "totalImportant": 338,
+  "totalDup": 414,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -34,12 +34,12 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 42934,
-      "rules": 261,
-      "classes": 116,
+      "bytes": 45224,
+      "rules": 273,
+      "classes": 119,
       "orphanCandidates": 0,
-      "important": 148,
-      "duplicateSelectors": 91
+      "important": 156,
+      "duplicateSelectors": 96
     },
     {
       "file": "src/app/sii-interactions.css",
@@ -70,7 +70,7 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 30390,
+      "bytes": 30388,
       "rules": 273,
       "classes": 83,
       "orphanCandidates": 0,
@@ -134,8 +134,8 @@
     {
       "file": "src/app/sii-v5-theme.css",
       "bytes": 13958,
-      "rules": 59,
-      "classes": 41,
+      "rules": 60,
+      "classes": 44,
       "orphanCandidates": 0,
       "important": 56,
       "duplicateSelectors": 16
