@@ -41,18 +41,6 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   background:radial-gradient(ellipse at 8% 0%,rgba(113,37,67,.26),transparent 53%),
     linear-gradient(170deg,#29121e,#130e18 76%);
 }
-.sii-app .sii-sidebar-status {
-  background:rgba(255,255,255,.055);
-  border-color:rgba(255,255,255,.07);
-}
-.sii-app a.sii-nav-item:hover {
-  background:rgba(255,255,255,.105);
-}
-.sii-app .sii-nav-item--active {
-  background:rgba(184,73,109,.46)!important;
-  box-shadow:inset 3px 0 rgba(253,203,220,.75),0 6px 18px rgba(20,6,17,.10);
-}
-.sii-app .sii-nav-item--muted{opacity:.82}
 /* Sticky frosted toolbar and high-opacity readable glass panels. */
 .sii-app .sii-topbar {
   position:sticky;
@@ -84,9 +72,6 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 .sii-app .sii-module-glyph,.sii-app .sii-security-shield {
   background:var(--sii-primary-soft);
 }
-.sii-app .sii-metric-icon {
-  box-shadow:inset 0 0 0 1px rgba(65,45,58,.045);
-}
 .sii-app .sii-module-card,.sii-app .sii-metric,.sii-app a.sii-institution-item {
   transition:transform .2s ease,box-shadow .2s ease,background-color .2s ease;
 }
@@ -104,10 +89,6 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   background:var(--sii-glass-header);
   -webkit-backdrop-filter:blur(16px);
   backdrop-filter:blur(16px);
-}
-.sii-auth .sii-auth-role-notice {
-  background:var(--sii-glass-soft);
-  border-color:var(--sii-glass-edge);
 }
 /* Keep effects optional; readable solid backgrounds are the fallback. */
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))) {
@@ -131,7 +112,6 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 }
 @media (forced-colors:active) {
   .sii-app,.sii-app .sii-sidebar{background:Canvas;color:CanvasText}
-  .sii-app .sii-nav-item--active{background:Highlight!important;color:HighlightText!important;box-shadow:none}
   .sii-app :is(.sii-metric,.sii-panel,.sii-module-card){border:1px solid CanvasText}
 }
 @media (prefers-reduced-motion:reduce) {
@@ -178,10 +158,6 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-sidebar,.sii-topbar) {
   outline:0!important;
 }
-.sii-app.sii-ui .sii-nav-item--active {
-  background:rgba(222,204,190,.19)!important;
-  box-shadow:none!important;
-}
 .sii-app.sii-ui :is(.sii-nav-item,.sii-module-card) {
   transition:background-color .18s ease,transform .18s ease!important;
 }
@@ -189,22 +165,7 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   background:rgba(255,255,255,.09)!important;
   border-color:rgba(255,255,255,.10)!important;
 }
-
-
-
-
-
-
-
-
-
-.sii-student-portal .siii-glass-title{font-weight:650;letter-spacing:-.015em;font-size:1rem;margin-bottom:16px}
 .sii-student-portal .siii-glass-muted{color:rgba(243,233,225,.72);font-size:.84rem}
-.sii-student-portal .siii-glass-number{font-size:clamp(1.4rem,2.2vw,2rem);font-weight:650;line-height:1.2;letter-spacing:-.035em}
-.sii-student-portal .siii-glass-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.085)}
-.sii-student-portal .siii-glass-row:last-child{border-bottom:0}
-.sii-student-portal .siii-glass-link{display:inline-flex;align-items:center;gap:6px;color:#ede3da;text-decoration:underline;text-underline-offset:4px;font-size:.84rem}
-.sii-student-portal .siii-glass-pill{display:inline-flex;align-items:center;border-radius:999px;background:rgba(218,204,191,.14);padding:5px 11px;color:#f5eae0;font-size:.78rem}
 @media(max-width:1100px){
 
 
@@ -301,9 +262,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar{background:rgba(255,249
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,255,255,.68)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-teacher-metric,.siii-teacher-work){background:rgba(255,251,246,.57)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-muted{color:#675a53}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-link{color:#342f2e}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-pill{color:#342f2e;background:rgba(92,72,60,.10)}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-row{border-bottom-color:rgba(52,47,46,.09)}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{background:rgba(92,72,60,.17)!important;color:#302b29!important}
 
 
@@ -331,8 +289,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] .text-mute
 .sii-app.sii-ui .siii-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:14px;text-align:center;font-size:.78rem}
 .sii-app.sii-ui .siii-calendar-days span{display:grid;place-items:center;min-height:28px}
 .sii-app.sii-ui .siii-calendar-today{border-radius:9px;background:#cbbdb4;color:#2b2523;font-weight:700}
-.sii-app.sii-ui .siii-calendar-shell button{padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.08)}
-@media(min-width:1250px){.sii-app.sii-ui .siii-calendar-shell{grid-column:10/13}}
+@media(min-width:1250px){}
 
 
 @media(max-width:980px){}
