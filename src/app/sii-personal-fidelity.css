@@ -112,7 +112,7 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal :is(.siii-overview-subtle,.siii-overview-empty){font-size:11px;font-weight:350;line-height:17px;color:var(--siii-personal-muted);opacity:1}
 #siii-personal .siii-overview-detail-grid .siii-overview-empty{margin:auto 0}
 #siii-personal .siii-overview-progress{min-height:201px;padding:13px 16px}
-#siii-personal .siii-overview-term-bars{gap:9px;align-content:center}
+
 #siii-personal .siii-overview-term-bars>p{font-size:10px;font-weight:350;line-height:14px}
 #siii-personal .siii-overview-track,#siii-personal .siii-overview-track svg{height:12px;border-radius:20px}
 #siii-personal .siii-overview-term-bars>small{font-size:9px;line-height:13px;font-weight:330}
@@ -164,9 +164,9 @@ html[data-sii-theme=light] #siii-personal .siii-overview-status{color:#24513e;ba
 html[data-sii-theme=light] #siii-personal :is(a,button,summary):focus-visible{outline-color:#374b43}
 /* Correct inherited active-tab paint; the composition itself has no enclosing panel. */
 #siii-personal :is(.siii-student-home-shell,.siii-teacher-home-shell) [role=tabpanel]{background:transparent!important}
-#siii-personal .siii-overview-listrow strong{line-height:17px;overflow-wrap:break-word;font-size:11px;font-weight:330;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#siii-personal .siii-overview-listrow strong{line-height:17px;overflow-wrap:break-word;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #siii-personal #avisos .siii-overview-listrow{gap:11px;border:0;min-height:48px;padding-block:4px}
-#siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0;font-weight:400}
+#siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0}
 #siii-personal .siii-overview-term>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #siii-personal .siii-teacher-home-shell>.sii-page-eyebrow{display:none}
 #siii-personal .siii-personal-nav-group>summary{font-weight:350}
@@ -258,7 +258,7 @@ html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:linea
 #siii-personal .siii-overview-term-bars{align-self:start;margin-top:2px}
 html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:radial-gradient(ellipse at 65% 15%,rgba(176,153,132,.12),transparent 45%),linear-gradient(145deg,rgba(118,111,101,.26),rgba(55,54,51,.32))!important}
 html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(140deg,rgba(84,78,70,.22),rgba(60,58,55,.18))!important}
-@media(max-width:767px){#siii-personal .siii-overview-term-bars{align-self:auto;margin-top:0}}
+@media(max-width:767px){#siii-personal .siii-overview-term-bars{align-self:auto}}
 #siii-personal .siii-personal-nav-group>div>.siii-personal-nav-link{padding-left:22px;padding-right:5px;gap:10px;white-space:nowrap}
 #siii-personal .siii-overview-term-bars{margin-top:-4px}
 @media(max-width:767px){#siii-personal .siii-overview-term-bars{margin-top:0}}
