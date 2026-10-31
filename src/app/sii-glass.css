@@ -166,8 +166,6 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 }
 .sii-app.sii-ui .sii-topbar {
   background:rgba(108,98,92,.26)!important;
-  border:0!important;
-  box-shadow:none!important;
   backdrop-filter:blur(18px);
 }
 .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .rounded-xl.border.bg-card,.sii-workspace .rounded-xl.border) {
@@ -443,7 +441,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-metric:nth-child(4) 
 .sii-app.sii-ui .siii-overview-date-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;margin-top:5px;background:#d7c7bd;box-shadow:none}
 
 /* Reused metric component; one surface and color contract for every authorized role. */
-.sii-app.sii-ui .siii-shared-glass-metric{display:grid;gap:6px;align-content:start}
+.sii-app.sii-ui .siii-shared-glass-metric{gap:6px;align-content:start}
 .sii-app.sii-ui .siii-shared-glass-metric[data-tone="amber"] .siii-overview-metric-icon{background:rgba(195,148,104,.24);color:#f3d7b1}
 .sii-app.sii-ui .siii-shared-glass-metric[data-tone="blue"] .siii-overview-metric-icon{background:rgba(116,144,220,.28);color:#c6d3ff}
 .sii-app.sii-ui .siii-shared-glass-metric[data-tone="green"] .siii-overview-metric-icon{background:rgba(108,182,144,.22);color:#b8eacb}
