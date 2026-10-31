@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T08:12:00.000Z",
-  "review": "Personal mobile workspace-only CSS: preserves teacher home navigation visibility and visual height",
-  "totalBytes": 253902,
-  "totalImportant": 406,
-  "totalDup": 432,
+  "generatedAt": "2026-10-31T09:10:00Z",
+  "review": "Responsive academic catalog on 320-600px: compact grid tabs, checkbox sizing, accessible record cards; previous table retained on desktop. CSS measured from source.",
+  "totalBytes": 259657,
+  "totalImportant": 412,
+  "totalDup": 433,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -106,12 +106,12 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 5680,
-      "rules": 28,
-      "classes": 18,
+      "bytes": 11435,
+      "rules": 59,
+      "classes": 27,
       "orphanCandidates": 0,
-      "important": 1,
-      "duplicateSelectors": 9
+      "important": 7,
+      "duplicateSelectors": 10
     },
     {
       "file": "src/app/sii-tailwind.css",
