@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import Script from 'next/script';
 import {headers} from 'next/headers';
 import {invitationFragmentBootstrap} from '@/shared/invitations/fragment-bootstrap';
@@ -22,7 +22,28 @@ import './sii-v5-theme.css';
 import './sii-admin-coherence.css';
 import './sii-table-responsive.css';
 export const dynamic='force-dynamic';
-export const metadata:Metadata={title:'SII · Sistema Institucional Integral',description:'Plataforma institucional de gestión académica'};
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#efe8e3' },
+    { media: '(prefers-color-scheme: dark)', color: '#0d0f12' },
+  ],
+};
+export const metadata:Metadata={
+  title:'SII · Sistema Institucional Integral',
+  description:'Plataforma institucional de gestión académica',
+  applicationName:'SII Universitario',
+  appleWebApp:{
+    capable:true,
+    statusBarStyle:'default',
+    title:'SII',
+  },
+  formatDetection:{
+    telephone:false,
+  },
+};
 const siiThemeBootstrap="(function(){var personal=/^\\/dashboard\\/institutions\\/[^/]+\\/(student|teacher)(\\/|$)/.test(window.location.pathname),stored=null;try{stored=window.localStorage.getItem('sii-theme')}catch(_){}document.documentElement.dataset.siiTheme=stored==='light'?'light':stored==='dark'||personal?'dark':'light'})();";
 export default async function RootLayout({children}:{children:React.ReactNode}){
  const nonce=(await headers()).get('x-nonce')??undefined;

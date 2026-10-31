@@ -269,7 +269,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
      <MobileTrigger/>
      {personalShell&&<PersonalSidebarRestore/>}
      <Breadcrumb className="min-w-0 flex-1">
-      <BreadcrumbList className="flex-nowrap items-center gap-1 sm:gap-2 overflow-x-auto text-xs sm:text-sm">
+      <BreadcrumbList className="flex-nowrap items-center gap-1 sm:gap-2 overflow-x-auto text-xs sm:text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
        {breadcrumbs.map((item, idx) => (
         <React.Fragment key={item.label + idx}>
          {idx > 0 && <BreadcrumbSeparator className="shrink-0" />}
