@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-31T16:46:08.369Z",
-  "review": "Ambient breathing background, sidebar accordion transition, live status pulsing, watermark breathing, and tactile micro-interactions",
-  "totalBytes": 272533,
+  "generatedAt": "2026-10-31T21:00:00Z",
+  "review": "CSS cleanup pass 1: remove four identical media-scope declarations from personal fidelity; retain all dynamic/snapshot-dependent styles. Add syntax-aware audit for orphan candidates.",
+  "totalBytes": 272245,
   "totalImportant": 442,
   "totalDup": 461,
   "files": [
@@ -70,8 +70,8 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 41202,
-      "rules": 349,
+      "bytes": 40914,
+      "rules": 345,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 70,
