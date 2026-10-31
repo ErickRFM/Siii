@@ -80,7 +80,13 @@ jobs:
             if grep -Fqx -- "$branch" <<< "$open_heads"; then echo "SKIP open PR: $branch"; continue; fi
             state="$(gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' 2>/dev/null || true)"
             if [[ -z "$state" ]]; then echo "Already absent: $branch"; continue; fi
-            ahead="$(gh api "/repos/$GH_REPO/compare/main...$branch" --jq '.ahead_by')"
+            # Compare immutable SHA rather than a slash-containing branch path.
+            # The GitHub CLI has intermittently returned 404 for compare/main...codex/name.
+            echo "AUDIT existing branch: $branch at $state"
+            if ! ahead="$(gh api "/repos/$GH_REPO/compare/main...$state" --jq '.ahead_by')"; then
+              echo "::error::Unable to compare $branch at $state; preserving all remaining refs"
+              exit 1
+            fi
             if ! [[ "$ahead" =~ ^[0-9]+$ ]]; then echo "Invalid comparison, preserving: $branch"; continue; fi
             if (( ahead > 0 )); then
               tag="archive/siii-20261031/$branch"
