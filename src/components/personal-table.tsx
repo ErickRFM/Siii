@@ -53,7 +53,7 @@ export function PersonalTable<T extends {id:string}>({rows,columns,label,searchT
   else {setSortIndex(index);setDirection('asc');}
   setPage(0);
  }
- return <div className="min-w-0 space-y-4">
+ return <div className="siii-personal-data-table min-w-0 space-y-4">
   {(searchText||sortable.length>0)&&<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
    {searchText&&<label className="block min-w-0 flex-1 space-y-2 text-sm font-medium">Buscar en {label.toLocaleLowerCase('es-MX')}
     <Input type="search" value={query} onChange={event=>{setQuery(event.target.value);setPage(0)}} placeholder="Escribe para buscar"/>
@@ -71,7 +71,7 @@ export function PersonalTable<T extends {id:string}>({rows,columns,label,searchT
   {visible.length?<><div className="hidden min-w-0 md:block"><SiiScrollRegion label={label}><Table scrollable={false}><TableHeader><TableRow>{columns.map((column,index)=><TableHead key={index} scope="col" aria-sort={column.sortValue?sortIndex===index?(direction==='asc'?'ascending':'descending'):'none':undefined} className="whitespace-nowrap">
    {column.sortValue?<button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-md text-left font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" onClick={()=>chooseSort(index)} aria-label={`Ordenar por ${column.label}`}>{column.label}<span aria-hidden="true">{sortIndex===index?(direction==='asc'?'↑':'↓'):'↕'}</span></button>:column.label}
   </TableHead>)}</TableRow></TableHeader><TableBody>{visible.map(row=><TableRow key={row.id}>{columns.map((column,index)=><TableCell key={index} className="min-w-0">{column.render(row)}</TableCell>)}</TableRow>)}</TableBody></Table></SiiScrollRegion></div>
-  <section className="space-y-3 md:hidden" aria-label={label}>{visible.map(row=><dl key={row.id} className="grid min-w-0 grid-cols-1 gap-3 rounded-xl border bg-card p-4 min-[420px]:grid-cols-2">{columns.map((column,index)=><div key={index} className="min-w-0 break-words"><dt className="text-xs font-medium text-muted-foreground">{column.label}</dt><dd className="mt-1 break-words text-sm">{column.render(row)}</dd></div>)}</dl>)}</section>
+  <section className="siii-personal-mobile-records space-y-3 md:hidden" aria-label={label}>{visible.map(row=><dl key={row.id} className="siii-personal-record grid min-w-0 grid-cols-1 gap-3 rounded-xl border bg-card p-4">{columns.map((column,index)=><div key={index} className="siii-personal-record-field min-w-0 break-words"><dt className="siii-personal-record-label text-xs font-medium text-muted-foreground">{column.label}</dt><dd className="siii-personal-record-value mt-1 break-words text-sm">{column.render(row)}</dd></div>)}</dl>)}</section>
   <nav aria-label={`Paginación de ${label}`} className="flex flex-wrap items-center justify-between gap-3">
    <p className="text-sm text-muted-foreground" role="status" aria-live="polite">Mostrando {current*pageSize+1}–{current*pageSize+visible.length} de {ordered.length} registros · Página {current+1} de {last+1}</p>
    {last>0&&<div className="flex gap-2"><Button type="button" variant="outline" disabled={current===0} onClick={()=>setPage(Math.max(0,current-1))}>Anterior</Button><Button type="button" variant="outline" disabled={current===last} onClick={()=>setPage(Math.min(last,current+1))}>Siguiente</Button></div>}
