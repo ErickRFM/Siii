@@ -225,7 +225,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
       </div>
       <div className="sii-catalog-summary">
         <div><span className="sii-section-kicker">CATÁLOGO INSTITUCIONAL</span><h2>{selected.label}</h2><p>{selected.description}</p></div>
-        <span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span>
+        <span className="sii-small-count">{loading?'Cargando…':`${rows.length} ${rows.length===1?'registro':'registros'} en esta página`}</span>
       </div>
       {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
       {loadError&&<p className="sii-catalog-error" role="alert">{loadError}</p>}
