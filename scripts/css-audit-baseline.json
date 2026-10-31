@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Second CSS pass: remove 40 shadowed unconditional properties, 2 unreferenced keyframes; retain the later canonical selector/property winner. CI enforces single unscoped owner on 17 core selector families.",
-  "totalBytes": 251547,
-  "totalImportant": 426,
-  "totalDup": 435,
+  "review": "Reconciled PR #153 personal density/performance with PR #155 canonical CSS owners; preserve mobile CSS and remove 40 shadowed global declarations and 2 unused keyframes.",
+  "totalBytes": 254140,
+  "totalImportant": 432,
+  "totalDup": 437,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20334,
-      "rules": 88,
-      "classes": 50,
+      "bytes": 22927,
+      "rules": 104,
+      "classes": 53,
       "orphanCandidates": 0,
-      "important": 71,
-      "duplicateSelectors": 29
+      "important": 77,
+      "duplicateSelectors": 31
     },
     {
       "file": "src/app/sii-premium-kit.css",
