@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Legacy CSS audit cleanup: 176 dead static selector blocks, 8 provably repeated full CSS rules (including 4 cross-import), 9 redundant declarations and 12 unused custom-property definitions removed. All visual gates remain unchanged.",
-  "totalBytes": 253244,
-  "totalImportant": 426,
-  "totalDup": 441,
+  "review": "Reconciled merged CSS cleanup #154 with personal UX/perf #153. Keep deleted legacy CSS, append scoped responsive improvements; restore audited per-file/total budgets.",
+  "totalBytes": 255837,
+  "totalImportant": 432,
+  "totalDup": 443,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20334,
-      "rules": 88,
-      "classes": 50,
+      "bytes": 22927,
+      "rules": 104,
+      "classes": 53,
       "orphanCandidates": 0,
-      "important": 71,
-      "duplicateSelectors": 29
+      "important": 77,
+      "duplicateSelectors": 31
     },
     {
       "file": "src/app/sii-premium-kit.css",

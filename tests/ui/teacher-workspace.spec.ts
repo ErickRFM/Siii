@@ -15,7 +15,7 @@ test('teacher navigation has no agenda, opens minimum official roster and shows 
  await expect(page.getByRole('heading',{name:'Lista oficial',exact:true})).toBeVisible();await expect(page.getByRole('cell',{name:'Alumna propia Sintético',exact:true})).toBeVisible();await expect(page.getByRole('spinbutton')).toHaveCount(0);
  await page.getByRole('tab',{name:'Resultados y actas',exact:true}).click();await expect(page.getByRole('cell',{name:'8.50',exact:true})).toBeVisible();await expect(page.getByText('9.99',{exact:true})).toHaveCount(0);
  expect(requests.some(url=>url.includes('/schedule'))).toBe(false);await expect(page.getByRole('button',{name:/QR|asistencia|pase de lista/i})).toHaveCount(0);
- await page.getByRole('tab',{name:'Mi perfil',exact:true}).click();await expect(page.getByText('Número de empleado',{exact:true})).toBeVisible();await expect(page.getByText('Matrícula / número de empleado',{exact:true})).toHaveCount(0);
+ await personalNavigate(page,'Mi perfil');await expect(page.getByText('Número de empleado',{exact:true})).toBeVisible();await expect(page.getByText('Matrícula / número de empleado',{exact:true})).toHaveCount(0);
 });
 test('teacher mobile and desktop surfaces remain accessible without page overflow',async({page},info)=>{
  const f=await portalFixture(sql);await enter(page,f);await personalNavigate(page,'Mis grupos');await expect(page.getByRole('button',{name:'Lista oficial de SYS-101'})).toBeVisible();
@@ -32,7 +32,7 @@ test('saved teacher grade draft survives reload; closed term remains read-only',
  await sql.query("UPDATE academic_terms SET status='inactive' WHERE id=$1",[f.term]);await page.reload();await personalNavigate(page,'Mis grupos');await page.getByRole('button',{name:'Evaluar SYS-202'}).click();await expect(page.getByText(/Periodo cerrado.*consulta/)).toBeVisible();await expect(page.getByRole('button',{name:'Guardar',exact:true})).toHaveCount(0);
 });
 test('unlinked and offline states give truthful recovery guidance',async({page})=>{
- const f=await portalFixture(sql);await sql.query('UPDATE teacher_account_links SET revoked_at=now() WHERE membership_id=$1',[f.teacher.member]);await enter(page,f);await expect(page.getByText('Perfil docente aún sin vincular',{exact:true})).toBeVisible();await personalNavigate(page,'Mis grupos');await expect(page.getByRole('tab',{name:'Evaluaciones',exact:true})).toBeDisabled();
+ const f=await portalFixture(sql);await sql.query('UPDATE teacher_account_links SET revoked_at=now() WHERE membership_id=$1',[f.teacher.member]);await enter(page,f);await expect(page.getByText('Perfil docente aún sin vincular',{exact:true})).toBeVisible();await personalNavigate(page,'Mis grupos');await expect(page.locator('.sii-teacher-navigation [role="tab"]').filter({hasText:'Evaluaciones'})).toBeDisabled();
  await page.context().setOffline(true);await expect(page.getByRole('alert').filter({hasText:'Sin conexión'})).toBeVisible();await page.context().setOffline(false);await expect(page.getByText('Perfil docente aún sin vincular',{exact:true})).toBeVisible();
 });
 

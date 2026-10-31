@@ -320,3 +320,58 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 
 /* Teacher interior must clear the fixed mobile topbar. */
 @media(max-width:767px){#siii-personal .sii-teacher-portal:not(.siii-teacher-home-shell){padding-top:40px}}
+
+/* Personal UX density: keep navigation in the sidebar on wide desktop while
+   preserving touch-friendly section tabs on mobile/tablet. Home reference is unchanged. */
+@media(min-width:1440px){
+ #siii-personal .sii-student-portal:not(.siii-student-home-shell) .sii-personal-navigation,
+ #siii-personal .sii-teacher-portal:not(.siii-teacher-home-shell) .sii-teacher-navigation{display:none!important}
+}
+#siii-personal :is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)){
+ gap:12px;
+}
+#siii-personal .sii-student-portal:not(.siii-student-home-shell) .sii-kit-page-heading{
+ margin-bottom:4px;align-items:center;
+}
+#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card{
+ display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;
+ padding:12px 16px!important;min-height:0;background:var(--siii-interior-panel)!important;
+}
+#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card h2{
+ margin:0;font-size:1rem;line-height:1.35;flex:0 1 auto;
+}
+#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card p{
+ margin:0;font-size:.82rem;line-height:1.4;
+}
+#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card p:last-child{
+ color:var(--siii-interior-muted);flex:1 1 230px;
+}
+#siii-personal .siii-personal-data-table table{
+ width:100%;table-layout:fixed;min-width:740px;
+}
+#siii-personal .siii-personal-data-table thead th:first-child{width:35%}
+#siii-personal .siii-personal-data-table thead th{
+ font-size:.82rem!important;white-space:normal!important;
+ line-height:1.35;padding:10px 12px;overflow-wrap:break-word;
+}
+#siii-personal .siii-personal-data-table tbody td{
+ font-size:.875rem;line-height:1.45;vertical-align:middle;
+ padding:11px 12px;overflow-wrap:anywhere;
+}
+#siii-personal .siii-personal-data-table tbody td:first-child{font-weight:550}
+#siii-personal .siii-overview-metric[data-long-value=true] .siii-shared-metric-copy>strong{
+ font-size:clamp(15px,1.2vw,19px);line-height:1.2;
+ white-space:normal;overflow-wrap:break-word;text-wrap:pretty;
+}
+/* One result must not reserve the same dashboard height as four results. */
+@media(min-width:1160px){
+ #siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel{
+  min-height:190px;
+ }
+}
+@media(max-width:767px){
+ #siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card{
+  display:grid;gap:4px;padding:12px!important;
+ }
+ #siii-personal .siii-personal-data-table table{min-width:0}
+}

@@ -33,3 +33,13 @@ it('does not display a complete-looking enrollment count when the collection is 
  const html=renderToStaticMarkup(<StudentGlassOverview snapshot={snapshot} profile={profile} institutionName="Institución sintética" onNavigate={()=>{}} onRefresh={()=>{}} refreshing={false}/>);
  expect(html).toContain('Datos incompletos');expect(html).not.toContain('0 de 0 inscripciones consultadas');
 });
+
+
+it('uses a compact detail grid for sparse authorized data and preserves long KPI wording',()=>{
+ const profile={id:'student',firstName:'Estudiante',lastName:'Sintético',status:'active',institutionalEmail:null,verifiedEmail:null,timeZone:'America/Mexico_City'};
+ const snapshot:PersonalSnapshot={profile,courses:[],teachers:[],schedule:[],grades:[],orders:[],payments:[],groups:[],requests:[],pendingRequests:[],requestHistory:[],announcements:[]};
+ const html=renderToStaticMarkup(<StudentGlassOverview snapshot={snapshot} profile={profile} institutionName="Institución de prueba" onNavigate={()=>{}} onRefresh={()=>{}} refreshing={false}/>);
+ expect(html).toContain('siii-overview-detail-grid--sparse');
+ expect(html).toContain('data-long-value="true"');
+ expect(html).toContain('Sin cargos pendientes');
+});
