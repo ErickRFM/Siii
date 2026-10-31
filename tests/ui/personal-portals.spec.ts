@@ -274,7 +274,7 @@ test('mobile personal interiors keep header and academic records readable in bot
 test('teacher portal mobile groups keep cards and toolbar within viewport',async({page})=>{
  await login(page,f.teacher);
  await page.goto('/dashboard/institutions/'+f.tenant+'/teacher');
- await page.getByRole('tab',{name:'Mis grupos',exact:true}).click();
+ await personalNavigate(page,'Mis grupos');
  for(const width of [320,390,430,768]){
   await page.setViewportSize({width,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
