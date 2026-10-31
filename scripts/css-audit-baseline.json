@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T16:46:08.369Z",
-  "review": "Ambient breathing background, sidebar accordion transition, live status pulsing, watermark breathing, and tactile micro-interactions",
-  "totalBytes": 272533,
-  "totalImportant": 442,
-  "totalDup": 461,
+  "generatedAt": "2026-10-31T21:05:00Z",
+  "review": "Personal UX density: no redundant wide-desktop section tabs, concise identity, readable tables and long metrics. CSS source budget reviewed.",
+  "totalBytes": 275126,
+  "totalImportant": 448,
+  "totalDup": 463,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20357,
-      "rules": 88,
-      "classes": 50,
+      "bytes": 22950,
+      "rules": 104,
+      "classes": 53,
       "orphanCandidates": 0,
-      "important": 71,
-      "duplicateSelectors": 29
+      "important": 77,
+      "duplicateSelectors": 31
     },
     {
       "file": "src/app/sii-premium-kit.css",
