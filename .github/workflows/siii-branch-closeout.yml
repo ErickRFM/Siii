@@ -79,7 +79,15 @@ jobs:
             [[ "$branch" != main && "$branch" =~ ^[a-zA-Z0-9/_-]+$ ]] || { echo "Skip unsafe branch: $branch"; continue; }
             if grep -Fqx -- "$branch" <<< "$open_heads"; then echo "SKIP open PR: $branch"; continue; fi
             state="$(gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' 2>/dev/null || true)"
-            if [[ -z "$state" ]]; then echo "Already absent: $branch"; continue; fi
+            # gh api may print a 404 JSON body to stdout; do not treat that as a SHA.
+            if [[ "$state" == *'"message":"Branch not found"'* || "$state" == *'"status":"404"'* ]]; then
+              echo "Already absent: $branch"
+              continue
+            fi
+            if [[ ! "$state" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::Unexpected branch lookup response for $branch; aborting safely"
+              exit 1
+            fi
             # Compare immutable SHA rather than a slash-containing branch path.
             # The GitHub CLI has intermittently returned 404 for compare/main...codex/name.
             echo "AUDIT existing branch: $branch at $state"
@@ -120,8 +128,14 @@ jobs:
           # Fail visibly if allowlisted refs still exist after the cleanup.
           leftovers=0
           for branch in "${branches[@]}"; do
-            if gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' >/dev/null 2>&1; then
-              echo "::error::Allowlisted branch still remains: $branch"
+            check="$(gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' 2>/dev/null || true)"
+            if [[ "$check" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::Allowlisted branch still remains: $branch at $check"
+              leftovers=$((leftovers+1))
+            elif [[ "$check" == *'"message":"Branch not found"'* || "$check" == *'"status":"404"'* ]]; then
+              : # Confirmed absent.
+            else
+              echo "::error::Cannot verify branch absence for $branch; fail closed"
               leftovers=$((leftovers+1))
             fi
           done
