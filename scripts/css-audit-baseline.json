@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T08:12:00.000Z",
-  "review": "Personal mobile workspace-only CSS: preserves teacher home navigation visibility and visual height",
-  "totalBytes": 253902,
-  "totalImportant": 406,
-  "totalDup": 432,
+  "generatedAt": "2026-10-31T08:20:00.000Z",
+  "review": "Borderless personal/operational table layout, no clipping in mobile tab navigation, forced-colors preserved",
+  "totalBytes": 259110,
+  "totalImportant": 432,
+  "totalDup": 446,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 16133,
-      "rules": 68,
-      "classes": 42,
+      "bytes": 19767,
+      "rules": 86,
+      "classes": 48,
       "orphanCandidates": 0,
-      "important": 51,
-      "duplicateSelectors": 18
+      "important": 70,
+      "duplicateSelectors": 29
     },
     {
       "file": "src/app/sii-premium-kit.css",
@@ -106,12 +106,12 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 5680,
-      "rules": 28,
+      "bytes": 7254,
+      "rules": 34,
       "classes": 18,
       "orphanCandidates": 0,
-      "important": 1,
-      "duplicateSelectors": 9
+      "important": 8,
+      "duplicateSelectors": 12
     },
     {
       "file": "src/app/sii-tailwind.css",
