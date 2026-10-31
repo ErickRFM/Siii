@@ -326,6 +326,7 @@ test('borderless personal panels and fully visible mobile student tabs',async({p
       overflow:el.scrollWidth-el.clientWidth};
     });
     expect(bottom.display).toBe('grid');
+    await expect(studentNav.getByRole('tab')).toHaveCount(5);
     expect(bottom.columns).toBe(5);
     expect(bottom.right).toBeLessThanOrEqual(width+2);
     expect(bottom.lastWidth).toBeGreaterThanOrEqual(44);
@@ -337,6 +338,18 @@ test('borderless personal panels and fully visible mobile student tabs',async({p
   const first=page.locator('.siii-personal-mobile-records .siii-personal-record').first();
   await expect(first).toBeVisible();
   expect(await first.evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe('0px');
+  // A fixed bottom bar must not hide the final academic record or pagination.
+  // Verify this at the actual document bottom, not only at the first viewport.
+  await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
+  const clearance=await page.evaluate(()=>{
+   const bar=document.querySelector('#siii-personal .sii-student-portal .sii-personal-navigation');
+   const records=[...document.querySelectorAll('.siii-personal-mobile-records .siii-personal-record')];
+   const last=records.at(-1);
+   if(!bar||!last)return null;
+   return {barTop:bar.getBoundingClientRect().top,lastBottom:last.getBoundingClientRect().bottom};
+  });
+  expect(clearance).not.toBeNull();
+  expect(clearance!.lastBottom).toBeLessThanOrEqual(clearance!.barTop-8);
   await personalNavigate(page,'Inicio');
  }
 });
