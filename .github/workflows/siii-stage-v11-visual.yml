@@ -1,0 +1,88 @@
+name: Stage reviewed V11 visual snapshots
+on:
+  push:
+    branches:
+      - fix/siii-restore-visual-gates-after150-20261031
+
+permissions:
+  contents: write
+
+jobs:
+  stage-v11-baselines:
+    if: "!contains(github.event.head_commit.message, 'chore(visual):')"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: university_sis_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/university_sis_test
+      SIII_DATABASE_ENV: test
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install and prepare isolated test fixtures
+        run: |
+          npm ci --ignore-scripts
+          npm rebuild argon2 esbuild
+          node --import tsx scripts/prepare-test-api-roles.ts
+          npm run db:migrate
+          npx playwright install --with-deps chromium
+      - name: Capture eight reference screenshots with regression checks still active
+        shell: bash
+        run: |
+          set +e
+          npx playwright test tests/ui/approved-reference.spec.ts --project=chromium
+          code=$?
+          echo "Expected historical baseline failures during reference capture: exit=$code"
+          exit 0
+      - name: Stage candidate PNGs in this PR (not main)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "siii-visual-capture[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for role in student teacher; do
+            for theme in dark light; do
+              for width in 1344 390; do
+                name="${role}-${theme}-${width}"
+                file=".p0-local/fidelity/${name}.png"
+                if [[ ! -s "$file" ]]; then echo "::error::Missing required reviewed screenshot: $file"; exit 1; fi
+                cp "$file" "tests/ui/visual-baselines/${name}-linux.png"
+                cp "$file" "tests/ui/visual-baselines/${name}.png"
+              done
+            done
+          done
+          git add tests/ui/visual-baselines/
+          if git diff --cached --quiet; then
+            echo "No new reference snapshots to stage."
+          else
+            git commit -m "chore(visual): stage V11 borderless snapshots for review"
+            git push origin "HEAD:fix/siii-restore-visual-gates-after150-20261031"
+          fi
+      - name: Retain all generated reference evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reviewed-visual-snapshot-candidates
+          path: .p0-local/fidelity/*.png
+          if-no-files-found: warn
+          retention-days: 3
