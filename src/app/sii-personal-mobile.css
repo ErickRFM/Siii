@@ -1,5 +1,4 @@
-/* SIII personal interiors: layout and legibility in student/teacher academic views.
-   Scoped to role portals; preserves the approved home dashboards and admin workspaces. */
+/* Mobile interior styles; preserve home compositions. */
 #siii-personal :is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) {
   --siii-interior-text:#f2f0ed;
   --siii-interior-muted:#c9c8c5;
@@ -211,8 +210,7 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
 }
 
 
-/* The legacy interior light selector forced white headings/links on a dark shell.
-   Reconcile those exact targets after the shell switches to genuine light mode. */
+/* Interior light text contrast. */
 html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell))):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-page-eyebrow,.sii-page-heading h1,.sii-page-heading p,nav[aria-label="Contexto del portal"] a) {
   color:#283037!important;
 }
@@ -220,3 +218,6 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
   background:rgba(40,48,55,.085)!important;
   color:#283037!important;
 }
+
+/* Teacher interior must clear the fixed mobile topbar. */
+@media(max-width:767px){#siii-personal .sii-teacher-portal:not(.siii-teacher-home-shell){padding-top:40px}}
