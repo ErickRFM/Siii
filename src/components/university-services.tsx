@@ -138,7 +138,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
     <SiiScrollRegion label="Tabla de servicios, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
      <TableHeader><TableRow><TableHead>Información</TableHead><TableHead>Estado</TableHead><TableHead>Operación</TableHead></TableRow></TableHeader>
      <TableBody>{rows.map(row=><TableRow key={row.id}>
-      <TableCell><strong>{row.title??row.summary??row.requestType}</strong><small>{row.description??row.body??''}</small></TableCell>
+      <TableCell><strong>{row.title??row.summary??row.requestType}</strong><small style={{color:'var(--sii-text)'}}>{row.description??row.body??''}</small></TableCell>
       <TableCell>{row.status}</TableCell>
       <TableCell>
        {tab==='announcements'&&row.status==='DRAFT'&&<Button variant="outline" type="button" disabled={saving} onClick={()=>void advance(row,'PUBLISHED')}>Publicar</Button>}
