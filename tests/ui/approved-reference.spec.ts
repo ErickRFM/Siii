@@ -133,6 +133,7 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
  await page.evaluate(async()=>{await document.fonts.ready});
  if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro',exact:true}).click();
  await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
+ let visualBaselineFailure:unknown;
  for(const width of [1344,390]){
   await page.setViewportSize({width,height:896});await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
   if(width===390&&theme==='light'){
@@ -148,7 +149,10 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   expect(screenshot.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
   // Release gate: compare every student/teacher desktop/mobile PNG against reviewed references.
   // Do not suppress this call, widen its 5% budget or auto-approve new reference PNGs.
-  expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info);
+  // Gather both desktop and mobile screenshots before reporting the reference mismatch.
+  // Do not suppress a failing comparison: fail after the evidence set is complete.
+  try{expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info)}
+  catch(error){visualBaselineFailure??=error}
   // The former PNG references document the bordered V1 look, not the approved borderless V11 design.
   // Keep the captured PNG as review evidence; enforce spatial, material and accessibility contracts
   // rather than accepting a larger pixel-diff tolerance or silently replacing historical PNGs.
@@ -189,6 +193,7 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations;
   expect(violations).toEqual([]);
  }
+ if(visualBaselineFailure)throw visualBaselineFailure;
  if(role==='teacher'){
   await page.locator('.siii-overview-shortcuts').getByRole('link',{name:'Mi perfil',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Mi perfil docente institucional',exact:true})).toBeVisible();
