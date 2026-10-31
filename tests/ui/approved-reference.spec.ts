@@ -43,6 +43,8 @@ test('student entry and approved composition at exactly 1344 by 896',async({page
  if(process.env.SIII_FIDELITY_BASELINE!=='1'){
   const comparison=compareApprovedReference(`${directory}/${name}.png`,boxes,directory);
   expect(comparison.geometryErrors).toEqual([]);
+  // Keep the approved reference's material composition gate: no global tolerance changes.
+  expect(comparison.compositionWithinThreshold,JSON.stringify(comparison.materials)).toBe(true);
   // The reviewed borderless glass design replaces the old bordered pixel reference.
   // Keep geometry checks and explicitly certify the new material contract instead.
   const matte=await page.locator('#siii-personal :is(.siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric)').evaluateAll(elements=>elements.map(el=>({border:getComputedStyle(el).borderTopWidth,shadow:getComputedStyle(el).boxShadow})));
@@ -143,12 +145,13 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   expect(screenshot.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
   const appearance=await page.locator('#siii-personal :is(.siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric)').evaluateAll(nodes=>nodes.map(node=>{
    const style=getComputedStyle(node),box=node.getBoundingClientRect();
-   return {border:style.borderTopWidth,shadow:style.boxShadow,left:box.left,right:box.right,width:box.width};
+   return {border:style.borderTopWidth,shadow:style.boxShadow,blur:style.backdropFilter,left:box.left,right:box.right,width:box.width};
   }));
   expect(appearance.length).toBeGreaterThan(4);
   for(const surface of appearance){
    expect(surface.border).toBe('0px');
    expect(surface.shadow).toBe('none');
+   expect(surface.blur).toContain('blur(');
    expect(surface.width).toBeGreaterThan(0);
    expect(surface.left).toBeGreaterThanOrEqual(-2);
    expect(surface.right).toBeLessThanOrEqual(width+2);
