@@ -7,7 +7,6 @@ import {approvedReferenceFixture} from '../support/approved-reference-fixture';
 import AxeBuilder from '@axe-core/playwright';
 import {compareApprovedReference} from '../../scripts/compare-approved-reference.mjs';
 import {personalNavigate} from '../support/personal-navigation';
-import {expectVisualBaseline} from '../support/visual-baseline';
 
 
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()});
@@ -125,7 +124,7 @@ test('personal surfaces become opaque with reduced transparency and honor forced
  expect(await page.locator('#avisos').evaluate(el=>getComputedStyle(el).backdropFilter)).toBe('none');
 });
 
-for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page},info)=>{
+for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page})=>{
  test.setTimeout(120000);await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
  await login(page,f[role].username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${role}`));
  await expect(page.locator('.siii-overview-hero h2')).toContainText(role==='student'?'Alejandra':'Docente oficial');
@@ -144,7 +143,30 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   // A new borderless design intentionally differs from the historical bordered PNGs.
   // Keep the screenshot as evidence, verify PNG output and enforce material/geometry.
   expect(screenshot.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
-  expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info);
+  // The former PNG references document the bordered V1 look, not the approved borderless V11 design.
+  // Keep the captured PNG as review evidence; enforce spatial, material and accessibility contracts
+  // rather than accepting a larger pixel-diff tolerance or silently replacing historical PNGs.
+  const layout=await page.locator('#siii-personal .siii-student-dashboard').evaluate(board=>{
+   const bounds=board.getBoundingClientRect();
+   const hero=board.querySelector('.siii-overview-hero')?.getBoundingClientRect();
+   const metrics=board.querySelector('.siii-overview-metrics')?.getBoundingClientRect();
+   const aside=board.querySelector('.siii-student-aside')?.getBoundingClientRect();
+   return {left:bounds.left,right:bounds.right,width:bounds.width,
+    heroLeft:hero?.left??-1,heroRight:hero?.right??Infinity,heroBottom:hero?.bottom??Infinity,
+    metricsLeft:metrics?.left??-1,metricsRight:metrics?.right??Infinity,metricsTop:metrics?.top??-1,
+    asideLeft:aside?.left??-1,asideRight:aside?.right??Infinity,asideWidth:aside?.width??0};
+  });
+  expect(layout.left).toBeGreaterThanOrEqual(-2);
+  expect(layout.right).toBeLessThanOrEqual(width+2);
+  expect(layout.width).toBeGreaterThan(0);
+  expect(layout.heroLeft).toBeGreaterThanOrEqual(-2);
+  expect(layout.heroRight).toBeLessThanOrEqual(width+2);
+  expect(layout.metricsLeft).toBeGreaterThanOrEqual(-2);
+  expect(layout.metricsRight).toBeLessThanOrEqual(width+2);
+  expect(layout.metricsTop).toBeGreaterThanOrEqual(layout.heroBottom-2);
+  expect(layout.asideLeft).toBeGreaterThanOrEqual(-2);
+  expect(layout.asideRight).toBeLessThanOrEqual(width+2);
+  expect(layout.asideWidth).toBeGreaterThan(180);
   const appearance=await page.locator('#siii-personal :is(.siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric)').evaluateAll(nodes=>nodes.map(node=>{
    const style=getComputedStyle(node),box=node.getBoundingClientRect();
    return {border:style.borderTopWidth,shadow:style.boxShadow,blur:style.backdropFilter,left:box.left,right:box.right,width:box.width};
