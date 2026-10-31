@@ -94,16 +94,16 @@
    Native scrollbar mechanics are preserved for keyboard, touch and OS accessibility.
    Avoid global '*' rules: auth, system dialogs and third-party widgets retain their own scroll. */
 .sii-app {
- --sii-scroll-thumb: hsl(345 30% 48% / .42);
- --sii-scroll-thumb-hover: hsl(345 46% 42% / .75);
- --sii-scroll-sidebar-thumb: hsl(345 65% 80% / .40);
- --sii-scroll-sidebar-hover: hsl(345 70% 86% / .72);
+ --sii-scroll-thumb: rgba(0, 0, 0, .22);
+ --sii-scroll-thumb-hover: rgba(0, 0, 0, .36);
+ --sii-scroll-sidebar-thumb: rgba(0, 0, 0, .18);
+ --sii-scroll-sidebar-hover: rgba(0, 0, 0, .32);
 }
 html[data-sii-theme="dark"] .sii-app {
- --sii-scroll-thumb: hsl(345 40% 72% / .42);
- --sii-scroll-thumb-hover: hsl(345 65% 80% / .73);
- --sii-scroll-sidebar-thumb: hsl(345 60% 78% / .45);
- --sii-scroll-sidebar-hover: hsl(345 70% 86% / .78);
+ --sii-scroll-thumb: rgba(255, 255, 255, .20);
+ --sii-scroll-thumb-hover: rgba(255, 255, 255, .34);
+ --sii-scroll-sidebar-thumb: rgba(255, 255, 255, .16);
+ --sii-scroll-sidebar-hover: rgba(255, 255, 255, .30);
 }
 /* Sidebar scroll is intentionally easier to discover than workspace scroll. */
 .sii-app [data-sidebar="content"] {
@@ -119,12 +119,24 @@ html[data-sii-theme="dark"] .sii-app {
 /* Keep document scrollbar unobtrusive in the dashboard; no forced overflow mode. */
 html:has(.sii-app) {
  scrollbar-width: thin;
- scrollbar-color: hsl(345 30% 48% / .42) transparent;
+ scrollbar-color: rgba(0, 0, 0, .22) transparent;
 }
 html[data-sii-theme="dark"]:has(.sii-app) {
- scrollbar-color: hsl(345 40% 72% / .45) transparent;
+ scrollbar-color: rgba(255, 255, 255, .20) transparent;
 }
 @supports selector(::-webkit-scrollbar) {
+ html:has(.sii-app)::-webkit-scrollbar {width:8px;height:8px}
+ html:has(.sii-app)::-webkit-scrollbar-track {background:transparent}
+ html:has(.sii-app)::-webkit-scrollbar-thumb {
+  background:rgba(0,0,0,.22);border:2px solid transparent;
+  background-clip:padding-box;border-radius:999px;
+ }
+ html[data-sii-theme="dark"]:has(.sii-app)::-webkit-scrollbar-thumb {
+  background:rgba(255,255,255,.20);border:2px solid transparent;
+  background-clip:padding-box;border-radius:999px;
+ }
+ html:has(.sii-app)::-webkit-scrollbar-thumb:hover {background-color:rgba(0,0,0,.36)}
+ html[data-sii-theme="dark"]:has(.sii-app)::-webkit-scrollbar-thumb:hover {background-color:rgba(255,255,255,.34)}
  .sii-app [data-sidebar="content"]::-webkit-scrollbar {width:8px;height:8px}
  .sii-app [data-sidebar="content"]::-webkit-scrollbar-track {background:transparent}
  .sii-app [data-sidebar="content"]::-webkit-scrollbar-thumb {

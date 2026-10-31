@@ -136,8 +136,7 @@ export default function SiiAppShell({actorId,firstName,fullName,defaultInstituti
  const pathname=usePathname();
  const {active,institutionId}=resolveDashboardLocation(pathname,defaultInstitutionId);
  const isPersonal=personalAccount||active==='student'||active==='teacher';
- const [sidebarOpen,setSidebarOpen]=useState(isPersonal||initialSidebarOpen);
- useEffect(()=>{if(isPersonal)setSidebarOpen(true)},[isPersonal]);
+ const [sidebarOpen,setSidebarOpen]=useState(initialSidebarOpen);
  const updateSidebar=(open:boolean)=>{
   setSidebarOpen(open);
  };
@@ -329,7 +328,7 @@ function StudentSidebarDisclosure({label,children}:{label:string;children:ReactN
 
 function PersonalSidebarRestore(){
  const {open,isMobile,toggleSidebar}=useSidebar();
- return !open&&!isMobile?<Button type="button" variant="ghost" size="icon" aria-label="Mostrar navegación" onClick={toggleSidebar}><PanelLeftOpen/></Button>:null;
+ return !open&&!isMobile?<Button type="button" variant="ghost" size="icon" aria-label="Mostrar navegación" title="Mostrar navegación lateral" onClick={toggleSidebar} className="siii-topbar-restore"><PanelLeftOpen/></Button>:null;
 }
 
 function CollapseButton(){
