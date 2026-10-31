@@ -25,7 +25,8 @@ html[data-sii-theme="light"] .sii-app.sii-ui:has(.siii-glass-workspace) {
 .sii-app.sii-ui .siii-glass-workspace > :is(section,div) {margin-block:0}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel,.sii-security-card,.sii-security-aside){
   background:var(--siii-admin-panel)!important;
-  border:1px solid var(--siii-admin-edge)!important;
+  border:0!important;
+  border-width:0!important;
   border-radius:var(--siii-admin-radius)!important;
   box-shadow:0 10px 32px rgba(53,39,46,.045)!important;
   backdrop-filter:blur(17px) saturate(108%);
@@ -68,7 +69,8 @@ html[data-sii-theme="dark"] .sii-app.sii-ui:has(.siii-glass-workspace){
 }
 html[data-sii-theme="dark"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel) {
   background:var(--siii-admin-panel)!important;
-  border:1px solid var(--siii-admin-edge)!important;
+  border:0!important;
+  border-width:0!important;
   border-radius:var(--siii-admin-radius)!important;
 }
 @media(max-width:767px) {

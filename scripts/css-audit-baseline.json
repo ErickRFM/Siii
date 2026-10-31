@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T20:45:00.000Z",
-  "review": "Dark Slate Glass SIII v10: consolidated glass materials, night/day theme alignment, and updated visual baselines.",
-  "totalBytes": 237638,
-  "totalImportant": 349,
+  "generatedAt": "2026-10-30T21:10:00.000Z",
+  "review": "Dark Slate Glass SIII v10: full repair of CI dependencies, glass material consolidation, and workspace border fixes.",
+  "totalBytes": 237769,
+  "totalImportant": 355,
   "totalDup": 414,
   "files": [
     {
@@ -25,20 +25,20 @@
     },
     {
       "file": "src/app/sii-admin-coherence.css",
-      "bytes": 4011,
+      "bytes": 4005,
       "rules": 22,
       "classes": 12,
       "orphanCandidates": 0,
-      "important": 28,
+      "important": 30,
       "duplicateSelectors": 8
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 45224,
+      "bytes": 45268,
       "rules": 273,
       "classes": 119,
       "orphanCandidates": 0,
-      "important": 156,
+      "important": 158,
       "duplicateSelectors": 96
     },
     {
@@ -70,11 +70,11 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 34321,
-      "rules": 292,
-      "classes": 87,
+      "bytes": 34414,
+      "rules": 293,
+      "classes": 89,
       "orphanCandidates": 0,
-      "important": 66,
+      "important": 68,
       "duplicateSelectors": 50
     },
     {
