@@ -1,8 +1,7 @@
 /* Approved personal composition: 1344×896. Scoped away from operational workspaces. */
 @font-face{font-family:SiiiInter;src:url('/fonts/siii-inter.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 #siii-personal{
- --sidebar-width:214px!important;--sidebar-width-icon:74px!important;scrollbar-color:rgba(255,255,255,.18) transparent;
- --siii-personal-panel:rgba(62,58,54,.42);--siii-personal-edge:rgba(255,255,255,.11);
+ --sidebar-width:214px!important;--sidebar-width-icon:74px!important;scrollbar-color:rgba(255,255,255,.18) transparent;--siii-personal-edge:rgba(255,255,255,.11);
  --siii-personal-text:#f1f0ec;--siii-personal-muted:#cbc9c4;
  background:radial-gradient(ellipse 950px 600px at 16% 9%,rgba(215,145,95,.20),transparent 62%),radial-gradient(ellipse 900px 650px at 86% 86%,rgba(100,145,195,.18),transparent 68%),radial-gradient(ellipse 750px 500px at 50% 50%,rgba(145,115,160,.12),transparent 70%),linear-gradient(135deg,rgba(46,42,40,.96),rgba(34,32,31,.98)),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;color:var(--siii-personal-text);font-family:SiiiInter,Inter,Arial,sans-serif;
  isolation:isolate;font-size:12px;
@@ -153,7 +152,7 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-teacher-context{min-height:207px}
 #siii-personal :is(a,button,summary):focus-visible{outline:2px solid #eadac6;outline-offset:3px}
 /* Light uses the same neutral material and geometry, with luminance adapted for reading. */
-html[data-sii-theme=light] #siii-personal{--siii-personal-panel:rgba(220,220,212,.68);--siii-personal-edge:rgba(255,255,255,.17);--siii-personal-text:#292d2c;--siii-personal-muted:#4d5350;color:#292d2c}
+html[data-sii-theme=light] #siii-personal{--siii-personal-edge:rgba(255,255,255,.17);--siii-personal-text:#292d2c;--siii-personal-muted:#4d5350;color:#292d2c}
 html[data-sii-theme=light] #siii-personal [data-sidebar=sidebar]{background:rgba(206,208,198,.70)!important;color:#292d2c!important}
 html[data-sii-theme=light] #siii-personal .siii-personal-nav-link,html[data-sii-theme=light] #siii-personal .siii-personal-nav-group summary{color:#303632!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-hero{background:rgba(183,185,172,.22)!important}
