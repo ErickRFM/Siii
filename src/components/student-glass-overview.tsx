@@ -45,7 +45,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <SiiiGlassMetric label="Cargos por liquidar" value={profile?outstandingLabel:'—'} description={snapshot.orders.length?'Según el registro de Caja':'Sin movimientos registrados'} icon={<Wallet size={21}/>} tone="green"/>
     <SiiiGlassMetric label="Trámites activos" value={m.incomplete.pendingRequests||!profile?'—':m.pendingCount} description={m.incomplete.pendingRequests?'Consulta parcial de trámites':'Solicitudes en seguimiento'} icon={<FileText size={21}/>} tone="terracotta"/>
    </SiiiGlassMetricsRow>
-   <div className="siii-overview-detail-grid">
+   <div className={'siii-overview-detail-grid'+(m.published.length<=1&&snapshot.pendingRequests.length<=1?' siii-overview-detail-grid--sparse':'')}>
     <SiiiGlassPanel >
      <SiiiGlassPanelHeading title="Calificaciones recientes" action={quick('Ver todas','academic','grades')}/>
      {m.published.slice(0,4).map((grade,index)=>{const Icon=/datos/i.test(grade.courseName)?Database:[BookOpen,Code2,Network,SquareRadical][index];return <div key={grade.sectionId} className="siii-overview-listrow">
