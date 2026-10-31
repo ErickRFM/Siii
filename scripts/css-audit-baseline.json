@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Comprehensive legacy CSS cleanup: 176 unused selector blocks removed in seven old stylesheets, four exact media duplicates and nine shadowed identical declarations removed. Candidate orphan selectors were checked against all src TS/TSX/JS; dynamically composed classes remain protected by CI visual/role gates.",
-  "totalBytes": 253965,
+  "review": "Safe CSS purge: 176 unreferenced legacy rule blocks, 4 identical media rules, 9 overshadowed identical declarations, 12 unreferenced custom-property definitions. All other selectors retained pending runtime/visual verification.",
+  "totalBytes": 253513,
   "totalImportant": 426,
   "totalDup": 442,
   "files": [
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/app/sii-admin-coherence.css",
-      "bytes": 3999,
+      "bytes": 3873,
       "rules": 22,
       "classes": 12,
       "orphanCandidates": 0,
@@ -34,7 +34,7 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 43126,
+      "bytes": 43089,
       "rules": 255,
       "classes": 109,
       "orphanCandidates": 0,
@@ -43,7 +43,7 @@
     },
     {
       "file": "src/app/sii-interactions.css",
-      "bytes": 1581,
+      "bytes": 1546,
       "rules": 7,
       "classes": 9,
       "orphanCandidates": 0,
@@ -70,7 +70,7 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 40800,
+      "bytes": 40713,
       "rules": 344,
       "classes": 89,
       "orphanCandidates": 0,
@@ -142,7 +142,7 @@
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 13958,
+      "bytes": 13872,
       "rules": 60,
       "classes": 44,
       "orphanCandidates": 0,
@@ -151,7 +151,7 @@
     },
     {
       "file": "src/app/sii-workspaces.css",
-      "bytes": 13546,
+      "bytes": 13465,
       "rules": 103,
       "classes": 45,
       "orphanCandidates": 0,
