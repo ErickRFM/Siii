@@ -21,7 +21,7 @@ export function SiiiGlassMetric({label,value,description,icon,accessory,tone='am
  label:string;value:ReactNode;description?:ReactNode;icon?:ReactNode;
  tone?:'amber'|'blue'|'green'|'terracotta';className?:string;accessory?:ReactNode;
 }){
- return <SiiiGlassPanel className={['siii-overview-metric','siii-shared-glass-metric',accessory?'siii-metric-with-accessory':'',className].filter(Boolean).join(' ')} data-tone={tone} aria-label={label} title={typeof description==='string'?description:undefined}>
+ return <SiiiGlassPanel className={['siii-overview-metric','siii-shared-glass-metric',accessory?'siii-metric-with-accessory':'',className].filter(Boolean).join(' ')} data-tone={tone} data-long-value={typeof value==='string'&&value.length>=17?'true':undefined} aria-label={label} title={typeof description==='string'?description:undefined}>
   {icon&&<span className="siii-overview-metric-icon" aria-hidden="true">{icon}</span>}
   <div className="siii-shared-metric-copy">
    <span>{label}</span>
