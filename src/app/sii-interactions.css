@@ -18,9 +18,6 @@
     transition-duration: var(--sii-interaction-fast);
     transition-timing-function: var(--sii-interaction-curve);
   }
-  .sii-app .sii-sidebar-collapse svg {
-    transition: transform var(--sii-interaction-normal) var(--sii-interaction-curve);
-  }
 }
 .sii-app :is(.sii-catalog-tab, .sii-outline-button, .sii-quick-switch-trigger, .sii-theme-toggle):focus-visible {
   outline: 3px solid var(--sii-primary);
