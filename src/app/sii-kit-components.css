@@ -32,7 +32,6 @@
 .sii-kit-module-icon svg{width:23px;height:23px;fill:none}
 .sii-kit-module-card--disabled{opacity:1;border-style:dashed}
 .sii-kit-module-card--disabled:hover{transform:none!important;box-shadow:var(--sii-kit-shadow)!important;border-color:var(--sii-kit-border)!important}
-.sii-kit-module-card--disabled .sii-module-bottom{color:var(--sii-muted)}
 .sii-kit-skeleton{display:grid;gap:12px;padding:18px;border:1px solid var(--sii-kit-border);background:var(--sii-kit-surface);border-radius:16px;min-height:132px}
 .sii-kit-skeleton-block{display:block;height:15px;max-width:100%;background:linear-gradient(90deg,var(--sii-surface-soft) 0%,var(--sii-primary-soft) 48%,var(--sii-surface-soft) 100%);background-size:220% 100%;border-radius:6px;animation:sii-kit-shimmer 1.6s ease infinite}
 .sii-kit-skeleton-block:nth-child(1){width:38%}
@@ -138,16 +137,6 @@
 .sii-workspace--admissions tr[data-selected="true"]{background:var(--sii-primary-soft)}
 .sii-app .sii-admission-detail p{font-size:12px;line-height:1.5;color:var(--sii-muted)}
 .sii-admission-detail dd{font-size:13px;margin-top:5px}
-.sii-workspace-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--sii-line);font-size:13px}
-.sii-workspace-row>span{min-width:0;overflow-wrap:anywhere}
-.sii-workspace-row>button{flex-shrink:0}
-.sii-operation-roster .sii-catalog-form{padding-bottom:16px;border-bottom:1px solid var(--sii-line)}
-.sii-operation-roster h4{font-size:13px;margin:16px 0 4px}
-.sii-app .sii-operation-roster .sii-kit-empty{padding:14px;gap:10px;margin-top:8px;align-items:flex-start}
-.sii-operation-roster .sii-kit-empty [data-slot="empty-header"]{display:grid;grid-template-columns:28px minmax(0,1fr);text-align:left;column-gap:10px;max-width:none}
-.sii-app .sii-operation-roster .sii-kit-empty-icon{grid-row:span 2;width:28px;height:28px;margin:0;border-radius:6px}
-.sii-app .sii-operation-roster .sii-kit-empty-title{font-size:13px}
-.sii-operation-roster .sii-kit-empty [data-slot="empty-description"]{font-size:12px}
 .sii-security-secondary{display:grid;gap:18px}
 .sii-app .sii-security-workspace .sii-security-card h2{font-size:20px;margin:6px 0 8px;line-height:1.3}
 .sii-app .sii-security-workspace .sii-security-card h3{font-size:16px;margin:20px 0 8px;padding-top:16px;border-top:1px solid var(--sii-line)}
@@ -166,7 +155,6 @@
 @container workspace (min-width:800px){
  .sii-workspace>.sii-catalog-layout>:first-child{grid-column:span 7}
  .sii-workspace>.sii-catalog-layout>:nth-child(2){grid-column:span 5}
- .sii-workspace .sii-workspace-grid--equal>*{grid-column:span 6}
  .sii-workspace-grid--detail>:first-child,.sii-security-layout>:first-child{grid-column:span 7}
  .sii-workspace-grid--detail>:nth-child(2),.sii-security-layout>:nth-child(2){grid-column:span 5}
  .sii-app .sii-workspace-filters label:first-child{grid-column:auto}

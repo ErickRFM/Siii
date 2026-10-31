@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T16:46:08.369Z",
-  "review": "Ambient breathing background, sidebar accordion transition, live status pulsing, watermark breathing, and tactile micro-interactions",
-  "totalBytes": 272533,
-  "totalImportant": 442,
-  "totalDup": 461,
+  "generatedAt": "2026-10-31T21:00:00Z",
+  "review": "Legacy CSS audit cleanup: 176 dead static selector blocks, 8 provably repeated full CSS rules (including 4 cross-import), 9 redundant declarations and 12 unused custom-property definitions removed. All visual gates remain unchanged.",
+  "totalBytes": 253244,
+  "totalImportant": 426,
+  "totalDup": 441,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/app/sii-admin-coherence.css",
-      "bytes": 3999,
+      "bytes": 3873,
       "rules": 22,
       "classes": 12,
       "orphanCandidates": 0,
@@ -34,44 +34,44 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 45271,
-      "rules": 273,
-      "classes": 119,
+      "bytes": 43089,
+      "rules": 255,
+      "classes": 109,
       "orphanCandidates": 0,
-      "important": 158,
-      "duplicateSelectors": 96
+      "important": 151,
+      "duplicateSelectors": 95
     },
     {
       "file": "src/app/sii-interactions.css",
-      "bytes": 1710,
-      "rules": 8,
-      "classes": 10,
+      "bytes": 1546,
+      "rules": 7,
+      "classes": 9,
       "orphanCandidates": 0,
       "important": 5,
       "duplicateSelectors": 3
     },
     {
       "file": "src/app/sii-kit-components.css",
-      "bytes": 18977,
-      "rules": 189,
-      "classes": 65,
+      "bytes": 17872,
+      "rules": 177,
+      "classes": 62,
       "orphanCandidates": 0,
       "important": 4,
       "duplicateSelectors": 30
     },
     {
       "file": "src/app/sii-motion-polish.css",
-      "bytes": 13339,
-      "rules": 108,
-      "classes": 46,
+      "bytes": 12389,
+      "rules": 99,
+      "classes": 40,
       "orphanCandidates": 0,
       "important": 5,
       "duplicateSelectors": 19
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 41202,
-      "rules": 349,
+      "bytes": 40713,
+      "rules": 344,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 70,
@@ -79,7 +79,7 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20357,
+      "bytes": 20334,
       "rules": 88,
       "classes": 50,
       "orphanCandidates": 0,
@@ -88,21 +88,21 @@
     },
     {
       "file": "src/app/sii-premium-kit.css",
-      "bytes": 28112,
-      "rules": 210,
-      "classes": 113,
+      "bytes": 19983,
+      "rules": 136,
+      "classes": 82,
       "orphanCandidates": 0,
-      "important": 12,
-      "duplicateSelectors": 64
+      "important": 5,
+      "duplicateSelectors": 49
     },
     {
       "file": "src/app/sii-system-coherence.css",
-      "bytes": 10052,
-      "rules": 82,
+      "bytes": 9925,
+      "rules": 80,
       "classes": 30,
       "orphanCandidates": 0,
       "important": 2,
-      "duplicateSelectors": 24
+      "duplicateSelectors": 23
     },
     {
       "file": "src/app/sii-table-responsive.css",
@@ -124,25 +124,25 @@
     },
     {
       "file": "src/app/sii-ux-refinement.css",
-      "bytes": 8810,
-      "rules": 85,
-      "classes": 45,
+      "bytes": 8103,
+      "rules": 75,
+      "classes": 39,
       "orphanCandidates": 0,
       "important": 4,
       "duplicateSelectors": 14
     },
     {
       "file": "src/app/sii-v2.css",
-      "bytes": 22216,
-      "rules": 225,
-      "classes": 119,
+      "bytes": 17096,
+      "rules": 173,
+      "classes": 85,
       "orphanCandidates": 0,
-      "important": 7,
-      "duplicateSelectors": 36
+      "important": 5,
+      "duplicateSelectors": 33
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 13958,
+      "bytes": 13872,
       "rules": 60,
       "classes": 44,
       "orphanCandidates": 0,
@@ -151,7 +151,7 @@
     },
     {
       "file": "src/app/sii-workspaces.css",
-      "bytes": 13546,
+      "bytes": 13465,
       "rules": 103,
       "classes": 45,
       "orphanCandidates": 0,

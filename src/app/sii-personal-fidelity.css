@@ -1,8 +1,7 @@
 /* Approved personal composition: 1344×896. Scoped away from operational workspaces. */
 @font-face{font-family:SiiiInter;src:url('/fonts/siii-inter.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 #siii-personal{
- --sidebar-width:214px!important;--sidebar-width-icon:74px!important;scrollbar-color:rgba(255,255,255,.18) transparent;
- --siii-personal-panel:rgba(62,58,54,.42);--siii-personal-edge:rgba(255,255,255,.11);
+ --sidebar-width:214px!important;--sidebar-width-icon:74px!important;scrollbar-color:rgba(255,255,255,.18) transparent;--siii-personal-edge:rgba(255,255,255,.11);
  --siii-personal-text:#f1f0ec;--siii-personal-muted:#cbc9c4;
  background:radial-gradient(ellipse 950px 600px at 16% 9%,rgba(215,145,95,.20),transparent 62%),radial-gradient(ellipse 900px 650px at 86% 86%,rgba(100,145,195,.18),transparent 68%),radial-gradient(ellipse 750px 500px at 50% 50%,rgba(145,115,160,.12),transparent 70%),linear-gradient(135deg,rgba(46,42,40,.96),rgba(34,32,31,.98)),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;color:var(--siii-personal-text);font-family:SiiiInter,Inter,Arial,sans-serif;
  isolation:isolate;font-size:12px;
@@ -112,7 +111,7 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal :is(.siii-overview-subtle,.siii-overview-empty){font-size:11px;font-weight:350;line-height:17px;color:var(--siii-personal-muted);opacity:1}
 #siii-personal .siii-overview-detail-grid .siii-overview-empty{margin:auto 0}
 #siii-personal .siii-overview-progress{min-height:201px;padding:13px 16px}
-#siii-personal .siii-overview-term-bars{gap:9px;align-content:center}
+
 #siii-personal .siii-overview-term-bars>p{font-size:10px;font-weight:350;line-height:14px}
 #siii-personal .siii-overview-track,#siii-personal .siii-overview-track svg{height:12px;border-radius:20px}
 #siii-personal .siii-overview-term-bars>small{font-size:9px;line-height:13px;font-weight:330}
@@ -153,7 +152,7 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-teacher-context{min-height:207px}
 #siii-personal :is(a,button,summary):focus-visible{outline:2px solid #eadac6;outline-offset:3px}
 /* Light uses the same neutral material and geometry, with luminance adapted for reading. */
-html[data-sii-theme=light] #siii-personal{--siii-personal-panel:rgba(220,220,212,.68);--siii-personal-edge:rgba(255,255,255,.17);--siii-personal-text:#292d2c;--siii-personal-muted:#4d5350;color:#292d2c}
+html[data-sii-theme=light] #siii-personal{--siii-personal-edge:rgba(255,255,255,.17);--siii-personal-text:#292d2c;--siii-personal-muted:#4d5350;color:#292d2c}
 html[data-sii-theme=light] #siii-personal [data-sidebar=sidebar]{background:rgba(206,208,198,.70)!important;color:#292d2c!important}
 html[data-sii-theme=light] #siii-personal .siii-personal-nav-link,html[data-sii-theme=light] #siii-personal .siii-personal-nav-group summary{color:#303632!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-hero{background:rgba(183,185,172,.22)!important}
@@ -164,9 +163,9 @@ html[data-sii-theme=light] #siii-personal .siii-overview-status{color:#24513e;ba
 html[data-sii-theme=light] #siii-personal :is(a,button,summary):focus-visible{outline-color:#374b43}
 /* Correct inherited active-tab paint; the composition itself has no enclosing panel. */
 #siii-personal :is(.siii-student-home-shell,.siii-teacher-home-shell) [role=tabpanel]{background:transparent!important}
-#siii-personal .siii-overview-listrow strong{line-height:17px;overflow-wrap:break-word;font-size:11px;font-weight:330;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#siii-personal .siii-overview-listrow strong{line-height:17px;overflow-wrap:break-word;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #siii-personal #avisos .siii-overview-listrow{gap:11px;border:0;min-height:48px;padding-block:4px}
-#siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0;font-weight:400}
+#siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0}
 #siii-personal .siii-overview-term>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #siii-personal .siii-teacher-home-shell>.sii-page-eyebrow{display:none}
 #siii-personal .siii-personal-nav-group>summary{font-weight:350}
@@ -222,9 +221,9 @@ html[data-sii-theme=light] #siii-personal .text-muted-foreground{color:#454b46!i
 #siii-personal .siii-metric-with-accessory .siii-shared-metric-copy{padding-right:46px}
 #siii-personal .siii-metric-accessory{position:absolute;right:8px;top:14px}
 @media(min-width:1700px){#siii-personal .sii-page{padding-left:24px}#siii-personal .siii-student-dashboard{grid-template-columns:minmax(0,1fr) 300px}#siii-personal .siii-overview-hero{height:195px}#siii-personal .siii-overview-detail-grid>.siii-overview-panel{min-height:320px}}
-@media(max-width:1150px){#siii-personal{--sidebar-width:200px!important}#siii-personal .siii-student-dashboard{grid-template-columns:minmax(0,1fr) 245px}#siii-personal .siii-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1fr)}#siii-personal .sii-command-trigger{max-width:30vw}.siii-personal-account{min-width:170px}}
+@media(max-width:1150px){#siii-personal{--sidebar-width:200px!important}#siii-personal .siii-student-dashboard{grid-template-columns:minmax(0,1fr) 245px}#siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1fr)}#siii-personal .sii-command-trigger{max-width:30vw}.siii-personal-account{min-width:170px}}
 @media(max-width:900px){#siii-personal .siii-student-dashboard{grid-template-columns:minmax(0,1fr)}#siii-personal .siii-student-aside{grid-template-columns:repeat(2,minmax(0,1fr))}#siii-personal .siii-personal-account{min-width:0}.siii-personal-account summary{padding:7px;gap:7px}.siii-personal-account summary>span:nth-child(2){display:none}#siii-personal .siii-overview-motto{right:5%}}
-@media(max-width:767px){#siii-personal .sii-topbar{padding:10px 0 0 12px;height:68px;min-height:68px}#siii-personal .sii-main{padding-right:12px}#siii-personal .sii-page{padding:10px 0 22px 12px}#siii-personal .sii-menu-button{display:inline-flex}#siii-personal .sii-command-trigger{width:40px;min-width:40px;max-width:40px;padding:10px}#siii-personal .sii-command-trigger :is(span,kbd){display:none}#siii-personal .sii-topbar-actions{gap:6px}#siii-personal [data-mobile=true]{--sidebar-width:240px!important;background:#4b4b43f5!important}#siii-personal .siii-overview-progress-body{grid-template-columns:minmax(0,1fr)}#siii-personal .siii-overview-motto{display:none}#siii-personal .siii-overview-hero{padding:16px;height:171px}#siii-personal .siii-overview-hero h2{font-size:34px}#siii-personal .siii-overview-refresh{opacity:1}#siii-personal .siii-student-aside{grid-template-columns:minmax(0,1fr)}#siii-personal .siii-overview-term{grid-template-columns:minmax(90px,1fr) minmax(60px,1.5fr) 27px}#siii-personal .siii-overview-detail-grid>.siii-overview-panel{min-height:250px}#siii-personal .siii-shared-glass-metric{padding:10px;gap:10px}#siii-personal .siii-shared-metric-copy>strong{font-size:20px}}
+@media(max-width:767px){#siii-personal .sii-topbar{padding:10px 0 0 12px;height:68px;min-height:68px}#siii-personal .sii-main{padding-right:12px}#siii-personal .sii-page{padding:10px 0 22px 12px}#siii-personal .sii-menu-button{display:inline-flex}#siii-personal .sii-command-trigger{width:40px;min-width:40px;max-width:40px;padding:10px}#siii-personal .sii-command-trigger :is(span,kbd){display:none}#siii-personal .sii-topbar-actions{gap:6px}#siii-personal [data-mobile=true]{--sidebar-width:240px!important;background:#4b4b43f5!important}#siii-personal .siii-overview-progress-body{grid-template-columns:minmax(0,1fr)}#siii-personal .siii-overview-motto{display:none}#siii-personal .siii-overview-hero{padding:16px;height:171px}#siii-personal .siii-overview-refresh{opacity:1}#siii-personal .siii-student-aside{grid-template-columns:minmax(0,1fr)}#siii-personal .siii-overview-detail-grid>.siii-overview-panel{min-height:250px}#siii-personal .siii-shared-glass-metric{padding:10px;gap:10px}#siii-personal .siii-shared-metric-copy>strong{font-size:20px}}
 @media(max-width:360px){#siii-personal .siii-overview-metric-icon{width:32px;flex-basis:32px;height:38px}#siii-personal .siii-shared-glass-metric{gap:7px}#siii-personal .siii-shared-metric-copy>strong{font-size:18px}#siii-personal .sii-topbar-actions>button,#siii-personal .siii-topbar-notices{width:34px;padding:7px}.siii-personal-account>summary{height:40px}}
 @media(prefers-reduced-motion:reduce){#siii-personal *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){#siii-personal :is(.siii-overview-panel,[data-sidebar=sidebar]){background:#454741!important;backdrop-filter:none!important;border-color:#ffffff70!important}html[data-sii-theme=light] #siii-personal :is(.siii-overview-panel,[data-sidebar=sidebar]){background:#e0e3d9!important}}
@@ -248,7 +247,7 @@ html[data-sii-theme=light] #siii-personal{background:linear-gradient(135deg,#eef
 html[data-sii-theme=dark] #siii-personal .text-primary{color:#ffb9c7!important}
 html[data-sii-theme=dark] #siii-personal .text-muted-foreground{color:#fff9f1!important}
 @media(max-width:1150px){#siii-personal .siii-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:767px){#siii-personal .siii-overview-hero h2{font-size:34px}#siii-personal .siii-overview-progress-summary{border-right:0;padding-right:0}}
+@media(max-width:767px){#siii-personal .siii-overview-progress-summary{border-right:0;padding-right:0}}
 html[data-sii-theme=dark] #siii-personal .sii-catalog-code{color:#f4d5c8}
 #siii-personal .siii-overview-hero h2{font-size:41px}
 #siii-personal .siii-overview-term{grid-template-columns:minmax(90px,.98fr) minmax(80px,1.8fr) 27px}
@@ -258,7 +257,7 @@ html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:linea
 #siii-personal .siii-overview-term-bars{align-self:start;margin-top:2px}
 html[data-sii-theme=dark] #siii-personal [data-sidebar=sidebar]{background:radial-gradient(ellipse at 65% 15%,rgba(176,153,132,.12),transparent 45%),linear-gradient(145deg,rgba(118,111,101,.26),rgba(55,54,51,.32))!important}
 html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-sii-theme=dark] #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){background:linear-gradient(140deg,rgba(84,78,70,.22),rgba(60,58,55,.18))!important}
-@media(max-width:767px){#siii-personal .siii-overview-term-bars{align-self:auto;margin-top:0}}
+@media(max-width:767px){#siii-personal .siii-overview-term-bars{align-self:auto}}
 #siii-personal .siii-personal-nav-group>div>.siii-personal-nav-link{padding-left:22px;padding-right:5px;gap:10px;white-space:nowrap}
 #siii-personal .siii-overview-term-bars{margin-top:-4px}
 @media(max-width:767px){#siii-personal .siii-overview-term-bars{margin-top:0}}

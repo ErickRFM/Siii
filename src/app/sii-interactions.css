@@ -2,7 +2,6 @@
    No Javascript animations or extra runtime dependencies. */
 :root {
   --sii-interaction-fast: 150ms;
-  --sii-interaction-normal: 240ms;
   --sii-interaction-curve: cubic-bezier(.22, 1, .36, 1);
 }
 @keyframes sii-ui-enter {
@@ -17,9 +16,6 @@
   .sii-app :is(.sii-catalog-tab, .sii-outline-button, .sii-quick-switch-trigger, .sii-theme-toggle) {
     transition-duration: var(--sii-interaction-fast);
     transition-timing-function: var(--sii-interaction-curve);
-  }
-  .sii-app .sii-sidebar-collapse svg {
-    transition: transform var(--sii-interaction-normal) var(--sii-interaction-curve);
   }
 }
 .sii-app :is(.sii-catalog-tab, .sii-outline-button, .sii-quick-switch-trigger, .sii-theme-toggle):focus-visible {
