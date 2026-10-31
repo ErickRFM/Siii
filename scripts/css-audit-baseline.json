@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T07:43:00.000Z",
-  "review": "Student/teacher interior-only responsive correction; approved dashboard surfaces excluded.",
-  "totalBytes": 252012,
+  "generatedAt": "2026-10-31T07:47:00.000Z",
+  "review": "Mobile personal-interior-only correction: homepage screenshots and shell remain unaffected.",
+  "totalBytes": 253797,
   "totalImportant": 406,
-  "totalDup": 431,
+  "totalDup": 432,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 14243,
+      "bytes": 16028,
       "rules": 68,
       "classes": 42,
       "orphanCandidates": 0,
       "important": 51,
-      "duplicateSelectors": 17
+      "duplicateSelectors": 18
     },
     {
       "file": "src/app/sii-premium-kit.css",
