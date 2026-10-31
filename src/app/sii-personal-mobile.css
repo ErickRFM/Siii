@@ -209,3 +209,14 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teach
     background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important;
   }
 }
+
+
+/* The legacy interior light selector forced white headings/links on a dark shell.
+   Reconcile those exact targets after the shell switches to genuine light mode. */
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-page-eyebrow,.sii-page-heading h1,.sii-page-heading p,nav[aria-label="Contexto del portal"] a) {
+  color:#283037!important;
+}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices,.siii-personal-account>summary) {
+  background:rgba(40,48,55,.085)!important;
+  color:#283037!important;
+}
