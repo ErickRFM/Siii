@@ -7,6 +7,7 @@ import {approvedReferenceFixture} from '../support/approved-reference-fixture';
 import AxeBuilder from '@axe-core/playwright';
 import {compareApprovedReference} from '../../scripts/compare-approved-reference.mjs';
 import {personalNavigate} from '../support/personal-navigation';
+import {expectVisualBaseline} from '../support/visual-baseline';
 
 
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()});
@@ -125,13 +126,14 @@ test('personal surfaces become opaque with reduced transparency and honor forced
  expect(await page.locator('#avisos').evaluate(el=>getComputedStyle(el).backdropFilter)).toBe('none');
 });
 
-for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page})=>{
+for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page},info)=>{
  test.setTimeout(120000);await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
  await login(page,f[role].username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${role}`));
  await expect(page.locator('.siii-overview-hero h2')).toContainText(role==='student'?'Alejandra':'Docente oficial');
  await page.evaluate(async()=>{await document.fonts.ready});
  if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro',exact:true}).click();
  await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
+ let visualBaselineFailure:unknown;
  for(const width of [1344,390]){
   await page.setViewportSize({width,height:896});await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
   if(width===390&&theme==='light'){
@@ -145,6 +147,12 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   // A new borderless design intentionally differs from the historical bordered PNGs.
   // Keep the screenshot as evidence, verify PNG output and enforce material/geometry.
   expect(screenshot.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
+  // Release gate: compare every student/teacher desktop/mobile PNG against reviewed references.
+  // Do not suppress this call, widen its 5% budget or auto-approve new reference PNGs.
+  // Gather both desktop and mobile screenshots before reporting the reference mismatch.
+  // Do not suppress a failing comparison: fail after the evidence set is complete.
+  try{expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info)}
+  catch(error){visualBaselineFailure??=error}
   // The former PNG references document the bordered V1 look, not the approved borderless V11 design.
   // Keep the captured PNG as review evidence; enforce spatial, material and accessibility contracts
   // rather than accepting a larger pixel-diff tolerance or silently replacing historical PNGs.
@@ -185,6 +193,7 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations;
   expect(violations).toEqual([]);
  }
+ if(visualBaselineFailure)throw visualBaselineFailure;
  if(role==='teacher'){
   await page.locator('.siii-overview-shortcuts').getByRole('link',{name:'Mi perfil',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Mi perfil docente institucional',exact:true})).toBeVisible();
