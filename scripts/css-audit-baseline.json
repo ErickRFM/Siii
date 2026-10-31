@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T07:30:00.000Z",
-  "review": "Personal student/teacher responsive design audit: scoped layout and accessible themes without weakening prior CSS budgets.",
-  "totalBytes": 249356,
-  "totalImportant": 403,
-  "totalDup": 430,
+  "generatedAt": "2026-10-31T07:39:00.000Z",
+  "review": "Personal mobile and light/dark theme coherence with verified high-contrast academic headings",
+  "totalBytes": 250152,
+  "totalImportant": 406,
+  "totalDup": 431,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 11587,
-      "rules": 66,
-      "classes": 41,
+      "bytes": 12383,
+      "rules": 68,
+      "classes": 42,
       "orphanCandidates": 0,
-      "important": 48,
-      "duplicateSelectors": 16
+      "important": 51,
+      "duplicateSelectors": 17
     },
     {
       "file": "src/app/sii-premium-kit.css",
