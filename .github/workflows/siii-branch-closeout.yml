@@ -71,6 +71,8 @@ jobs:
             if (( ahead > 0 )); then
               tag="archive/siii-20261031/$branch"
               existing="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)"
+              # gh api --jq can return the literal string null for a missing ref.
+              if [[ "$existing" == "null" ]]; then existing=""; fi
               if [[ -n "$existing" && "$existing" != "$state" ]]; then echo "SKIP existing archive points elsewhere: $branch"; continue; fi
               if [[ -z "$existing" ]]; then
                 gh api -X POST "/repos/$GH_REPO/git/refs" -f "ref=refs/tags/$tag" -f "sha=$state" >/dev/null
@@ -85,4 +87,14 @@ jobs:
             gh api -X DELETE "/repos/$GH_REPO/git/refs/heads/$branch" >/dev/null
             echo "DELETED obsolete branch ref: $branch"
           done
-          echo "Closeout complete. Unique divergent history preserved under archive/siii-20261031."
+          # Fail visibly if allowlisted refs still exist after the cleanup.
+          leftovers=0
+          for branch in "${branches[@]}"; do
+            if gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' >/dev/null 2>&1; then
+              echo "::error::Allowlisted branch still remains: $branch"
+              leftovers=$((leftovers+1))
+            fi
+          done
+          echo "Cleanup complete: remaining allowlisted refs=$leftovers"
+          if (( leftovers > 0 )); then exit 1; fi
+          echo "Unique divergent history preserved under archive/siii-20261031."
