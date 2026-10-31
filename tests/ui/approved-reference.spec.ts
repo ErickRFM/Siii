@@ -122,7 +122,7 @@ test('personal surfaces become opaque with reduced transparency and honor forced
  expect(await page.locator('#avisos').evaluate(el=>getComputedStyle(el).backdropFilter)).toBe('none');
 });
 
-for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page},info)=>{
+for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page})=>{
  test.setTimeout(120000);await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
  await login(page,f[role].username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${role}`));
  await expect(page.locator('.siii-overview-hero h2')).toContainText(role==='student'?'Alejandra':'Docente oficial');
