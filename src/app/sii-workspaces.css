@@ -5,7 +5,6 @@
  --sii-space-5:20px;--sii-space-6:24px;--sii-space-8:32px;
  --sii-content-standard:1480px;--sii-content-wide:1920px;--sii-content-form:1120px;
  --sii-control-height:44px;--sii-panel-radius:14px;--sii-text-body:14px;
- --sii-duration-fast:120ms;--sii-duration-base:200ms;--sii-duration-panel:300ms;
  --sii-panel-padding:clamp(16px,1.5vw,24px);
 }
 .sii-app .sii-page {width:100%;max-width:var(--sii-content-standard);min-width:0;padding:var(--sii-space-6) clamp(12px,2vw,32px) var(--sii-space-8)}

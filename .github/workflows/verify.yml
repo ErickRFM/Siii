@@ -46,6 +46,8 @@ jobs:
         run: git diff --exit-code -- package-lock.json
       - name: CSS source usage audit (read-only)
         run: node scripts/audit-css.mjs
+      - name: CSS exact-duplicate gate and orphan inventory
+        run: node scripts/css-cleanup.mjs --check
       - name: Lint
         run: npm run lint
       - name: Typecheck

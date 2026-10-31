@@ -74,7 +74,6 @@ html[data-sii-theme="dark"] {
 .sii-app .sii-catalog-table tbody tr:nth-child(even) {background:var(--sii-system-row)}
 .sii-app .sii-catalog-table tbody tr:hover,
 .sii-app .sii-catalog-table tbody tr:focus-within {background:var(--sii-primary-soft)}
-.sii-app .sii-catalog-table tbody tr:last-child td {border-bottom:0}
 .sii-app .sii-catalog-actions {gap:7px}
 .sii-app .sii-catalog-actions button {min-height:40px;border-radius:9px;padding:9px 11px}
 .sii-app .sii-catalog-actions button:focus-visible {outline-offset:2px}
@@ -118,7 +117,6 @@ html[data-sii-theme="dark"] {
 .sii-app :is(.sii-catalog-error,.sii-catalog-notice) .sii-outline-button {margin-top:12px}
 .sii-app .sii-catalog-pagination {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 0}
 .sii-app .sii-catalog-pagination>span {color:var(--sii-muted);font-size:12px;font-weight:700}
-.sii-app .sii-catalog-pagination button {min-height:44px}
 .sii-app .sii-catalog-pagination button:disabled {cursor:not-allowed;opacity:.55}
 .sii-app .sii-module-card {border-color:var(--sii-system-card-outline);min-width:0}
 .sii-app .sii-module-card h3 {line-height:1.38}

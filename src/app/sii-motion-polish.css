@@ -30,15 +30,9 @@ html[data-sii-theme="dark"] {
   box-shadow:var(--sii-v4-elevation);
   animation:sii-v4-rise 420ms cubic-bezier(.2,.7,.25,1) backwards;
 }
-.sii-auth .sii-auth-form-icon {
-  border:1px solid var(--sii-v4-outline);
-  box-shadow:0 9px 24px rgba(122,41,70,.10);
-  margin-bottom:18px;
-}
 .sii-auth .sii-auth-form-subtitle{margin-bottom:24px}
 .sii-auth .sii-auth-form-wrap h2 {letter-spacing:-.052em}
 .sii-auth .sii-auth-access-footer {flex:none;margin-top:16px;padding-bottom:2px}
-.sii-auth .sii-auth-divider {margin-bottom:16px}
 .sii-auth .sii-auth-form #sii-factor-help {
   margin:0 0 20px;
   padding:16px 17px;
@@ -49,12 +43,6 @@ html[data-sii-theme="dark"] {
   font-size:12px;
   color:var(--sii-text);
 }
-.sii-auth .sii-field-wrap input {
-  border-radius:12px;
-  background:var(--sii-surface-soft);
-  transition:border-color 180ms ease,box-shadow 180ms ease;
-}
-.sii-auth .sii-field-wrap:focus-within input {background:var(--sii-surface)}
 .sii-auth .sii-submit {
   width:100%;
   position:relative;
@@ -74,7 +62,6 @@ html[data-sii-theme="dark"] {
 .sii-auth .sii-auth-help {margin:19px 0 18px;line-height:1.85}
 .sii-auth .sii-auth-help a {display:inline-block;color:var(--sii-primary);font-weight:750;text-underline-offset:3px;text-decoration:underline}
 .sii-auth .sii-auth-help a:hover {text-decoration-thickness:2px}
-.sii-auth .sii-auth-role-notice {border-color:var(--sii-v4-outline);padding:14px}
 .sii-auth .sii-auth-story {background:
   radial-gradient(ellipse 85% 90% at 100% 85%,rgba(195,64,102,.40),transparent 72%),
   radial-gradient(circle at 0 0,rgba(138,52,78,.32),transparent 58%),
@@ -109,9 +96,7 @@ html[data-sii-theme="dark"] {
 .sii-app .sii-metric:nth-child(1){border-top:2px solid rgba(162,55,89,.55)}
 .sii-app .sii-metric:nth-child(2){border-top:2px solid rgba(113,115,167,.46)}
 .sii-app .sii-metric:nth-child(3){border-top:2px solid rgba(52,155,117,.40)}
-.sii-app .sii-metric-icon {width:43px;height:43px;border-radius:13px;margin-bottom:17px}
 .sii-app .sii-metric-value {font-weight:810}
-.sii-app .sii-summary-grid .sii-metric {transition:transform 220ms ease,box-shadow 220ms ease,border-color 220ms ease}
 .sii-app .sii-administration-discovery,
 .sii-app .sii-institutions-panel,
 .sii-app .sii-access-panel {
@@ -140,9 +125,7 @@ html[data-sii-theme="dark"] {
 @media(hover:hover) and (pointer:fine){.sii-app .sii-access-panel .sii-access-feature:hover{background:var(--sii-primary-soft);border-color:var(--sii-v4-outline)}}
 .sii-app .sii-access-feature {width:100%;padding:13px 12px;gap:12px;margin-bottom:9px;border:1px solid var(--sii-v4-outline);background:var(--sii-surface-soft);border-radius:12px}
 .sii-app .sii-access-feature>span {margin-top:2px}
-.sii-app .sii-nav-item {transition:background-color 180ms ease,color 180ms ease,transform 180ms ease,border-color 180ms ease}
 @media(hover:hover) and (pointer:fine){
- .sii-app .sii-summary-grid .sii-metric:hover {transform:translateY(-3px);box-shadow:var(--sii-glass-hover)}
  .sii-app .sii-nav-item:not(.sii-nav-item--active):hover {transform:translateX(2px)}
 }
 /* Institutional admin: restrained alert, useful links and consistent forms. */

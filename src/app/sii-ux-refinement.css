@@ -1,8 +1,4 @@
-/* Incremental polish: preserve the existing SIII matte institutional design. */
-.sii-app .sii-nav-item{transition:background-color 160ms ease,color 160ms ease,box-shadow 160ms ease}
-.sii-app a.sii-nav-item:focus-visible{outline-offset:-2px}
-.sii-app .sii-nav-item--loading{opacity:.72}
-.sii-app .sii-nav-item--loading .sii-nav-soon{color:#f3ceda}
+
 .sii-app .sii-page-heading{gap:clamp(16px,2.2vw,28px)}
 .sii-app :is(.sii-outline-button,.sii-theme-toggle,.sii-logout){transition:border-color 160ms ease,background-color 160ms ease,color 160ms ease,box-shadow 160ms ease}
 .sii-app .sii-outline-button{min-height:44px;line-height:1.35;text-align:center}
@@ -12,20 +8,18 @@
 .sii-app .sii-panel-top{gap:clamp(14px,2vw,24px)}
 .sii-app .sii-module-card,.sii-app .sii-institution-item{transition:border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease}
 @media(hover:hover) and (pointer:fine){.sii-app a.sii-module-card:hover{border-color:var(--sii-primary);box-shadow:0 12px 28px rgba(40,20,35,.10);transform:translateY(-2px)}}
-@media(min-width:841px){.sii-app .sii-sidebar{position:sticky;top:0;height:100dvh;min-height:100dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}.sii-app .sii-sidebar-spacer{min-height:24px}}
-@media(max-width:600px){.sii-app .sii-page-heading>a{margin-top:12px}.sii-app .sii-page-heading h1{overflow-wrap:anywhere}.sii-app .sii-topbar-actions .sii-logout{min-height:44px}}
+@media(min-width:841px){.sii-app .sii-sidebar{position:sticky;top:0;height:100dvh;min-height:100dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}}
+@media(max-width:600px){.sii-app .sii-page-heading>a{margin-top:12px}.sii-app .sii-page-heading h1{overflow-wrap:anywhere}}
 @media(prefers-reduced-motion:reduce){.sii-app :is(.sii-nav-item,.sii-outline-button,.sii-module-card,.sii-institution-item){transition:none!important;transform:none!important}}
 
 /* Prevent closed off-canvas navigation from being reached by keyboard. */
 @media(max-width:840px){
   .sii-app .sii-sidebar{visibility:hidden;pointer-events:none}
-  .sii-app .sii-sidebar--open{visibility:visible;pointer-events:auto}
 }
 
 /* Incremental operational polish: same palette, tighter layout, consistent controls. */
 .sii-app .sii-catalog-layout,.sii-app .sii-catalog-table-panel,.sii-app .sii-panel{min-width:0}
 .sii-app .sii-catalog-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
-.sii-app .sii-catalog-table{border-collapse:separate;border-spacing:0}
 .sii-app .sii-catalog-table th{white-space:nowrap}
 .sii-app .sii-catalog-table tbody tr{transition:background-color .15s}
 .sii-app .sii-catalog-table tbody tr:hover{background:var(--sii-surface-soft)}
@@ -101,7 +95,6 @@ html[data-sii-theme="dark"] .sii-app .sii-info-banner{background:#392b1c;color:#
       max(17px, env(safe-area-inset-right, 0px));
     padding-bottom: calc(29px + env(safe-area-inset-bottom, 0px));
   }
-  .sii-app .sii-scrim { touch-action: none; }
   .sii-app :is(.sii-menu-button, .sii-nav-item) { min-height: 44px; }
   .sii-app .sii-menu-button { min-width: 44px; align-items: center; justify-content: center; }
   .sii-app :is(.sii-catalog-actions, .sii-catalog-pagination) button { min-height: 44px; }
@@ -113,5 +106,4 @@ html[data-sii-theme="dark"] .sii-app .sii-info-banner{background:#392b1c;color:#
  .sii-app .sii-catalog-toolbar{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:10px}
  .sii-app .sii-catalog-toolbar label,.sii-app .sii-catalog-toolbar input{width:100%;min-width:0}
  .sii-app .sii-catalog-toolbar input{min-height:44px;font-size:16px}
- .sii-app .sii-catalog-toolbar .sii-outline-button{justify-self:start}
 }
