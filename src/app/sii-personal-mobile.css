@@ -156,13 +156,18 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
     display:flex;flex-wrap:wrap;align-items:center;gap:9px 18px;
     font-size:.8rem;line-height:1.5;margin:0!important;
   }
+  /* Reserve scrollable room for the fixed student bar, including home indicator.
+     Otherwise the last record and pagination controls sit behind the bar. */
+  #siii-personal:has(.sii-student-portal:not(.siii-student-home-shell)) .sii-page {
+    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  }
   /* Fixed bottom navigation must show all five destinations, without clipping Perfil. */
   #siii-personal .sii-student-portal .sii-personal-navigation {
     position:fixed;inset:auto 12px max(8px,env(safe-area-inset-bottom));
     width:auto;max-width:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
     gap:3px;padding:6px;align-items:stretch;
     overflow:visible;scrollbar-width:none;border:0!important;box-shadow:none!important;
-    border-radius:17px;
+    border-radius:17px;z-index:30;
     backdrop-filter:blur(18px) saturate(110%);
     -webkit-backdrop-filter:blur(18px) saturate(110%);
   }
