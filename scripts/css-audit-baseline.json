@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-31T07:39:00.000Z",
-  "review": "Personal mobile and light/dark theme coherence with verified high-contrast academic headings",
-  "totalBytes": 250152,
+  "generatedAt": "2026-10-31T07:43:00.000Z",
+  "review": "Student/teacher interior-only responsive correction; approved dashboard surfaces excluded.",
+  "totalBytes": 252012,
   "totalImportant": 406,
   "totalDup": 431,
   "files": [
@@ -79,7 +79,7 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 12383,
+      "bytes": 14243,
       "rules": 68,
       "classes": 42,
       "orphanCandidates": 0,
