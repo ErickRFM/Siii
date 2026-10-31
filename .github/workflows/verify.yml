@@ -48,6 +48,8 @@ jobs:
         run: node scripts/audit-css.mjs
       - name: CSS exact-duplicate gate and orphan inventory
         run: node scripts/css-cleanup.mjs --check
+      - name: CSS canonical property ownership
+        run: node scripts/css-owner-gate.mjs
       - name: Lint
         run: npm run lint
       - name: Typecheck

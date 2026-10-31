@@ -71,9 +71,6 @@ html[data-sii-theme="dark"] {
 @media(hover:hover) and (pointer:fine){
   .sii-auth .sii-story-features>div:hover {transform:translateX(4px)}
 }
-/* Dashboard: hierarchy and tactility without changing the data represented. */
-.sii-app .sii-page-heading h1 {font-weight:790}
-.sii-app .sii-page-heading {margin-bottom:29px}
 .sii-app .sii-page-eyebrow,.sii-app .sii-page-heading {animation:sii-v4-rise 350ms cubic-bezier(.2,.7,.25,1) backwards}
 .sii-app .sii-page-heading {animation-delay:35ms}
 .sii-app .sii-metric {

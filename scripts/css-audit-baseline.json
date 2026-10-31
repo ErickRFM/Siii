@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Legacy CSS audit cleanup: 176 dead static selector blocks, 8 provably repeated full CSS rules (including 4 cross-import), 9 redundant declarations and 12 unused custom-property definitions removed. All visual gates remain unchanged.",
-  "totalBytes": 253244,
+  "review": "Second CSS pass: remove 40 shadowed unconditional properties, 2 unreferenced keyframes; retain the later canonical selector/property winner. CI enforces single unscoped owner on 17 core selector families.",
+  "totalBytes": 251547,
   "totalImportant": 426,
-  "totalDup": 441,
+  "totalDup": 435,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -52,7 +52,7 @@
     },
     {
       "file": "src/app/sii-kit-components.css",
-      "bytes": 17872,
+      "bytes": 17834,
       "rules": 177,
       "classes": 62,
       "orphanCandidates": 0,
@@ -61,8 +61,8 @@
     },
     {
       "file": "src/app/sii-motion-polish.css",
-      "bytes": 12389,
-      "rules": 99,
+      "bytes": 12213,
+      "rules": 97,
       "classes": 40,
       "orphanCandidates": 0,
       "important": 5,
@@ -88,18 +88,18 @@
     },
     {
       "file": "src/app/sii-premium-kit.css",
-      "bytes": 19983,
-      "rules": 136,
+      "bytes": 19643,
+      "rules": 131,
       "classes": 82,
       "orphanCandidates": 0,
       "important": 5,
-      "duplicateSelectors": 49
+      "duplicateSelectors": 46
     },
     {
       "file": "src/app/sii-system-coherence.css",
-      "bytes": 9925,
-      "rules": 80,
-      "classes": 30,
+      "bytes": 9372,
+      "rules": 78,
+      "classes": 29,
       "orphanCandidates": 0,
       "important": 2,
       "duplicateSelectors": 23
@@ -124,12 +124,12 @@
     },
     {
       "file": "src/app/sii-ux-refinement.css",
-      "bytes": 8103,
-      "rules": 75,
-      "classes": 39,
+      "bytes": 7513,
+      "rules": 67,
+      "classes": 37,
       "orphanCandidates": 0,
       "important": 4,
-      "duplicateSelectors": 14
+      "duplicateSelectors": 11
     },
     {
       "file": "src/app/sii-v2.css",

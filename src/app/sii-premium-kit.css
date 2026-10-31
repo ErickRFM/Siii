@@ -71,10 +71,9 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   min-height:42px;min-width:42px;align-items:center;justify-content:center;
 }
 .sii-app .sii-theme-toggle:hover,.sii-app .sii-menu-button:hover{border-color:var(--sii-kit-border-strong);box-shadow:0 3px 10px rgba(88,27,57,.07)}
-.sii-app .sii-page {max-width:1680px;padding:clamp(22px,3vw,46px) clamp(18px,3vw,48px) 50px;min-width:0}
 .sii-app .sii-page-eyebrow,.sii-app .sii-section-kicker{letter-spacing:.16em;font-weight:850;color:var(--sii-kit-accent)}
 .sii-app .sii-page-heading{margin:10px 0 28px;align-items:center}
-.sii-app .sii-page-heading h1{font-size:clamp(28px,3.1vw,46px);font-weight:840;line-height:1.13;letter-spacing:-.055em}
+.sii-app .sii-page-heading h1{font-weight:840}
 .sii-app .sii-page-heading p{max-width:76ch;color:var(--sii-kit-muted);line-height:1.6}
 .sii-app :is(.sii-metric,.sii-panel,.sii-module-card,.sii-catalog-tabs,.sii-catalog-table-panel,.sii-catalog-create,.sii-security-card,.sii-administration-card,.sii-administration-summary,.sii-administration-discovery) {
   border:1px solid var(--sii-kit-border);
@@ -216,7 +215,7 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 /* Quiet entrance and interaction motion borrowed from premium dashboard UI kits. */
 /* Keep text fully opaque throughout entry, including headings on fast routes. */
 @keyframes sii-kit-appear{from{transform:translateY(10px)}to{transform:translateY(0)}}
-@keyframes sii-kit-glow{from{opacity:.3;transform:translateX(-18%)}to{opacity:.85;transform:translateX(18%)}}
+
 .sii-app .sii-page> :is(.sii-page-eyebrow,.sii-page-heading,.sii-summary-grid,.sii-panel,.sii-content-grid,.sii-modules-section,.sii-academic,.sii-users,.sii-institution-admin){
   animation:sii-kit-appear 440ms var(--sii-kit-ease) both;
 }
@@ -274,7 +273,7 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 .sii-command-trigger:hover{border-color:var(--sii-kit-border-strong);box-shadow:0 3px 12px var(--sii-kit-ring)}
 .sii-command-trigger .sii-nav-glyph{width:17px;height:17px}
 .sii-command-trigger kbd{font:700 10px/1.4 ui-monospace,monospace;border:1px solid var(--sii-kit-border-strong);border-radius:6px;padding:2px 6px;background:var(--sii-surface-soft);color:var(--sii-kit-muted)}
-@keyframes sii-kit-fade{from{opacity:0}to{opacity:1}}
+
 @media(max-width:1050px){.sii-command-trigger kbd{display:none}.sii-command-trigger-label{display:none}.sii-command-trigger{width:42px;justify-content:center}}
 @media(max-width:600px){.sii-command-trigger{min-width:42px}}
 
