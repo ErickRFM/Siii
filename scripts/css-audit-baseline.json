@@ -1,8 +1,8 @@
 {
   "generatedAt": "2026-10-31T08:38:00.000Z",
-  "review": "Reconcile #147 wide layout and #148 academic catalog with #149 borderless tables/mobile; exact measured source budgets",
-  "totalBytes": 266304,
-  "totalImportant": 439,
+  "review": "SIII mobile academic catalogue 470px override with !important audited; keep borderless visual and accessibility contracts.",
+  "totalBytes": 266314,
+  "totalImportant": 440,
   "totalDup": 450,
   "files": [
     {
@@ -106,11 +106,11 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 13009,
+      "bytes": 13019,
       "rules": 65,
       "classes": 27,
       "orphanCandidates": 0,
-      "important": 14,
+      "important": 15,
       "duplicateSelectors": 13
     },
     {
