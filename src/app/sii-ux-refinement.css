@@ -20,7 +20,6 @@
 /* Incremental operational polish: same palette, tighter layout, consistent controls. */
 .sii-app .sii-catalog-layout,.sii-app .sii-catalog-table-panel,.sii-app .sii-panel{min-width:0}
 .sii-app .sii-catalog-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
-.sii-app .sii-catalog-table{border-collapse:separate;border-spacing:0}
 .sii-app .sii-catalog-table th{white-space:nowrap}
 .sii-app .sii-catalog-table tbody tr{transition:background-color .15s}
 .sii-app .sii-catalog-table tbody tr:hover{background:var(--sii-surface-soft)}
@@ -107,5 +106,4 @@ html[data-sii-theme="dark"] .sii-app .sii-info-banner{background:#392b1c;color:#
  .sii-app .sii-catalog-toolbar{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:10px}
  .sii-app .sii-catalog-toolbar label,.sii-app .sii-catalog-toolbar input{width:100%;min-width:0}
  .sii-app .sii-catalog-toolbar input{min-height:44px;font-size:16px}
- .sii-app .sii-catalog-toolbar .sii-outline-button{justify-self:start}
 }
