@@ -300,3 +300,9 @@
     min-height:40px;
   }
 }
+
+/* Prevent an accessible light-to-dark theme switch from briefly leaving pale
+   mobile table rows under white text (Axe CI #41186198002: 1.06:1). */
+html[data-sii-theme] .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) .sii-catalog-table tbody tr{
+ transition:none;
+}
