@@ -253,7 +253,8 @@ html[data-sii-theme] #siii-personal :is(
 }
 html[data-sii-theme] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(
  .siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric,
- .siii-glass-surface
+ .siii-glass-surface,.siii-student-aside>.siii-overview-panel,
+ .siii-overview-detail-grid>.siii-overview-panel
 ){
  border:0!important;
  border-width:0!important;
