@@ -1,0 +1,88 @@
+name: Archive and prune closed SIII work branches
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: siii-branch-closeout
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    if: github.repository == 'ErickRFM/Siii'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Archive unique work and remove only reviewed stale branch refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Explicit allowlist from the 2026-10-31 audit. Never delete unrelated branches.
+          branches=(
+          codex/admin-visual-coherence-20261029
+          codex/hmac-rotation-runbook-20261027
+          codex/siii-docente-v3-20261026
+          codex/siii-personal-tables-ux-20261028
+          codex/siii-reference-fidelity-entry-20261028
+          codex/siii-smoked-glass-ui-v1-20261027
+          codex/siii-v3-institutional-portal-20261026
+          codex/siii-v3-student-requests-20261026
+          codex/siii-v5-dual-theme-responsive-20261028
+          codex/v20-companion-attendance-read
+          codex/vnext-institutional-20261026
+          feat/siii-dark-slate-full-repair
+          feat/siii-dark-slate-full-repair-v11
+          feat/siii-glass-approved-v9
+          feat/siii-glass-depth-v7
+          feat/siii-glass-material-polish
+          fix/personal-schedule-hydration-20261030
+          fix/siii-academic-catalog-mobile-density-20261031
+          fix/siii-borderless-panels-tables-mobile-20261031
+          fix/siii-borderless-visual-contract-20261031
+          fix/siii-login-smoked-glass
+          fix/siii-personal-mobile-coherence-20261031
+          fix/siii-personal-viewport-layout-20261030
+          fix/siii-restore-visual-gates-after150-20261031
+          fix/siii-security-glass-coherence-20261030
+          fix/siii-serverless-db-pool-20261029
+          fix/siii-serverless-pool-exhaustion
+          fix/siii-shared-glass-borderless
+          fix/siii-v8-glass-light-depth
+          fix/siii-v11-light-theme-regression-20261031
+          fix/siii-wide-student-layout-after144-20261031
+          integration/siii-personal-ux-closure-20261031
+          )
+          open_heads="$(gh api --paginate "/repos/$GH_REPO/pulls?state=open&per_page=100" --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' | sort -u)"
+          for branch in "${branches[@]}"; do
+            [[ "$branch" != main && "$branch" =~ ^[a-zA-Z0-9/_-]+$ ]] || { echo "Skip unsafe branch: $branch"; continue; }
+            if grep -Fqx -- "$branch" <<< "$open_heads"; then echo "SKIP open PR: $branch"; continue; fi
+            state="$(gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' 2>/dev/null || true)"
+            if [[ -z "$state" ]]; then echo "Already absent: $branch"; continue; fi
+            ahead="$(gh api "/repos/$GH_REPO/compare/main...$branch" --jq '.ahead_by')"
+            if ! [[ "$ahead" =~ ^[0-9]+$ ]]; then echo "Invalid comparison, preserving: $branch"; continue; fi
+            if (( ahead > 0 )); then
+              tag="archive/siii-20261031/$branch"
+              existing="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)"
+              if [[ -n "$existing" && "$existing" != "$state" ]]; then echo "SKIP existing archive points elsewhere: $branch"; continue; fi
+              if [[ -z "$existing" ]]; then
+                gh api -X POST "/repos/$GH_REPO/git/refs" -f "ref=refs/tags/$tag" -f "sha=$state" >/dev/null
+              fi
+              verified="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha')"
+              if [[ "$verified" != "$state" ]]; then echo "SKIP archive verification failed: $branch"; continue; fi
+              echo "ARCHIVED unique commits: $branch -> $tag at $state"
+            fi
+            # Recheck immediately before deletion; never knowingly discard moved refs.
+            now="$(gh api "/repos/$GH_REPO/branches/$branch" --jq '.commit.sha' 2>/dev/null || true)"
+            if [[ "$now" != "$state" ]]; then echo "SKIP concurrent update: $branch"; continue; fi
+            gh api -X DELETE "/repos/$GH_REPO/git/refs/heads/$branch" >/dev/null
+            echo "DELETED obsolete branch ref: $branch"
+          done
+          echo "Closeout complete. Unique divergent history preserved under archive/siii-20261031."
