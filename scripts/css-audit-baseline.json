@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T08:12:00.000Z",
-  "review": "Personal mobile workspace-only CSS: preserves teacher home navigation visibility and visual height",
-  "totalBytes": 253902,
+  "generatedAt": "2026-10-31T09:00:00Z",
+  "review": "SIII wide-screen student workspace after PR #144: preserve approved 1344 composition, adapt grid at >=1400px; audit budget updated to match added rules.",
+  "totalBytes": 254894,
   "totalImportant": 406,
-  "totalDup": 432,
+  "totalDup": 433,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,12 +70,12 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 34414,
-      "rules": 293,
+      "bytes": 35406,
+      "rules": 300,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 68,
-      "duplicateSelectors": 50
+      "duplicateSelectors": 51
     },
     {
       "file": "src/app/sii-personal-mobile.css",
