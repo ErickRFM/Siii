@@ -7,6 +7,7 @@ import {approvedReferenceFixture} from '../support/approved-reference-fixture';
 import AxeBuilder from '@axe-core/playwright';
 import {compareApprovedReference} from '../../scripts/compare-approved-reference.mjs';
 import {personalNavigate} from '../support/personal-navigation';
+import {expectVisualBaseline} from '../support/visual-baseline';
 
 
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()});
@@ -143,6 +144,7 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   // A new borderless design intentionally differs from the historical bordered PNGs.
   // Keep the screenshot as evidence, verify PNG output and enforce material/geometry.
   expect(screenshot.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
+  expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info);
   const appearance=await page.locator('#siii-personal :is(.siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric)').evaluateAll(nodes=>nodes.map(node=>{
    const style=getComputedStyle(node),box=node.getBoundingClientRect();
    return {border:style.borderTopWidth,shadow:style.boxShadow,blur:style.backdropFilter,left:box.left,right:box.right,width:box.width};
