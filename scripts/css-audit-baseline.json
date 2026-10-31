@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T08:29:00.000Z",
-  "review": "Borderless personal/operational tables; fixed student bar reserves safe-area scroll clearance, with regression assertions",
-  "totalBytes": 259441,
-  "totalImportant": 433,
-  "totalDup": 446,
+  "generatedAt": "2026-10-31T08:38:00.000Z",
+  "review": "Reconcile #147 wide layout and #148 academic catalog with #149 borderless tables/mobile; exact measured source budgets",
+  "totalBytes": 266304,
+  "totalImportant": 439,
+  "totalDup": 450,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,17 +70,17 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 34414,
-      "rules": 293,
+      "bytes": 35354,
+      "rules": 300,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 68,
-      "duplicateSelectors": 50
+      "duplicateSelectors": 53
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20098,
-      "rules": 87,
+      "bytes": 20266,
+      "rules": 88,
       "classes": 48,
       "orphanCandidates": 0,
       "important": 71,
@@ -106,12 +106,12 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 7254,
-      "rules": 34,
-      "classes": 18,
+      "bytes": 13009,
+      "rules": 65,
+      "classes": 27,
       "orphanCandidates": 0,
-      "important": 8,
-      "duplicateSelectors": 12
+      "important": 14,
+      "duplicateSelectors": 13
     },
     {
       "file": "src/app/sii-tailwind.css",

@@ -168,3 +168,77 @@ test('system-wide module shell stays coherent in both themes and narrow screens'
   await page.screenshot({path:'.p0-local/ux-matrix-all-'+area+'-light-1440.png',fullPage:true,animations:'disabled'});
  }
 });
+
+
+test('academic catalogue fits mobile viewport with readable record cards and compact filters',async({page})=>{
+ test.setTimeout(180000);
+ await fixture('super_admin');await login(page);
+ await page.goto('/dashboard/institutions/'+tenant+'/academic');
+ await expect(page.getByRole('heading',{name:'Catálogo académico'})).toBeVisible();
+ await expect(page.locator('.sii-catalog-table tbody tr').first()).toBeVisible();
+ await expect(page.locator('.sii-catalog-summary .sii-small-count')).toHaveText('1 registro en esta página');
+ const table=page.locator('.sii-catalog-table');
+ for(const theme of ['light','dark'] as const){
+  if(await page.locator('html').getAttribute('data-sii-theme')!==theme)
+   await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro'}).click();
+  for(const width of [320,390,430]){
+   await page.setViewportSize({width,height:844});
+   const sizes=await page.evaluate(()=>{
+    const tablist=document.querySelector('.sii-catalog-tabs')!;
+    const tabs=[...tablist.querySelectorAll('[role=tab]')];
+    const row=document.querySelector('.sii-catalog-table tbody tr')!;
+    const table=document.querySelector('.sii-catalog-table')!;
+    const search=document.querySelector('#catalog-search')!;
+    const cards=[...document.querySelectorAll('.sii-catalog-table tbody tr')];
+    return {overflow:document.documentElement.scrollWidth-window.innerWidth,
+     tabVisible:tabs.every(t=>{const b=t.getBoundingClientRect();return b.left>=-2&&b.right<=innerWidth+2}),
+     tabCount:tabs.length,tabLayout:getComputedStyle(tablist).display,
+     tableLayout:getComputedStyle(table).display,rowLayout:getComputedStyle(row).display,
+     cardLabels:[...row.querySelectorAll('td')].map(n=>n.getAttribute('data-label')),
+     searchHeight:search.getBoundingClientRect().height,cardWidth:cards[0].getBoundingClientRect().width};
+   });
+   expect(sizes.overflow,theme+'/'+width+' horizontal overflow').toBeLessThanOrEqual(2);
+   expect(sizes.tabVisible,theme+'/'+width+' all catalog tabs').toBe(true);
+   expect(sizes.tabCount).toBe(5);
+   expect(sizes.tabLayout).toBe('grid');
+   expect(sizes.tableLayout).toBe('block');
+   expect(sizes.rowLayout).toBe('grid');
+   expect(sizes.cardLabels.slice(0,3)).toEqual(['Clave / versión','Nombre / detalle','Estado']);
+   expect(sizes.searchHeight).toBeGreaterThanOrEqual(40);
+   expect(sizes.cardWidth).toBeLessThanOrEqual(width-20);
+  }
+ }
+ await page.setViewportSize({width:1440,height:900});
+ expect(await table.evaluate(node=>getComputedStyle(node).display)).toBe('table');
+ await page.locator('#catalog-search').fill('SYS');
+ await expect(page.locator('.sii-catalog-table tbody tr')).toHaveCount(1);
+ await expect(page.locator('.sii-catalog-table tbody tr').first()).toContainText('Sistemas');
+ await page.getByRole('tab',{name:/Materias/}).click();
+ await expect(page.locator('#catalog-search')).toHaveValue('');
+});
+
+
+test('read-only academic catalogue keeps inactive-record checkbox compact on phones',async({page})=>{
+ await fixture('teacher');await login(page);
+ await page.goto('/dashboard/institutions/'+tenant+'/academic');
+ const inactive=page.getByRole('checkbox',{name:'Incluir registros inactivos y archivados'});
+ await expect(inactive).toBeVisible();
+ await expect(page.getByRole('tab',{name:/Programas/})).toBeVisible();
+ for(const width of [320,390]){
+  await page.setViewportSize({width,height:844});
+  const geometry=await inactive.evaluate(node=>{
+   const box=node.getBoundingClientRect();
+   const label=node.closest('label')!.getBoundingClientRect();
+   const update=document.querySelector('.sii-catalog-toolbar > button')!.getBoundingClientRect();
+   return {w:box.width,h:box.height,labelRight:label.right,updateLeft:update.left};
+  });
+  expect(geometry.w).toBeGreaterThanOrEqual(16);
+  expect(geometry.w).toBeLessThanOrEqual(20);
+  expect(geometry.h).toBeGreaterThanOrEqual(16);
+  expect(geometry.h).toBeLessThanOrEqual(20);
+  expect(geometry.labelRight).toBeLessThanOrEqual(geometry.updateLeft+2);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+ }
+ await inactive.check();
+ await expect(inactive).toBeChecked();
+});

@@ -316,3 +316,6 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
   border:1px solid CanvasText!important;
  }
 }
+
+/* Teacher interior must clear the fixed mobile topbar. */
+@media(max-width:767px){#siii-personal .sii-teacher-portal:not(.siii-teacher-home-shell){padding-top:40px}}
