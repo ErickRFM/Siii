@@ -215,3 +215,29 @@ test('academic catalogue fits mobile viewport with readable record cards and com
  await page.getByRole('tab',{name:/Materias/}).click();
  await expect(page.locator('#catalog-search')).toHaveValue('');
 });
+
+
+test('read-only academic catalogue keeps inactive-record checkbox compact on phones',async({page})=>{
+ await fixture('teacher');await login(page);
+ await page.goto('/dashboard/institutions/'+tenant+'/academic');
+ const inactive=page.getByRole('checkbox',{name:'Incluir registros inactivos y archivados'});
+ await expect(inactive).toBeVisible();
+ await expect(page.getByRole('tab',{name:/Programas/})).toBeVisible();
+ for(const width of [320,390]){
+  await page.setViewportSize({width,height:844});
+  const geometry=await inactive.evaluate(node=>{
+   const box=node.getBoundingClientRect();
+   const label=node.closest('label')!.getBoundingClientRect();
+   const update=document.querySelector('.sii-catalog-toolbar > button')!.getBoundingClientRect();
+   return {w:box.width,h:box.height,labelRight:label.right,updateLeft:update.left};
+  });
+  expect(geometry.w).toBeGreaterThanOrEqual(16);
+  expect(geometry.w).toBeLessThanOrEqual(20);
+  expect(geometry.h).toBeGreaterThanOrEqual(16);
+  expect(geometry.h).toBeLessThanOrEqual(20);
+  expect(geometry.labelRight).toBeLessThanOrEqual(geometry.updateLeft+2);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+ }
+ await inactive.check();
+ await expect(inactive).toBeChecked();
+});
