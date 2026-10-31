@@ -14,8 +14,8 @@ html[data-sii-theme="light"] .sii-app.sii-ui:has(.siii-glass-workspace) {
     linear-gradient(115deg,#efe8e3,#e5dedb 58%,#eee7e5)!important;
 }
 .sii-app.sii-ui .siii-glass-workspace {
-  width:min(100%,1280px);
-  margin-inline:auto;
+  width:100%;
+  max-width:100%;
   min-width:0;
   display:flex;
   flex-direction:column;

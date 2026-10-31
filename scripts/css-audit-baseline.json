@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T12:30:00.000Z",
-  "review": "PR #137 and #139 integration: operational table responsiveness and account-security glass coherence.",
-  "totalBytes": 233049,
-  "totalImportant": 338,
+  "generatedAt": "2026-10-31T02:17:35.279Z",
+  "review": "Enhanced glassmorphism: collapsed navigation groups, full viewport width utilization, ambient frosted backdrop and specular rim lighting.",
+  "totalBytes": 234433,
+  "totalImportant": 345,
   "totalDup": 414,
   "files": [
     {
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/app/sii-admin-coherence.css",
-      "bytes": 4027,
+      "bytes": 4011,
       "rules": 22,
       "classes": 12,
       "orphanCandidates": 0,
@@ -70,11 +70,11 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 30388,
+      "bytes": 31788,
       "rules": 273,
       "classes": 83,
       "orphanCandidates": 0,
-      "important": 55,
+      "important": 62,
       "duplicateSelectors": 50
     },
     {

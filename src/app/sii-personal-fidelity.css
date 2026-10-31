@@ -2,13 +2,13 @@
 @font-face{font-family:SiiiInter;src:url('/fonts/siii-inter.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 #siii-personal{
  --sidebar-width:214px!important;--sidebar-width-icon:64px!important;
- --siii-personal-panel:rgba(111,108,102,.30);--siii-personal-edge:rgba(255,255,255,.055);
+ --siii-personal-panel:rgba(62,58,54,.42);--siii-personal-edge:rgba(255,255,255,.11);
  --siii-personal-text:#f1f0ec;--siii-personal-muted:#cbc9c4;
- background:#383735!important;color:var(--siii-personal-text);font-family:SiiiInter,Inter,Arial,sans-serif;
+ background:radial-gradient(ellipse 950px 600px at 16% 9%,rgba(215,145,95,.20),transparent 62%),radial-gradient(ellipse 900px 650px at 86% 86%,rgba(100,145,195,.18),transparent 68%),radial-gradient(ellipse 750px 500px at 50% 50%,rgba(145,115,160,.12),transparent 70%),linear-gradient(135deg,rgba(46,42,40,.96),rgba(34,32,31,.98)),url('/visuals/siii-warm-architecture.svg') center / cover no-repeat fixed!important;color:var(--siii-personal-text);font-family:SiiiInter,Inter,Arial,sans-serif;
  isolation:isolate;font-size:12px;
 }
 #siii-personal>.group.peer>div.fixed{padding:14px 0 22px 16px;height:100svh}
-#siii-personal [data-sidebar=sidebar]{border-radius:15px!important;background:rgba(103,103,96,.26)!important;backdrop-filter:blur(19px) saturate(.8);color:var(--siii-personal-text)!important;overflow:hidden}
+#siii-personal [data-sidebar=sidebar]{border-radius:15px!important;background:linear-gradient(160deg,rgba(255,255,255,.065) 0%,rgba(255,255,255,.015) 100%),rgba(46,45,42,.55)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 14px 36px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08)!important;backdrop-filter:blur(22px) saturate(1.15);-webkit-backdrop-filter:blur(22px) saturate(1.15);color:var(--siii-personal-text)!important;overflow:hidden}
 #siii-personal .sii-main{position:relative;min-width:0;padding-right:16px}
 #siii-personal .sii-topbar{height:71px;min-height:71px;margin:0;padding:21px 0 0 33px;border-radius:0;background:transparent!important;backdrop-filter:none;box-shadow:none;align-items:flex-start}
 #siii-personal .sii-topbar-start{min-width:0;display:flex;align-items:center;gap:10px}
@@ -54,7 +54,7 @@
 .siii-personal-nav-footer .siii-personal-nav-link{min-height:35px}
 #siii-personal :is(.siii-student-main,.siii-student-aside){display:grid;min-width:0;align-content:start;gap:14px;grid-template-columns:minmax(0,1fr)}
 #siii-personal .siii-student-aside{gap:13px}
-#siii-personal :is(.siii-overview-panel,.siii-overview-hero){border-radius:15px!important;background:var(--siii-personal-panel)!important;border:1px solid var(--siii-personal-edge)!important;box-shadow:inset 0 1px rgba(255,255,255,.025)!important;padding:16px;backdrop-filter:blur(16px) saturate(.75);color:var(--siii-personal-text);min-width:0}
+#siii-personal :is(.siii-overview-panel,.siii-overview-hero){border-radius:15px!important;background:linear-gradient(140deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.018) 60%,rgba(0,0,0,.15) 100%),rgba(58,55,52,.46)!important;border:1px solid var(--siii-personal-edge)!important;box-shadow:0 16px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12)!important;padding:16px;backdrop-filter:blur(22px) saturate(1.18);-webkit-backdrop-filter:blur(22px) saturate(1.18);color:var(--siii-personal-text);min-width:0}
 #siii-personal .siii-overview-hero .siii-overview-eyebrow{font-size:20px;font-weight:330;line-height:27px;opacity:.78}
 #siii-personal .siii-overview-hero h2{font-size:40px;font-weight:510;line-height:48px;letter-spacing:-.025em;margin:2px 0 0}
 #siii-personal .siii-overview-hero>p:not(.siii-overview-motto){font-size:14px;line-height:23px;font-weight:350;margin:0}
@@ -63,7 +63,7 @@
 #siii-personal .siii-overview-refresh{position:absolute;right:12px;top:12px;padding:5px;background:transparent;border:0;opacity:0;width:28px;height:28px;z-index:3}
 #siii-personal .siii-overview-hero:hover .siii-overview-refresh,#siii-personal .siii-overview-refresh:focus-visible{opacity:1}
 #siii-personal .siii-overview-metrics{display:grid;grid-template-columns:1.18fr 1.25fr 1fr 1fr;gap:12px;align-items:stretch}
-#siii-personal .siii-shared-glass-metric{display:flex;align-items:center;gap:13px;padding:12px 14px;min-height:83px;height:83px;border-radius:14px!important;overflow:hidden;grid-column:auto}
+#siii-personal .siii-shared-glass-metric{display:flex;align-items:center;gap:13px;padding:12px 14px;min-height:83px;height:83px;border-radius:14px!important;overflow:hidden;grid-column:auto;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.015)),rgba(60,57,53,.42)!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 10px 28px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.10)!important;backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15)}
 #siii-personal .siii-shared-metric-copy{min-width:0;flex:1;display:grid;gap:5px;align-content:center}
 #siii-personal .siii-shared-metric-copy>span{font-size:10px;font-weight:350;line-height:13px;white-space:normal;word-break:normal;overflow-wrap:normal}
 #siii-personal .siii-shared-metric-copy>strong{font-size:23px;font-weight:550;line-height:26px;letter-spacing:-.025em;white-space:nowrap}
@@ -107,7 +107,7 @@
 #siii-personal #avisos .siii-overview-listrow:nth-of-type(2)>svg{background:#5989d4;color:#e2eeff}
 #siii-personal #avisos .siii-overview-listrow:nth-of-type(3)>svg{background:#a273d3;color:#f0ddff}
 #siii-personal .siii-student-aside>.siii-overview-panel:nth-child(3){min-height:165px}
-#siii-personal .siii-overview-shortcuts>:is(button,a){display:flex;align-items:center;gap:10px;min-height:48px;border-radius:11px;background:#ffffff0a;border:1px solid #ffffff03;padding:9px 7px;text-align:left;font-size:9px;line-height:12px;font-weight:350}
+#siii-personal .siii-overview-shortcuts>:is(button,a){display:flex;align-items:center;gap:10px;min-height:48px;border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02))!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 4px 14px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(10px);padding:9px 10px;text-align:left;font-size:10px;line-height:13px;font-weight:350;transition:all .18s ease}
 #siii-personal .siii-overview-shortcuts svg{width:21px;height:21px;flex:0 0 21px;stroke-width:1.5}
 #siii-personal .siii-overview-dates{min-height:170px}
 #siii-personal .siii-overview-date{display:flex;gap:13px;align-items:start;margin-top:13px;font-size:10px;line-height:15px}
@@ -158,7 +158,7 @@ html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal
 #siii-personal .siii-overview-motto small{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
 /* Complete personal layout primitives; legacy personal layouts have been removed. */
-#siii-personal .siii-student-dashboard{grid-template-columns:minmax(0,1fr) 274px;gap:12px;align-items:start;display:grid;width:100%;min-width:0}
+#siii-personal .siii-student-dashboard{grid-template-columns:minmax(0,1fr) clamp(280px,23vw,370px);gap:clamp(12px,1.4vw,18px);align-items:start;display:grid;width:100%;min-width:0}
 #siii-personal .siii-overview-hero{height:171px;min-height:171px;padding:16px 15px;background:rgba(83,81,76,.14)!important;border-color:transparent!important;backdrop-filter:blur(2px);position:relative;overflow:hidden}
 #siii-personal .siii-overview-hero>*:not(.siii-overview-watermark):not(.siii-overview-refresh):not(.siii-overview-motto){position:relative;z-index:1}
 #siii-personal .siii-overview-hero .siii-overview-motto{position:absolute}

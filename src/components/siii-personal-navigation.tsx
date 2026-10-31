@@ -26,7 +26,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
     window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:hash}));setSelected(hash);if(isMobile)setOpenMobile(false);
    }}>{icon}<span>{label}</span></Link>;
  }
- const group=(label:string,icon:ReactNode,children:ReactNode)=><details className="siii-personal-nav-group" open><summary>{icon}<span>{label}</span><ChevronDown size={13}/></summary><div>{children}</div></details>;
+ const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=><details className="siii-personal-nav-group" open={hasActive||undefined}><summary>{icon}<span>{label}</span><ChevronDown size={13}/></summary><div>{children}</div></details>;
  return <>
   <SidebarHeader className="siii-personal-brand"><Link href={(role==='context'?base:base+'#inicio') as Route} aria-label="SIII, ir al inicio institucional" onClick={()=>{
    if(role!=='context'){window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:'inicio'}));setSelected('inicio');if(isMobile)setOpenMobile(false)}
@@ -37,13 +37,13 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
   <SidebarContent className="siii-personal-nav-content">
    {role==='context'?<Link href="/dashboard" className="siii-personal-nav-link is-current"><Home/><span>Mis contextos</span></Link>:item('Inicio','inicio',<Home/>)}
    {role==='student'&&<>
-    {group('Académico',<GraduationCap/>,<>{item('Calificaciones','calificaciones',<FileText/>)}{item('Historial académico','historial',<BookOpen/>)}{item('Plan de estudios','plan',<FileText/>,false)}{item('Carga académica','inscripciones',<ClipboardCheck/>)}</>)}
-    {group('Financiero',<Wallet/>,<>{item('Estado de cuenta','finanzas',<FileText/>)}{item('Órdenes de pago','ordenes',<Wallet/>)}{item('Comprobantes','comprobantes',<FileText/>)}</>)}
-    {group('Trámites',<Layers/>,<>{item('Mis trámites','tramites',<FileText/>)}{item('Solicitudes','solicitudes',<ClipboardCheck/>)}{item('Documentos','documentos',<FileText/>)}</>)}
-    {group('Comunidad',<Heart/>,<>{item('Mis docentes','docentes',<Users/>)}{item('Avisos institucionales','avisos',<Users/>)}</>)}
+    {group('Académico',<GraduationCap/>,<>{item('Calificaciones','calificaciones',<FileText/>)}{item('Historial académico','historial',<BookOpen/>)}{item('Plan de estudios','plan',<FileText/>,false)}{item('Carga académica','inscripciones',<ClipboardCheck/>)}</>,['calificaciones','historial','plan','inscripciones'].includes(selected))}
+    {group('Financiero',<Wallet/>,<>{item('Estado de cuenta','finanzas',<FileText/>)}{item('Órdenes de pago','ordenes',<Wallet/>)}{item('Comprobantes','comprobantes',<FileText/>)}</>,['finanzas','ordenes','comprobantes'].includes(selected))}
+    {group('Trámites',<Layers/>,<>{item('Mis trámites','tramites',<FileText/>)}{item('Solicitudes','solicitudes',<ClipboardCheck/>)}{item('Documentos','documentos',<FileText/>)}</>,['tramites','solicitudes','documentos'].includes(selected))}
+    {group('Comunidad',<Heart/>,<>{item('Mis docentes','docentes',<Users/>)}{item('Avisos institucionales','avisos',<Users/>)}</>,['docentes','avisos'].includes(selected))}
    </>}
    {role==='teacher'&&<>
-    {group('Docencia',<GraduationCap/>,<>{item('Mis grupos','grupos',<Users/>)}{item('Evaluaciones','evaluaciones',<ClipboardCheck/>)}{item('Mi perfil','perfil',<UserRound/>)}</>)}
+    {group('Docencia',<GraduationCap/>,<>{item('Mis grupos','grupos',<Users/>)}{item('Evaluaciones','evaluaciones',<ClipboardCheck/>)}{item('Mi perfil','perfil',<UserRound/>)}</>,['grupos','evaluaciones','perfil'].includes(selected))}
     <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route}><FileText/><span>Mis rectificaciones</span></Link>
    </>}
   </SidebarContent>
