@@ -255,7 +255,7 @@
     overflow:visible;scrollbar-gutter:auto;border:0;
   }
   .sii-app.sii-ui .sii-academic.siii-glass-workspace .sii-catalog-table {
-    display:block;width:100%;min-width:0;
+    display:block;width:100%;min-width:0!important;
     border-collapse:separate;
   }
   .sii-app.sii-ui .sii-academic.siii-glass-workspace .sii-catalog-table thead {
