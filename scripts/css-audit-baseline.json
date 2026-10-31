@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T07:47:00.000Z",
-  "review": "Mobile personal-interior-only correction: homepage screenshots and shell remain unaffected.",
-  "totalBytes": 253797,
+  "generatedAt": "2026-10-31T07:50:00Z",
+  "review": "PR #144 personal mobile coherence + PR #140 wide student workspace (>=1400px) without changing 1344px approved layout; source audit budget reconciled.",
+  "totalBytes": 254789,
   "totalImportant": 406,
-  "totalDup": 432,
+  "totalDup": 433,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,12 +70,12 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 34414,
-      "rules": 293,
+      "bytes": 35406,
+      "rules": 300,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 68,
-      "duplicateSelectors": 50
+      "duplicateSelectors": 51
     },
     {
       "file": "src/app/sii-personal-mobile.css",
