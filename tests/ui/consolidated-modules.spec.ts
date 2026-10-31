@@ -176,6 +176,7 @@ test('academic catalogue fits mobile viewport with readable record cards and com
  await page.goto('/dashboard/institutions/'+tenant+'/academic');
  await expect(page.getByRole('heading',{name:'Catálogo académico'})).toBeVisible();
  await expect(page.locator('.sii-catalog-table tbody tr').first()).toBeVisible();
+ await expect(page.locator('.sii-catalog-summary .sii-small-count')).toHaveText('1 registro en esta página');
  const table=page.locator('.sii-catalog-table');
  for(const theme of ['light','dark'] as const){
   if(await page.locator('html').getAttribute('data-sii-theme')!==theme)
