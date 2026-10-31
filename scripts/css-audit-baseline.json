@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-31T07:50:00Z",
-  "review": "PR #144 personal mobile coherence + PR #140 wide student workspace (>=1400px) without changing 1344px approved layout; source audit budget reconciled.",
-  "totalBytes": 254789,
+  "generatedAt": "2026-10-31T08:07:00Z",
+  "review": "SIII personal UX #146: scoping mobile context navigation to interior portals, preserving teacher home layout; budget precisely adjusted.",
+  "totalBytes": 254894,
   "totalImportant": 406,
   "totalDup": 433,
   "files": [
@@ -79,7 +79,7 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 16028,
+      "bytes": 16133,
       "rules": 68,
       "classes": 42,
       "orphanCandidates": 0,
