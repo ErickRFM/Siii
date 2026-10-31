@@ -248,14 +248,14 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
           :<SiiScrollRegion label="Tabla del catálogo académico, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table" role="table">
             <TableHeader role="rowgroup"><TableRow role="row"><TableHead role="columnheader" scope="col">Clave / Versión</TableHead><TableHead role="columnheader" scope="col">Nombre / Detalle</TableHead><TableHead role="columnheader" scope="col">Estado</TableHead>{canManage&&<TableHead role="columnheader" scope="col">Acciones</TableHead>}</TableRow></TableHeader>
             <TableBody role="rowgroup">{filtered.map(row=><TableRow role="row" key={row.id}>
-              <TableCell role="cell" data-label="Clave / versión"><span className="sii-catalog-code">{row.code??row.version??'—'}</span></TableCell>
-              <TableCell role="cell" data-label="Nombre / detalle">
+              <TableCell data-label="Clave / versión"><span className="sii-catalog-code">{row.code??row.version??'—'}</span></TableCell>
+              <TableCell data-label="Nombre / detalle">
                 {editing===row.id?<div className="sii-catalog-edit"><label htmlFor="catalog-edit-name">Nombre</label><Input id="catalog-edit-name" aria-invalid={nameError||undefined} aria-describedby={nameError?'catalog-mutation-error':undefined} value={editName} onChange={e=>setEditName(e.target.value)} maxLength={160} minLength={3}/><Button variant="outline" type="button" disabled={saving||!online} onClick={()=>void saveName(row.id)}>Guardar</Button><Button variant="outline" type="button" onClick={()=>setEditing(null)}>Cancelar</Button></div>
                 :<><strong>{row.name??(programs.find(p=>p.id===row.programId)?.name??'Plan de estudios')}</strong>
                   <small>{row.level?typeLabels[row.level]+' · '+typeLabels[row.modality??'']:row.credits!==undefined?`${row.credits} créditos`:row.startDate?`${String(row.startDate).slice(0,10)} — ${String(row.endDate).slice(0,10)}`:''}</small></>}
               </TableCell>
-              <TableCell role="cell" data-label="Estado"><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></TableCell>
-              {canManage&&<TableCell role="cell" data-label="Acciones">{canManageRow(row)?<div className="sii-catalog-actions">
+              <TableCell data-label="Estado"><span className={row.status==='active'?'sii-catalog-status sii-catalog-status--active':'sii-catalog-status'}>{statusLabels[row.status]??row.status}</span></TableCell>
+              {canManage&&<TableCell data-label="Acciones">{canManageRow(row)?<div className="sii-catalog-actions">
                 {tab!=='curricula'&&<Button variant="outline" type="button" disabled={saving||!online} onClick={()=>{setEditing(row.id);setEditName(row.name??'');setNameError(false);setMutationError('');}}>Editar</Button>}
                 <Button variant="outline" type="button" disabled={saving||!online||row.status==='archived'} onClick={()=>void setStatus(row)}>{row.status==='archived'?'Archivado':row.status==='active'?'Archivar':'Reactivar'}</Button>
               </div>:<span>{row.status==='archived'?'Archivado':'Solo consulta'}</span>}</TableCell>}
