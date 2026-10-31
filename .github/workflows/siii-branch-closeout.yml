@@ -75,9 +75,9 @@ jobs:
               if [[ "$existing" == "null" ]]; then existing=""; fi
               if [[ -n "$existing" && "$existing" != "$state" ]]; then echo "SKIP existing archive points elsewhere: $branch"; continue; fi
               if [[ -z "$existing" ]]; then
-                gh api -X POST "/repos/$GH_REPO/git/refs" -f "ref=refs/tags/$tag" -f "sha=$state" >/dev/null
+                gh api -X POST "/repos/$GH_REPO/git/refs" -f "ref=refs/tags/$tag" -f "sha=$state" >/dev/null 2>&1 || true
               fi
-              verified="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha')"
+              verified="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)"
               if [[ "$verified" != "$state" ]]; then echo "SKIP archive verification failed: $branch"; continue; fi
               echo "ARCHIVED unique commits: $branch -> $tag at $state"
             fi

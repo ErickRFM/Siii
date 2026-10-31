@@ -300,7 +300,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar{background:rgba(255,249,242,.48)!important;color:#302b29!important}
-html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,250,243,.57)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,255,255,.68)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-teacher-metric,.siii-teacher-work){background:rgba(255,251,246,.57)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-muted{color:#675a53}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-link{color:#342f2e}
@@ -467,7 +467,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone
 }
 .sii-app.sii-ui .siii-teacher-profile-hero h2{font-size:clamp(24px,2.7vw,36px);letter-spacing:-.035em;line-height:1.2}
 .sii-app.sii-ui .siii-teacher-profile-hero p{color:var(--sii-text);opacity:.86}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-surface{background:rgba(255,250,243,.60)!important;color:#302b29}
+html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-surface{background:rgba(255,255,255,.70)!important;color:#302b29}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero{background:linear-gradient(115deg,rgba(255,249,241,.72),rgba(231,216,202,.48))!important}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:#51453f}
 @media(max-width:768px){
@@ -544,7 +544,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
 .sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{color:#dccfc5;opacity:.78}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
  .sii-panel,.sii-catalog-summary,.sii-catalog-create
-){background:rgba(255,250,243,.60)!important;color:#302b29}
+){background:rgba(255,255,255,.70)!important;color:#302b29}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
  input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]
 ){background:rgba(255,254,251,.72)!important;border-color:rgba(78,55,43,.2)!important;color:#342a25}
@@ -609,7 +609,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-cata
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
  .sii-administration-summary,.sii-administration-links,.sii-administration-card,
  .sii-calendar-panel,.sii-operation-table
-){background:rgba(255,250,243,.6)!important;color:#302b29}
+){background:rgba(255,255,255,.70)!important;color:#302b29}
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-administration-links,.sii-workspace-section-nav){
  gap:10px;border:0;max-width:100%;min-width:0;
 }
@@ -691,7 +691,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
  .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
-){background:rgba(255,250,243,.6)!important;color:#302b29}
+){background:rgba(255,255,255,.70)!important;color:#302b29}
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside) h2{
  font-weight:650;letter-spacing:-.025em
 }
@@ -732,7 +732,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institut
  box-shadow:none!important;
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-panel{
- background:rgba(255,250,243,.6)!important;color:#302b29;border:0!important;border-width:0!important;
+ background:rgba(255,255,255,.70)!important;color:#302b29;border:0!important;border-width:0!important;
 }
 @media(forced-colors:active),(prefers-contrast:more){
  .sii-app.sii-ui .siii-glass-workspace .sii-panel{

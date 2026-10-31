@@ -26,7 +26,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
     window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:hash}));setSelected(hash);if(isMobile)setOpenMobile(false);
    }}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span></Link>;
  }
- const group=(label:string,icon:ReactNode,children:ReactNode,_hasActive=false)=><details className="siii-personal-nav-group" open><summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary><div>{children}</div></details>;
+ const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=><details className="siii-personal-nav-group" open={hasActive||undefined}><summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary><div>{children}</div></details>;
  return <>
   <SidebarHeader className="siii-personal-brand">
    <div className="siii-personal-brand-inner">

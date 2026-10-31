@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T08:38:00.000Z",
-  "review": "Audit #41186198002: strengthen borderless personal selector precedence and eliminate WCAG 1.06:1 during operational mobile table theme switches; no test thresholds changed.",
-  "totalBytes": 266688,
-  "totalImportant": 440,
-  "totalDup": 450,
+  "generatedAt": "2026-10-31T16:46:08.369Z",
+  "review": "Ambient breathing background, sidebar accordion transition, live status pulsing, watermark breathing, and tactile micro-interactions",
+  "totalBytes": 272533,
+  "totalImportant": 442,
+  "totalDup": 461,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/app/sii-admin-coherence.css",
-      "bytes": 4005,
+      "bytes": 3999,
       "rules": 22,
       "classes": 12,
       "orphanCandidates": 0,
@@ -34,7 +34,7 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 45268,
+      "bytes": 45271,
       "rules": 273,
       "classes": 119,
       "orphanCandidates": 0,
@@ -70,18 +70,18 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 35354,
-      "rules": 300,
+      "bytes": 41202,
+      "rules": 349,
       "classes": 89,
       "orphanCandidates": 0,
-      "important": 68,
-      "duplicateSelectors": 53
+      "important": 70,
+      "duplicateSelectors": 64
     },
     {
       "file": "src/app/sii-personal-mobile.css",
       "bytes": 20357,
       "rules": 88,
-      "classes": 48,
+      "classes": 50,
       "orphanCandidates": 0,
       "important": 71,
       "duplicateSelectors": 29

@@ -25,8 +25,9 @@ function calendarNow(timeZone:string){
 }
 
 function Schedule({rows,teachers,timeZone}:{rows:PersonalSchedule[];teachers:PersonalTeacher[];timeZone:string}){
- const [week,setWeek]=useState(()=>calendarNow(timeZone)?.date??'');
- const dates=weekDates(week),visible=rows.filter(row=>dates.includes(row.date));
+ const [week,setWeek]=useState('');
+ useEffect(()=>{setWeek(previous=>previous||calendarNow(timeZone)?.date||'')},[timeZone]);
+ const dates=weekDates(week),visible=week?rows.filter(row=>dates.includes(row.date)):[];
  return <div className="space-y-4"><label className="block max-w-xs space-y-2 font-medium">Semana a consultar<Input type="date" value={week} onChange={event=>setWeek(event.target.value)}/></label><p className="text-sm text-muted-foreground">Programación registrada por la institución · Zona horaria: {timeZone}. Las cancelaciones y cambios aparecen con su estado.</p>
   <AcademicWeek week={week} occurrences={visible.map(row=>({...row,teacherName:teachers.filter(teacher=>teacher.sectionId===row.sectionId).map(teacher=>teacher.firstName+' '+teacher.lastName).join(', ')}))} emptyDescription="La institución no tiene clases registradas para ti en esta semana. Consulta otra fecha o solicita a coordinación revisar tu programación."/></div>;
 }

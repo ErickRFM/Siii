@@ -4,14 +4,14 @@
 .sii-app.sii-ui:has(.siii-glass-workspace) {
   --siii-admin-radius:18px;
   --siii-admin-gap:20px;
-  --siii-admin-edge:rgba(84,66,68,.09);
-  --siii-admin-panel:rgba(255,252,249,.69);
-  --siii-admin-soft:rgba(255,252,249,.5);
+  --siii-admin-edge:rgba(20,25,35,.08);
+  --siii-admin-panel:rgba(255,255,255,.72);
+  --siii-admin-soft:rgba(255,255,255,.55);
 }
 html[data-sii-theme="light"] .sii-app.sii-ui:has(.siii-glass-workspace) {
   background:
-    radial-gradient(ellipse 65% 58% at 90% 10%,rgba(148,104,118,.10),transparent 80%),
-    linear-gradient(115deg,#efe8e3,#e5dedb 58%,#eee7e5)!important;
+    radial-gradient(ellipse 65% 58% at 90% 10%,rgba(160,180,205,.12),transparent 80%),
+    linear-gradient(115deg,#eef2f5,#e2e8ee 58%,#eef2f5)!important;
 }
 .sii-app.sii-ui .siii-glass-workspace {
   width:100%;
@@ -28,7 +28,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metr
   border:0!important;
   border-width:0!important;
   border-radius:var(--siii-admin-radius)!important;
-  box-shadow:0 10px 32px rgba(53,39,46,.045)!important;
+  box-shadow:0 10px 32px rgba(15,20,30,.04)!important;
   backdrop-filter:blur(17px) saturate(108%);
   -webkit-backdrop-filter:blur(17px) saturate(108%);
 }
@@ -46,21 +46,19 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metr
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item {
   background:rgba(255,255,255,.71)!important;
-  border:1px solid rgba(75,59,68,.07)!important;
+  border:1px solid rgba(20,25,35,.07)!important;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institution-item) {
   transition:background-color .18s ease,border-color .18s ease;
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar {
-  background:rgba(249,245,241,.77)!important;
-  border:1px solid rgba(81,62,67,.08)!important;
+  background:rgba(255,255,255,.80)!important;border:1px solid rgba(20,25,35,.07)!important;
   box-shadow:none!important;
   backdrop-filter:blur(16px) saturate(105%);
   -webkit-backdrop-filter:blur(16px) saturate(105%);
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar {
-  background:rgba(252,249,245,.94)!important;
-  border-right:1px solid rgba(74,53,62,.11)!important;
+  background:rgba(255,255,255,.88)!important;border-right:1px solid rgba(20,25,35,.08)!important;
   box-shadow:none!important;
 }
 html[data-sii-theme="dark"] .sii-app.sii-ui:has(.siii-glass-workspace){

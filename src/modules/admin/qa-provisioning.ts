@@ -123,6 +123,73 @@ export async function provisionQaAccounts(connectionString: string) {
       results.push({username: item.username, role: item.role, userId, membershipId: memberId});
     }
 
+    // QA-UNIV Certified Academic Data: Grade 8.70, Notices, Requests, Schedule
+    const studentUser = results.find(r => r.role === 'student');
+    const teacherUser = results.find(r => r.role === 'teacher');
+    const adminUser = results.find(r => r.role === 'admin');
+
+    if (studentUser && teacherUser) {
+      const studentRecordId = (await sql.query("SELECT id FROM institutional_students WHERE institution_id=$1 AND enrollment_number='MAT-QA-2026'", [tenantId])).rows[0]?.id;
+      if (studentRecordId) {
+        // 1. Published Grade 8.70 (870 hundredths) for Calidad de Software
+        const existingPub = (await sql.query("SELECT id FROM grade_publications WHERE institution_id=$1 AND section_id=$2", [tenantId, sectionId])).rows[0];
+        let pubId = existingPub?.id;
+        if (!pubId) {
+          pubId = (await sql.query(
+            "INSERT INTO grade_publications(id, institution_id, section_id, operation_id, published_by, version) VALUES($1, $2, $3, $4, $5, 1) RETURNING id",
+            [randomUUID(), tenantId, sectionId, randomUUID(), teacherUser.userId]
+          )).rows[0].id;
+        }
+        await sql.query(
+          "INSERT INTO final_grades(id, institution_id, publication_id, student_id, score_hundredths) VALUES($1, $2, $3, $4, 870) ON CONFLICT DO NOTHING",
+          [randomUUID(), tenantId, pubId, studentRecordId]
+        );
+
+        // 2. Demo student service request
+        const existingReq = (await sql.query("SELECT id FROM student_service_requests WHERE institution_id=$1 AND student_id=$2", [tenantId, studentRecordId])).rows[0];
+        if (!existingReq) {
+          await sql.query(
+            "INSERT INTO student_service_requests(id, institution_id, student_id, request_type, summary, status) VALUES($1, $2, $3, 'CERTIFICATE', 'Constancia oficial de estudios', 'SUBMITTED')",
+            [randomUUID(), tenantId, studentRecordId]
+          );
+        }
+      }
+    }
+
+    if (adminUser) {
+      // 3. Demo institutional announcement
+      const existingNotice = (await sql.query("SELECT id FROM institutional_announcements WHERE institution_id=$1", [tenantId])).rows[0];
+      if (!existingNotice) {
+        await sql.query(
+          "INSERT INTO institutional_announcements(id, institution_id, title, body, status, author_user_id, published_at) VALUES($1, $2, 'Inicio del periodo académico QA 2026', 'Bienvenidos al ciclo de Calidad de Software institucional.', 'PUBLISHED', $3, now())",
+          [randomUUID(), tenantId, adminUser.userId]
+        );
+      }
+    }
+
+    // 4. Demo Schedule: Campus, Classroom and Pattern for SEC-QA1
+    let campusId = (await sql.query("SELECT id FROM campuses WHERE institution_id=$1 AND code='QA-CAMPUS'", [tenantId])).rows[0]?.id;
+    if (!campusId) {
+      campusId = (await sql.query(
+        "INSERT INTO campuses(id, institution_id, code, name, is_primary) VALUES($1, $2, 'QA-CAMPUS', 'Campus Central QA', true) RETURNING id",
+        [randomUUID(), tenantId]
+      )).rows[0].id;
+    }
+    let roomId = (await sql.query("SELECT id FROM classrooms WHERE campus_id=$1 AND code='AULA-QA1'", [campusId])).rows[0]?.id;
+    if (!roomId) {
+      roomId = (await sql.query(
+        "INSERT INTO classrooms(id, institution_id, campus_id, code, building, capacity) VALUES($1, $2, $3, 'AULA-QA1', 'Edificio QA', 30) RETURNING id",
+        [randomUUID(), tenantId, campusId]
+      )).rows[0].id;
+    }
+    const existingPattern = (await sql.query("SELECT id FROM schedule_patterns WHERE section_id=$1 AND room_id=$2", [sectionId, roomId])).rows[0];
+    if (!existingPattern) {
+      await sql.query(
+        "INSERT INTO schedule_patterns(id, institution_id, section_id, room_id, weekday, start_minute, end_minute) VALUES($1, $2, $3, $4, 1, 480, 600)",
+        [randomUUID(), tenantId, sectionId, roomId]
+      );
+    }
+
     return {tenantId, accounts: results};
   } finally {
     await sql.end();
