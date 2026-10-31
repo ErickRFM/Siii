@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-31T07:47:00.000Z",
-  "review": "Mobile personal-interior-only correction: homepage screenshots and shell remain unaffected.",
-  "totalBytes": 253797,
+  "generatedAt": "2026-10-31T08:12:00.000Z",
+  "review": "Personal mobile workspace-only CSS: preserves teacher home navigation visibility and visual height",
+  "totalBytes": 253902,
   "totalImportant": 406,
   "totalDup": 432,
   "files": [
@@ -79,7 +79,7 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 16028,
+      "bytes": 16133,
       "rules": 68,
       "classes": 42,
       "orphanCandidates": 0,
