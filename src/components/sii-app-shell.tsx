@@ -1,10 +1,10 @@
 'use client';
 
+import React, {useEffect,useId,useRef,useState,type ReactNode} from 'react';
 import Link from 'next/link';
 import type {Route} from 'next';
 import {usePathname} from 'next/navigation';
 import {resolveDashboardLocation,type DashboardActive} from '@/shared/navigation/dashboard-location';
-import {useEffect,useId,useRef,useState,type ReactNode} from 'react';
 import {Bell,ChevronDown,Menu,PanelLeftClose,PanelLeftOpen,X} from 'lucide-react';
 import SiiiPersonalNavigation from './siii-personal-navigation';
 import {SiiBrand,SiiMark} from './sii-brand';
@@ -17,7 +17,7 @@ import {academicModuleLinks,allAcademicModuleLinks} from '@/shared/navigation/ac
 import {personalModuleLinks,hasOnlyPersonalRoles} from '@/shared/navigation/personal-modules';
 import {Avatar,AvatarFallback} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
-import {Breadcrumb,BreadcrumbItem,BreadcrumbList,BreadcrumbPage,BreadcrumbSeparator} from '@/components/ui/breadcrumb';
+import {Breadcrumb,BreadcrumbItem,BreadcrumbLink,BreadcrumbList,BreadcrumbPage,BreadcrumbSeparator} from '@/components/ui/breadcrumb';
 import {Button} from '@/components/ui/button';
 import {Sidebar,SidebarContent,SidebarFooter,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarHeader,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarProvider,SidebarSeparator,useSidebar} from '@/components/ui/sidebar';
 
@@ -30,6 +30,104 @@ function iconForModule(id:string):SiiNavIconName {
     case 'scheduling': return 'calendar';
     default: return 'services';
   }
+}
+
+type BreadcrumbSegment = {
+  label: string;
+  href?: Route | string;
+  current?: boolean;
+  className?: string;
+  isRoot?: boolean;
+};
+
+function getBreadcrumbSegments(
+  pathname: string,
+  institutionId?: string,
+  institutionName?: string,
+  activeModule?: { id: string; label: string },
+  personal: readonly { id: string; label: string }[] = []
+): BreadcrumbSegment[] {
+  const segments = pathname.split('/').filter(Boolean);
+  const items: BreadcrumbSegment[] = [
+    { label: 'SII', href: '/dashboard', isRoot: true }
+  ];
+
+  if (segments.length <= 1 || segments[1] === 'dashboard') {
+    items[0].current = true;
+    return items;
+  }
+
+  if (segments[1] === 'security') {
+    items.push({ label: 'Cuenta y seguridad', current: true });
+    return items;
+  }
+
+  if (segments[1] === 'institutions' && segments[2]) {
+    const instTitle = institutionName || 'Institución';
+    const isInstRoot = segments.length === 3;
+    items.push({
+      label: instTitle,
+      href: isInstRoot ? undefined : (`/dashboard/institutions/${segments[2]}` as Route),
+      current: isInstRoot,
+      className: 'max-w-[120px] sm:max-w-[180px] md:max-w-[240px] truncate',
+    });
+
+    if (isInstRoot) return items;
+
+    const section = segments[3];
+    const subSection = segments[4];
+
+    const sectionLabel =
+      personal.find(p => p.id === section)?.label ??
+      (activeModule && activeModule.id === section ? activeModule.label : null) ??
+      (section === 'admin' ? 'Administración institucional' :
+       section === 'academic' ? 'Catálogo académico' :
+       section === 'roles' ? 'Roles y ámbitos' :
+       section === 'users' ? 'Usuarios' :
+       section === 'invitations' ? 'Invitaciones' :
+       section === 'financials' ? 'Caja y finanzas' :
+       section === 'student' ? 'Mi vida universitaria' :
+       section === 'teacher' ? 'Mi docencia' :
+       section === 'grading' ? 'Calificaciones' :
+       section === 'registry' ? 'Estudiantes y docentes' :
+       section === 'operations' ? 'Grupos e inscripciones' :
+       section === 'scheduling' ? 'Horarios y aulas' :
+       section === 'services' ? 'Servicios universitarios' :
+       section === 'admissions' ? 'Admisiones' :
+       section);
+
+    if (subSection) {
+      items.push({
+        label: sectionLabel,
+        href: `/dashboard/institutions/${segments[2]}/${section}` as Route,
+        className: 'max-w-[100px] sm:max-w-none truncate',
+      });
+
+      const subLabel =
+        section === 'grading' && subSection === 'corrections'
+          ? 'Rectificaciones'
+          : section === 'student' && subSection === 'attendance'
+          ? 'Historial de asistencia'
+          : subSection;
+
+      items.push({
+        label: subLabel,
+        current: true,
+        className: 'max-w-[130px] sm:max-w-none truncate font-semibold',
+      });
+    } else {
+      items.push({
+        label: sectionLabel,
+        current: true,
+        className: 'max-w-[150px] sm:max-w-none truncate font-semibold',
+      });
+    }
+
+    return items;
+  }
+
+  items.push({ label: 'Panel', current: true });
+  return items;
 }
 
 export default function SiiAppShell({actorId,firstName,fullName,defaultInstitutionId,institutionLabels={},personalAccount=false,initialSidebarOpen=true,children}:{
@@ -47,12 +145,12 @@ export default function SiiAppShell({actorId,firstName,fullName,defaultInstituti
   <SidebarProvider id={isPersonal?'siii-personal':undefined} open={sidebarOpen} onOpenChange={updateSidebar} className={'sii-app sii-ui flex min-h-svh w-full'+(sidebarOpen?'':' sii-app--collapsed')+(isPersonal?' siii-personal-shell':'')}>
    <Shell firstName={firstName} fullName={fullName} active={active} institutionId={institutionId}
      personalShell={isPersonal} institutionName={institutionId?institutionLabels[institutionId]:undefined}
-     institutionAdministrationAvailable={active==='administration'}>{children}</Shell>
+     institutionAdministrationAvailable={active==='administration'} pathname={pathname}>{children}</Shell>
   </SidebarProvider>
  </InstitutionCapabilitiesProvider></GradebookDraftsProvider>;
 }
 
-function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,personalShell,institutionName,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;personalShell:boolean;institutionName?:string;children:ReactNode}) {
+function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,personalShell,institutionName,pathname,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;personalShell:boolean;institutionName?:string;pathname:string;children:ReactNode}) {
  const {data,loading,error}=useInstitutionCapabilities();
  const verifying=Boolean(institutionId && loading && !data);
  const unavailableLabel=!institutionId?'Selecciona institución':verifying?'Verificando…':error?'No disponible':'Restringido';
@@ -83,7 +181,10 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  ];
  if(institutionId){
   const base='/dashboard/institutions/'+institutionId;
+  quickLinks.push({id:'institution-context',label:institutionName?`Contexto: ${institutionName}`:'Contexto institucional',href:base,group:'Plataforma'});
   for(const module of personal)quickLinks.push({id:module.id,label:module.label,href:base+'/'+module.id,group:'Mi espacio'});
+  if(personal.some(module=>module.id==='student'))
+   quickLinks.push({id:'student-attendance',label:'Historial de asistencia',href:base+'/student/attendance',group:'Mi espacio'});
   if(institutionAdministrationAvailable||hasInstitutionCapability(data,'institutions.manage'))
    quickLinks.push({id:'administration',label:'Administración institucional',href:base+'/admin',group:'Plataforma'});
   if(hasInstitutionCapability(data,'users.read'))
@@ -94,8 +195,10 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
    quickLinks.push({id:'invitations',label:'Invitaciones',href:base+'/invitations',group:'Plataforma'});
   if(academicAvailable)quickLinks.push({id:'academic',label:'Catálogo académico',href:base+'/academic',group:'Gestión académica'});
   for(const module of modules)quickLinks.push({id:module.id,label:module.label,href:base+'/'+module.id,group:'Gestión académica'});
+  if(hasInstitutionCapability(data,'grades.manage'))
+   quickLinks.push({id:'grading-corrections',label:'Rectificaciones de calificaciones',href:base+'/grading/corrections',group:'Gestión académica'});
  }
- const crumb=personal.find(module=>module.id===active)?.label??(activeModule?activeModule.label:active==='overview'?'Inicio':active==='security'?'Seguridad':active==='academic'?'Catálogo académico':active==='roles'?'Roles y ámbitos':active==='invitations'?'Invitaciones':active==='users'?'Usuarios':active==='administration'?'Administración institucional':'Institución');
+ const breadcrumbs=getBreadcrumbSegments(pathname,institutionId,institutionName,activeModule,personal);
  return <>
   <Sidebar collapsible="icon" className={'border-sidebar-border bg-sidebar'+(personalShell?' siii-personal-rail':'')}>
    <nav aria-label="Navegación institucional" className="flex h-full min-h-0 flex-col">
@@ -165,11 +268,29 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     <div className="sii-topbar-start">
      <MobileTrigger/>
      {personalShell&&<PersonalSidebarRestore/>}
-     <Breadcrumb>
-      <BreadcrumbList>
-       <BreadcrumbItem className="hidden sm:block"><Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground">SII</Link></BreadcrumbItem>
-       <BreadcrumbSeparator className="hidden sm:block"/>
-       <BreadcrumbItem><BreadcrumbPage className="font-semibold">{crumb}</BreadcrumbPage></BreadcrumbItem>
+     <Breadcrumb className="min-w-0 flex-1">
+      <BreadcrumbList className="flex-nowrap items-center gap-1 sm:gap-2 overflow-x-auto text-xs sm:text-sm">
+       {breadcrumbs.map((item, idx) => (
+        <React.Fragment key={item.label + idx}>
+         {idx > 0 && <BreadcrumbSeparator className="shrink-0" />}
+         <BreadcrumbItem className="min-w-0 shrink-0">
+          {item.current || !item.href ? (
+           <BreadcrumbPage
+            className={`font-semibold text-foreground ${item.className ?? ''}`}
+            title={item.label}
+           >
+            {item.label}
+           </BreadcrumbPage>
+          ) : (
+           <BreadcrumbLink asChild className={`text-muted-foreground hover:text-foreground transition-colors ${item.className ?? ''}`}>
+            <Link href={item.href as Route} title={item.label}>
+             {item.label}
+            </Link>
+           </BreadcrumbLink>
+          )}
+         </BreadcrumbItem>
+        </React.Fragment>
+       ))}
       </BreadcrumbList>
      </Breadcrumb>
      <SiiQuickSwitch links={quickLinks}/>

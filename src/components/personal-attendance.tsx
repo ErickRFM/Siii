@@ -42,7 +42,7 @@ export default function PersonalAttendance({institutionId,session}:{institutionI
   return()=>{active.current?.abort();window.removeEventListener('focus',focus);window.removeEventListener('blur',clear);window.removeEventListener('online',focus);window.removeEventListener('offline',clear);window.removeEventListener(ASSURANCE_CHANGED_EVENT,clear);document.removeEventListener('visibilitychange',visible);document.removeEventListener('submit',logout,true);window.removeEventListener('beforeunload',clear)};
  },[refresh,clear]);
  const current=state.scope===scope?state:{scope,loading:true,error:'',history:null};
- return <section className="space-y-4" aria-label="Consulta personal de asistencia">
+ return <section className="sii-panel siii-glass-workspace space-y-4 p-5" aria-label="Consulta personal de asistencia">
   <p className="text-sm text-muted-foreground">Consulta informativa desde Compañero, limitada a 100 registros y tus inscripciones vigentes. Una revisión pendiente no acredita presencia validada por el docente.</p>
   <Button variant="outline" disabled={current.loading} onClick={()=>void refresh()}>Actualizar asistencia</Button>
   {current.loading&&<SiiSkeleton label="Consultando mi asistencia"/>}

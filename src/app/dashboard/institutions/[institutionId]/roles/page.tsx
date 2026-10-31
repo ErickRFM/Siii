@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
+import { SiiPageIntro } from '@/components/ui/sii-kit';
 
 import InstitutionRoles from '@/components/institution-roles';
 
@@ -12,8 +13,12 @@ export default async function RolesPage({ params }: { params: Promise<{ institut
   const access = (await getInstitutionAccess(user.id)).find(item => item.institutionId === institutionId);
   if (!access) notFound();
   return <>
-    <div className="sii-page-eyebrow">ACCESO INSTITUCIONAL <span className="sii-page-eyebrow-line"/></div>
-    <div className="sii-page-heading"><div><h1>Roles y ámbitos<span className="sii-welcome-period">.</span></h1><p>{access.institutionName} · Concesiones por institución, programa o campus.</p></div><Link href={`/dashboard/institutions/${institutionId}`} className="sii-outline-button">← Institución</Link></div>
+    <SiiPageIntro
+      eyebrow="ACCESO INSTITUCIONAL"
+      title="Roles y ámbitos"
+      description={`${access.institutionName} · Concesiones por institución, programa o campus.`}
+      actions={<Link href={`/dashboard/institutions/${institutionId}`} className="sii-outline-button">← Institución</Link>}
+    />
     <InstitutionRoles institutionId={institutionId}/>
   </>;
 }

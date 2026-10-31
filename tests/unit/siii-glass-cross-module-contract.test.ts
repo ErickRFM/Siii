@@ -24,7 +24,8 @@ describe('Smoked Glass cross-module design contract',()=>{
    'academic-operations','teacher-portal','personal-portal',
    'school-registry','financial-workspace','institution-roles',
    'institution-users','institution-admin','institution-invitations',
-   'scheduling-studio','teacher-gradebook'
+   'scheduling-studio','teacher-gradebook','grade-corrections',
+   'personal-attendance'
   ];
   for(const name of files)expect(source('src/components/'+name+'.tsx'),name).toContain('siii-glass-workspace');
  });

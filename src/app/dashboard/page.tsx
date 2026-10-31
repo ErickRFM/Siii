@@ -24,9 +24,9 @@ export default async function Dashboard(){
  const managementAvailable=await hasInstitutionManagementPageAccess(user);
  const personalDestination=managementAvailable?null:resolveDashboardEntry(institutions,user.mustChangePassword);
  if(personalDestination)redirect(personalDestination as Route);
- if(!managementAvailable&&!institutions.some(item=>item.roles.some(role=>!PERSONAL_ENTRY_ROLES.includes(role))))return <section className="siii-entry-chooser space-y-5" aria-label="Seleccionar contexto institucional">
+ if(!managementAvailable&&!institutions.some(item=>item.roles.some(role=>!PERSONAL_ENTRY_ROLES.includes(role))))return <section className="siii-entry-chooser siii-glass-workspace space-y-5" aria-label="Seleccionar contexto institucional">
   <SiiPageIntro eyebrow="MI ESPACIO INSTITUCIONAL" title={`Hola, ${user.firstName}`} description="Elige la institución y el perfil que deseas consultar."/>
-  {institutions.length?institutions.map(inst=><Card key={inst.institutionId}><CardHeader><h2>{inst.institutionName}</h2></CardHeader><CardContent className="flex flex-wrap gap-3">
+  {institutions.length?institutions.map(inst=><Card key={inst.institutionId} className="sii-panel"><CardHeader><h2>{inst.institutionName}</h2></CardHeader><CardContent className="flex flex-wrap gap-3">
    {personalEntryAvailable(inst,'student')&&<Link className="sii-outline-button" href={`/dashboard/institutions/${inst.institutionId}/student`}>Mi vida universitaria</Link>}
    {personalEntryAvailable(inst,'teacher')&&<Link className="sii-outline-button" href={`/dashboard/institutions/${inst.institutionId}/teacher`}>Mi docencia</Link>}
    {!personalEntryAvailable(inst,'student')&&!personalEntryAvailable(inst,'teacher')&&<p>Tu acceso está vigente. La institución debe habilitar el perfil correspondiente.</p>}

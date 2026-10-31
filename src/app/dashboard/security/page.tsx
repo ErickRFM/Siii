@@ -17,7 +17,7 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
   const {returnTo}=await searchParams;
   const safeReturn = safeSecurityReturn(returnTo);
   return (
-    <div className="sii-workspace sii-security-workspace">
+    <div className="sii-workspace sii-security-workspace siii-glass-workspace">
       <SiiPageIntro eyebrow="CENTRO PERSONAL" title="Cuenta y seguridad"
         description="Gestiona tus credenciales y consulta el estado de tu cuenta."
         actions={<Link href="/dashboard" className="sii-outline-button sii-back-link">← Volver a inicio</Link>}/>

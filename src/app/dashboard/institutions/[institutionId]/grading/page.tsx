@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound,redirect } from 'next/navigation';
 import { getIdentity } from '@/shared/auth/session';
 import {z} from 'zod';
+import {SiiPageIntro} from '@/components/ui/sii-kit';
 
 import TeacherGradebook from '@/components/teacher-gradebook';
 export const dynamic='force-dynamic';
@@ -16,10 +17,12 @@ export default async function GradingPage({params,searchParams}:Props){
  const access=authorization?.access;if(!access)notFound();
  const requested=(await searchParams).sectionId,initialSectionId=z.uuid().safeParse(requested).success?requested:undefined;
  return <>
-  <div className="sii-page-eyebrow">DOCENCIA · EVALUACIÓN <span className="sii-page-eyebrow-line"/></div>
-  <div className="sii-page-heading"><div><h1>Calificaciones<span className="sii-welcome-period">.</span></h1>
-   <p>{access.institutionName} · Actas autorizadas exclusivamente para docentes asignados.</p></div>
-   <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link></div>
+  <SiiPageIntro
+   eyebrow="DOCENCIA · EVALUACIÓN"
+   title="Calificaciones"
+   description={`${access.institutionName} · Actas autorizadas exclusivamente para docentes asignados.`}
+   actions={<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>}
+  />
   <TeacherGradebook key={`${institutionId}:${initialSectionId??''}`} institutionId={institutionId} initialSectionId={initialSectionId}/>
  </>;
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
+import { SiiPageIntro } from '@/components/ui/sii-kit';
 
 import AcademicCatalog from '@/components/academic-catalog';
 
@@ -16,12 +17,12 @@ export default async function AcademicCatalogPage({ params }: PageProps) {
   if (!access) notFound();
   return (
     <>
-      <div className="sii-page-eyebrow">CATÁLOGO INSTITUCIONAL <span className="sii-page-eyebrow-line"/></div>
-      <div className="sii-page-heading">
-        <div><h1>Catálogo académico<span className="sii-welcome-period">.</span></h1>
-          <p>{access.institutionName} · Consulta los programas, materias, campus, periodos y planes disponibles dentro de tu ámbito.</p></div>
-        <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>
-      </div>
+      <SiiPageIntro
+        eyebrow="CATÁLOGO INSTITUCIONAL"
+        title="Catálogo académico"
+        description={`${access.institutionName} · Consulta los programas, materias, campus, periodos y planes disponibles dentro de tu ámbito.`}
+        actions={<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link>}
+      />
       <AcademicCatalog institutionId={institutionId} />
     </>
   );
