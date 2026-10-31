@@ -283,3 +283,60 @@ test('teacher portal mobile groups keep cards and toolbar within viewport',async
   if(width<768)expect(heading!.y).toBeGreaterThanOrEqual(header!.y+header!.height-2);
  }
 });
+
+
+test('borderless personal panels and fully visible mobile student tabs',async({page})=>{
+ test.setTimeout(180000);
+ await login(page);
+ await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ const hero=page.locator('#siii-personal .siii-overview-hero');
+ await expect(hero).toBeVisible();
+ for(const theme of ['dark','light'] as const){
+  if(await page.locator('html').getAttribute('data-sii-theme')!==theme){
+   await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
+  }
+  for(const width of [320,360,390,430,768]){
+   await page.setViewportSize({width,height:844});
+   const paint=await hero.evaluate(el=>({border:getComputedStyle(el).borderTopWidth,shadow:getComputedStyle(el).boxShadow}));
+   expect(paint.border).toBe('0px');
+   expect(paint.shadow).toBe('none');
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+  }
+  await personalNavigate(page,'Académico');
+  const academics=page.getByRole('tablist',{name:'Consultas académicas'});
+  const studentNav=page.getByRole('tablist',{name:'Navegación estudiantil'});
+  for(const width of [320,360,390,430,768]){
+   await page.setViewportSize({width,height:844});
+   const academicsBox=await academics.boundingBox();
+   expect(academicsBox?.x??-1).toBeGreaterThanOrEqual(0);
+   expect((academicsBox?.x??0)+(academicsBox?.width??0)).toBeLessThanOrEqual(width+2);
+   for(const label of ['Mis inscripciones','Mis docentes','Calificaciones e historial']){
+    const tab=academics.getByRole('tab',{name:label,exact:true});
+    await expect(tab).toBeVisible();
+    const box=await tab.boundingBox();
+    expect(box?.x??-1).toBeGreaterThanOrEqual(-1);
+    expect((box?.x??0)+(box?.width??0)).toBeLessThanOrEqual(width+2);
+   }
+   if(width<768){
+    const bottom=await studentNav.evaluate(el=>{
+     const style=getComputedStyle(el),tabs=[...el.querySelectorAll('[role=tab]')];
+     return {display:style.display,columns:style.gridTemplateColumns.split(' ').length,
+      right:tabs.at(-1)?.getBoundingClientRect().right??Infinity,
+      lastWidth:tabs.at(-1)?.getBoundingClientRect().width??0,
+      overflow:el.scrollWidth-el.clientWidth};
+    });
+    expect(bottom.display).toBe('grid');
+    expect(bottom.columns).toBe(5);
+    expect(bottom.right).toBeLessThanOrEqual(width+2);
+    expect(bottom.lastWidth).toBeGreaterThanOrEqual(44);
+    expect(bottom.overflow).toBeLessThanOrEqual(2);
+   }
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+  }
+  await page.setViewportSize({width:390,height:844});
+  const first=page.locator('.siii-personal-mobile-records .siii-personal-record').first();
+  await expect(first).toBeVisible();
+  expect(await first.evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe('0px');
+  await personalNavigate(page,'Inicio');
+ }
+});
