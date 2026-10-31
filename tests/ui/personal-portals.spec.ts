@@ -283,3 +283,29 @@ test('teacher portal mobile groups keep cards and toolbar within viewport',async
   if(width<768)expect(heading!.y).toBeGreaterThanOrEqual(header!.y+header!.height-2);
  }
 });
+
+test('wide student workspace uses available width without shifting approved 1344px layout',async({page})=>{
+ test.setTimeout(120000);
+ await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);
+ await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+ for(const theme of ['dark','light'] as const){
+  const current=await page.locator('html').getAttribute('data-sii-theme');
+  if(current!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro',exact:true}).click();
+  for(const width of [1440,1666]){
+   await page.setViewportSize({width,height:900});
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth),`${theme} ${width}: no horizontal overflow`).toBeLessThanOrEqual(width+2);
+   const geometry=await page.locator('.siii-student-dashboard').evaluate(node=>{
+    const dashboard=node.getBoundingClientRect();
+    const shell=node.closest('.sii-main')?.getBoundingClientRect();
+    const main=node.querySelector('.siii-student-main')?.getBoundingClientRect();
+    const aside=node.querySelector('.siii-student-aside')?.getBoundingClientRect();
+    return {left:shell?dashboard.left-shell.left:999,right:shell?shell.right-dashboard.right:999,
+     aligned:main&&aside?Math.abs(main.top-aside.top):999,columns:getComputedStyle(node).gridTemplateColumns.split(' ').length};
+   });
+   expect(geometry.left).toBeLessThan(70);
+   expect(geometry.right).toBeLessThan(70);
+   expect(geometry.aligned).toBeLessThan(12);
+   expect(geometry.columns).toBe(2);
+  }
+ }
+});

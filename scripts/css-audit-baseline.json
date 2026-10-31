@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T09:10:00Z",
-  "review": "Responsive academic catalog on 320-600px: compact grid tabs, checkbox sizing, accessible record cards; previous table retained on desktop. CSS measured from source.",
-  "totalBytes": 259657,
+  "generatedAt": "2026-10-31T09:00:00Z",
+  "review": "Merged main #147 and academic catalog mobile PR #148: 320-600px tabs/filters/record cards; source CSS budget reconciled",
+  "totalBytes": 260779,
   "totalImportant": 412,
-  "totalDup": 433,
+  "totalDup": 436,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,12 +70,12 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 34414,
-      "rules": 293,
+      "bytes": 35536,
+      "rules": 300,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 68,
-      "duplicateSelectors": 50
+      "duplicateSelectors": 53
     },
     {
       "file": "src/app/sii-personal-mobile.css",
