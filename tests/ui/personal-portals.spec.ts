@@ -235,3 +235,51 @@ test('student official tables support accessible desktop and mobile sorting',asy
  await expect(page.getByRole('region',{name:'Inscripciones'}).locator('dl').first()).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
 });
+
+
+test('mobile personal interiors keep header and academic records readable in both themes',async({page})=>{
+ test.setTimeout(180000);
+ await login(page);
+ await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ await personalNavigate(page,'Académico');
+ await expect(page.getByRole('tab',{name:'Mis docentes',exact:true})).toBeVisible();
+ for(const theme of ['light','dark'] as const){
+  if(await page.locator('html').getAttribute('data-sii-theme')!==theme){
+   await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro'}).click();
+  }
+  for(const width of [320,360,390,430,768]){
+   await page.setViewportSize({width,height:844});
+   await expect(page.getByRole('heading',{name:'Mi vida universitaria'})).toBeVisible();
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+   const rectangles=await page.evaluate(()=>{
+    const top=document.querySelector('#siii-personal .sii-topbar')?.getBoundingClientRect();
+    const heading=document.querySelector('#siii-personal .sii-student-portal .sii-kit-page-heading h1')?.getBoundingClientRect();
+    const tabs=document.querySelector('#siii-personal .siii-academic-tabs')?.getBoundingClientRect();
+    const main=document.querySelector('#siii-personal .sii-page')?.getBoundingClientRect();
+    return {top:top?.bottom??0,heading:heading?.top??-1,headingRight:heading?.right??Infinity,tabsRight:tabs?.right??Infinity,mainRight:main?.right??Infinity};
+   });
+   expect(rectangles.heading).toBeGreaterThanOrEqual(rectangles.top-2);
+   expect(rectangles.headingRight).toBeLessThanOrEqual(width+2);
+   expect(rectangles.tabsRight).toBeLessThanOrEqual(width+2);
+   expect(rectangles.mainRight).toBeLessThanOrEqual(width+2);
+   if(width===390){
+    await expect(page.locator('.siii-personal-mobile-records .siii-personal-record').first()).toBeVisible();
+    await expect(page.locator('.siii-personal-mobile-records .siii-personal-record-label').first()).toBeVisible();
+    await expect(page.getByRole('navigation',{name:'Accesos académicos'})).toBeVisible();
+   }
+  }
+ }
+});
+
+test('teacher portal mobile groups keep cards and toolbar within viewport',async({page})=>{
+ await login(page,f.teacher);
+ await page.goto('/dashboard/institutions/'+f.tenant+'/teacher');
+ await page.getByRole('tab',{name:'Mis grupos',exact:true}).click();
+ for(const width of [320,390,430,768]){
+  await page.setViewportSize({width,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
+  const header=await page.locator('#siii-personal .sii-topbar').boundingBox();
+  const heading=await page.getByRole('heading',{name:'Mi docencia'}).boundingBox();
+  if(width<768)expect(heading!.y).toBeGreaterThanOrEqual(header!.y+header!.height-2);
+ }
+});
