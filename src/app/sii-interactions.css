@@ -2,7 +2,6 @@
    No Javascript animations or extra runtime dependencies. */
 :root {
   --sii-interaction-fast: 150ms;
-  --sii-interaction-normal: 240ms;
   --sii-interaction-curve: cubic-bezier(.22, 1, .36, 1);
 }
 @keyframes sii-ui-enter {
