@@ -413,7 +413,7 @@ test('student desktop uses the sidebar once and keeps academic data readable',as
 test('student home avoids unused personal collection requests',async({page})=>{
  const unnecessary:string[]=[];
  page.on('request',request=>{
-  if(/\\/portal\\/student\\/(teachers|payments)(?:\\?|$)/.test(new URL(request.url()).pathname))unnecessary.push(request.url());
+  const pathname=new URL(request.url()).pathname; if(pathname.endsWith('/portal/student/teachers')||pathname.endsWith('/portal/student/payments'))unnecessary.push(request.url());
  });
  await login(page);
  await expect(page.locator('.siii-student-dashboard')).toBeVisible();
