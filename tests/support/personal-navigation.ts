@@ -11,9 +11,13 @@ export async function personalNavigate(page:Page,label:string){
  const targetName=labels[label]??label;
  const link=nav.getByRole('link',{name:targetName,exact:true});
  if(!(await link.isVisible())){
-  const group=nav.locator('.siii-personal-nav-group').filter({hasText:label});
-  if(await group.count()>0)await group.locator('summary').click();
+  // Sidebar groups are collapsed by default. Find the disclosure by its actual
+  // destination, not by the top-level tab name (Servicios -> Trámites).
+  const group=nav.locator('.siii-personal-nav-group').filter({hasText:targetName});
+  await expect(group).toHaveCount(1);
+  await group.locator('summary').click();
  }
+ await expect(link).toBeVisible();
  await link.click();
  if(await menu.isVisible())await expect(page.getByRole('dialog')).toHaveCount(0);
 }
