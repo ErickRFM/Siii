@@ -7,6 +7,7 @@ import {approvedReferenceFixture} from '../support/approved-reference-fixture';
 import AxeBuilder from '@axe-core/playwright';
 import {compareApprovedReference} from '../../scripts/compare-approved-reference.mjs';
 import {personalNavigate} from '../support/personal-navigation';
+import {expectVisualBaseline} from '../support/visual-baseline';
 
 
 const sql=new pg.Client({connectionString:isolatedDatabaseUrl()});
@@ -125,7 +126,7 @@ test('personal surfaces become opaque with reduced transparency and honor forced
  expect(await page.locator('#avisos').evaluate(el=>getComputedStyle(el).backdropFilter)).toBe('none');
 });
 
-for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page})=>{
+for(const role of ['student','teacher'] as const)for(const theme of ['dark','light'] as const)test(`${role} authenticated ${theme} desktop and mobile evidence`,async({page},info)=>{
  test.setTimeout(120000);await page.setViewportSize({width:1344,height:896});await page.clock.setFixedTime(new Date('2026-10-26T18:00:00Z'));
  await login(page,f[role].username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${role}`));
  await expect(page.locator('.siii-overview-hero h2')).toContainText(role==='student'?'Alejandra':'Docente oficial');
@@ -145,6 +146,9 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
   // A new borderless design intentionally differs from the historical bordered PNGs.
   // Keep the screenshot as evidence, verify PNG output and enforce material/geometry.
   expect(screenshot.subarray(0,8).toString('hex')).toBe('89504e470d0a1a0a');
+  // Release gate: compare every student/teacher desktop/mobile PNG against reviewed references.
+  // Do not suppress this call, widen its 5% budget or auto-approve new reference PNGs.
+  expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info);
   // The former PNG references document the bordered V1 look, not the approved borderless V11 design.
   // Keep the captured PNG as review evidence; enforce spatial, material and accessibility contracts
   // rather than accepting a larger pixel-diff tolerance or silently replacing historical PNGs.
