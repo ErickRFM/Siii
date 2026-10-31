@@ -21,6 +21,8 @@ import './sii-personal-fidelity.css';
 import './sii-v5-theme.css';
 import './sii-admin-coherence.css';
 import './sii-table-responsive.css';
+// Personal interior corrective layer after legacy themes and table styles.
+import './sii-personal-mobile.css';
 export const dynamic='force-dynamic';
 export const viewport: Viewport = {
   width: 'device-width',
