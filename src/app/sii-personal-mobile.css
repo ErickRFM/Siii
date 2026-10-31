@@ -82,7 +82,7 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
 #siii-personal .siii-personal-record-field {padding:10px 0}
 #siii-personal .siii-personal-record-field+.siii-personal-record-field {border-top:1px solid var(--siii-interior-subtle)}
 #siii-personal .siii-personal-record-label {font-size:.78rem;line-height:1.4}
-#siii-personal .siii-personal-record-value {font-size:.9rem;line-height:1.5;color:var(--siii-interior-text);overflow-wrap:anywhere}
+#siii-personal .siii-personal-record-value {font-size:.9rem;line-height:1.5;color:var(--siii-interior-text)}
 #siii-personal .siii-personal-record-value :is(button,a) {max-width:100%;white-space:normal;text-align:left}
 #siii-personal .siii-student-academic-links {
   display:grid;gap:12px;min-width:0;max-width:100%;
