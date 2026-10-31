@@ -19,7 +19,12 @@ export async function personalNavigate(page:Page,label:string){
  }
  await expect(link).toBeVisible();
  await link.click();
- if(await menu.isVisible())await expect(page.getByRole('dialog')).toHaveCount(0);
+ if(await menu.isVisible()){
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  // Radix removes aria-hidden after the mobile sheet exit transition.
+  // Keep the full WCAG audit: never inspect a page while its focus trap is still active.
+  await expect(page.locator('#siii-personal')).not.toHaveAttribute('aria-hidden','true');
+ }
 }
 
 export async function openAccount(page:Page){
