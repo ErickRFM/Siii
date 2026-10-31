@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-10-31T08:38:00.000Z",
-  "review": "SIII mobile academic catalogue 470px override with !important audited; keep borderless visual and accessibility contracts.",
-  "totalBytes": 266314,
+  "review": "Audit #41186198002: strengthen borderless personal selector precedence and eliminate WCAG 1.06:1 during operational mobile table theme switches; no test thresholds changed.",
+  "totalBytes": 266688,
   "totalImportant": 440,
   "totalDup": 450,
   "files": [
@@ -79,7 +79,7 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20266,
+      "bytes": 20357,
       "rules": 88,
       "classes": 48,
       "orphanCandidates": 0,
@@ -106,8 +106,8 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 13019,
-      "rules": 65,
+      "bytes": 13302,
+      "rules": 66,
       "classes": 27,
       "orphanCandidates": 0,
       "important": 15,
