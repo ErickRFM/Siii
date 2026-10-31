@@ -64,6 +64,18 @@ test('personal first paint defaults to the approved dark theme and respects an e
  await page.getByRole('button',{name:'Activar tema claro',exact:true}).click();
  expect(await page.evaluate(()=>localStorage.getItem('sii-theme'))).toBe('light');
  await page.reload();await expect(page.locator('html')).toHaveAttribute('data-sii-theme','light');
+ // Guard against the V11 regression where a stored light preference rendered a dark dashboard.
+ const dayTokens=await page.evaluate(()=>{
+  const style=getComputedStyle(document.documentElement);
+  return {background:style.getPropertyValue('--siii-v5-background').trim(),text:style.getPropertyValue('--siii-v5-text').trim()};
+ });
+ expect(dayTokens).toEqual({background:'#e3e6df',text:'#292d2c'});
+ await page.getByRole('button',{name:'Activar tema oscuro',exact:true}).click();
+ const nightTokens=await page.evaluate(()=>{
+  const style=getComputedStyle(document.documentElement);
+  return {background:style.getPropertyValue('--siii-v5-background').trim(),text:style.getPropertyValue('--siii-v5-text').trim()};
+ });
+ expect(nightTokens).toEqual({background:'#0D0F12',text:'#f3f4f6'});
 });
 
 test('browser back restores the personal home after navigating to a section',async({page})=>{
