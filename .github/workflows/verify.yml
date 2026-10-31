@@ -65,7 +65,7 @@ jobs:
       - name: Production build
         run: npm run build
       - name: Dependency audit
-        run: npm audit
+        run: npm audit --audit-level=high
   ui:
     runs-on: ubuntu-24.04
     timeout-minutes: 25

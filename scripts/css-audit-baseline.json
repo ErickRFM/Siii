@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-10-30T20:45:00.000Z",
   "review": "Dark Slate Glass SIII v10: consolidated glass materials, night/day theme alignment, and updated visual baselines.",
-  "totalBytes": 237597,
+  "totalBytes": 237638,
   "totalImportant": 349,
   "totalDup": 414,
   "files": [
@@ -70,8 +70,8 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 34280,
-      "rules": 293,
+      "bytes": 34321,
+      "rules": 292,
       "classes": 87,
       "orphanCandidates": 0,
       "important": 66,
