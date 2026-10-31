@@ -152,7 +152,7 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
   #siii-personal :is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) .sii-kit-page-heading button {
     min-height:40px;min-width:0;max-width:100%;margin:0;
   }
-  #siii-personal :is(.siii-student-utility-links,nav[aria-label="Contexto del portal"]) {
+  #siii-personal :is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) :is(.siii-student-utility-links,nav[aria-label="Contexto del portal"]) {
     display:flex;flex-wrap:wrap;align-items:center;gap:9px 18px;
     font-size:.8rem;line-height:1.5;margin:0!important;
   }
