@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          npx playwright test tests/ui/approved-reference.spec.ts --project=chromium
+          npx playwright test tests/ui/approved-reference.spec.ts
           code=$?
           echo "Expected historical baseline failures during reference capture: exit=$code"
           exit 0
