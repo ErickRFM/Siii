@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "CSS cleanup pass 1: remove four exact duplicate rules and nine superseded identical declarations, preserving final specificity and media scopes; unresolved orphan selectors remain read-only candidates.",
-  "totalBytes": 272044,
-  "totalImportant": 440,
-  "totalDup": 461,
+  "review": "Comprehensive legacy CSS cleanup: 176 unused selector blocks removed in seven old stylesheets, four exact media duplicates and nine shadowed identical declarations removed. Candidate orphan selectors were checked against all src TS/TSX/JS; dynamically composed classes remain protected by CI visual/role gates.",
+  "totalBytes": 253965,
+  "totalImportant": 426,
+  "totalDup": 442,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -34,36 +34,36 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 45207,
-      "rules": 273,
-      "classes": 119,
+      "bytes": 43126,
+      "rules": 255,
+      "classes": 109,
       "orphanCandidates": 0,
-      "important": 156,
-      "duplicateSelectors": 96
+      "important": 151,
+      "duplicateSelectors": 95
     },
     {
       "file": "src/app/sii-interactions.css",
-      "bytes": 1710,
-      "rules": 8,
-      "classes": 10,
+      "bytes": 1581,
+      "rules": 7,
+      "classes": 9,
       "orphanCandidates": 0,
       "important": 5,
       "duplicateSelectors": 3
     },
     {
       "file": "src/app/sii-kit-components.css",
-      "bytes": 18977,
-      "rules": 189,
-      "classes": 65,
+      "bytes": 17872,
+      "rules": 177,
+      "classes": 62,
       "orphanCandidates": 0,
       "important": 4,
       "duplicateSelectors": 30
     },
     {
       "file": "src/app/sii-motion-polish.css",
-      "bytes": 13339,
-      "rules": 108,
-      "classes": 46,
+      "bytes": 12389,
+      "rules": 99,
+      "classes": 40,
       "orphanCandidates": 0,
       "important": 5,
       "duplicateSelectors": 19
@@ -88,12 +88,12 @@
     },
     {
       "file": "src/app/sii-premium-kit.css",
-      "bytes": 28112,
-      "rules": 210,
-      "classes": 113,
+      "bytes": 19983,
+      "rules": 136,
+      "classes": 82,
       "orphanCandidates": 0,
-      "important": 12,
-      "duplicateSelectors": 64
+      "important": 5,
+      "duplicateSelectors": 49
     },
     {
       "file": "src/app/sii-system-coherence.css",
@@ -124,21 +124,21 @@
     },
     {
       "file": "src/app/sii-ux-refinement.css",
-      "bytes": 8810,
-      "rules": 85,
-      "classes": 45,
+      "bytes": 8245,
+      "rules": 77,
+      "classes": 39,
       "orphanCandidates": 0,
       "important": 4,
       "duplicateSelectors": 14
     },
     {
       "file": "src/app/sii-v2.css",
-      "bytes": 22216,
-      "rules": 225,
-      "classes": 119,
+      "bytes": 17096,
+      "rules": 173,
+      "classes": 85,
       "orphanCandidates": 0,
-      "important": 7,
-      "duplicateSelectors": 36
+      "important": 5,
+      "duplicateSelectors": 33
     },
     {
       "file": "src/app/sii-v5-theme.css",
