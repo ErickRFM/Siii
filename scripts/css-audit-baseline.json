@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Reconciled merged CSS cleanup #154 with personal UX/perf #153. Keep deleted legacy CSS, append scoped responsive improvements; restore audited per-file/total budgets.",
-  "totalBytes": 255837,
+  "review": "Reconciled PR #153 personal density/performance with PR #155 canonical CSS owners; preserve mobile CSS and remove 40 shadowed global declarations and 2 unused keyframes.",
+  "totalBytes": 254140,
   "totalImportant": 432,
-  "totalDup": 443,
+  "totalDup": 437,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -52,7 +52,7 @@
     },
     {
       "file": "src/app/sii-kit-components.css",
-      "bytes": 17872,
+      "bytes": 17834,
       "rules": 177,
       "classes": 62,
       "orphanCandidates": 0,
@@ -61,8 +61,8 @@
     },
     {
       "file": "src/app/sii-motion-polish.css",
-      "bytes": 12389,
-      "rules": 99,
+      "bytes": 12213,
+      "rules": 97,
       "classes": 40,
       "orphanCandidates": 0,
       "important": 5,
@@ -88,18 +88,18 @@
     },
     {
       "file": "src/app/sii-premium-kit.css",
-      "bytes": 19983,
-      "rules": 136,
+      "bytes": 19643,
+      "rules": 131,
       "classes": 82,
       "orphanCandidates": 0,
       "important": 5,
-      "duplicateSelectors": 49
+      "duplicateSelectors": 46
     },
     {
       "file": "src/app/sii-system-coherence.css",
-      "bytes": 9925,
-      "rules": 80,
-      "classes": 30,
+      "bytes": 9372,
+      "rules": 78,
+      "classes": 29,
       "orphanCandidates": 0,
       "important": 2,
       "duplicateSelectors": 23
@@ -124,12 +124,12 @@
     },
     {
       "file": "src/app/sii-ux-refinement.css",
-      "bytes": 8103,
-      "rules": 75,
-      "classes": 39,
+      "bytes": 7513,
+      "rules": 67,
+      "classes": 37,
       "orphanCandidates": 0,
       "important": 4,
-      "duplicateSelectors": 14
+      "duplicateSelectors": 11
     },
     {
       "file": "src/app/sii-v2.css",

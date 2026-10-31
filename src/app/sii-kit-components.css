@@ -112,7 +112,7 @@
 .sii-app .sii-workspace .sii-kit-empty{padding:24px 16px;gap:12px;min-height:0;flex:none}
 .sii-app .sii-workspace .sii-kit-empty-icon{width:36px;height:36px;border-radius:10px}
 .sii-app .sii-workspace .sii-kit-empty-title{font-size:15px}
-.sii-app .sii-workspace-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));align-items:end;gap:10px;padding:12px;background:var(--sii-surface-soft);border:1px solid var(--sii-line);border-radius:10px;margin-bottom:16px}
+.sii-app .sii-workspace-filters{grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));padding:12px;background:var(--sii-surface-soft);border:1px solid var(--sii-line);border-radius:10px;margin-bottom:16px}
 .sii-app .sii-workspace-filters label:first-child{grid-column:1/-1}
 .sii-app .sii-workspace-filters>button{align-self:end}
 .sii-user-detail-forms{display:grid;gap:20px}
