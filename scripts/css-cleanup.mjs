@@ -11,9 +11,12 @@ function walk(dir){
  });
 }
 const all=walk('src');
-const styles=all.filter(f=>f.endsWith('.css')).sort();
+const ordered=[...fs.readFileSync('src/app/layout.tsx','utf8').matchAll(/import '\\.\\/([^']+\\.css)'/g)].map(m=>'src/app/'+m[1]);
+const styles=[...ordered,...all.filter(f=>f.endsWith('.css')&&!ordered.includes(f)).sort()];
+const orderedSet=new Set(ordered);
 const source=all.filter(f=>/\.(?:ts|tsx|js|jsx|mjs)$/.test(f)).map(f=>fs.readFileSync(f,'utf8')).join('\n');
-const stats={files:styles.length,rules:0,duplicates:0,bytesBefore:0,bytesAfter:0};
+const stats={files:styles.length,rules:0,duplicates:0,crossFileDuplicates:0,bytesBefore:0,bytesAfter:0};
+const crossSeen=new Map();
 const candidates=new Map();
 for(const file of styles){
  const raw=fs.readFileSync(file,'utf8');stats.bytesBefore+=Buffer.byteLength(raw);
@@ -35,6 +38,11 @@ for(const file of styles){
    console.log('SAFE_DUPLICATE',file,rule.selector.slice(0,90),'scope='+scope.join('/'));
   }
   seen.set(signature,rule);
+  if(orderedSet.has(file)){
+   const previousFile=crossSeen.get(signature);
+   if(previousFile&&previousFile!==file){stats.crossFileDuplicates++;console.log('CROSS_FILE_DUPLICATE',previousFile,'->',file,rule.selector.slice(0,90));}
+   crossSeen.set(signature,file);
+  }
   for(const match of rule.selector.matchAll(/\.([a-zA-Z][\w-]*)/g)){
    const name=match[1];
    if(source.includes(name))continue;
@@ -51,4 +59,4 @@ for(const file of styles){
 console.log('CSS_CLEANUP_SUMMARY',JSON.stringify({...stats,possibleOrphans:candidates.size,mode}));
 console.log('CSS_ORPHANS_READ_ONLY',JSON.stringify([...candidates].slice(0,120).map(([name,files])=>({name,files:[...files]}))));
 console.log('CSS_NOTE Orphan candidates may be dynamic selectors: verify behavior before deletion.');
-if(mode==='check'&&stats.duplicates)process.exitCode=1;
+if(mode==='check'&&(stats.duplicates||stats.crossFileDuplicates))process.exitCode=1;
