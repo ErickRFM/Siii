@@ -1,0 +1,211 @@
+/* SIII personal interiors: layout and legibility in student/teacher academic views.
+   Scoped to role portals; preserves the approved home dashboards and admin workspaces. */
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) {
+  --siii-interior-text:#f2f0ed;
+  --siii-interior-muted:#c9c8c5;
+  --siii-interior-panel:rgba(37,41,49,.58);
+  --siii-interior-subtle:rgba(255,255,255,.055);
+  --siii-interior-selected:rgba(255,255,255,.12);
+  color:var(--siii-interior-text);
+  min-width:0;
+}
+html[data-sii-theme=light] #siii-personal :is(.sii-student-portal,.sii-teacher-portal) {
+  --siii-interior-text:#283037;
+  --siii-interior-muted:#515c64;
+  --siii-interior-panel:rgba(255,255,255,.69);
+  --siii-interior-subtle:rgba(40,48,55,.06);
+  --siii-interior-selected:rgba(40,48,55,.12);
+}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) {
+  background:radial-gradient(ellipse at 15% 12%,rgba(201,185,173,.23),transparent 58%),linear-gradient(140deg,#ece9e5,#e5e7e8)!important;
+  color:#283037!important;
+  --siii-personal-text:#283037;
+  --siii-personal-muted:#515c64;
+  --sii-text:#283037;
+  --sii-muted:#515c64;
+}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)))>.group.peer>div.fixed {
+  background:transparent!important;
+}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) [data-sidebar=sidebar] {
+  background:rgba(238,239,235,.78)!important;color:#283037!important;
+}
+html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal,.sii-teacher-portal)):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.siii-personal-nav-link,.siii-personal-nav-group summary) {
+  color:#283037!important;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-kit-page-heading,.sii-kit-page-heading>div) {
+  min-width:0;max-width:100%;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-kit-page-heading h1 {
+  font-size:clamp(1.85rem,3vw,2.5rem)!important;
+  line-height:1.15!important;letter-spacing:-.025em;
+  max-width:100%;overflow-wrap:break-word;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-kit-page-heading p {
+  color:var(--siii-interior-muted);overflow-wrap:anywhere;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-workspace-tabs,.sii-personal-navigation,.sii-teacher-navigation) {
+  min-width:0;max-width:100%;
+  border:0!important;box-shadow:none!important;
+  background:var(--siii-interior-subtle)!important;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-workspace-tabs,.sii-personal-navigation,.sii-teacher-navigation) [role=tab] {
+  color:var(--siii-interior-text)!important;border:0!important;box-shadow:none!important;
+  border-radius:10px;line-height:1.3;min-height:44px;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-workspace-tabs,.sii-personal-navigation,.sii-teacher-navigation) [role=tab][data-state=active] {
+  color:var(--siii-interior-text)!important;background:var(--siii-interior-selected)!important;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) [role=tabpanel] {
+  min-width:0;max-width:100%;background:transparent!important;
+  color:var(--siii-interior-text)!important;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-workspace-tabs [role=tab] {
+  color:var(--siii-interior-text)!important;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-kit-empty,.sii-empty,.siii-personal-record,.siii-teacher-profile-hero) {
+  min-width:0;max-width:100%;color:var(--siii-interior-text)!important;
+  background:var(--siii-interior-panel)!important;
+  border:0!important;border-radius:16px!important;
+  box-shadow:none!important;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-kit-empty-title,.sii-kit-empty [data-slot=empty-title]) {
+  color:var(--siii-interior-text)!important;opacity:1!important;
+  font-weight:650;line-height:1.25;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-kit-empty [data-slot=empty-description],.siii-personal-record-label,.siii-student-academic-links-title) {
+  color:var(--siii-interior-muted)!important;opacity:1!important;
+}
+#siii-personal .siii-personal-data-table,
+#siii-personal .siii-personal-data-table :is(input,select) {min-width:0;max-width:100%}
+#siii-personal .siii-personal-record {padding:16px;gap:0}
+#siii-personal .siii-personal-record-field {padding:10px 0}
+#siii-personal .siii-personal-record-field+.siii-personal-record-field {border-top:1px solid var(--siii-interior-subtle)}
+#siii-personal .siii-personal-record-label {font-size:.78rem;line-height:1.4}
+#siii-personal .siii-personal-record-value {font-size:.9rem;line-height:1.5;color:var(--siii-interior-text);overflow-wrap:anywhere}
+#siii-personal .siii-personal-record-value :is(button,a) {max-width:100%;white-space:normal;text-align:left}
+#siii-personal .siii-student-academic-links {
+  display:grid;gap:12px;min-width:0;max-width:100%;
+  padding:16px;border-radius:16px;background:var(--siii-interior-subtle);
+}
+#siii-personal .siii-student-academic-links-title {font-weight:650;font-size:.86rem}
+#siii-personal .siii-student-academic-links>div {
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;
+}
+#siii-personal .siii-student-academic-links .sii-outline-button {
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;min-height:44px;max-width:100%;
+  margin:0!important;text-align:center;white-space:normal;
+  background:var(--siii-interior-panel)!important;color:var(--siii-interior-text)!important;
+  border:0!important;box-shadow:none!important;border-radius:12px;
+}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) [role=tab]:focus-visible,
+#siii-personal .siii-student-academic-links a:focus-visible {
+  outline:2px solid currentColor;outline-offset:2px;
+}
+@media(max-width:767px) {
+  #siii-personal .sii-main {min-width:0;padding-right:0}
+  #siii-personal .sii-topbar {
+    display:flex;align-items:center;justify-content:space-between;
+    gap:6px;padding:8px 12px 0;margin:0;
+    min-width:0;min-height:62px;height:62px;
+  }
+  #siii-personal .sii-topbar-start {flex:0 1 auto;min-width:0;gap:6px}
+  #siii-personal .sii-topbar-actions {flex:0 0 auto;gap:5px;padding:0;margin-left:auto;min-width:0}
+  #siii-personal .sii-command-trigger {width:38px;min-width:38px;max-width:38px;height:42px;padding:9px}
+  #siii-personal :is(.sii-menu-button,.sii-topbar-actions>button,.siii-topbar-notices) {
+    width:40px;min-width:40px;height:42px;min-height:42px;padding:9px;
+  }
+  #siii-personal .siii-personal-account {flex:0 0 44px;min-width:0!important;max-width:44px!important}
+  #siii-personal .siii-personal-account>summary {
+    box-sizing:border-box;width:44px;height:44px;padding:5px;
+    margin-top:0;gap:0;justify-content:center;
+  }
+  #siii-personal .siii-personal-account summary>span:nth-child(2) {display:none!important}
+  #siii-personal .siii-personal-account>div {right:0;max-width:min(85vw,270px)}
+  #siii-personal .sii-page {
+    width:100%;min-width:0;max-width:100%;margin:0;
+    padding:12px max(12px,env(safe-area-inset-right)) 26px max(12px,env(safe-area-inset-left));
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal):not(:is(.siii-student-home-shell,.siii-teacher-home-shell)) {
+    width:100%;min-width:0;max-width:100%;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal):not(:is(.siii-student-home-shell,.siii-teacher-home-shell))>* {
+    min-width:0;max-width:100%;margin-top:0!important;margin-bottom:0!important;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-page-eyebrow {
+    font-size:.67rem;line-height:1.4;margin:0 0 6px;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-kit-page-heading {
+    display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+    margin:0!important;padding:0;min-height:0;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-kit-page-heading h1 {
+    font-size:clamp(1.4rem,6vw,1.85rem)!important;
+    line-height:1.12!important;letter-spacing:-.03em;
+    word-break:normal;overflow-wrap:break-word;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-kit-page-heading p {
+    font-size:.85rem;line-height:1.4;margin-top:5px;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) .sii-kit-page-heading button {
+    min-height:40px;min-width:0;max-width:100%;margin:0;
+  }
+  #siii-personal :is(.siii-student-utility-links,nav[aria-label="Contexto del portal"]) {
+    display:flex;flex-wrap:wrap;align-items:center;gap:9px 18px;
+    font-size:.8rem;line-height:1.5;margin:0!important;
+  }
+  #siii-personal .sii-student-portal .sii-personal-navigation {
+    width:100%;max-width:100%;display:flex;flex-wrap:nowrap;
+    overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;
+    overscroll-behavior-x:contain;gap:5px;padding:5px;
+  }
+  #siii-personal .sii-student-portal .sii-personal-navigation [role=tab] {
+    flex:0 0 auto;min-width:44px;padding-inline:12px;
+  }
+  #siii-personal .sii-student-portal .siii-academic-tabs {
+    display:flex;flex-wrap:nowrap!important;justify-content:flex-start;
+    width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;
+    overscroll-behavior-x:contain;scrollbar-width:thin;
+    gap:4px;padding:5px;
+  }
+  #siii-personal .sii-student-portal .siii-academic-tab {
+    flex:0 0 auto;white-space:nowrap;padding:10px 12px;
+  }
+  #siii-personal .sii-teacher-portal .sii-teacher-navigation {
+    width:100%;max-width:100%;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:5px;padding:5px;
+  }
+  #siii-personal .sii-teacher-portal .sii-teacher-navigation [role=tab] {
+    min-width:0;white-space:normal;overflow-wrap:anywhere;
+  }
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-kit-empty,.sii-empty) {
+    padding:20px 14px;min-height:0!important;
+  }
+  #siii-personal .siii-personal-data-table nav[aria-label^="Paginación"] {gap:10px}
+  #siii-personal .siii-personal-data-table nav[aria-label^="Paginación"] p {line-height:1.4}
+  #siii-personal .siii-personal-mobile-records {min-width:0}
+}
+@media(max-width:360px) {
+  #siii-personal .sii-topbar {gap:3px;padding-inline:7px}
+  #siii-personal .sii-topbar-actions {gap:3px}
+  #siii-personal .siii-personal-account {flex-basis:40px;max-width:40px!important}
+  #siii-personal .siii-personal-account>summary {width:40px;height:42px}
+  #siii-personal .sii-menu-button,#siii-personal .sii-topbar-actions>button,#siii-personal .siii-topbar-notices {
+    width:36px;min-width:36px;padding:8px;
+  }
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) {
+    --siii-interior-panel:#292d33;--siii-interior-subtle:#30343a;
+  }
+  html[data-sii-theme=light] #siii-personal :is(.sii-student-portal,.sii-teacher-portal) {
+    --siii-interior-panel:#fff;--siii-interior-subtle:#e4e7ea;
+  }
+}
+@media(forced-colors:active) {
+  #siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.sii-kit-empty,.siii-personal-record,.siii-student-academic-links,.sii-workspace-tabs) {
+    background:Canvas!important;color:CanvasText!important;border:1px solid CanvasText!important;
+  }
+}
