@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-30T21:10:00.000Z",
-  "review": "Dark Slate Glass SIII v10: full repair of CI dependencies, glass material consolidation, and workspace border fixes.",
-  "totalBytes": 237769,
-  "totalImportant": 355,
-  "totalDup": 414,
+  "generatedAt": "2026-10-31T07:30:00.000Z",
+  "review": "Personal student/teacher responsive design audit: scoped layout and accessible themes without weakening prior CSS budgets.",
+  "totalBytes": 249356,
+  "totalImportant": 403,
+  "totalDup": 430,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -76,6 +76,15 @@
       "orphanCandidates": 0,
       "important": 68,
       "duplicateSelectors": 50
+    },
+    {
+      "file": "src/app/sii-personal-mobile.css",
+      "bytes": 11587,
+      "rules": 66,
+      "classes": 41,
+      "orphanCandidates": 0,
+      "important": 48,
+      "duplicateSelectors": 16
     },
     {
       "file": "src/app/sii-premium-kit.css",
