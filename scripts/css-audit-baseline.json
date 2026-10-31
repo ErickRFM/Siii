@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T09:00:00Z",
-  "review": "SIII wide-screen student workspace after PR #144: preserve approved 1344 composition, adapt grid at >=1400px; audit budget updated to match added rules.",
-  "totalBytes": 254894,
+  "review": "Wide Estudiante UX with CSS selectors explicitly scoped to student home, never shared teacher dashboard, at >=1400px; reviewed CSS budget.",
+  "totalBytes": 255024,
   "totalImportant": 406,
-  "totalDup": 433,
+  "totalDup": 435,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,12 +70,12 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 35406,
+      "bytes": 35536,
       "rules": 300,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 68,
-      "duplicateSelectors": 51
+      "duplicateSelectors": 53
     },
     {
       "file": "src/app/sii-personal-mobile.css",
