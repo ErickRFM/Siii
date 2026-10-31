@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-10-31T09:00:00Z",
-  "review": "Wide Estudiante UX with CSS selectors explicitly scoped to student home, never shared teacher dashboard, at >=1400px; reviewed CSS budget.",
-  "totalBytes": 255024,
-  "totalImportant": 406,
-  "totalDup": 435,
+  "review": "Merged main #147 and academic catalog mobile PR #148: 320-600px tabs/filters/record cards; source CSS budget reconciled",
+  "totalBytes": 260779,
+  "totalImportant": 412,
+  "totalDup": 436,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -106,12 +106,12 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 5680,
-      "rules": 28,
-      "classes": 18,
+      "bytes": 11435,
+      "rules": 59,
+      "classes": 27,
       "orphanCandidates": 0,
-      "important": 1,
-      "duplicateSelectors": 9
+      "important": 7,
+      "duplicateSelectors": 10
     },
     {
       "file": "src/app/sii-tailwind.css",
