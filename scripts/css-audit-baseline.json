@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T08:20:00.000Z",
-  "review": "Borderless personal/operational table layout, no clipping in mobile tab navigation, forced-colors preserved",
-  "totalBytes": 259110,
-  "totalImportant": 432,
+  "generatedAt": "2026-10-31T08:29:00.000Z",
+  "review": "Borderless personal/operational tables; fixed student bar reserves safe-area scroll clearance, with regression assertions",
+  "totalBytes": 259441,
+  "totalImportant": 433,
   "totalDup": 446,
   "files": [
     {
@@ -79,11 +79,11 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 19767,
-      "rules": 86,
+      "bytes": 20098,
+      "rules": 87,
       "classes": 48,
       "orphanCandidates": 0,
-      "important": 70,
+      "important": 71,
       "duplicateSelectors": 29
     },
     {
