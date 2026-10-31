@@ -1,8 +1,8 @@
 {
   "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "CSS cleanup pass 1: remove four identical media-scope declarations from personal fidelity; retain all dynamic/snapshot-dependent styles. Add syntax-aware audit for orphan candidates.",
-  "totalBytes": 272245,
-  "totalImportant": 442,
+  "review": "CSS cleanup pass 1: remove four exact duplicate rules and nine superseded identical declarations, preserving final specificity and media scopes; unresolved orphan selectors remain read-only candidates.",
+  "totalBytes": 272044,
+  "totalImportant": 440,
   "totalDup": 461,
   "files": [
     {
@@ -34,11 +34,11 @@
     },
     {
       "file": "src/app/sii-glass.css",
-      "bytes": 45271,
+      "bytes": 45207,
       "rules": 273,
       "classes": 119,
       "orphanCandidates": 0,
-      "important": 158,
+      "important": 156,
       "duplicateSelectors": 96
     },
     {
@@ -70,8 +70,8 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 40914,
-      "rules": 345,
+      "bytes": 40800,
+      "rules": 344,
       "classes": 89,
       "orphanCandidates": 0,
       "important": 70,
@@ -79,7 +79,7 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 20357,
+      "bytes": 20334,
       "rules": 88,
       "classes": 50,
       "orphanCandidates": 0,
