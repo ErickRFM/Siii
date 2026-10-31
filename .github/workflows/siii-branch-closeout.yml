@@ -60,7 +60,21 @@ jobs:
           fix/siii-wide-student-layout-after144-20261031
           integration/siii-personal-ux-closure-20261031
           )
-          open_heads="$(gh api --paginate "/repos/$GH_REPO/pulls?state=open&per_page=100" --jq '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' | sort -u)"
+          # Fail closed if we cannot establish the complete set of open PR heads.
+          # GitHub's Actions token has intermittently received 404 on the pulls list.
+          if ! open_prs_json="$(gh api --paginate "/repos/$GH_REPO/pulls?state=open&per_page=100" 2>/dev/null)"; then
+            echo "::warning::Actions token could not list PRs; trying the public read-only endpoint"
+            open_prs_json="$(curl --fail --silent --show-error --location --retry 3 --header 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GH_REPO/pulls?state=open&per_page=100")" || {
+              echo "::error::Unable to list open PRs; no branch may be deleted"
+              exit 1
+            }
+            # Public fallback is a single page; refuse to act if pagination is possible.
+            if (( $(jq -s '[.[][]] | length' <<< "$open_prs_json") >= 100 )); then
+              echo "::error::Public PR list may be paginated; no branch may be deleted"
+              exit 1
+            fi
+          fi
+          open_heads="$(jq -r '.[] | select(.head.repo.full_name == .base.repo.full_name) | .head.ref' <<< "$open_prs_json" | sort -u)"
           for branch in "${branches[@]}"; do
             [[ "$branch" != main && "$branch" =~ ^[a-zA-Z0-9/_-]+$ ]] || { echo "Skip unsafe branch: $branch"; continue; }
             if grep -Fqx -- "$branch" <<< "$open_heads"; then echo "SKIP open PR: $branch"; continue; fi
@@ -70,15 +84,25 @@ jobs:
             if ! [[ "$ahead" =~ ^[0-9]+$ ]]; then echo "Invalid comparison, preserving: $branch"; continue; fi
             if (( ahead > 0 )); then
               tag="archive/siii-20261031/$branch"
-              existing="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)"
-              # gh api --jq can return the literal string null for a missing ref.
-              if [[ "$existing" == "null" ]]; then existing=""; fi
+              # matching-refs returns [] for a missing tag (unlike git/ref, which returns 404).
+              # Match the full ref, not a similarly prefixed tag.
+              tag_query='.[] | select(.ref == "refs/tags/'"$tag"'") | .object.sha'
+              if ! existing="$(gh api "/repos/$GH_REPO/git/matching-refs/tags/$tag" --jq "$tag_query")"; then
+                echo "::error::Unable to inspect archive refs; preserving $branch"
+                continue
+              fi
               if [[ -n "$existing" && "$existing" != "$state" ]]; then echo "SKIP existing archive points elsewhere: $branch"; continue; fi
               if [[ -z "$existing" ]]; then
-                gh api -X POST "/repos/$GH_REPO/git/refs" -f "ref=refs/tags/$tag" -f "sha=$state" >/dev/null 2>&1 || true
+                if ! gh api -X POST "/repos/$GH_REPO/git/refs" -f "ref=refs/tags/$tag" -f "sha=$state" >/dev/null; then
+                  echo "::error::Archive creation failed; preserving $branch"
+                  continue
+                fi
               fi
-              verified="$(gh api "/repos/$GH_REPO/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)"
-              if [[ "$verified" != "$state" ]]; then echo "SKIP archive verification failed: $branch"; continue; fi
+              if ! verified="$(gh api "/repos/$GH_REPO/git/matching-refs/tags/$tag" --jq "$tag_query")"; then
+                echo "::error::Archive verification API failed; preserving $branch"
+                continue
+              fi
+              if [[ "$verified" != "$state" ]]; then echo "::error::Archive SHA mismatch; preserving $branch"; continue; fi
               echo "ARCHIVED unique commits: $branch -> $tag at $state"
             fi
             # Recheck immediately before deletion; never knowingly discard moved refs.
