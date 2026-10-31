@@ -383,3 +383,41 @@ test('wide student workspace uses available width without shifting approved 1344
   }
  }
 });
+
+
+test('student desktop uses the sidebar once and keeps academic data readable',async({page})=>{
+ test.setTimeout(120000);
+ await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
+ await personalNavigate(page,'Calificaciones');
+ await expect(page.getByRole('tab',{name:'Calificaciones e historial',exact:true})).toHaveAttribute('data-state','active');
+ await page.setViewportSize({width:1666,height:920});
+ const geometry=await page.evaluate(()=>{
+  const primary=document.querySelector('#siii-personal .sii-student-portal .sii-personal-navigation');
+  const identity=document.querySelector('#siii-personal .siii-student-identity-card');
+  const table=document.querySelector('#siii-personal .siii-personal-data-table table');
+  const first=table?.querySelector('thead th');
+  return {primaryDisplay:primary?getComputedStyle(primary).display:null,identityHeight:identity?.getBoundingClientRect().height??0,
+   firstColumnPercent:first&&table?first.getBoundingClientRect().width/table.getBoundingClientRect().width:0,
+   overflow:document.documentElement.scrollWidth-window.innerWidth};
+ });
+ expect(geometry.primaryDisplay).toBe('none');
+ expect(geometry.identityHeight).toBeGreaterThan(35);
+ expect(geometry.identityHeight).toBeLessThan(100);
+ expect(geometry.firstColumnPercent).toBeGreaterThan(.29);
+ expect(geometry.overflow).toBeLessThanOrEqual(2);
+ await page.setViewportSize({width:390,height:844});
+ await expect(page.getByRole('tablist',{name:'Navegación estudiantil'})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
+});
+
+test('student home avoids unused personal collection requests',async({page})=>{
+ const unnecessary:string[]=[];
+ page.on('request',request=>{
+  if(/\\/portal\\/student\\/(teachers|payments)(?:\\?|$)/.test(new URL(request.url()).pathname))unnecessary.push(request.url());
+ });
+ await login(page);
+ await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Calificaciones recientes'})).toBeVisible();
+ await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
+ expect(unnecessary).toEqual([]);
+});
