@@ -77,7 +77,12 @@ test('personal first paint defaults to the approved dark theme and respects an e
 test('browser back restores the personal home after navigating to a section',async({page})=>{
  for(const [kind,actor,label,link]of [['student',f.student,'Académico','Carga académica'],['teacher',f.teacher,'Mis grupos','Mis grupos']] as const){
   await login(page,actor.username);await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${kind}$`));
-  const nav=page.getByRole('navigation',{name:'Navegación institucional',exact:true});await expect(nav.getByRole('link',{name:link,exact:true})).not.toHaveAttribute('aria-disabled','true');
+  const nav=page.getByRole('navigation',{name:'Navegación institucional',exact:true});
+  const destinationGroup=nav.locator('.siii-personal-nav-group').filter({hasText:link});
+  await expect(destinationGroup).toHaveCount(1);
+  await destinationGroup.locator('summary').click();
+  await expect(nav.getByRole('link',{name:link,exact:true})).toBeVisible();
+  await expect(nav.getByRole('link',{name:link,exact:true})).not.toHaveAttribute('aria-disabled','true');
   await personalNavigate(page,label);await expect(page).toHaveURL(/#(?:inscripciones|grupos)$/);await page.goBack();
   await expect(page).toHaveURL(new RegExp(`/dashboard/institutions/${f.tenant}/${kind}$`));await expect(page.locator(kind==='student'?'.siii-student-dashboard':'.siii-teacher-dashboard')).toBeVisible();
  }

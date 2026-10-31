@@ -81,6 +81,8 @@ test('V3 student home stays institutional and loads only dashboard resources',as
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await expect(page.getByText('Próximas clases registradas',{exact:true})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'Mi horario',exact:true})).toHaveCount(0);
+ const academicGroup=page.getByRole('navigation',{name:'Navegación institucional'}).locator('.siii-personal-nav-group').filter({hasText:'Carga académica'});
+ await expect(academicGroup).toHaveCount(1);await academicGroup.locator('summary').click();
  await expect(page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Carga académica',exact:true})).toBeVisible();
  expect(resources).not.toContain('schedule');expect(resources).toContain('grades');expect(resources).toContain('payments');
  await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
@@ -88,10 +90,10 @@ test('V3 student home stays institutional and loads only dashboard resources',as
 });
 test('student sidebar opens real academic and finance sections without duplicating operational schedules',async({page})=>{
  await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
- await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Calificaciones',exact:true}).click();
+ await personalNavigate(page,'Calificaciones');
  await expect(page.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
  await expect(page.getByRole('tab',{name:'Calificaciones e historial',exact:true})).toHaveAttribute('data-state','active');
- await page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Estado de cuenta'}).click();
+ await personalNavigate(page,'Estado de cuenta');
  await expect(page.getByRole('tab',{name:'Finanzas',exact:true})).toHaveAttribute('data-state','active');
 });
 test('V3 revalidation preserves displayed records and search while a valid profile is checked',async({page})=>{
@@ -122,7 +124,9 @@ test('V3 mobile destinations remain keyboard accessible and clear records offlin
  await page.setViewportSize({width:360,height:800});await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Abrir navegación',exact:true}).focus();await page.keyboard.press('Enter');
  const drawer=page.getByRole('dialog');await expect(drawer).toBeVisible();
- const academic=drawer.getByRole('link',{name:'Carga académica',exact:true});await academic.focus();await page.keyboard.press('Enter');await expect(drawer).toHaveCount(0);
+ const disclosure=drawer.locator('.siii-personal-nav-group').filter({hasText:'Carga académica'}).locator('summary');
+ await disclosure.focus();await page.keyboard.press('Enter');
+ const academic=drawer.getByRole('link',{name:'Carga académica',exact:true});await expect(academic).toBeVisible();await academic.focus();await page.keyboard.press('Enter');await expect(drawer).toHaveCount(0);
  const navigation=page.getByRole('tablist',{name:'Navegación estudiantil'});await expect(navigation.getByRole('tab',{name:'Académico',exact:true})).toHaveAttribute('data-state','active');
  await expect(page.getByRole('searchbox',{name:'Buscar en inscripciones'})).toBeVisible();await expect(page.getByRole('cell')).toHaveCount(0);
  for(const name of ['Inicio','Académico','Finanzas','Servicios','Perfil']){const box=await navigation.getByRole('tab',{name,exact:true}).boundingBox();expect(box?.height).toBeGreaterThanOrEqual(44);expect(box?.width).toBeGreaterThanOrEqual(44)}
