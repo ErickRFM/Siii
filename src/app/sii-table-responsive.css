@@ -138,6 +138,47 @@
   }
 }
 
+
+/* Operational tables share the same unframed matte surfaces.
+   Do not flatten inputs, status indicators, focused rows or column dividers. */
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(
+ .sii-catalog-table-panel,.sii-operation-table,.sii-catalog-scroll,[data-slot=table-container]
+):has(table){
+ border:0!important;border-width:0!important;box-shadow:none!important;
+ max-width:100%;min-width:0;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(
+ .sii-catalog-table,.sii-operation-table table,[data-slot=table-container] table
+){
+ border:0!important;box-shadow:none!important;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(
+ .sii-catalog-table,.sii-operation-table table,[data-slot=table-container] table
+) thead th{
+ background:transparent!important;
+ font-weight:650;letter-spacing:0;
+}
+.sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(
+ .sii-catalog-table,.sii-operation-table table,[data-slot=table-container] table
+) tbody tr:last-child td{
+ border-bottom:0;
+}
+@media(max-width:767px){
+ .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(
+  .sii-catalog-scroll,[data-slot=table-container],.sii-operation-table
+ ):has(table){
+  overflow-x:auto;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+ }
+}
+@media(forced-colors:active){
+ .sii-app.sii-ui:not(#siii-personal):not(:has(#siii-personal)) :is(
+  .sii-catalog-table-panel,.sii-operation-table,.sii-catalog-scroll,[data-slot=table-container]
+ ):has(table){
+  border:1px solid CanvasText!important;
+ }
+}
+
 /* Academic catalogue on phones: show every destination, preserve record semantics,
    and remove the desktop table's forced 470px width. Scoped to this catalogue only. */
 @media (max-width:600px) {

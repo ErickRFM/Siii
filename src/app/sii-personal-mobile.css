@@ -1,4 +1,5 @@
-/* Mobile interior styles; preserve home compositions. */
+/* SIII personal interiors: layout and legibility in student/teacher academic views.
+   Scoped to role portals; preserves the approved home dashboards and admin workspaces. */
 #siii-personal :is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) {
   --siii-interior-text:#f2f0ed;
   --siii-interior-muted:#c9c8c5;
@@ -155,22 +156,39 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
     display:flex;flex-wrap:wrap;align-items:center;gap:9px 18px;
     font-size:.8rem;line-height:1.5;margin:0!important;
   }
+  /* Reserve scrollable room for the fixed student bar, including home indicator.
+     Otherwise the last record and pagination controls sit behind the bar. */
+  #siii-personal:has(.sii-student-portal:not(.siii-student-home-shell)) .sii-page {
+    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  }
+  /* Fixed bottom navigation must show all five destinations, without clipping Perfil. */
   #siii-personal .sii-student-portal .sii-personal-navigation {
-    width:100%;max-width:100%;display:flex;flex-wrap:nowrap;
-    overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;
-    overscroll-behavior-x:contain;gap:5px;padding:5px;
+    position:fixed;inset:auto 12px max(8px,env(safe-area-inset-bottom));
+    width:auto;max-width:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:3px;padding:6px;align-items:stretch;
+    overflow:visible;scrollbar-width:none;border:0!important;box-shadow:none!important;
+    border-radius:17px;z-index:30;
+    backdrop-filter:blur(18px) saturate(110%);
+    -webkit-backdrop-filter:blur(18px) saturate(110%);
   }
   #siii-personal .sii-student-portal .sii-personal-navigation [role=tab] {
-    flex:0 0 auto;min-width:44px;padding-inline:12px;
+    flex:initial;min-width:0;min-height:56px;width:100%;
+    padding:7px 2px;white-space:normal;overflow-wrap:normal;
+    font-size:clamp(10px,2.8vw,12px);line-height:1.15;
+    text-align:center;box-shadow:none!important;
   }
+  /* All three academic options remain visible; no hidden third tab or scrollbar. */
   #siii-personal .sii-student-portal .siii-academic-tabs {
-    display:flex;flex-wrap:nowrap!important;justify-content:flex-start;
-    width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;
-    overscroll-behavior-x:contain;scrollbar-width:thin;
-    gap:4px;padding:5px;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;max-width:100%;overflow:visible;
+    gap:5px;padding:5px;
   }
   #siii-personal .sii-student-portal .siii-academic-tab {
-    flex:0 0 auto;white-space:nowrap;padding:10px 12px;
+    min-width:0;min-height:44px;white-space:normal;
+    text-align:center;overflow-wrap:break-word;line-height:1.3;padding:9px 7px;
+  }
+  #siii-personal .sii-student-portal .siii-academic-tab:nth-child(3) {
+    grid-column:1/-1;
   }
   #siii-personal .sii-teacher-portal .sii-teacher-navigation {
     width:100%;max-width:100%;grid-template-columns:repeat(2,minmax(0,1fr));
@@ -210,13 +228,93 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
 }
 
 
-/* Interior light text contrast. */
+/* The legacy interior light selector forced white headings/links on a dark shell.
+   Reconcile those exact targets after the shell switches to genuine light mode. */
 html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell))):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-page-eyebrow,.sii-page-heading h1,.sii-page-heading p,nav[aria-label="Contexto del portal"] a) {
   color:#283037!important;
 }
 html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell))):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))) :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices,.siii-personal-account>summary) {
   background:rgba(40,48,55,.085)!important;
   color:#283037!important;
+}
+
+
+/* Borderless matte glass: surface separation comes from tone and blur, not outlines.
+   Keep inner row separators and interactive keyboard focus indicators. */
+html[data-sii-theme] #siii-personal :is(
+ .siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric,
+ .siii-glass-surface,.siii-student-identity-card,.siii-teacher-profile-hero,
+ .siii-personal-record,.siii-student-academic-links,.sii-kit-empty,.sii-empty,
+ .sii-panel
+){
+ border:0!important;
+ border-width:0!important;
+ box-shadow:none!important;
+}
+html[data-sii-theme] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(
+ .siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric,
+ .siii-glass-surface
+){
+ border:0!important;
+ border-width:0!important;
+ box-shadow:none!important;
+}
+/* Preserve functional table structure without a frame around the table. */
+html[data-sii-theme] #siii-personal .siii-personal-data-table :is(
+ [data-slot=table-container],table,[role=table]
+){
+ border:0!important;box-shadow:none!important;
+}
+html[data-sii-theme] #siii-personal .siii-personal-data-table th{
+ background:transparent!important;
+ font-size:.79rem;line-height:1.45;font-weight:600;
+ white-space:nowrap;
+}
+html[data-sii-theme] #siii-personal .siii-personal-data-table td{
+ line-height:1.5;vertical-align:middle;
+}
+#siii-personal .siii-personal-record{gap:0!important;padding:10px 16px!important}
+#siii-personal .siii-personal-record-field{min-width:0;padding:9px 0}
+#siii-personal .siii-personal-record-value{overflow-wrap:anywhere}
+#siii-personal .siii-personal-data-table :is(button,a):focus-visible{
+ outline:2px solid currentColor;outline-offset:2px;
+}
+@media(min-width:420px) and (max-width:767px){
+ #siii-personal .siii-personal-record{
+  grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;
+ }
+ #siii-personal .siii-personal-record-field+.siii-personal-record-field{
+  border-top:0;
+ }
+}
+@media(min-width:768px){
+ #siii-personal .sii-student-portal .siii-academic-tabs{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ }
+ #siii-personal .siii-academic-tab{
+  min-width:0;white-space:normal;text-align:center;
+ }
+}
+/* Explicit palette for the five-item bottom bar. */
+@media(max-width:767px){
+ html[data-sii-theme=dark] #siii-personal .sii-personal-navigation{
+  background:rgba(42,42,43,.91)!important;
+ }
+ html[data-sii-theme=light] #siii-personal .sii-personal-navigation{
+  background:rgba(248,247,244,.93)!important;
+ }
+ html[data-sii-theme] #siii-personal .sii-personal-navigation{
+  border:0!important;border-width:0!important;box-shadow:none!important;
+ }
+}
+/* Forced-colors users need visible boundaries even when decorative edges are removed. */
+@media(forced-colors:active){
+ html[data-sii-theme] #siii-personal :is(
+  .siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric,
+  .siii-glass-surface,.sii-panel,.sii-kit-empty,.siii-personal-record
+ ){
+  border:1px solid CanvasText!important;
+ }
 }
 
 /* Teacher interior must clear the fixed mobile topbar. */

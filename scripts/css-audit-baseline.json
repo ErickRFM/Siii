@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T09:00:00Z",
-  "review": "Merged main #147 and academic catalog mobile PR #148: 320-600px tabs/filters/record cards; source CSS budget reconciled",
-  "totalBytes": 260779,
-  "totalImportant": 412,
-  "totalDup": 436,
+  "generatedAt": "2026-10-31T08:38:00.000Z",
+  "review": "Reconcile #147 wide layout and #148 academic catalog with #149 borderless tables/mobile; exact measured source budgets",
+  "totalBytes": 266304,
+  "totalImportant": 439,
+  "totalDup": 450,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -70,7 +70,7 @@
     },
     {
       "file": "src/app/sii-personal-fidelity.css",
-      "bytes": 35536,
+      "bytes": 35354,
       "rules": 300,
       "classes": 89,
       "orphanCandidates": 0,
@@ -79,12 +79,12 @@
     },
     {
       "file": "src/app/sii-personal-mobile.css",
-      "bytes": 16133,
-      "rules": 68,
-      "classes": 42,
+      "bytes": 20266,
+      "rules": 88,
+      "classes": 48,
       "orphanCandidates": 0,
-      "important": 51,
-      "duplicateSelectors": 18
+      "important": 71,
+      "duplicateSelectors": 29
     },
     {
       "file": "src/app/sii-premium-kit.css",
@@ -106,12 +106,12 @@
     },
     {
       "file": "src/app/sii-table-responsive.css",
-      "bytes": 11435,
-      "rules": 59,
+      "bytes": 13009,
+      "rules": 65,
       "classes": 27,
       "orphanCandidates": 0,
-      "important": 7,
-      "duplicateSelectors": 10
+      "important": 14,
+      "duplicateSelectors": 13
     },
     {
       "file": "src/app/sii-tailwind.css",
