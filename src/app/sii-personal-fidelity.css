@@ -63,7 +63,7 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 .siii-personal-nav-footer .siii-personal-nav-link{min-height:35px}
 #siii-personal :is(.siii-student-main,.siii-student-aside){display:grid;min-width:0;align-content:start;gap:14px;grid-template-columns:minmax(0,1fr)}
 #siii-personal .siii-student-aside{gap:13px}
-#siii-personal :is(.siii-overview-panel,.siii-overview-hero){border-radius:15px!important;background:linear-gradient(140deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.018) 60%,rgba(0,0,0,.15) 100%),rgba(58,55,52,.46)!important;border:1px solid var(--siii-personal-edge)!important;box-shadow:0 16px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12)!important;padding:16px;backdrop-filter:blur(22px) saturate(1.18);-webkit-backdrop-filter:blur(22px) saturate(1.18);color:var(--siii-personal-text);min-width:0}
+#siii-personal :is(.siii-overview-panel,.siii-overview-hero){border-radius:15px!important;background:linear-gradient(140deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.018) 60%,rgba(0,0,0,.15) 100%),rgba(58,55,52,.46)!important;border:0!important;box-shadow:none!important;padding:16px;backdrop-filter:blur(22px) saturate(1.18);-webkit-backdrop-filter:blur(22px) saturate(1.18);color:var(--siii-personal-text);min-width:0}
 #siii-personal .siii-glass-workspace .sii-panel{border:0!important;border-width:0!important}
 #siii-personal .siii-overview-hero .siii-overview-eyebrow{font-size:20px;font-weight:330;line-height:27px;opacity:.78}
 #siii-personal .siii-overview-hero h2{font-size:40px;font-weight:510;line-height:48px;letter-spacing:-.025em;margin:2px 0 0}
@@ -73,7 +73,7 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-overview-refresh{position:absolute;right:12px;top:12px;padding:5px;background:transparent;border:0;opacity:0;width:28px;height:28px;z-index:3}
 #siii-personal .siii-overview-hero:hover .siii-overview-refresh,#siii-personal .siii-overview-refresh:focus-visible{opacity:1}
 #siii-personal .siii-overview-metrics{display:grid;grid-template-columns:1.18fr 1.25fr 1fr 1fr;gap:12px;align-items:stretch}
-#siii-personal .siii-shared-glass-metric{display:flex;align-items:center;gap:13px;padding:12px 14px;min-height:83px;height:83px;border-radius:14px!important;overflow:hidden;grid-column:auto;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.015)),rgba(60,57,53,.42)!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 10px 28px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.10)!important;backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15)}
+#siii-personal .siii-shared-glass-metric{display:flex;align-items:center;gap:13px;padding:12px 14px;min-height:83px;height:83px;border-radius:14px!important;overflow:hidden;grid-column:auto;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.015)),rgba(60,57,53,.42)!important;border:0!important;box-shadow:none!important;backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15)}
 #siii-personal .siii-shared-metric-copy{min-width:0;flex:1;display:grid;gap:5px;align-content:center}
 #siii-personal .siii-shared-metric-copy>span{font-size:10px;font-weight:350;line-height:13px;white-space:normal;word-break:normal;overflow-wrap:normal}
 #siii-personal .siii-shared-metric-copy>strong{font-size:23px;font-weight:550;line-height:26px;letter-spacing:-.025em;white-space:nowrap}
