@@ -470,7 +470,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
  .sii-workspace-tabs,.sii-catalog-tabs,
  .sii-catalog-create,.sii-workspace-drawer,.sii-services-list
 ){
- --glass-tint:rgba(123,111,103,.27);
  border-color:transparent;
  box-shadow:none;
 }
