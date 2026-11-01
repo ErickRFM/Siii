@@ -11,9 +11,10 @@ const expectedSuites: Record<string, number> = {
   'org.companerodeescuela.api.integrations.academic.SiiiPushLiveContractTest': 1,
   'org.companerodeescuela.api.integrations.academic.SiiiFullChainLiveContractTest': 1,
   'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest': 9,
+  'org.companerodeescuela.api.integrations.academic.SiiiChangeNotificationTest': 4,
   'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest': 11,
   'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest': 5,
-  'org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest': 7,
+  'org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest': 8,
 };
 const directory = mkdtempSync(join(tmpdir(), 'siii-live-contract-gate-'));
 afterAll(() => rmSync(directory, {recursive: true, force: true}));
@@ -60,7 +61,7 @@ describe('full Companion live contract CI gate', () => {
     expect(job['timeout-minutes']).toBe(25);
   });
 
-  it('runs and validates exactly the six required suites and uploads only bounded evidence', () => {
+  it('runs and validates exactly the seven required suites and uploads only bounded evidence', () => {
     const receiver = steps().find(step => step.run?.includes('./gradlew'))!.run!;
     const selected = [...receiver.matchAll(/--tests '([^']+)'/g)].map(match => match[1]).sort();
     expect(selected).toEqual(Object.keys(expectedSuites).sort());
@@ -83,7 +84,7 @@ describe('full Companion live contract CI gate', () => {
   it('accepts complete successful XML fixtures', () => {
     const result = executeGate();
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout.trim().split('\n')).toHaveLength(6);
+    expect(result.stdout.trim().split('\n')).toHaveLength(Object.keys(expectedSuites).length);
   });
 
   it.each(['skipped', 'failure', 'error'])('rejects a %s testcase even when suite totals claim success', tag => {

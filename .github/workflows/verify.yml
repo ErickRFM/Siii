@@ -205,7 +205,7 @@ jobs:
         with:
           repository: ErickRFM/Compa-ero-de-esc
           # Fixed V24 receiver: institutional entry, durable notices, attendance history and revocation.
-          ref: a08244d001d8a65cac9b09ec166e4fbb1e1c6175
+          ref: 76b6b58263cba9fa146f01357e64b20f9a68a289
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -234,7 +234,7 @@ jobs:
               'org.companerodeescuela.api.integrations.academic.MongoSiiiSectionProjectionTest': 9,
               'org.companerodeescuela.api.integrations.push.MongoInstitutionalPushRepositoryTest': 11,
               'org.companerodeescuela.api.integrations.push.InstitutionalProjectionReceiptRoutesTest': 5,
-              'org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest': 7,
+              'org.companerodeescuela.api.academic.InstitutionalAttendanceHistoryRoutesTest': 8,
               'org.companerodeescuela.api.integrations.academic.SiiiChangeNotificationTest': 4,
           }
           problems = []
@@ -263,7 +263,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = 'a08244d001d8a65cac9b09ec166e4fbb1e1c6175'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '76b6b58263cba9fa146f01357e64b20f9a68a289'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Disposable service diagnostics
         if: always()

@@ -1,3 +1,4 @@
+vi.mock('server-only',()=>({}));
 import {randomUUID} from 'node:crypto';
 import {beforeEach,describe,expect,it,vi} from 'vitest';
 import {NextRequest} from 'next/server';
@@ -6,7 +7,7 @@ const mocks=vi.hoisted(()=>({authorize:vi.fn(),transaction:vi.fn(),subject:vi.fn
 vi.mock('@/shared/auth/session',()=>({authorizeInstitution:mocks.authorize}));
 vi.mock('@/modules/consolidation/domain-boundary',()=>({withDomainErrors:(fn:unknown)=>fn,domainTransaction:mocks.transaction}));
 vi.mock('@/integrations/companion/attendance-subject',()=>({attendanceSubject:mocks.subject,attendanceRecordsMatch:mocks.matches}));
-vi.mock('@/integrations/companion/attendance-history',()=>({readCompanionAttendance:mocks.read}));
+vi.mock('@/integrations/companion/attendance-history',()=>({readCompanionAttendance:mocks.read,institutionalResultsEnabled:()=>false}));
 vi.mock('@/shared/http/request-context',()=>({audit:mocks.audit,requestId:()=> 'synthetic-request'}));
 import {GET} from '@/app/api/v1/institutions/[institutionId]/companion-attendance/[studentId]/route';
 

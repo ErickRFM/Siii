@@ -34,6 +34,8 @@ export default async function setup(){
  process.env.SIII_PUBLIC_ORIGIN ||= 'https://siii.fixture.example';
  // Synthetic correction authorities exist only inside this isolated test server.
  process.env.SIII_GRADE_CORRECTIONS_ENABLED='true';
+ // Development HTTP integration exercises archive endpoints; production UI fixtures keep the feature disabled.
+ if(process.env.SIII_HTTP_TEST_PRODUCTION!=='1')process.env.SIII_COMPANION_RESULTS_ENABLED='true';
  process.env.SIII_CORRECTION_TEST_TENANT=randomUUID();
  process.env.SIII_CORRECTION_CLOSED_TEST_TENANT=randomUUID();
  process.env.SIII_CORRECTION_BLOCKED_TEST_TENANT=randomUUID();

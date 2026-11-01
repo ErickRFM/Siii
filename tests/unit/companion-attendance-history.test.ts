@@ -56,4 +56,28 @@ describe('private bounded Companion attendance reader',()=>{
   await readCompanionAttendance(institution,'MAT-001',{targets,http});await readCompanionAttendance(institution,'MAT-001',{targets,http});
   expect(new Set(nonces).size).toBe(2);
  });
+ it('negotiates v2 without weakening v1 and requires a positive record revision',async()=>{
+  const body={...value(),contract:'siii.attendance_history.v2',page:1,records:value().records.map(row=>({...row,recordRevision:2}))};
+  const http=vi.fn<typeof fetch>(async(_url,init)=>{expect(JSON.parse(String(init?.body)).contract).toBe('siii.attendance_history_request.v2');return Response.json(body)});
+  expect(await readCompanionAttendance(institution,'MAT-001',{targets,http,version:2})).toMatchObject({contract:'siii.attendance_history.v2',records:[{recordRevision:2}]});
+  body.records[0].recordRevision=0;expect(await readCompanionAttendance(institution,'MAT-001',{targets,http,version:2})).toBeNull();
+  const unversioned=vi.fn<typeof fetch>(async()=>Response.json(value()));expect(await readCompanionAttendance(institution,'MAT-001',{targets,http:unversioned,version:2})).toBeNull();
+ });
+
+ it('uses a separate archive credential and rejects cross-purpose responses or pages',async()=>{
+  vi.stubEnv('SIII_COMPANION_ATTENDANCE_TARGETS_JSON',targets);vi.stubEnv('SIII_COMPANION_RESULTS_TARGETS_JSON','');
+  const http=vi.fn<typeof fetch>(async()=>Response.json({...value(),contract:'siii.attendance_archive.v1',page:1,records:value().records.map(row=>({...row,recordRevision:1}))}));
+  expect(await readCompanionAttendance(institution,'MAT-001',{http,version:'archive'})).toBeNull();expect(http).not.toHaveBeenCalled();
+  vi.stubEnv('SIII_COMPANION_RESULTS_TARGETS_JSON',targets);
+  expect(await readCompanionAttendance(institution,'MAT-001',{http,version:'archive'})).toMatchObject({contract:'siii.attendance_archive.v1'});
+  expect(await readCompanionAttendance(institution,'MAT-001',{http,version:'archive',page:2})).toBeNull();
+ });
+
+ it('exports teacher class closures with no student records using only the archive purpose',async()=>{
+  const body={...value(),contract:'siii.attendance_archive.v1',page:1,records:[],classSessions:[{sessionId,sectionId,occurrenceId,sourceVersion:2,occurrenceDate:'2026-10-28',teacherExternalId:'EMP001',sessionRevision:2,status:'closed',openedAtEpochSeconds:1,closedAtEpochSeconds:2,closedByTeacher:true}]};
+  const http=vi.fn<typeof fetch>(async(_url,init)=>{expect(JSON.parse(String(init?.body))).toEqual({contract:'siii.attendance_archive_request.v1',teacherExternalId:'EMP001',page:1});return Response.json(body)});
+  expect(await readCompanionAttendance(institution,'EMP001',{targets,http,version:'archive',subjectType:'teacher'})).toMatchObject({classSessions:[{closedByTeacher:true}]});
+  body.classSessions[0].closedAtEpochSeconds=0;expect(await readCompanionAttendance(institution,'EMP001',{targets,http,version:'archive',subjectType:'teacher'})).toBeNull();
+ });
+
 });

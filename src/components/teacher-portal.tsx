@@ -21,7 +21,7 @@ const destinations=[{id:'home',label:'Inicio',icon:Home},{id:'groups',label:'Mis
 function evaluationState(group:Group){if(group.published)return 'Resultados publicados';if(group.termStatus!=='active'||group.sectionStatus!=='open')return 'Captura cerrada';if(!group.componentCount)return 'Sin evaluaciones configuradas';return `${group.savedScoreCount??0} / ${(group.componentCount??0)*(group.enrolledCount??0)} notas guardadas`;}
 
 /** Institutional teaching only. Operational class schedules belong to Compañero. */
-export default function TeacherPortal({institutionId,institutionName,actorId}:{institutionId:string;institutionName:string;actorId:string}){
+export default function TeacherPortal({institutionId,institutionName,actorId,institutionalResults=false}:{institutionId:string;institutionName:string;actorId:string;institutionalResults?:boolean}){
  const [view,setView]=useState<View>('home'),[term,setTerm]=useState(''),[state,setState]=useState('');
  const [selection,setSelection]=useState<{id?:string;mode:'roster'|'capture'|'results'}>({mode:'capture'});
  const {snapshot,loading,error,updatedAt,refresh}=usePersonalSnapshot(institutionId,'teacher',actorId,'groups');
@@ -41,7 +41,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId}:{i
  function open(id:string,mode:'roster'|'capture'|'results'){setSelection({id,mode});setView('evaluations');}
  return <div className={'sii-workspace siii-glass-workspace sii-teacher-portal sii-glass-role min-w-0 space-y-6'+(view==='home'?' siii-teacher-home-shell':'')}>
   <SiiPageIntro eyebrow="PORTAL DOCENTE" title="Mi docencia" description={institutionName} actions={view==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
-  <nav aria-label="Contexto del portal" className="flex flex-wrap gap-4 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link><Link className="font-semibold text-primary underline" href={{pathname:`/dashboard/institutions/${institutionId}/grading/corrections`}}>Mis rectificaciones</Link></nav>
+  <nav aria-label="Contexto del portal" className="flex flex-wrap gap-4 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link><Link className="font-semibold text-primary underline" href={{pathname:`/dashboard/institutions/${institutionId}/grading/corrections`}}>Mis rectificaciones</Link>{institutionalResults&&<Link className="font-semibold text-primary underline" href={{pathname:`/dashboard/institutions/${institutionId}/teacher/attendance`}}>Asistencia de mis grupos</Link>}</nav>
   {incompleteGroups&&<p role="status" className="text-sm text-muted-foreground">La consulta de grupos está incompleta. Los indicadores totales se ocultan hasta recuperar todo el registro.</p>}
   {error&&<div role="alert" className="sii-catalog-error">{error}<Button variant="outline" onClick={()=>refresh()}>Reintentar consulta</Button></div>}
   {loading&&(snapshot?<p role="status" className={view==='home'?'sr-only':undefined}>Actualizando información institucional…</p>:view==='home'?<span role="status" className="sr-only">Consultando tu información docente</span>:<SiiSkeleton label="Consultando tu información docente"/>)}

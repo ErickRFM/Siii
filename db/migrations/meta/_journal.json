@@ -190,6 +190,13 @@
       "when": 1793075700000,
       "tag": "0026_grade_corrections",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793499000000,
+      "tag": "0027_institutional_attendance_results",
+      "breakpoints": true
     }
   ]
 }

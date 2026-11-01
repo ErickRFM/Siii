@@ -1,3 +1,4 @@
+vi.mock('server-only',()=>({}));
 import {randomUUID,createHash} from 'node:crypto';
 import {beforeEach,describe,expect,it,vi} from 'vitest';
 import {NextRequest} from 'next/server';
@@ -6,7 +7,7 @@ const mocks=vi.hoisted(()=>({context:vi.fn(),subject:vi.fn(),read:vi.fn(),finish
 vi.mock('@/modules/portal/read-model',()=>({personalContext:mocks.context}));
 vi.mock('@/modules/consolidation/domain-boundary',()=>({withDomainErrors:(fn:unknown)=>fn}));
 vi.mock('@/integrations/companion/personal-attendance',()=>({personalAttendanceSubject:mocks.subject,finishPersonalAttendance:mocks.finish}));
-vi.mock('@/integrations/companion/attendance-history',()=>({readCompanionAttendance:mocks.read}));
+vi.mock('@/integrations/companion/attendance-history',()=>({readCompanionAttendance:mocks.read,institutionalResultsEnabled:()=>false}));
 import {GET} from '@/app/api/v1/institutions/[institutionId]/companion-attendance/mine/route';
 
 const tenant=randomUUID(),actor={identity:{id:randomUUID(),sessionId:randomUUID()},access:{institutionId:tenant}};
