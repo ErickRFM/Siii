@@ -21,8 +21,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       # Non-secret metadata. Update ONLY after verifying the successor in MongoDB and production.
-      HMAC_KEY_ID: ${{ vars.SIII_HMAC_WATCH_KEY_ID || 'siii-hmac-20261025-138dedb2ba5840759868ff77844616a7' }}
-      HMAC_EXPIRES_AT: ${{ vars.SIII_HMAC_WATCH_EXPIRES_AT || '1793591855' }}
+      HMAC_KEY_ID: ${{ vars.SIII_HMAC_WATCH_KEY_ID || 'siii-hmac-20261031-f785a0a53db8c5f69e86586e' }}
+      HMAC_EXPIRES_AT: ${{ vars.SIII_HMAC_WATCH_EXPIRES_AT || '1799977446' }}
       ALERT_WINDOW_SECONDS: '1209600'
     steps:
       - name: Validate metadata and alert on expiry
