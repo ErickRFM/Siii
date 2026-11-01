@@ -34,7 +34,7 @@ export async function GET(request:Request){
   const h={'Content-Type':'application/json','X-Integration-Key-Id':target.keyId,'X-Integration-Timestamp':timestamp,'X-Integration-Nonce':nonce,'X-Integration-Signature':signature};
   const url=new URL(path,target.url);
   const send=async(headersToSend:typeof h)=>{
-   const response=await fetch(url,{method:'POST',body,headers:headersToSend,cache:'no-store',redirect:'manual',credentials:'omit',signal:AbortSignal.timeout(10000)});
+   const response=await fetch(url,{method:'POST',body,headers:headersToSend,cache:'no-store',redirect:'manual',credentials:'omit',signal:AbortSignal.timeout(25000)});
    const status=response.status;
    let contractOk=false;
    if(status===200){
