@@ -16,7 +16,7 @@ const successorSecret=Buffer.alloc(32,81);
 const successorTargets=JSON.stringify({[institutionId]:{origin:'https://companion.fixture.example',keyId:'successor-key',secretBase64:successorSecret.toString('base64')}});
 function successorHeaders(offset:number){
  const timestamp=String(now/1000+offset);
- const canonical=['POST',ACADEMIC_AUTHORITY_PATH,timestamp,nonce,createHash('sha256').update(body).digest('hex')].join('\\n');
+ const canonical=['POST',ACADEMIC_AUTHORITY_PATH,timestamp,nonce,createHash('sha256').update(body).digest('hex')].join('\n');
  return new Headers({'x-integration-key-id':'successor-key','x-integration-timestamp':timestamp,'x-integration-nonce':nonce,'x-integration-signature':'v1='+createHmac('sha256',successorSecret).update(canonical).digest('hex')});
 }
 afterEach(()=>vi.unstubAllEnvs());
