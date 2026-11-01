@@ -20,5 +20,5 @@ export const GET=withDomainErrors(async(req:NextRequest,context:Context)=>{
  const history=await readCompanionAttendance(institutionId,before.externalId,{signal:req.signal});
  if(!history)return jsonError('COMPANION_ATTENDANCE_UNAVAILABLE',503);
  const permitted=await finishPersonalAttendance(actor,before,history,requestId(req.headers));
- return permitted?NextResponse.json({data:history},{headers:{'Cache-Control':'no-store','X-SIII-Attendance-Session':attendanceSession(actor.identity)}}):jsonError('ATTENDANCE_SOURCE_CHANGED',503);
+ return permitted?NextResponse.json({data:{...history,sections:before.sections}},{headers:{'Cache-Control':'no-store','X-SIII-Attendance-Session':attendanceSession(actor.identity)}}):jsonError('ATTENDANCE_SOURCE_CHANGED',503);
 });

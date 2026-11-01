@@ -1,22 +1,24 @@
 'use client';
 
 import {useCallback,useEffect,useRef,useState} from 'react';
-import type {CompanionAttendanceHistory} from '@/integrations/companion/attendance-history';
+import {attendanceRows,type PersonalAttendanceHistory} from '@/integrations/companion/attendance-view';
 import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {Button} from './ui/button';
 import {SiiEmptyView,SiiSkeleton} from './ui/sii-kit';
 import {PersonalTable} from './personal-table';
+import {NativeSelect} from './ui/native-select';
 
 const statuses={verified:'Verificada',likely:'Probable',review_required:'Revisión pendiente',rejected:'Rechazada'};
 const dispositions={present:'Presente',late:'Retardo',absent:'Ausente'};
-type State={scope:string;loading:boolean;error:string;history:CompanionAttendanceHistory|null};
+type State={scope:string;loading:boolean;error:string;history:PersonalAttendanceHistory|null};
 export default function PersonalAttendance({institutionId,session}:{institutionId:string;session:string}){
  const permissions=useInstitutionCapabilities();
  const allowed=hasAnyCapability(permissions.data,'student.self.read');
  const scope=JSON.stringify({institutionId,session,permissions:permissions.data});
  const [state,setState]=useState<State>({scope,loading:true,error:'',history:null});
  const active=useRef<AbortController|null>(null);
+ const [filters,setFilters]=useState({scope,subject:'',term:''});
  const clear=useCallback(()=>{active.current?.abort();active.current=null;setState({scope,loading:false,error:'Actualiza la consulta para comprobar tu acceso vigente.',history:null})},[scope]);
  const refresh=useCallback(async()=>{
   active.current?.abort();const controller=new AbortController();active.current=controller;
@@ -28,7 +30,7 @@ export default function PersonalAttendance({institutionId,session}:{institutionI
    const response=await fetch(`/api/v1/institutions/${institutionId}/companion-attendance/mine`,{signal:controller.signal,cache:'no-store'});
    if(!response.ok)throw Error(response.status===404?'No hay un vínculo e inscripción vigentes para consultar asistencia.':response.status===401||response.status===403?'Tu acceso cambió. Inicia sesión nuevamente.':'El historial de Compañero no está disponible. Reintenta más tarde.');
    if(response.headers.get('x-siii-attendance-session')!==session)throw Error('Tu sesión cambió. Vuelve a abrir esta página.');
-   const history=(await response.json()).data as CompanionAttendanceHistory;
+   const history=(await response.json()).data as PersonalAttendanceHistory;
    if(!controller.signal.aborted)setState({scope,loading:false,error:'',history});
   }catch(cause){if(!controller.signal.aborted)setState({scope,loading:false,error:cause instanceof Error?cause.message:'No se pudo consultar el historial.',history:null})}
   finally{if(active.current===controller)active.current=null}
@@ -42,6 +44,11 @@ export default function PersonalAttendance({institutionId,session}:{institutionI
   return()=>{active.current?.abort();window.removeEventListener('focus',focus);window.removeEventListener('blur',clear);window.removeEventListener('online',focus);window.removeEventListener('offline',clear);window.removeEventListener(ASSURANCE_CHANGED_EVENT,clear);document.removeEventListener('visibilitychange',visible);document.removeEventListener('submit',logout,true);window.removeEventListener('beforeunload',clear)};
  },[refresh,clear]);
  const current=state.scope===scope?state:{scope,loading:true,error:'',history:null};
+ const rows=current.history?attendanceRows(current.history):[];
+ const subjects=[...new Map(rows.filter(row=>row.subjectId).map(row=>[row.subjectId,row.subjectName])).entries()];
+ const terms=[...new Map(rows.filter(row=>row.termId).map(row=>[row.termId,row.termName])).entries()];
+ const selected={scope,subject:filters.scope===scope&&subjects.some(([id])=>id===filters.subject)?filters.subject:'',term:filters.scope===scope&&terms.some(([id])=>id===filters.term)?filters.term:''};
+ const filtered=rows.filter(row=>(!selected.subject||row.subjectId===selected.subject)&&(!selected.term||row.termId===selected.term));
  return <section className="sii-panel siii-glass-workspace space-y-4 p-5" aria-label="Consulta personal de asistencia">
   <p className="text-sm text-muted-foreground">Consulta informativa desde Compañero, limitada a 100 registros y tus inscripciones vigentes. Una revisión pendiente no acredita presencia validada por el docente.</p>
   <Button variant="outline" disabled={current.loading} onClick={()=>void refresh()}>Actualizar asistencia</Button>
@@ -49,7 +56,16 @@ export default function PersonalAttendance({institutionId,session}:{institutionI
   {current.error&&<p role="alert" className="sii-catalog-error">{current.error}</p>}
   {current.history&&(current.history.records.length?<>
    <p className="text-sm text-muted-foreground">Observado: {new Date(current.history.observedAtEpochSeconds*1000).toLocaleString('es-MX')} · Máximo {current.history.sampleLimit} registros.</p>
-   <PersonalTable label="Mi asistencia registrada" rows={current.history.records.map(row=>({...row,id:row.auditRecordId}))} searchText={row=>row.occurrenceDate+' '+statuses[row.status]} columns={[{label:'Fecha de clase',render:row=>row.occurrenceDate},{label:'Estado de revisión',render:row=>statuses[row.status]},{label:'Decisión docente',render:row=>row.disposition?dispositions[row.disposition]:'Sin decisión'},{label:'Grupo académico',render:row=><span className="break-all">{row.sectionId}</span>}]}/>
+   {(subjects.length>0||terms.length>0)&&<div className="grid gap-3 sm:grid-cols-2">
+    {subjects.length>0&&<label className="space-y-2 text-sm font-medium">Materia<NativeSelect value={selected.subject} onChange={event=>setFilters({...selected,subject:event.target.value})}><option value="">Todas las materias</option>{subjects.map(([id,name])=><option key={id} value={id}>{name}</option>)}</NativeSelect></label>}
+    {terms.length>0&&<label className="space-y-2 text-sm font-medium">Periodo<NativeSelect value={selected.term} onChange={event=>setFilters({...selected,term:event.target.value})}><option value="">Todos los periodos disponibles</option>{terms.map(([id,name])=><option key={id} value={id}>{name}</option>)}</NativeSelect></label>}
+   </div>}
+   <PersonalTable key={JSON.stringify(selected)} label="Mi asistencia registrada" rows={filtered} searchText={row=>[row.occurrenceDate,row.subjectName,row.groupName,row.teacherNames,row.termName,statuses[row.status],row.disposition?dispositions[row.disposition]:''].join(' ')} columns={[
+    {label:'Fecha de clase',render:row=>row.occurrenceDate,sortValue:row=>row.occurrenceDate},
+    {label:'Materia',render:row=>row.subjectName},{label:'Grupo',render:row=>row.groupName},{label:'Docente',render:row=>row.teacherNames},
+    {label:'Periodo',render:row=>row.termName},{label:'Estado de revisión',render:row=>statuses[row.status]},
+    {label:'Decisión docente',render:row=>row.disposition?dispositions[row.disposition]:'Sin decisión'},
+   ]}/>
   </>:<SiiEmptyView icon="registry" title="No hay asistencias disponibles" description="Compañero respondió sin registros para tus inscripciones vigentes. Esta consulta no acredita ausencia ni presencia."/>)}
  </section>;
 }
