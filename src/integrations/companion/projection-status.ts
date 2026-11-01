@@ -1,6 +1,6 @@
 import {createHash,createHmac,randomBytes} from 'node:crypto';
 import {z} from 'zod';
-import {academicDeliveryTarget} from './outbox/signed-transport';
+import {academicDeliveryTarget,selectedAcademicDeliveryTarget} from './outbox/signed-transport';
 
 const path='/integration/v1/projection-status';
 const positive=z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
@@ -17,7 +17,12 @@ export async function readProjectionStatus(institutionId:string,events:Projectio
  try{
   const parsed=z.array(reference).min(1).max(50).safeParse(events);
   if(!parsed.success||new Set(events.map(event=>event.eventId)).size!==events.length)return {status:'unavailable'};
-  target=academicDeliveryTarget(institutionId,options.targets??process.env.SIII_COMPANION_DELIVERY_TARGETS_JSON);
+  target=options.targets!==undefined
+   ?academicDeliveryTarget(institutionId,options.targets)
+   :selectedAcademicDeliveryTarget(institutionId,process.env.SIII_COMPANION_DELIVERY_TARGETS_JSON,{
+     enabled:process.env.SIII_COMPANION_HMAC_ROLLOVER_ENABLED,
+     targets:process.env.SIII_COMPANION_HMAC_ROLLOVER_TARGETS_JSON,
+   });
   const body=JSON.stringify({contract:'siii.projection_status_request.v1',eventIds:events.map(event=>event.eventId)});
   const timestamp=String(Math.floor(Date.now()/1000)),nonce=randomBytes(24).toString('base64url');
   const signature='v1='+createHmac('sha256',target.secret).update(['POST',path,timestamp,nonce,createHash('sha256').update(body).digest('hex')].join('\n')).digest('hex');

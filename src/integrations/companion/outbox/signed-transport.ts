@@ -24,6 +24,32 @@ export function academicDeliveryTarget(institutionId:string,encoded:string|undef
  return {url:url.origin+path,keyId:target.keyId,secret};
 }
 
+/**
+ * Explicit per-institution HMAC rollover. The original secret is never changed;
+ * a verified successor can be selected with two server-only environment values.
+ * Invalid rollover configuration fails closed rather than signing with a stale key.
+ * Do not use this selector for independently scoped attendance:read targets.
+ */
+export function selectedAcademicDeliveryTarget(
+ institutionId:string,
+ current:string|undefined,
+ rollover:{enabled?:string;targets?:string}={},
+):ReturnType<typeof academicDeliveryTarget>{
+ const mode=rollover.enabled??'false';
+ if(mode!=='true'&&mode!=='false')throw Error('COMPANION_ROTATION_INVALID');
+ if(mode==='true'){
+  const rotated=rollover.targets;
+  if(!rotated||rotated.length>32000)throw Error('COMPANION_ROTATION_INVALID');
+  let mappings:unknown;
+  try{mappings=JSON.parse(rotated)}catch{throw Error('COMPANION_ROTATION_INVALID')}
+  if(!mappings||typeof mappings!=='object'||Array.isArray(mappings))throw Error('COMPANION_ROTATION_INVALID');
+  if(Object.prototype.hasOwnProperty.call(mappings,institutionId)){
+   return academicDeliveryTarget(institutionId,rotated);
+  }
+ }
+ return academicDeliveryTarget(institutionId,current);
+}
+
 /** Only server credentials bind a Siii institution to one verified Companion tenant. */
 export function signedAcademicTransport(
  encodedTargets:string|undefined=process.env.SIII_COMPANION_DELIVERY_TARGETS_JSON,
@@ -31,7 +57,7 @@ export function signedAcademicTransport(
 ):AcademicTransport {
  return async ({eventId,institutionId,body,signal}):Promise<AcademicDeliveryResult>=>{
   let target:{url:string;keyId:string;secret:Buffer};
-  try{target=academicDeliveryTarget(institutionId,encodedTargets)}catch{return {status:'retryable'}}
+  try{target=selectedAcademicDeliveryTarget(institutionId,encodedTargets,{enabled:process.env.SIII_COMPANION_HMAC_ROLLOVER_ENABLED,targets:process.env.SIII_COMPANION_HMAC_ROLLOVER_TARGETS_JSON})}catch{return {status:'retryable'}}
   try{
    const timestamp=Math.floor(Date.now()/1000).toString();
    const nonce=randomBytes(24).toString('base64url');
