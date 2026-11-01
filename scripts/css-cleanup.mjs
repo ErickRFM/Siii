@@ -11,7 +11,7 @@ function walk(dir){
  });
 }
 const all=walk('src');
-const ordered=fs.readFileSync('src/app/layout.tsx','utf8').split(String.fromCharCode(10)).filter(line=>line.startsWith("import './")&&line.includes(".css';")).map(line=>'src/app/'+line.split("'")[1].slice(2));
+const ordered=fs.readFileSync('src/app/layout.tsx','utf8').split(String.fromCharCode(10)).filter(line=>line.startsWith("import './")&&line.includes(".css';")).map(line=>path.join('src','app',line.split("'")[1].slice(2)));
 const styles=[...ordered,...all.filter(f=>f.endsWith('.css')&&!ordered.includes(f)).sort()];
 const orderedSet=new Set(ordered);
 const source=all.filter(f=>/\.(?:ts|tsx|js|jsx|mjs)$/.test(f)).map(f=>fs.readFileSync(f,'utf8')).join('\n');
