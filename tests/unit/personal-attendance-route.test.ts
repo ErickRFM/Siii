@@ -1,3 +1,4 @@
+vi.mock('server-only',()=>({}));
 import {randomUUID,createHash} from 'node:crypto';
 import {beforeEach,describe,expect,it,vi} from 'vitest';
 import {NextRequest} from 'next/server';
@@ -6,7 +7,7 @@ const mocks=vi.hoisted(()=>({context:vi.fn(),subject:vi.fn(),read:vi.fn(),finish
 vi.mock('@/modules/portal/read-model',()=>({personalContext:mocks.context}));
 vi.mock('@/modules/consolidation/domain-boundary',()=>({withDomainErrors:(fn:unknown)=>fn}));
 vi.mock('@/integrations/companion/personal-attendance',()=>({personalAttendanceSubject:mocks.subject,finishPersonalAttendance:mocks.finish}));
-vi.mock('@/integrations/companion/attendance-history',()=>({readCompanionAttendance:mocks.read}));
+vi.mock('@/integrations/companion/attendance-history',()=>({readCompanionAttendance:mocks.read,institutionalResultsEnabled:()=>false}));
 import {GET} from '@/app/api/v1/institutions/[institutionId]/companion-attendance/mine/route';
 
 const tenant=randomUUID(),actor={identity:{id:randomUUID(),sessionId:randomUUID()},access:{institutionId:tenant}};
@@ -18,12 +19,18 @@ function get(query='',institutionId:string=tenant,origin='http://localhost'){
 beforeEach(()=>{vi.clearAllMocks();mocks.context.mockResolvedValue(actor);mocks.subject.mockResolvedValue(subject);mocks.read.mockResolvedValue(history);mocks.finish.mockResolvedValue(true)});
 describe('personal attendance HTTP handler',()=>{
  it('resolves only the session-linked subject, revalidates and returns no-store history',async()=>{
-  const response=await get();expect(response.status).toBe(200);expect(await response.json()).toEqual({data:history});
+  const response=await get();expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{...history,sections:subject.sections}});
   expect(response.headers.get('cache-control')).toBe('no-store');
   expect(response.headers.get('x-siii-attendance-session')).toBe(createHash('sha256').update(actor.identity.id+':'+actor.identity.sessionId).digest('hex'));
   expect(mocks.context).toHaveBeenCalledWith(tenant,'student');expect(mocks.subject).toHaveBeenCalledWith(actor);
   expect(mocks.read).toHaveBeenCalledWith(tenant,subject.externalId,expect.objectContaining({signal:expect.any(AbortSignal)}));
   expect(mocks.finish).toHaveBeenCalledWith(actor,subject,history,expect.any(String));
+ });
+ it('returns only revalidated institutional labels alongside Ktor records',async()=>{
+  const sections=[{sectionId:'section',sourceVersion:1,groupName:'9A',subjectId:'subject',subjectName:'Materia',termId:'term',termName:'Periodo',teacherNames:['Docente']}];
+  mocks.subject.mockResolvedValue({...subject,sections});
+  const response=await get();const payload=await response.json();expect(payload.data.sections).toEqual(sections);
+  expect(payload.data).not.toHaveProperty('externalId');expect(payload.data).not.toHaveProperty('linkId');
  });
  it('denies missing student capability before any student or provider lookup',async()=>{mocks.context.mockResolvedValue(null);expect((await get()).status).toBe(403);expect(mocks.subject).not.toHaveBeenCalled();expect(mocks.read).not.toHaveBeenCalled()});
  it('denies missing or revoked link without asking Companion',async()=>{mocks.subject.mockResolvedValue(null);expect((await get()).status).toBe(404);expect(mocks.read).not.toHaveBeenCalled()});

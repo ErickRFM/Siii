@@ -1,3 +1,6 @@
+import {materializeSectionOccurrences} from '@/modules/scheduling/materialize';
+import {lockWriteAccess} from '@/shared/auth/write-access';
+import {DomainAccessDenied} from '@/modules/consolidation/domain-boundary';
 import {NextRequest,NextResponse} from 'next/server';
 import {and,eq,inArray,sql} from 'drizzle-orm';
 import {z} from 'zod';
@@ -13,7 +16,7 @@ import {readProjectionStatus} from '@/integrations/companion/projection-status';
 export const runtime='nodejs';
 const headers={'Cache-Control':'no-store'};
 type Context={params:Promise<{institutionId:string}>};
-const recovery=z.strictObject({sectionId:z.uuid(),expectedSourceVersion:z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),reason:z.string().trim().min(12).max(240).refine(value=>!/[\u0000-\u001f\u007f]/.test(value))});
+const recovery=z.strictObject({materializeOccurrences:z.boolean().optional(),sectionId:z.uuid(),expectedSourceVersion:z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),reason:z.string().trim().min(12).max(240).refine(value=>!/[\u0000-\u001f\u007f]/.test(value))});
 async function institution(context:Context){const {institutionId}=await context.params;return z.uuid().safeParse(institutionId).success?institutionId:null}
 
 /** Metadata only: accepted is a durable receipt acknowledgement, not applied projection. */
@@ -64,10 +67,16 @@ export const POST=withDomainErrors(async(req:NextRequest,context:Context)=>{
   const [version]=await tx.select({sourceVersion:academicSectionVersions.sourceVersion}).from(academicSectionVersions).where(and(eq(academicSectionVersions.institutionId,id),eq(academicSectionVersions.sectionId,section.id)));
   if((version?.sourceVersion??0)!==input.expectedSourceVersion)return {error:'SOURCE_VERSION_CHANGED',status:409} as const;
   const correlation=requestId(req.headers);
+  let materialized:number|undefined;
+  if(input.materializeOccurrences){
+   if(!await lockWriteAccess(tx,actor.identity,actor.access,'academic.manage'))throw new DomainAccessDenied();
+   materialized=await materializeSectionOccurrences(tx,id,section.id);
+   await audit(tx,{institutionId:id,actorUserId:actor.identity.id,requestId:correlation,action:'schedule.occurrences.materialized',target:'section:'+section.id,details:{after:{inserted:materialized,reason:input.reason}}});
+  }
   const result=await enqueueAcademicSection(tx,{institutionId:id,sectionId:section.id,actorUserId:actor.identity.id,requestId:correlation});
   if(result.status!=='queued')throw Error('ACADEMIC_OUTBOX_DISABLED');
   await audit(tx,{institutionId:id,actorUserId:actor.identity.id,requestId:correlation,action:'academic.snapshot.reconciled',target:'section:'+section.id,details:{before:{sourceVersion:input.expectedSourceVersion},after:{sourceVersion:result.sourceVersion,eventId:result.eventId,reason:input.reason}}});
-  return {data:result,status:201} as const;
+  return {data:{...result,...(materialized===undefined?{}:{materializedOccurrences:materialized})},status:201} as const;
  });
  return 'error'in data&&typeof data.error==='string'?jsonError(data.error,data.status):NextResponse.json({data:data.data},{status:201,headers});
 });

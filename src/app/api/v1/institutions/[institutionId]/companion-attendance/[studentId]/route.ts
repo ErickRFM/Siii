@@ -18,6 +18,7 @@ export const GET=withDomainErrors(async(req:NextRequest,context:Context)=>{
  if(!z.uuid().safeParse(institutionId).success||!z.uuid().safeParse(studentId).success)return jsonError('NOT_FOUND',404);
  const actor=await authorizeInstitution(institutionId,'academic.manage');if(!actor)return jsonError('FORBIDDEN',403);
  if(req.nextUrl.search)return jsonError('INVALID_QUERY',422);
+ const correlationId=requestId(req.headers);
  const before=await domainTransaction(actor,{permission:'academic.manage'},tx=>attendanceSubject(tx,institutionId,studentId));
  if(!before)return jsonError('ATTENDANCE_SUBJECT_UNAVAILABLE',404);
  const history=await readCompanionAttendance(institutionId,before.externalId,{signal:req.signal});
@@ -26,7 +27,7 @@ export const GET=withDomainErrors(async(req:NextRequest,context:Context)=>{
  const permitted=await domainTransaction(actor,{permission:'academic.manage'},async tx=>{
   const after=await attendanceSubject(tx,institutionId,studentId);
   if(!after||JSON.stringify(before)!==JSON.stringify(after)||!await attendanceRecordsMatch(tx,institutionId,after,history))return false;
-  await audit(tx,{institutionId,actorUserId:actor.identity.id,requestId:requestId(req.headers),action:'companion.attendance.read',target:'student:'+studentId,
+  await audit(tx,{institutionId,actorUserId:actor.identity.id,requestId:correlationId,action:'companion.attendance.read',target:'student:'+studentId,
    details:{after:{records:history.records.length,observedAtEpochSeconds:history.observedAtEpochSeconds}}});
   return true;
  });

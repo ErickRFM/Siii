@@ -1,3 +1,5 @@
+import InstitutionalAttendance from '@/components/institutional-attendance';
+import {institutionalResultsEnabled} from '@/integrations/companion/attendance-history';
 import Link from 'next/link';
 import {notFound,redirect} from 'next/navigation';
 import {getIdentity} from '@/shared/auth/session';
@@ -11,6 +13,6 @@ export default async function AttendancePage({params}:{params:Promise<{instituti
  const identity=await getIdentity();if(!identity)redirect('/login');if(identity.mustChangePassword)redirect('/dashboard/security');
  const {institutionId}=await params,context=await personalContext(institutionId,'student');if(!context)notFound();
  return <div className="sii-workspace siii-glass-workspace space-y-6"><SiiPageIntro eyebrow="PORTAL ESTUDIANTIL" title="Mi historial de asistencia" description={context.access.institutionName} actions={<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/student#inscripciones`}>Volver a mi portal</Link>}/>
-  <PersonalAttendance key={attendanceSession(context.identity)+':'+institutionId} institutionId={institutionId} session={attendanceSession(context.identity)}/>
+  {institutionalResultsEnabled(institutionId)?<InstitutionalAttendance institutionId={institutionId} session={attendanceSession(context.identity)} kind="student"/>:<PersonalAttendance key={attendanceSession(context.identity)+':'+institutionId} institutionId={institutionId} session={attendanceSession(context.identity)}/>}
  </div>;
 }

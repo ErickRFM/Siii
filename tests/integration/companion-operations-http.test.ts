@@ -25,7 +25,7 @@ async function section(id=tenant){
  return (await sql.query('INSERT INTO academic_sections(institution_id,term_id,course_id,code,capacity) VALUES($1,$2,$3,$4,20) RETURNING id',[id,term,course,'S'+code])).rows[0].id;
 }
 const recovery=(sectionId:string,expectedSourceVersion=0)=>({sectionId,expectedSourceVersion,reason:'Synthetic operator reconciliation'});
-beforeAll(async()=>{await sql.connect();const rows=(await sql.query("INSERT INTO institutions(code,name) VALUES($1,'Synthetic operations'),($2,'Synthetic foreign') RETURNING id",['OP'+randomUUID(),'OF'+randomUUID()])).rows;tenant=rows[0].id;foreign=rows[1].id;admin=await actor('admin');student=await actor('student');noMfa=await actor('admin',false)});
+beforeAll(async()=>{await sql.connect();const rows=(await sql.query("INSERT INTO institutions(id,code,name) VALUES($1,$2,'Synthetic operations'),($3,$4,'Synthetic foreign') RETURNING id",[process.env.SIII_RESULTS_OPERATIONS_TEST_TENANT,'OP'+randomUUID(),randomUUID(),'OF'+randomUUID()])).rows;tenant=rows[0].id;foreign=rows[1].id;admin=await actor('admin');student=await actor('student');noMfa=await actor('admin',false)});
 afterAll(async()=>{await sql.end()});
 describe.sequential('authorized outbox observation and audited snapshot reconciliation '+(enabled?'ON':'OFF'),()=>{
  for(const method of ['GET','POST'])it.each(['anonymous','student','missing-mfa','foreign'] as const)(method+' denies %s',async mode=>{
@@ -74,4 +74,18 @@ describe.sequential('authorized outbox observation and audited snapshot reconcil
   const response=await request(),data=(await response.json()).data;expect(data.summary.accepted).toBeGreaterThanOrEqual(1);expect(data.summary.failed).toBeGreaterThanOrEqual(1);expect(data.summary.retrying).toBeGreaterThanOrEqual(1);expect(data.projectionStatus).toBe('unverified');
   expect(data.events.filter((event:{sectionId:string})=>event.sectionId===sectionId).map((event:{state:string})=>event.state).sort()).toEqual(['accepted','failed','queued']);
  });
+ it('recovers the exact failed teacher archive job only with fresh scoped administration',async()=>{
+  const teacher=(await sql.query("INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) VALUES($1,$2,'Synthetic','Archive teacher') RETURNING id",[tenant,'EMP-'+randomBytes(5).toString('hex').toUpperCase()])).rows[0].id;
+  await sql.query("INSERT INTO class_session_reconciliation(institution_id,teacher_id,page,attempts,state) VALUES($1,$2,2,8,'failed')",[tenant,teacher]);
+  const endpoint=(id=tenant)=>base+'/api/v1/institutions/'+id+'/companion-attendance/reconcile';
+  const recover=(cookie:string,body:unknown={teacherId:teacher,reason:'Synthetic authorized teacher replay'},id=tenant)=>fetch(endpoint(id),{method:'POST',headers:{origin:base,cookie,'content-type':'application/json'},body:JSON.stringify(body)});
+  for(const cookie of ['',student,noMfa])expect((await recover(cookie)).status).toBe(403);
+  expect((await recover(admin,undefined,foreign)).status).toBe(403);
+  expect((await recover(admin,{studentId:randomUUID(),teacherId:teacher,reason:'Synthetic exclusive subject required'})).status).toBe(422);
+  const response=await recover(admin);expect(response.status).toBe(200);expect(response.headers.get('cache-control')).toBe('no-store');expect((await response.json()).data.queued).toBe(true);
+  expect((await sql.query('SELECT state,page,attempts FROM class_session_reconciliation WHERE institution_id=$1 AND teacher_id=$2',[tenant,teacher])).rows).toEqual([{state:'queued',page:1,attempts:0}]);
+  expect((await recover(admin)).status).toBe(404);
+  expect((await sql.query("SELECT 1 FROM security_audit_log WHERE institution_id=$1 AND action='attendance.results.recovery' AND target=$2",[tenant,'teacher:'+teacher])).rows).toHaveLength(1);
+ });
+
 });

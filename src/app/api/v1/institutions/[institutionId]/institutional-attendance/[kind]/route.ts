@@ -1,0 +1,21 @@
+import {NextRequest,NextResponse} from 'next/server';
+import {z} from 'zod';
+import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
+import {withDomainErrors} from '@/modules/consolidation/domain-boundary';
+import {personalContext} from '@/modules/portal/read-model';
+import {institutionalResultsEnabled} from '@/integrations/companion/attendance-history';
+import {institutionalHistory,institutionalHistoryQuery} from '@/integrations/companion/institutional-history';
+import {attendanceSession} from '@/shared/auth/attendance-session';
+import {requestId} from '@/shared/http/request-context';
+export const runtime='nodejs';
+export const GET=withDomainErrors(async(req:NextRequest,context:{params:Promise<{institutionId:string;kind:string}>})=>{
+ if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
+ const {institutionId,kind}=await context.params;
+ if(!z.uuid().safeParse(institutionId).success||!['student','teacher'].includes(kind))return jsonError('NOT_FOUND',404);
+ const entries=[...req.nextUrl.searchParams.entries()];
+ if(new Set(entries.map(([key])=>key)).size!==entries.length)return jsonError('INVALID_QUERY',422);
+ const query=institutionalHistoryQuery.safeParse(Object.fromEntries(entries));if(!query.success)return jsonError('INVALID_QUERY',422);
+ const actor=await personalContext(institutionId,kind as 'student'|'teacher');if(!actor)return jsonError('FORBIDDEN',403);
+ if(!institutionalResultsEnabled(institutionId))return jsonError('INSTITUTIONAL_ATTENDANCE_PENDING',503);
+ return NextResponse.json({data:await institutionalHistory(actor,query.data,requestId(req.headers))},{headers:{'Cache-Control':'no-store','X-SIII-Attendance-Session':attendanceSession(actor.identity)}});
+});

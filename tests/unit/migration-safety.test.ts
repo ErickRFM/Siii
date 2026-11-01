@@ -7,7 +7,8 @@ function migrate(env: Record<string,string|undefined>) {
   });
   return {status:result.status,output:result.stdout+result.stderr};
 }
-describe('migration environment gate',()=>{
+// The inner Node process has a 10-second deadline; allow it to finish before the outer test expires.
+describe('migration environment gate',{timeout:15000},()=>{
   it('rejects production without explicit authorization before connecting',()=>{
     const r=migrate({NODE_ENV:'production',SIII_DATABASE_ENV:'production',
       DATABASE_URL:'postgresql://postgres.kkjzbqsaummyralqjqrb:placeholder@127.0.0.1:1/postgres'});

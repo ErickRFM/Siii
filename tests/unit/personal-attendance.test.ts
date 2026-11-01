@@ -10,7 +10,7 @@ vi.mock('@/integrations/companion/attendance-subject',()=>({attendanceSubject:mo
 import {personalAttendanceSubject,finishPersonalAttendance} from '@/integrations/companion/personal-attendance';
 import type {InstitutionAccess} from '@/shared/auth/institution-policy';
 const actor={identity:{id:'actor',sessionId:'session'},access:{institutionId:'tenant',membershipId:'membership'} as InstitutionAccess};
-const subject={id:'student',externalId:'PRACTICE001',programId:'program',sections:[{sectionId:'section',sourceVersion:1}]};
+const subject={id:'student',externalId:'PRACTICE001',programId:'program',sections:[{sectionId:'section',sourceVersion:1,groupName:'9A',subjectId:'subject',subjectName:'Materia',termId:'term',termName:'Periodo',teacherNames:['Docente']}]};
 const before={linkId:'link',...subject};
 const history={contract:'siii.attendance_history.v1' as const,observedAtEpochSeconds:1,sampleLimit:100 as const,records:[]};
 let links:{linkId:string;studentId:string;programId:string}[],tx:{select:ReturnType<typeof vi.fn>;execute:ReturnType<typeof vi.fn>};
