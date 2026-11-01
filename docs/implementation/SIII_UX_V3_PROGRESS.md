@@ -1,5 +1,9 @@
 # SIII UX/UI V3 — Plan de ejecución y registro de evidencia
 
+## Corte verificable — 31 octubre 2026
+
+La tabla histórica inferior no representa el estado actual de todas las fases. La [auditoría de integración y limpieza](../audit/SIII_INTEGRATION_CLEANUP_2026-10-31.md) verifica `main@f19d8a0e` y su publicación, identifica la duplicación entre `SiiDataTable` y `PersonalTable` y registra su unificación. R1–R2 incorporado no acredita adopción global de los componentes ni cierre UX09. Consultar ese informe para pruebas, pendientes y límites del incremento.
+
 > Auditoría de arranque: 2026-10-19. **No usar esta fecha ni los SHA como estado perpetuo**: actualizar después de cada merge y confirmar siempre `origin/main`.
 > El propósito es mejorar UX/UI sin duplicar lógica ni alterar garantías de autenticación, MFA, permisos, pagos o matrícula.
 

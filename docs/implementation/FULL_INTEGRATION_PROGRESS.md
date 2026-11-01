@@ -1,5 +1,9 @@
 # Avance de integración — 2026-10-17
 
+## Corte verificable — 31 octubre 2026
+
+La [auditoría actual de integración y limpieza](../audit/SIII_INTEGRATION_CLEANUP_2026-10-31.md) contrasta remoto, CI, fuente y deployment `main@f19d8a0e`. Documenta la tabla compartida realmente consumida por los portales, el inventario CSS corregido para Windows y el PR independiente #158. Las secciones inferiores conservan evidencia histórica: no deben interpretarse como estado actual de PRs, contratos o producción.
+
 ## Incremento vigente — 26 octubre 2026
 
 La consolidación institucional VNext se documenta en [SIII_INSTITUTIONAL_VNEXT_2026-10-26](SIII_INSTITUTIONAL_VNEXT_2026-10-26.md): portales personales de estudiante/docente, historial publicado, programación de sólo lectura, avisos vigentes, Caja con cargos/abonos idempotentes y captura docente con control de versión. Se apoya en main reconciliado con #115 y conserva sus contratos. Sin DDL nuevo ni cambios de secretos.
