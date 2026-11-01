@@ -29,7 +29,7 @@ export function academicAuthorityCredential(
     // deadline rejects predecessor requests, never extends their lifetime.
     selected.secret.fill(0);
     const expiry=process.env.SIII_COMPANION_HMAC_PREDECESSOR_EXPIRES_AT;
-    if(!expiry||!/^\\d{10,12}$/.test(expiry)||Math.floor(now/1000)>=Number(expiry))return null;
+    if(!expiry||!/^[0-9]{10,12}$/.test(expiry)||Math.floor(now/1000)>=Number(expiry))return null;
     target=academicDeliveryTarget(institutionId,encodedTargets);
    }
   }else target=academicDeliveryTarget(institutionId,encodedTargets);
