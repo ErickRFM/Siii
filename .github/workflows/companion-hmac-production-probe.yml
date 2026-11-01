@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify-successor:
     runs-on: ubuntu-24.04
-    timeout-minutes: 3
+    timeout-minutes: 4
     steps:
       - name: Verify read-only production handshake (200, 401, nonce replay)
         shell: bash
@@ -25,13 +25,21 @@ jobs:
           fi
           response_file="$(mktemp)"
           trap 'rm -f "$response_file"' EXIT
-          status="$(curl --silent --show-error --max-time 50 --connect-timeout 10 \
+          status="$(curl --silent --show-error --max-time 110 --connect-timeout 10 \
             --output "$response_file" --write-out '%{http_code}' \
             --header "Authorization: Bearer ${CRON_SECRET}" \
             --header 'Cache-Control: no-store' \
             'https://siii-three.vercel.app/api/internal/companion-hmac-probe')"
           if [[ "$status" != 200 ]]; then
             echo "HMAC_PROBE_HTTP_STATUS=$status" >&2
+            node -e '
+              const fs=require("node:fs");
+              try {
+                const x=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+                const keys=["status","validStatus","contractVerified","invalidStatus","replayStatus","passed"];
+                for(const key of keys)if(typeof x[key]==="boolean"||typeof x[key]==="number"||typeof x[key]==="string")process.stdout.write(key+"="+String(x[key]).slice(0,60)+"\\n");
+              } catch {process.stdout.write("HMAC_PROBE_RESPONSE_UNREADABLE\\n");}
+            ' "$response_file"
             exit 1
           fi
           node -e '

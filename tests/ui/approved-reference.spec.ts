@@ -118,6 +118,10 @@ test('personal home honors increased contrast in both themes',async({page})=>{
   expect(violations).toEqual([]);
  }
  await personalNavigate(page,'Académico');
+ // The mobile Radix drawer temporarily aria-hides document siblings during its
+ // exit transition. Audit only after that focus trap is fully released.
+ await expect(page.locator('.sii-skip-link')).not.toHaveAttribute('aria-hidden','true');
+ await expect(page.getByRole('dialog')).toHaveCount(0);
  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);
 });
 
