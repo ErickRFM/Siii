@@ -35,7 +35,7 @@ export { default as SiiAppShell } from '@/components/sii-app-shell';
  * Estructura y espaciado uniforme para las páginas institucionales de SIII.
  */
 export interface SiiPageLayoutProps extends HTMLAttributes<HTMLElement> {
-  children: ReactNode;
+  children?: ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
@@ -119,7 +119,7 @@ export function SiiPageHeader({
  * Superficie glass ahumado mate con variantes visuales explícitas.
  */
 export interface SiiPanelProps extends HTMLAttributes<HTMLElement> {
-  children: ReactNode;
+  children?: ReactNode;
   variant?: 'default' | 'compact' | 'interactive' | 'hero';
 }
 
@@ -560,7 +560,7 @@ export function SiiMetric({
 export interface SiiStatusBadgeProps {
   status?: string;
   variant?: 'active' | 'pending' | 'completed' | 'cancelled' | 'live' | 'archived' | 'muted';
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
 }
 
@@ -649,7 +649,7 @@ export interface SiiAsyncStateProps {
   onRetry?: () => void;
   accessDenied?: boolean;
   accessDeniedMessage?: string;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
 }
 
