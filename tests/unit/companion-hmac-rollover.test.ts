@@ -39,7 +39,7 @@ describe('SIII → Compañero HMAC rollover without replacing the stored origina
    expect(String(url)).toBe('https://companion.example.org/integration/v1/events');
    const headers=new Headers(init?.headers);
    expect(headers.get('X-Integration-Key-Id')).toBe('new_20261031');
-   const canonical=['POST','/integration/v1/events',headers.get('X-Integration-Timestamp'),headers.get('X-Integration-Nonce'),createHash('sha256').update(signedBody).digest('hex')].join('\\n');
+   const canonical=['POST','/integration/v1/events',headers.get('X-Integration-Timestamp'),headers.get('X-Integration-Nonce'),createHash('sha256').update(signedBody).digest('hex')].join('\n');
    expect(headers.get('X-Integration-Signature')).toBe('v1='+createHmac('sha256',newSecret).update(canonical).digest('hex'));
    return Response.json({eventId,status:'received'},{status:202});
   });
