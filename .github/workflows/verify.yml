@@ -205,7 +205,7 @@ jobs:
         with:
           repository: ErickRFM/Compa-ero-de-esc
           # Fixed V24 receiver: institutional entry, durable notices, attendance history and revocation.
-          ref: 76b6b58263cba9fa146f01357e64b20f9a68a289
+          ref: 4b18d63e37d87dcd7e3927bd844a548258689581
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -263,7 +263,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '76b6b58263cba9fa146f01357e64b20f9a68a289'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '4b18d63e37d87dcd7e3927bd844a548258689581'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Disposable service diagnostics
         if: always()

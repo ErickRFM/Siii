@@ -14,7 +14,7 @@ La recuperación de publicación puede materializar ocurrencias desde patrones o
 
 - 1059 pruebas unitarias; TypeScript, ESLint y build de producción aprobados.
 - 9 pruebas PostgreSQL/HTTP con migración fresca y rol runtime restringido: revisiones, deduplicación, aislamiento, autorización/revocación, fuente histórica, clase sin asistencia, cierre/cancelación y RLS.
-- Gate de siete suites nativas con ocho casos de historial; receiver fijado a 76b6b58263cba9fa146f01357e64b20f9a68a289. La cadena real local y CI del SHA final se registran aparte cuando concluyan.
+- Gate de siete suites nativas con ocho casos de historial; receiver fijado a 4b18d63e37d87dcd7e3927bd844a548258689581. La cadena real local y CI del SHA final se registran aparte cuando concluyan.
 - Revisión independiente de clases/archivo/jobs: RETURNING de recuperación docente corregido. El receiver conserva continuación durable del cierre antes de exportar una clase realizada.
 
 ## Activación pendiente
