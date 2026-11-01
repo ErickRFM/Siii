@@ -1,7 +1,9 @@
 # V24 — código de historial e integración Compañero
 
-Base SIII: `f19d8a0eacf37960aba95e9d09000ce6d4992f7f`.
-Receptor de contrato fijado: `ErickRFM/Compa-ero-de-esc@190a8d7a0472edba0206168862ecf76a65c39ab5`.
+Se reconciliaron los cambios HMAC de `main@7150280` (#158), sin modificar su activación ni secretos.
+
+Base inicial SIII: `f19d8a0eacf37960aba95e9d09000ce6d4992f7f`.
+Receptor de contrato fijado: `ErickRFM/Compa-ero-de-esc@a08244d001d8a65cac9b09ec166e4fbb1e1c6175`.
 
 El usuario reservó las pruebas para sí: «Solo trabaja en codigo, las pruebas las hago yo». No se ejecutaron suites, piloto, migraciones ni despliegues en esta entrega.
 
