@@ -35,7 +35,12 @@ export default async function setup(){
  // Synthetic correction authorities exist only inside this isolated test server.
  process.env.SIII_GRADE_CORRECTIONS_ENABLED='true';
  // Development HTTP integration exercises archive endpoints; production UI fixtures keep the feature disabled.
- if(process.env.SIII_HTTP_TEST_PRODUCTION!=='1')process.env.SIII_COMPANION_RESULTS_ENABLED='true';
+ if(process.env.SIII_HTTP_TEST_PRODUCTION!=='1'){
+  process.env.SIII_COMPANION_RESULTS_ENABLED='true';
+  process.env.SIII_RESULTS_HISTORY_TEST_TENANT=randomUUID();
+  process.env.SIII_RESULTS_OPERATIONS_TEST_TENANT=randomUUID();
+  process.env.SIII_COMPANION_RESULTS_TARGETS_JSON=JSON.stringify(Object.fromEntries([process.env.SIII_RESULTS_HISTORY_TEST_TENANT,process.env.SIII_RESULTS_OPERATIONS_TEST_TENANT].map(id=>[id,{origin:'https://companion.fixture.example',keyId:'archive-fixture',secretBase64:randomBytes(32).toString('base64')}])))
+ }
  process.env.SIII_CORRECTION_TEST_TENANT=randomUUID();
  process.env.SIII_CORRECTION_CLOSED_TEST_TENANT=randomUUID();
  process.env.SIII_CORRECTION_BLOCKED_TEST_TENANT=randomUUID();

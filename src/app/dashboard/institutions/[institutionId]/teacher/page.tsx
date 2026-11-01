@@ -7,5 +7,5 @@ export const dynamic='force-dynamic';
 export default async function TeacherPage({params}:{params:Promise<{institutionId:string}>}){
  const user=await getIdentity();if(!user)redirect('/login');if(user.mustChangePassword)redirect('/dashboard/security');
  const {institutionId}=await params,context=await personalContext(institutionId,'teacher');if(!context)notFound();
- return <TeacherPortal key={`${user.id}:${institutionId}`} actorId={user.id} institutionId={institutionId} institutionalResults={institutionalResultsEnabled()} institutionName={context.access.institutionName}/>;
+ return <TeacherPortal key={`${user.id}:${institutionId}`} actorId={user.id} institutionId={institutionId} institutionalResults={institutionalResultsEnabled(institutionId)} institutionName={context.access.institutionName}/>;
 }

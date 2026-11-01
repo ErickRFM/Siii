@@ -46,6 +46,7 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
   await admin.connect();source=await database('source');target=await database('target');managed=await database('managed');
   await migrate(source,'canonical',readMigrationFiles({migrationsFolder:'db/migrations'}).length);await migrate(managed,'supabase-v1',18);
   await source.query("INSERT INTO institutions(id,name,code) VALUES('11111111-1111-4111-8111-111111111111','Synthetic recovery only','SYNTHETIC'); INSERT INTO auth_throttle(key,scope,expires_at) VALUES('synthetic-key','login_ip','2030-01-01'); INSERT INTO security_audit_log(action,target,details) VALUES('synthetic','recovery','{\"integer\":9007199254740993123456789,\"nested\":{\"fraction\":0.12345678901234567890}}')");
+  await source.query("INSERT INTO institutional_teachers(id,institution_id,employee_number,first_name,last_name) VALUES('22222222-2222-4222-8222-222222222222','11111111-1111-4111-8111-111111111111','EMP-RECOVERY','Synthetic','Recovery teacher'); INSERT INTO class_session_reconciliation(institution_id,teacher_id,page,attempts,state) VALUES('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222',2,3,'failed')");
   await source.query('CREATE SCHEMA supabase_migrations; CREATE TABLE supabase_migrations.schema_migrations(version text NOT NULL PRIMARY KEY,statements text[],name text,created_by text,idempotency_key text,rollback text[])');
   await source.query("INSERT INTO supabase_migrations.schema_migrations(version,statements,name) VALUES('202610270001',ARRAY['SELECT ''history only; never execute'''],'synthetic')");
   keyHome=mkdtempSync(join(tmpdir(),'siii-test-pgp-'));
@@ -60,7 +61,9 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
  it('captures every table and ledger with ciphertext-only output and fresh snapshot counts',async()=>{
   expect(Object.keys(capture).sort()).toEqual(['ciphertext_base64','ciphertext_sha256','manifest','recipient_key_id']);
   expect(capture.ciphertext_base64).not.toContain('Synthetic recovery only');
-  expect(capture.manifest.tables.filter(t=>t.schema==='public')).toHaveLength(59);
+  expect(capture.manifest.tables.filter(t=>t.schema==='public')).toHaveLength(63);
+  expect(capture.manifest.tables.filter(t=>t.schema==='public').map(t=>t.name)).toEqual(expect.arrayContaining(['institutional_attendance_results','attendance_result_reconciliation','institutional_class_sessions','class_session_reconciliation']));
+  expect(capture.manifest.statistics['public.class_session_reconciliation'].count).toBe(1);
   expect(capture.manifest.statistics['public.auth_throttle'].count).toBe(1);
   expect(capture.manifest.ledger).toEqual(readMigrationFiles({migrationsFolder:'db/migrations'}).map((migration,index)=>({id:index+1,hash:migration.hash,created_at:String(migration.folderMillis)})));
   await source.query("INSERT INTO auth_throttle(key,scope,expires_at) VALUES('second-synthetic-key','login_ip','2030-01-01')");
@@ -127,7 +130,8 @@ describe.sequential('application logical recovery V2 (synthetic isolated databas
   await expect(restoreApplicationBackup(target,await withManifest(corrupted,manifest),{expectedManifest:manifest})).rejects.toThrow('RESTORED_HISTORY_MISMATCH');expect(await empty(target)).toBe(true);
  });
  it('restores all values including JSON precision, key PK and migration history',async()=>{
-  const result=await restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest});expect(result.tables).toBe(61);expect(result.tables).toBe(capture.manifest.tables.length);expect(result.allRowsEqual).toBe(true);expect(result.historyEqual).toBe(true);
+  const result=await restoreApplicationBackup(target,raw,{expectedManifest:capture.manifest});expect(result.tables).toBe(65);expect(result.tables).toBe(capture.manifest.tables.length);expect(result.allRowsEqual).toBe(true);expect(result.historyEqual).toBe(true);
+  expect((await target.query('SELECT page,attempts,state FROM class_session_reconciliation')).rows).toEqual([{page:2,attempts:3,state:'failed'}]);
   expect((await target.query("SELECT details->>'integer' AS value,details#>>'{nested,fraction}' AS fraction FROM security_audit_log")).rows).toEqual([{value:'9007199254740993123456789',fraction:'0.12345678901234567890'}]);
   expect((await target.query('SELECT key FROM auth_throttle')).rows).toEqual([{key:'synthetic-key'}]);
   expect((await target.query('SELECT statements FROM supabase_migrations.schema_migrations')).rows[0].statements).toEqual(["SELECT 'history only; never execute'"]);

@@ -11,8 +11,8 @@ import {archivalAttendanceAuthority} from '@/integrations/companion/attendance-a
 import {persistAcceptedAttendance,persistAcceptedClasses} from '@/integrations/companion/attendance-results';
 import type {CompanionAttendanceHistory} from '@/integrations/companion/attendance-history';
 beforeAll(()=>{process.env.SIII_ACADEMIC_OUTBOX_ENABLED='true';process.env.SIII_ACADEMIC_OUTBOX_KEYS=JSON.stringify({archive:randomBytes(32).toString('base64')});process.env.SIII_ACADEMIC_OUTBOX_ACTIVE_KEY_ID='archive'});
-async function fixture(){return db.transaction(async tx=>{
- const [tenant]=await tx.insert(institutions).values({code:'AR'+randomUUID(),name:'Synthetic institutional results'}).returning();
+async function fixture(id?:string){return db.transaction(async tx=>{
+ const [tenant]=await tx.insert(institutions).values({...(id?{id}:{}),code:'AR'+randomUUID(),name:'Synthetic institutional results'}).returning();
  const [program]=await tx.insert(academicPrograms).values({institutionId:tenant.id,code:'QA',name:'Synthetic program',level:'licenciatura',modality:'presencial'}).returning();
  const [student]=await tx.insert(institutionalStudents).values({institutionId:tenant.id,programId:program.id,enrollmentNumber:'MAT001',firstName:'Synthetic',lastName:'Student'}).returning();
  const [term]=await tx.insert(academicTerms).values({institutionId:tenant.id,code:'QA',name:'Synthetic term',startDate:'2026-01-01',endDate:'2026-12-31'}).returning();
@@ -114,7 +114,7 @@ describe('institutional attendance immutable PostgreSQL revisions',()=>{
  });
 
  it('serves retained student and original teacher history through the real authorized HTTP boundary',async()=>{
-  const f=await fixture();await accept(f,{...f.history,records:f.history.records.map(record=>({...record,disposition:'present' as const,reviewedAtEpochSeconds:1791248401}))});
+  const f=await fixture(process.env.SIII_RESULTS_HISTORY_TEST_TENANT);await accept(f,{...f.history,records:f.history.records.map(record=>({...record,disposition:'present' as const,reviewedAtEpochSeconds:1791248401}))});
   async function actor(kind:'student'|'teacher'){
    const person=(await pool.query("insert into people(first_name,last_name) values('Synthetic','Reader') returning id")).rows[0].id;
    const user=(await pool.query('insert into platform_users(person_id,username) values($1,$2) returning id',[person,'ar-reader-'+randomUUID()])).rows[0].id;

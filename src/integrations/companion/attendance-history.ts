@@ -19,7 +19,13 @@ const classSession=z.strictObject({sessionId:opaque,sectionId:z.uuid(),occurrenc
 const archiveResult=resultV2.extend({contract:z.literal('siii.attendance_archive.v1'),classSessions:z.array(classSession).max(100).optional().default([])});
 export type InstitutionalClassSession=z.infer<typeof classSession>;
 export type CompanionAttendanceHistory=z.infer<typeof result>|z.infer<typeof resultV2>|z.infer<typeof archiveResult>;
-export function institutionalResultsEnabled(){return process.env.SIII_COMPANION_RESULTS_ENABLED==='true'}
+export function institutionalResultsEnabled(institutionId?:string){
+ if(process.env.SIII_COMPANION_RESULTS_ENABLED!=='true')return false;
+ if(institutionId===undefined)return true;
+ let target:ReturnType<typeof academicDeliveryTarget>|undefined;
+ try{target=academicDeliveryTarget(institutionId,process.env.SIII_COMPANION_RESULTS_TARGETS_JSON);return true}
+ catch{return false}finally{target?.secret.fill(0)}
+}
 
 /** Separate read credential only. Unavailable never means an empty authorized history. */
 export async function readCompanionAttendance(

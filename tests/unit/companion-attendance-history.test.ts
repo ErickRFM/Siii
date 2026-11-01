@@ -1,6 +1,6 @@
 import {createHash,createHmac,randomUUID} from 'node:crypto';
 import {afterEach,describe,expect,it,vi} from 'vitest';
-import {readCompanionAttendance} from '@/integrations/companion/attendance-history';
+import {readCompanionAttendance,institutionalResultsEnabled} from '@/integrations/companion/attendance-history';
 
 const institution=randomUUID(),sectionId=randomUUID(),occurrenceId=randomUUID(),sessionId=randomUUID(),secret=Buffer.alloc(32,9);
 const targets=JSON.stringify({[institution]:{origin:'https://companion.fixture.example',keyId:'attendance-reader',secretBase64:secret.toString('base64')}});
@@ -78,6 +78,15 @@ describe('private bounded Companion attendance reader',()=>{
   const http=vi.fn<typeof fetch>(async(_url,init)=>{expect(JSON.parse(String(init?.body))).toEqual({contract:'siii.attendance_archive_request.v1',teacherExternalId:'EMP001',page:1});return Response.json(body)});
   expect(await readCompanionAttendance(institution,'EMP001',{targets,http,version:'archive',subjectType:'teacher'})).toMatchObject({classSessions:[{closedByTeacher:true}]});
   body.classSessions[0].closedAtEpochSeconds=0;expect(await readCompanionAttendance(institution,'EMP001',{targets,http,version:'archive',subjectType:'teacher'})).toBeNull();
+ });
+
+ it('activates archived UI only for tenants with their own valid archive destination',()=>{
+  vi.stubEnv('SIII_COMPANION_RESULTS_ENABLED','true');vi.stubEnv('SIII_COMPANION_RESULTS_TARGETS_JSON',targets);
+  expect(institutionalResultsEnabled()).toBe(true);expect(institutionalResultsEnabled(institution)).toBe(true);expect(institutionalResultsEnabled(randomUUID())).toBe(false);
+  vi.stubEnv('SIII_COMPANION_RESULTS_TARGETS_JSON',JSON.stringify({[institution]:{}}));expect(institutionalResultsEnabled(institution)).toBe(false);
+  vi.stubEnv('SIII_COMPANION_RESULTS_TARGETS_JSON','[]');expect(institutionalResultsEnabled(institution)).toBe(false);
+  vi.stubEnv('SIII_COMPANION_RESULTS_TARGETS_JSON','');vi.stubEnv('SIII_COMPANION_ATTENDANCE_TARGETS_JSON',targets);expect(institutionalResultsEnabled(institution)).toBe(false);
+  vi.stubEnv('SIII_COMPANION_RESULTS_ENABLED','false');expect(institutionalResultsEnabled()).toBe(false);
  });
 
 });

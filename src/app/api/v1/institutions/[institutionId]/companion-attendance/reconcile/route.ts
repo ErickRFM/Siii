@@ -12,7 +12,7 @@ export const POST=withDomainErrors(async(req:NextRequest,context:{params:Promise
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const {institutionId}=await context.params;if(!z.uuid().safeParse(institutionId).success)return jsonError('NOT_FOUND',404);
  const actor=await authorizeInstitution(institutionId,'integrations.manage');if(!actor)return jsonError('FORBIDDEN',403);
- if(!institutionalResultsEnabled())return jsonError('INSTITUTIONAL_ATTENDANCE_PENDING',503);
+ if(!institutionalResultsEnabled(institutionId))return jsonError('INSTITUTIONAL_ATTENDANCE_PENDING',503);
  const input=recovery.safeParse(await req.json().catch(()=>null));if(!input.success)return jsonError('VALIDATION_ERROR',422);
  const subjectId=input.data.studentId??input.data.teacherId!;
  const kind=input.data.teacherId?'teacher':'student';

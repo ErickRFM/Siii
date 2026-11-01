@@ -12,13 +12,14 @@ La recuperación de publicación puede materializar ocurrencias desde patrones o
 
 ## Validación ejecutada
 
-- 1059 pruebas unitarias; TypeScript, ESLint y build de producción aprobados.
+- 1060 pruebas unitarias; TypeScript, ESLint y build de producción aprobados.
+- 49 pruebas focalizadas PostgreSQL/HTTP, recuperación cifrada y perfil de liberación administrado aprobadas; incluyen respaldo/restauración de las cuatro tablas nuevas y recuperación docente con MFA.
 - 9 pruebas PostgreSQL/HTTP con migración fresca y rol runtime restringido: revisiones, deduplicación, aislamiento, autorización/revocación, fuente histórica, clase sin asistencia, cierre/cancelación y RLS.
-- Gate de siete suites nativas con ocho casos de historial; receiver fijado a 4b18d63e37d87dcd7e3927bd844a548258689581. La cadena real local y CI del SHA final se registran aparte cuando concluyan.
+- Gate de siete suites nativas con ocho casos de historial; receiver fijado a c0ccd27b0eec9bd1a0f583be5e0b0fd484e8a00b. La cadena real local y CI del SHA final se registran aparte cuando concluyan.
 - Revisión independiente de clases/archivo/jobs: RETURNING de recuperación docente corregido. El receiver conserva continuación durable del cierre antes de exportar una clase realizada.
 
 ## Activación pendiente
 
 Activar solo después de migrar mediante el proceso autorizado y configurar SIII_COMPANION_RESULTS_TARGETS_JSON con la credencial de archivo exclusiva; SIII_COMPANION_RESULTS_ENABLED permanece deshabilitado por defecto. No se ejecutó migración sobre producción ni se publicaron datos QA remotos. QA-UNIV conserva los usuarios existentes y requiere alta/verificación/vinculación nativa oficial con MFA. FCM y dispositivos físicos siguen sin certificar.
 
-Contraparte: https://github.com/ErickRFM/Compa-ero-de-esc/pull/243. La ausencia de estas intervenciones impide afirmar certificación E2E remota.
+Contraparte: https://github.com/ErickRFM/Compa-ero-de-esc/pull/243. El rollout exige bandera global y destino attendance:archive válido del tenant: otras instituciones mantienen su consulta existente. La cadena real de 39 casos pasó en CI con el backend previo equivalente (4b18d63e); el receiver fijado añade únicamente traducciones y una prueba accesible. La ausencia de las intervenciones remotas impide afirmar certificación E2E remota.

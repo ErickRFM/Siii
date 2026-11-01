@@ -16,6 +16,6 @@ export const GET=withDomainErrors(async(req:NextRequest,context:{params:Promise<
  if(new Set(entries.map(([key])=>key)).size!==entries.length)return jsonError('INVALID_QUERY',422);
  const query=institutionalHistoryQuery.safeParse(Object.fromEntries(entries));if(!query.success)return jsonError('INVALID_QUERY',422);
  const actor=await personalContext(institutionId,kind as 'student'|'teacher');if(!actor)return jsonError('FORBIDDEN',403);
- if(!institutionalResultsEnabled())return jsonError('INSTITUTIONAL_ATTENDANCE_PENDING',503);
+ if(!institutionalResultsEnabled(institutionId))return jsonError('INSTITUTIONAL_ATTENDANCE_PENDING',503);
  return NextResponse.json({data:await institutionalHistory(actor,query.data,requestId(req.headers))},{headers:{'Cache-Control':'no-store','X-SIII-Attendance-Session':attendanceSession(actor.identity)}});
 });
