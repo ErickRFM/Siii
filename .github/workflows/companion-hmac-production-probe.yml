@@ -1,0 +1,44 @@
+name: Verify SIII Companion HMAC successor
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '41 12 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-successor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Verify read-only production handshake (200, 401, nonce replay)
+        shell: bash
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CRON_SECRET}" ]]; then
+            echo 'CRON_SECRET_NOT_CONFIGURED' >&2
+            exit 1
+          fi
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          status="$(curl --silent --show-error --max-time 50 --connect-timeout 10 \
+            --output "$response_file" --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            --header 'Cache-Control: no-store' \
+            'https://siii-three.vercel.app/api/internal/companion-hmac-probe')"
+          if [[ "$status" != 200 ]]; then
+            echo "HMAC_PROBE_HTTP_STATUS=$status" >&2
+            exit 1
+          fi
+          node -e '
+            const fs=require("node:fs");
+            const result=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+            if(result.passed!==true||result.validStatus!==200||result.invalidStatus!==401||result.replayStatus!==401||result.contractVerified!==true||result.academicWritesPerformed!==false){
+              process.stderr.write("HMAC_PROBE_ASSERTION_FAILED\\n");process.exit(1);
+            }
+            process.stdout.write("HMAC_SUCCESSOR_HANDSHAKE_VERIFIED\\n");
+          ' "$response_file"
