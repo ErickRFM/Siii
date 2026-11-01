@@ -8,13 +8,15 @@ Fecha: 31 de octubre de 2026, America/Mexico_City. Este informe registra comprob
 - Base remota consultada: `f19d8a0eacf37960aba95e9d09000ce6d4992f7f`, PR [#157](https://github.com/ErickRFM/Siii/pull/157) fusionado. La rama R1–R2 local tiene el mismo árbol que esa base, aunque sus SHA difieren por squash.
 - CI de esa base: runs [41259850420](https://github.com/ErickRFM/Siii/actions/runs/41259850420), [41258953074](https://github.com/ErickRFM/Siii/actions/runs/41258953074) y [41258953164](https://github.com/ErickRFM/Siii/actions/runs/41258953164) completados con éxito.
 - Trabajo de esta auditoría: `codex/siii-integration-audit-20261031`, creado desde el remoto verificado. Se conserva la rama anterior y el informe sin versionar `SIII_MASTER_PLAN_FULL_CERTIFICATION_2026-10-31.md`; este último no se incluye ni se toma como prueba de certificación.
+- Reconciliación final: el remoto avanzó a `main@7150280f56594101d8f1ee96f8ec9cdc212e6f9a` por #158 mientras se ejecutaba la auditoría. Se incorporó a esta rama sin conflictos y se actualizó main local por fast-forward. Sus runs `41263866321` y `41263866279` están aprobados. Tras reconciliar: typecheck y 1058 unitarias en 87 archivos aprobados. Los resultados anteriores de este documento conservan su SHA de referencia.
 
 | Rama o PR encontrado | Decisión y evidencia |
 |---|---|
 | `feat/siii-r1-r2-institutional-architecture` / #157 | Incorporado por squash; `git diff origin/main origin/feat/siii-r1-r2-institutional-architecture` vacío al iniciar. No repetir merge. |
 | `chore/siii-css-dead-rule-audit-20261031` | Conservar. Cadena anterior a #154/#155, sin PR abierto al iniciar; sus commits no son prueba de cambios pendientes después del squash. No reproducir eliminaciones sobre la cascada actual. |
 | `fix/siii-personal-density-and-home-fetch-20261031` | Conservar. Trabajo reconciliado en la línea #153; no reintroducir su base antigua. |
-| `fix/companion-hmac-safe-rollover-20261031` / [#158](https://github.com/ErickRFM/Siii/pull/158) | Trabajo independiente y activo. Primer head observado: fallo en `signs the outgoing event with the successor after promotion` (`retryable` frente a `accepted`). El head cambió durante la auditoría; sus checks y configuración externa requieren evaluación propia. No se modifican credenciales ni se fusiona desde este incremento. |
+| `fix/companion-hmac-safe-rollover-20261031` / [#158](https://github.com/ErickRFM/Siii/pull/158) | Inicialmente abierto con fallo de prueba; posteriormente corregido y fusionado por su propia línea en `7150280f`. Incluido en la reconciliación final. Su código prepara rollover; no se atribuye aquí una activación o rotación de secretos. |
+| `codex/v24-companion-contract-20261031` / [#160](https://github.com/ErickRFM/Siii/pull/160) | Nuevo trabajo activo detectado al cerrar: etiquetas autorizadas de asistencia y contrato V24 del receptor. Preservar y revisar por separado; no duplicar ni fusionar automáticamente. |
 
 Se ejecutó `git fetch --all --prune`; solo se retiraron referencias locales a ramas ya eliminadas en el remoto. No se eliminaron ramas remotas, locales ni worktrees.
 
@@ -80,9 +82,11 @@ El primer intento unitario dentro del sandbox no ejecutó pruebas: el sistema im
 
 Inspección de solo lectura con Vercel: deployment `dpl_DpZqCD88CUZmSY2gZj4JkwaYbfZi`, target `production`, estado `READY`, alias `siii-three.vercel.app`, fuente `main@f19d8a0e`. A las 19:51 del 31 de octubre, hora de México, `/api/health` y `/api/ready` devolvieron 200; readiness informó `database=connected` y `Cache-Control: no-store`. Ambas respuestas incluyeron CSP, `X-Frame-Options: DENY` y `X-Content-Type-Options: nosniff`.
 
+Nueva inspección final, tras el avance remoto: el alias apunta a `dpl_7nKFjrSsxJFA97QNd2x1snhbTaK3`, Production `READY`, fuente `main@7150280f`. A las 20:28, salud y readiness vuelven a responder 200 con base conectada. Esta publicación ocurrió por la línea de #158; no se desplegó la rama de auditoría.
+
 La salud pública y la coincidencia de SHA acreditan publicación de esa base, no la ejecución completa de admisiones, Caja, expedientes, actas o sincronización de identidades reales. No se ejecutó SQL ni se cambiaron variables o claves productivas.
 
-- **P1:** finalizar por separado #158 y validar su rotación, receptor y despliegue. La comprobación Vercel de su head observado reportó cuota de builds; no se contrata un plan ni se fuerza despliegue.
+- **P1:** el merge y despliegue de #158 no acreditan activación de rollover ni rotación real de credenciales; conservar su runbook y verificar la operación por separado. #160 sigue abierto para su propia revisión. No se contrata un plan ni se fuerza despliegue para evitar cuotas.
 - **P2:** nueve avisos moderados en herramientas de desarrollo, relacionados con la cadena ESLint/TypeScript/minimatch. `npm audit --omit=dev --audit-level=moderate`: cero vulnerabilidades. No se aplicó `npm audit fix --force`, que propone cambios mayores/regresivos.
 - **P2:** continuar la adopción de componentes institucionales por pantallas, con QA por flujo; evitar otra capa de componentes sin consumidores.
 - **Aceptación institucional:** lector de pantalla humano, dispositivos físicos, reglas oficiales, respaldo/restauración cloud y configuración de servicios externos requieren su propia evidencia vigente. Las notas antiguas de `docs/BLOCKERS.md` no acreditan que un bloqueo de base siga presente ni que se haya resuelto.

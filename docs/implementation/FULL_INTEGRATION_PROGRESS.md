@@ -2,7 +2,7 @@
 
 ## Corte verificable — 31 octubre 2026
 
-La [auditoría actual de integración y limpieza](../audit/SIII_INTEGRATION_CLEANUP_2026-10-31.md) contrasta remoto, CI, fuente y deployment `main@f19d8a0e`. Documenta la tabla compartida realmente consumida por los portales, el inventario CSS corregido para Windows y el PR independiente #158. Las secciones inferiores conservan evidencia histórica: no deben interpretarse como estado actual de PRs, contratos o producción.
+La [auditoría actual de integración y limpieza](../audit/SIII_INTEGRATION_CLEANUP_2026-10-31.md) parte de `main@f19d8a0e` y reconcilia remoto, CI, fuente y deployment `main@7150280f`, incorporando #158 ya fusionado. Documenta la tabla compartida realmente consumida por los portales, el inventario CSS corregido para Windows y el nuevo PR independiente #160. Las secciones inferiores conservan evidencia histórica: no deben interpretarse como estado actual de PRs, contratos o producción.
 
 ## Incremento vigente — 26 octubre 2026
 
