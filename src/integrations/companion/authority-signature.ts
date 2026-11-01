@@ -1,5 +1,5 @@
 import {createHash,createHmac,timingSafeEqual} from 'node:crypto';
-import {academicDeliveryTarget} from './outbox/signed-transport';
+import {academicDeliveryTarget,selectedAcademicDeliveryTarget} from './outbox/signed-transport';
 
 export const ACADEMIC_AUTHORITY_PATH='/api/integrations/companion/v1/authority';
 export type AcademicAuthorityCredential={institutionId:string;reservationId:string};
@@ -16,7 +16,24 @@ export function academicAuthorityCredential(
  try{institutionId=JSON.parse(body)?.institutionId}catch{return null}
  if(typeof institutionId!=='string')return null;
  let target:ReturnType<typeof academicDeliveryTarget>;
- try{target=academicDeliveryTarget(institutionId,encodedTargets)}catch{return null}
+ try{
+  const mode=process.env.SIII_COMPANION_HMAC_ROLLOVER_ENABLED;
+  if(mode!==undefined&&mode!=='true'&&mode!=='false')return null;
+  if(mode==='true'){
+   const selected=selectedAcademicDeliveryTarget(institutionId,encodedTargets,{
+    enabled:mode,targets:process.env.SIII_COMPANION_HMAC_ROLLOVER_TARGETS_JSON,
+   });
+   if(selected.keyId===keyId){target=selected}
+   else{
+    // Allow the predecessor only during the documented overlap. A missing
+    // deadline rejects predecessor requests, never extends their lifetime.
+    selected.secret.fill(0);
+    const expiry=process.env.SIII_COMPANION_HMAC_PREDECESSOR_EXPIRES_AT;
+    if(!expiry||!/^\\d{10,12}$/.test(expiry)||Math.floor(now/1000)>=Number(expiry))return null;
+    target=academicDeliveryTarget(institutionId,encodedTargets);
+   }
+  }else target=academicDeliveryTarget(institutionId,encodedTargets);
+ }catch{return null}
  try{
   if(target.keyId!==keyId)return null;
   const canonical=['POST',ACADEMIC_AUTHORITY_PATH,timestamp,nonce,createHash('sha256').update(body).digest('hex')].join('\n');
