@@ -5,6 +5,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {NativeSelect} from '@/components/ui/native-select';
 import {SiiNavIcon} from './sii-nav-icon';
 import SiiiWorkspaceHeading from './ui/siii-workspace-heading';
+import {RefreshCw} from 'lucide-react';
 
 import {useInstitutionConfirmation} from './sii-confirmation';
 
@@ -197,8 +198,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
     {notice && <p role="status" className="sii-catalog-notice">{notice}</p>}
     {(needsSecurity || blocked || (!archived && !actions.updateSettings && !actions.changeStatus)) && <div className="sii-info-banner sii-admin-security-banner"><div className="sii-admin-security-copy"><strong>Revisa tu seguridad de cuenta</strong><p>Confirma tu identidad para volver a consultar las acciones disponibles.</p></div><SecurityActionLink returnTo={returnTo}/></div>}
     <section className="sii-panel sii-administration-summary" aria-label="Contexto de administración">
-      <div><SiiiWorkspaceHeading level={2} title={institution.name} caption={<>{institution.code} · <strong data-status={institution.status}>{statusLabels[institution.status]}</strong> · Versión {institution.version}</>}/><p className="sii-admin-summary-date">Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
-      <Button variant="outline" type="button" className="sii-outline-button" disabled={saving || loading || !online} onClick={() => void reload()}>Recargar configuración vigente</Button>
+      <div><SiiiWorkspaceHeading level={2} title={institution.name} caption={<>{institution.code} · <strong data-status={institution.status}>{statusLabels[institution.status]}</strong> · Versión {institution.version}</>} action={<Button size="icon" variant="ghost" type="button" aria-label="Recargar configuración vigente" title="Recargar configuración vigente" disabled={saving || loading || !online} onClick={() => void reload()}><RefreshCw size={16} aria-hidden="true"/></Button>}/><p className="sii-admin-summary-date">Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
       {archived ? <p>Esta institución está archivada. Su configuración y estado son de solo lectura.</p> : !businessAvailable ? <p>La administración se limita a configuración, estado e historial. Las operaciones institucionales ordinarias permanecen bloqueadas.</p> : null}
     </section>
     {businessAvailable && <nav className="sii-panel sii-administration-links" aria-label="Áreas administrativas">
