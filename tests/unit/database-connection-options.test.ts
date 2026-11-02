@@ -1,5 +1,5 @@
 import pg from 'pg';
-import {describe,it,expect} from 'vitest';import {databaseConnectionOptions,serverlessTransactionPoolerUrl} from '../../src/infrastructure/database/connection-options';
+import {describe,it,expect} from 'vitest';import {databaseConnectionOptions,serverlessTransactionPoolerUrl,isSupavisorSessionPooler} from '../../src/infrastructure/database/connection-options';
 describe('verified database TLS configuration',()=>{
  it('passes a server-only CA without letting URL sslmode override verification',()=>{const result=databaseConnectionOptions('postgresql://user:secret@db.example.test/postgres?sslmode=require','PUBLIC-CA');expect(result.ssl).toEqual({ca:'PUBLIC-CA',rejectUnauthorized:true});expect(result.connectionString).not.toContain('sslmode');expect(result.connectionString).toContain('db.example.test')});
  it('rejects every URL parameter that can replace effective TLS verification',()=>{for(const query of ['ssl=0','ssl=no-verify','ssl=true','uselibpqcompat=true','sslmode=require&ssl=0'])expect(()=>databaseConnectionOptions('postgresql://user:synthetic@db.example.test/postgres?'+query,'PUBLIC-CA')).toThrow('DATABASE_TLS_CONFIGURATION_INVALID');const client=new pg.Client(databaseConnectionOptions('postgresql://user:synthetic@db.example.test/postgres?sslmode=verify-full','PUBLIC-CA'));expect((client as unknown as {connectionParameters:{ssl:unknown}}).connectionParameters.ssl).toEqual({ca:'PUBLIC-CA',rejectUnauthorized:true})});
@@ -16,5 +16,11 @@ describe('verified database TLS configuration',()=>{
  it('refuses unrelated hosts and direct database addresses',()=>{
   for(const input of ['postgresql://postgres:synthetic@db.example.supabase.co:5432/postgres','postgresql://test:synthetic@127.0.0.1:5432/test'])
    expect(()=>serverlessTransactionPoolerUrl(input,true)).toThrow('DATABASE_POOLER_CONFIGURATION_INVALID');
+ });
+ it('detects only a Supavisor session URL for Vercel auto transaction pooling',()=>{
+  expect(isSupavisorSessionPooler('postgresql://app:synthetic@aws-0-ca-central-1.pooler.supabase.com:5432/postgres')).toBe(true);
+  expect(isSupavisorSessionPooler('postgresql://app:synthetic@aws-0-ca-central-1.pooler.supabase.com:6543/postgres')).toBe(false);
+  expect(isSupavisorSessionPooler('postgresql://app:synthetic@db.example.supabase.co:5432/postgres')).toBe(false);
+  expect(isSupavisorSessionPooler(undefined)).toBe(false);
  });
 });
