@@ -163,7 +163,7 @@ for(const departure of ['hidden','blur'] as const)test(`V3 return after ${depart
 });
 test('teacher sees only assigned groups and can open the existing real gradebook',async({page})=>{
  await login(page,f.teacher);await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await expect(page.getByRole('heading',{name:'Docente oficial Asignado'})).toBeVisible();
- await expect(page.getByRole('tabpanel')).toContainText('SYS-101');await expect(page.getByRole('tabpanel')).not.toContainText('SYS-202');
+ await expect(page.getByRole('region',{name:'Inicio docente'})).toContainText('SYS-101');await expect(page.getByRole('region',{name:'Inicio docente'})).not.toContainText('SYS-202');
  await personalNavigate(page,'Mis grupos');await page.getByRole('button',{name:'Evaluar SYS-101'}).click();await expect(page.getByRole('heading',{name:'Libro de calificaciones'})).toBeVisible();
 });
 test('cashier records an external payment once and student sees its persistent statement',async({page,browser})=>{
@@ -209,7 +209,7 @@ test('denied cashier payment retires the private order and student list',async({
 test('teacher and treasury personal workspaces remain usable across both themes and all requested widths',async({page})=>{
  test.setTimeout(180000);
  for(const [kind,actor] of [['teacher',f.teacher],['financials',f.admin]] as const){
-  await login(page,actor);await page.goto(`/dashboard/institutions/${f.tenant}/${kind}`);await expect(page.getByRole('tabpanel')).toBeVisible();
+  await login(page,actor);await page.goto(`/dashboard/institutions/${f.tenant}/${kind}`);await expect(kind==='teacher'?page.getByRole('region',{name:'Inicio docente'}):page.getByRole('tabpanel')).toBeVisible();
   for(const theme of ['light','dark']){
    if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
    for(const width of [360,390,768,1024,1366,1600,1920]){
