@@ -83,6 +83,7 @@ export function SiiDataTable<T extends { id: string }>({
   const visible = ordered.slice(current * pageSize, current * pageSize + pageSize);
   // A single official record has nothing meaningful to sort: keep its labels plain.
   const hasUsefulSorting=ordered.length>1;
+  const hasUsefulSearch=Boolean(searchText)&&(rows.length>1||Boolean(query.trim()));
   const sortable = columns
     .map((column, index) => ({ ...column, index }))
     .filter((column) => column.sortValue);
@@ -102,9 +103,9 @@ export function SiiDataTable<T extends { id: string }>({
 
   return (
     <div className={cn('sii-data-table siii-personal-data-table min-w-0 space-y-2', className)}>
-      {(searchText || (sortable.length > 0 && hasUsefulSorting)) && (
+      {(hasUsefulSearch || (sortable.length > 0 && hasUsefulSorting)) && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {searchText && (
+          {hasUsefulSearch && (
             <label className="block min-w-0 flex-1 text-sm font-medium">
               <span className="sr-only">Buscar en {label.toLocaleLowerCase('es-MX')}</span>
               <Input
@@ -218,7 +219,7 @@ export function SiiDataTable<T extends { id: string }>({
             {visible.map((row) => (
               <dl
                 key={row.id}
-                className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3"
+                className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3 min-[460px]:grid-cols-2"
               >
                 {columns.map((column, index) => (
                   <div key={index} className="siii-personal-record-field min-w-0 break-words">
