@@ -2,15 +2,14 @@
 import Link from 'next/link';
 import {useEffect,useLayoutEffect,useRef,useState,type SetStateAction} from 'react';
 import dynamic from 'next/dynamic';
-import {Home,GraduationCap,Wallet,FileText,UserRound} from 'lucide-react';
 import {emptyPersonalSnapshot,usePersonalSnapshot,type PersonalView} from './use-personal-snapshot';
 import {PersonalEnrollments,PersonalHistory} from './personal-academics';
 import {emptyPersonalRequestDraft,type PersonalRequestDraft} from '@/shared/client/personal-request-draft';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
-import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
+import {Tabs,TabsContent} from './ui/tabs';
 import {Button} from './ui/button';
 import {Input} from './ui/input';
-import {SiiPageIntro,SiiEmptyView,SiiSkeleton} from './ui/sii-kit';
+import {SiiEmptyView,SiiSkeleton} from './ui/sii-kit';
 import {Card,CardHeader,CardContent,CardTitle} from './ui/card';
 import {PersonalTable} from './personal-table';
 import StudentGlassOverview from './student-glass-overview';
@@ -38,8 +37,6 @@ function Profile({profile}:{profile:PersonalProfile}){return <Card><CardHeader><
 function Statements({orders,payments}:{orders:PersonalOrder[];payments:PersonalPayment[]}){return <div className="space-y-6"><p className="text-sm text-muted-foreground">Consulta informativa de cargos y pagos registrados en Caja. Los pagos electrónicos requieren una pasarela institucional configurada; aquí se muestran abonos externos confirmados.</p>
  <h2 className="text-lg font-semibold">Órdenes de pago</h2><PersonalTable label="Órdenes de pago" rows={orders} searchText={row=>row.orderNumber+' '+row.feeTypeName} columns={[{label:'Orden / concepto',sortValue:row=>row.feeTypeName,render:row=><><strong>{row.feeTypeName}</strong><p className="break-all text-xs text-muted-foreground">{row.orderNumber}</p></>},{label:'Importe',sortValue:row=>row.totalAmountCents,render:row=>formatMoney(row.totalAmountCents,row.currency)},{label:'Pagado',render:row=>formatMoney(row.paidAmountCents,row.currency)},{label:'Saldo',sortValue:row=>Math.max(0,row.totalAmountCents-row.paidAmountCents),render:row=>formatMoney(['pending','partially_paid'].includes(row.status)?row.totalAmountCents-row.paidAmountCents:0,row.currency)},{label:'Estado',render:row=>financeStatus[row.status]??row.status},{label:'Fecha límite',sortValue:row=>row.dueDate,render:row=>row.dueDate?new Date(row.dueDate).toLocaleDateString('es-MX'):'Sin fecha registrada'}]}/>
  <h2 className="text-lg font-semibold">Movimientos registrados</h2><PersonalTable label="Pagos registrados" rows={payments} columns={[{label:'Movimiento',sortValue:row=>row.transactionNumber,render:row=><span className="break-all">{row.transactionNumber}</span>},{label:'Fecha',sortValue:row=>row.createdAt,render:row=>new Date(row.createdAt).toLocaleString('es-MX')},{label:'Importe',sortValue:row=>row.amountCents,render:row=>formatMoney(row.amountCents,row.currency)},{label:'Medio',render:row=>row.paymentMethod==='cash'?'Efectivo':row.paymentMethod==='transfer'?'Transferencia':row.paymentMethod},{label:'Referencia',render:row=>row.reference??'Sin referencia'}]}/></div>}
-
-const studentDestinations=[{id:'home',label:'Inicio',icon:Home},{id:'academic',label:'Académico',icon:GraduationCap},{id:'orders',label:'Finanzas',icon:Wallet},{id:'services',label:'Servicios',icon:FileText},{id:'profile',label:'Perfil',icon:UserRound}] as const;
 
 export default function PersonalPortal({institutionId,institutionName,actorId}:{institutionId:string;institutionName:string;actorId:string}){
  const [section,setSection]=useState('home'),[academicView,setAcademicView]=useState<PersonalView>('courses');
@@ -88,18 +85,11 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   return null;
  }
 
- return <div className={'sii-workspace siii-glass-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}>
-  <div className={section==='home'?'siii-home-visually-hidden':''}>
-    <SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={section==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
-  </div>
-  <nav aria-label="Contexto del portal" className="siii-student-utility-links flex flex-wrap gap-3 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link></nav>
+ return <div className="sii-workspace siii-glass-workspace sii-student-portal siii-student-home-shell min-w-0 space-y-4">
+  {section!=='home'&&<header className="siii-student-section-heading flex min-w-0 flex-wrap items-center justify-between gap-3"><div className="min-w-0"><p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Portal estudiantil</p><h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{section==='academic'?(academicView==='grades'?'Calificaciones e historial':academicView==='teachers'?'Mis docentes':'Mis inscripciones'):section==='orders'?'Estado de cuenta':section==='services'?'Mis trámites':'Mi perfil'}</h1></div><Button variant="outline" size="sm" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button></header>}
   <Tabs value={section} onValueChange={setSection} className={'min-w-0 space-y-5'+(section==='home'?' siii-home-tabs':'')}>
-   <TabsList aria-label={'Navegación estudiantil'} className="sii-personal-navigation md:hidden">
-    {studentDestinations.map(item=><TabsTrigger key={item.id} value={item.id} className="min-h-11 gap-2"><item.icon className="size-5" aria-hidden="true"/><span>{item.label}</span></TabsTrigger>)}
-   </TabsList>
-   {profile&&section!=='home'&&<div className="siii-student-identity-card rounded-xl border bg-card p-5"><p className="text-sm text-muted-foreground">{'Estudiante'} · {academicStatus[profile.status]??profile.status}</p><h2 className="mt-1 text-xl font-semibold">{profile.firstName} {profile.lastName}</h2><p className="mt-1 text-sm">{profile.enrollmentNumber}{profile.programName?' · '+profile.programName:''}</p></div>}
    {['home','academic','orders','services','profile'].map(destination=><TabsContent key={destination} value={destination} className="space-y-4">
-    {destination==='academic'?<Tabs value={academicView} onValueChange={value=>setAcademicView(value as PersonalView)} className="space-y-4"><TabsList aria-label="Consultas académicas" className="sii-workspace-tabs siii-academic-tabs flex h-auto w-full flex-wrap justify-start gap-1 bg-muted p-1">{[['courses','Mis inscripciones'],['teachers','Mis docentes'],['grades','Calificaciones e historial']].map(([value,label])=><TabsTrigger key={value} value={value} className="siii-academic-tab min-h-11">{label}</TabsTrigger>)}</TabsList>{['courses','teachers','grades'].map(value=><TabsContent key={value} value={value} className="space-y-4">{status}{content()}</TabsContent>)}<nav className="siii-student-academic-links" aria-label="Accesos académicos"><span className="siii-student-academic-links-title">Accesos académicos</span><div><Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/academic`}>Consultar oferta académica</Link><Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/student/attendance`}>Mi historial de asistencia</Link></div></nav></Tabs>:<>{status}{content()}</>}
+    {destination==='academic'?<Tabs value={academicView} onValueChange={value=>setAcademicView(value as PersonalView)} className="space-y-4"><TabsContent value={academicView} className="min-w-0 space-y-4">{status}{content()}</TabsContent><nav className="siii-student-academic-links" aria-label="Accesos académicos"><span className="siii-student-academic-links-title">Accesos académicos</span><div><Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/academic`}>Consultar oferta académica</Link><Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/student/attendance`}>Mi historial de asistencia</Link></div></nav></Tabs>:<>{status}{content()}</>}
    </TabsContent>)}
   </Tabs>
   {updatedAt&&<p className="text-sm text-muted-foreground">Última consulta: {updatedAt}. Al actualizar se vuelven a validar tus permisos y vínculos.</p>}
