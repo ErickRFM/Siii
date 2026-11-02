@@ -5,3 +5,9 @@ Estas capturas se revisaron a partir de sesiones y datos sintéticos aislados. L
 La referencia original de composición sigue siendo `docs/design/reference/siii-glass-approved.png` y conserva su comparador independiente. La fotografía de campus continúa omitida por indicación del usuario.
 
 Las referencias con sufijo `-linux` se revisaron desde la ejecución real de GitHub Actions: su altura puede diferir de Windows por la composición tipográfica. Se comparan sin recortes y con el mismo umbral; las demás capturas usan la referencia compartida.
+
+## Control Windows — 31 octubre 2026
+
+`teacher-{dark,light}-390-win32.png` proviene de una exportación intacta de `main@f19d8a0e`, con Chromium headless 156.0.8078.4 (Playwright 1.64.0), reloj y fixtures de la suite. Ambas referencias compartidas fallaban también en ese control: 2426 px frente a 2413 px reales. Las capturas compartidas dejaban paneles inferiores sin pintar; las de Windows muestran el contenido completo. Se revisaron las imágenes antes de añadir la variante de plataforma.
+
+El control de main y la rama de limpieza tienen dimensiones idénticas; difieren un 0,0471 % (oscuro) y un 0,0606 % (claro) de píxeles, incluidos identificadores sintéticos variables. Se mantienen las referencias compartidas/Linux, las dimensiones estrictas, la comparación sin máscaras y el máximo de 5 %. Evidencia y límites en `docs/audit/SIII_INTEGRATION_CLEANUP_2026-10-31.md`.

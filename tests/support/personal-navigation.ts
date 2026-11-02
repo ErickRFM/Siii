@@ -6,7 +6,8 @@ export async function personalNavigate(page:Page,label:string){
  if(await tab.isVisible()){await tab.click();return}
  const labels:Record<string,string>={Académico:'Carga académica',Finanzas:'Estado de cuenta',Servicios:'Mis trámites'};
  const menu=page.getByRole('button',{name:'Abrir navegación',exact:true});
- if(await menu.isVisible())await menu.click();
+ const mobileNavigation=await menu.isVisible();
+ if(mobileNavigation)await menu.click();
  const nav=page.getByRole('navigation',{name:'Navegación institucional',exact:true});
  const targetName=labels[label]??label;
  const link=nav.getByRole('link',{name:targetName,exact:true});
@@ -15,11 +16,14 @@ export async function personalNavigate(page:Page,label:string){
   // destination, not by the top-level tab name (Servicios -> Trámites).
   const group=nav.locator('.siii-personal-nav-group').filter({hasText:targetName});
   await expect(group).toHaveCount(1);
-  await group.locator('summary').click();
+  // A transiently hidden link does not imply the disclosure is closed.
+  // Clicking an already-open group would close it and hide the destination.
+  if(await group.getAttribute('open')===null)await group.locator('summary').click();
+  await expect(group).toHaveAttribute('open','',{timeout:10000});
  }
  await expect(link).toBeVisible();
  await link.click();
- if(await menu.isVisible()){
+ if(mobileNavigation){
   await expect(page.getByRole('dialog')).toHaveCount(0);
   // Radix removes aria-hidden after the mobile sheet exit transition.
   // Keep the full WCAG audit: never inspect a page while its focus trap is still active.

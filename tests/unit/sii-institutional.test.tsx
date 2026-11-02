@@ -116,6 +116,26 @@ describe('SIII Institutional Component Architecture (Bloque B & D)', () => {
     expect(html).toContain('Ver historial');
   });
 
+  it.each([0, -1, NaN, Infinity])('keeps official records visible for invalid page size %s', (pageSize) => {
+    const rows = Array.from({ length: 21 }, (_, index) => ({ id: String(index), name: `Registro ${index}` }));
+    const html = renderToStaticMarkup(
+      <SiiDataTable rows={rows} pageSize={pageSize} label="Expedientes"
+        columns={[{ label: 'Nombre', render: row => row.name }]} />
+    );
+    expect(html).toContain('Mostrando 1–20 de 21 registros');
+    expect(html).not.toContain('Sin registros para mostrar');
+  });
+
+  it('normalizes fractional page sizes before slicing and announcing records', () => {
+    const rows = Array.from({ length: 4 }, (_, index) => ({ id: String(index), name: `Registro ${index}` }));
+    const html = renderToStaticMarkup(
+      <SiiDataTable rows={rows} pageSize={2.5} label="Expedientes"
+        columns={[{ label: 'Nombre', render: row => row.name }]} />
+    );
+    expect(html).toContain('Mostrando 1–2 de 4 registros');
+    expect(html).not.toContain('Registro 2');
+  });
+
   it('SiiStatusBadge reflects semantic states with accessible contrast', () => {
     const activeHtml = renderToStaticMarkup(<SiiStatusBadge variant="active">Inscrito</SiiStatusBadge>);
     const pendingHtml = renderToStaticMarkup(<SiiStatusBadge variant="pending">En revisión</SiiStatusBadge>);
