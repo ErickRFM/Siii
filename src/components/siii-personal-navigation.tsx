@@ -26,6 +26,7 @@ function iconMap(name: PersonalNavDestination['iconName']): ReactNode {
 /** URL navigation only; the server and existing portal capabilities remain authoritative. */
 export default function SiiiPersonalNavigation({role,institutionId,institutionName,allowed}:{role:Role;institutionId?:string;institutionName?:string;allowed:boolean}){
  const [selected,setSelected]=useState('inicio');
+ const [expandedGroups,setExpandedGroups]=useState<Record<string,boolean>>({});
  const {open,setOpen,setOpenMobile,isMobile}=useSidebar();
  useEffect(()=>{
   const sync=(event:Event)=>setSelected((event as CustomEvent<string>).detail||'inicio');
@@ -54,8 +55,8 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  }
 
  const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=>(
-  <details className="siii-personal-nav-group" open={hasActive ? true : undefined}>
-    <summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
+  <details key={label} className="siii-personal-nav-group" open={hasActive||Boolean(expandedGroups[label])}>
+    <summary title={label} onClick={event=>{event.preventDefault();setExpandedGroups(previous=>({...previous,[label]:!(previous[label]??hasActive)}))}}> {icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
     <div>{children}</div>
   </details>
  );
