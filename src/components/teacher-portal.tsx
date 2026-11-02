@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
 import {RefreshCw} from 'lucide-react';
+import SiiiWorkspaceHeading from './ui/siii-workspace-heading';
 import {usePersonalSnapshot} from './use-personal-snapshot';
 import TeacherGradebook from './teacher-gradebook';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
@@ -51,10 +52,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId,ins
  function open(id:string,mode:'roster'|'capture'|'results'){setSelection({id,mode});window.location.hash='evaluaciones';setView('evaluations');}
 
  return <div className={'sii-workspace siii-glass-workspace sii-teacher-portal sii-glass-role min-w-0 space-y-6'+(view==='home'?' siii-teacher-home-shell':'')}>
-  {view!=='home'&&<header className="flex min-w-0 items-center justify-between gap-3 pb-1">
-   <h1 className="text-base font-semibold tracking-tight">{view==='groups'?'Mis grupos':view==='evaluations'?'Evaluaciones':'Mi perfil docente'}</h1>
-   <Button size="icon" variant="ghost" disabled={loading} onClick={()=>refresh()} title="Actualizar mi información" aria-label="Actualizar mi información"><RefreshCw size={16} aria-hidden="true"/></Button>
-  </header>}
+  {view!=='home'&&<SiiiWorkspaceHeading title={view==='groups'?'Mis grupos':view==='evaluations'?'Evaluaciones':'Mi perfil docente'} action={<Button size="icon" variant="ghost" disabled={loading} onClick={()=>refresh()} title="Actualizar mi información" aria-label="Actualizar mi información"><RefreshCw size={16} aria-hidden="true"/></Button>}/>} 
   {institutionalResults&&view==='groups'&&<Link className="inline-flex text-sm font-medium underline-offset-4 hover:underline" href={`/dashboard/institutions/${institutionId}/teacher/attendance`}>Asistencia de mis grupos</Link>}
   {incompleteGroups&&<p role="status" className="text-sm text-muted-foreground">La consulta de grupos está incompleta. Los indicadores totales se ocultan hasta recuperar todo el registro.</p>}
   {error&&<div role="alert" className="sii-catalog-error">{error}<Button variant="outline" onClick={()=>refresh()}>Reintentar consulta</Button></div>}
