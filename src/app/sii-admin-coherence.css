@@ -2,14 +2,14 @@
    Operational workspace only. Personal student/teacher views are untouched.
    Do not affect routing, permissions, or document content. */
 .sii-app.sii-ui:has(.siii-glass-workspace) {
-  --siii-admin-radius:18px;
-  --siii-admin-gap:20px;
-  --siii-admin-panel:rgba(255,255,255,.72);
+  --siii-admin-radius:16px;
+  --siii-admin-gap:16px;
+  --siii-admin-panel:rgba(241,237,231,.78);
 }
 html[data-sii-theme="light"] .sii-app.sii-ui:has(.siii-glass-workspace) {
   background:
-    radial-gradient(ellipse 65% 58% at 90% 10%,rgba(160,180,205,.12),transparent 80%),
-    linear-gradient(115deg,#eef2f5,#e2e8ee 58%,#eef2f5)!important;
+    radial-gradient(ellipse 65% 58% at 90% 10%,rgba(174,156,142,.09),transparent 80%),
+    linear-gradient(115deg,#f1ede8,#e8e3db 58%,#f1ede8)!important;
 }
 .sii-app.sii-ui .siii-glass-workspace {
   width:100%;
@@ -43,24 +43,24 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metr
   padding:14px 16px!important;
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item {
-  background:rgba(255,255,255,.71)!important;
+  background:rgba(248,245,241,.78)!important;
   border:1px solid rgba(20,25,35,.07)!important;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institution-item) {
   transition:background-color .18s ease,border-color .18s ease;
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar {
-  background:rgba(255,255,255,.80)!important;border:1px solid rgba(20,25,35,.07)!important;
+  background:rgba(241,237,231,.82)!important;border:1px solid rgba(20,25,35,.07)!important;
   box-shadow:none!important;
   backdrop-filter:blur(16px) saturate(105%);
   -webkit-backdrop-filter:blur(16px) saturate(105%);
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar {
-  background:rgba(255,255,255,.88)!important;border-right:1px solid rgba(20,25,35,.08)!important;
+  background:rgba(236,232,226,.92)!important;border-right:1px solid rgba(20,25,35,.08)!important;
   box-shadow:none!important;
 }
 html[data-sii-theme="dark"] .sii-app.sii-ui:has(.siii-glass-workspace){
-  --siii-admin-panel:rgba(30,36,47,.74);
+  --siii-admin-panel:rgba(42,40,39,.76);
 }
 html[data-sii-theme="dark"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-metric,.sii-panel,.sii-institutions-panel,.sii-access-panel) {
   background:var(--siii-admin-panel)!important;
