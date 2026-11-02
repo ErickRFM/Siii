@@ -13,7 +13,7 @@ import Link from 'next/link';
 import type {Route} from 'next';
 import {useCallback, useEffect, useRef, useState, type FormEvent} from 'react';
 import type {InstitutionAdminDTO} from '@/shared/institution-admin/policy';
-import {hasInstitutionCapability, SecurityActionLink, useInstitutionCapabilities} from './institution-capabilities';
+import {SecurityActionLink, useInstitutionCapabilities} from './institution-capabilities';
 import './institution-admin.css';
 
 type Actions = {updateSettings: boolean; changeStatus: boolean; readAudit: boolean};
@@ -110,7 +110,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
   const base = `/api/v1/institutions/${institutionId}`;
   const returnTo = `/dashboard/institutions/${institutionId}/admin`;
   const online = useOnline();
-  const {data: capabilities, refresh: refreshCapabilities} = useInstitutionCapabilities();
+  const {refresh: refreshCapabilities} = useInstitutionCapabilities();
   const [institution, setInstitution] = useState(initialInstitution);
   const [draft, setDraft] = useState(() => editable(initialInstitution));
   const [reason, setReason] = useState('');
