@@ -221,27 +221,18 @@ test('teacher and treasury personal workspaces remain usable across both themes 
  }
 });
 
-test('student official tables support accessible desktop and mobile sorting',async({page})=>{
+test('single published enrollment uses a calm responsive table without redundant sorting',async({page})=>{
  await login(page);
  await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await personalNavigate(page,'Académico');
  const region=page.getByRole('region',{name:'Inscripciones'});
- const firstHeader=region.getByRole('columnheader').first();
- await expect(firstHeader).toHaveAttribute('aria-sort','none');
- const sort=region.getByRole('button',{name:'Ordenar por Materia'});
- await sort.click();
- await expect(firstHeader).toHaveAttribute('aria-sort','ascending');
- await sort.click();
- await expect(firstHeader).toHaveAttribute('aria-sort','descending');
+ await expect(region.getByRole('columnheader').first()).not.toHaveAttribute('aria-sort','none');
+ await expect(region.getByRole('button',{name:'Ordenar por Materia'})).toHaveCount(0);
  await page.setViewportSize({width:390,height:844});
- const mobileSort=page.getByRole('combobox',{name:'Ordenar Inscripciones'});
- await expect(mobileSort).toBeVisible();
- await mobileSort.selectOption({label:'Materia'});
- await expect(page.getByRole('button',{name:'Cambiar a orden descendente'})).toBeEnabled();
- await expect(page.getByRole('region',{name:'Inscripciones'}).locator('dl').first()).toBeVisible();
+ await expect(page.getByRole('combobox',{name:'Ordenar Inscripciones'})).toHaveCount(0);
+ await expect(region.locator('dl').first()).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
 });
-
 
 test('mobile student academic pages have a compact heading, one navigation and no document overflow',async({page})=>{
  test.setTimeout(180000);await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
