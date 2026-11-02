@@ -24,11 +24,15 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
  const scope=`${actorId}:${institutionId}:${kind}:${permissionContext}`;
  const [state,setState]=useState<State>(()=>initial(scope,view));
  const active=useRef<AbortController|null>(null);
+ const lastCheckedAt=useRef(0);
  const refresh=useCallback(async(background=false)=>{
   // Coalesce focus + visibility while a request is active. Returning to a page
   // always revalidates: a record link can change without changing capabilities.
-  if(background&&active.current)return;
+  // Browser focus can fire immediately after visibilitychange. Do not request the
+  // same five resources again unless the user explicitly refreshes or returns.
+  if(background&&(active.current||Date.now()-lastCheckedAt.current<8000))return;
   active.current?.abort();const controller=new AbortController();active.current=controller;
+  lastCheckedAt.current=Date.now();
   setState(previous=>previous.scope===scope&&previous.view===view?{...previous,loading:true,error:''}:initial(scope,view));
   try{
    if(!allowed){setState({...initial(scope,view),accessChanged:!permissions.loading&&Boolean(permissions.data),loading:permissions.loading,error:permissions.loading?'':'Tu acceso cambió. Actualiza los permisos o inicia sesión nuevamente.'});return}
@@ -44,7 +48,15 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
    if(controller.signal.aborted)return;
    setState(previous=>previous.scope===scope&&previous.view===view&&previous.context===context?{...previous,authority,accessChanged:false,snapshot:previous.snapshot?{...previous.snapshot,profile}:null}:{...initial(scope,view),context,authority});
    const check=(page:Response)=>{if(page.headers.get('x-siii-portal-authority')!==authority||page.headers.get('x-siii-portal-actor')!==actorId)throw new Error('CONTEXT_CHANGED');if(page.headers.get('x-siii-portal-context')!==context)throw new Error('PROFILE_CHANGED')};
-   const entries=profile?await Promise.all(resources[view].map(async resource=>[resource,await readCollection(base+'/'+(resource==='requestHistory'?'request-history':resource==='pendingRequests'?'pending-requests':resource),{signal:controller.signal},check)] as const)):[];
+   // Cap the burst from the personal dashboard. Five parallel collections can
+   // fan out to separate Vercel functions and exhaust Supavisor connections.
+   const requested=profile?resources[view]:[];
+   const entries:Array<readonly [typeof requested[number],Awaited<ReturnType<typeof readCollection>>]>=[];
+   for(let i=0;i<requested.length;i+=2){
+    const batch=await Promise.all(requested.slice(i,i+2).map(async resource=>[resource,await readCollection(base+'/'+(resource==='requestHistory'?'request-history':resource==='pendingRequests'?'pending-requests':resource),{signal:controller.signal},check)] as const));
+    if(controller.signal.aborted)return;
+    entries.push(...batch);
+   }
    if(!controller.signal.aborted)setState({scope,view,context,authority,accessChanged:false,snapshot:{...empty,...Object.fromEntries(entries.map(([resource,result])=>[resource,result.data])),truncatedResources:Object.fromEntries(entries.filter(([,result])=>result.truncated).map(([resource])=>[resource,true])),profile},loading:false,error:'',updatedAt:new Date().toLocaleString('es-MX')});
   }catch(cause){
    if(!controller.signal.aborted){const accessChanged=cause instanceof CollectionReadError&&[401,403].includes(cause.status)||cause instanceof Error&&cause.message==='CONTEXT_CHANGED';controller.abort();setState({...initial(scope,view),accessChanged,loading:false,error:!navigator.onLine?'Sin conexión. Reconecta para consultar información vigente.':accessChanged?'Tu acceso o expediente cambió. Actualiza o inicia sesión nuevamente.':cause instanceof Error&&cause.message==='PROFILE_CHANGED'?'La información cambió durante la consulta. Actualiza para comprobar tu acceso.':cause instanceof RequestTimeoutError?'La consulta tardó demasiado. Reintenta cuando la conexión esté estable.':'No se pudo consultar esta sección. Reintenta para obtener información vigente.'})}
