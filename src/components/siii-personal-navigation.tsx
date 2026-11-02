@@ -90,6 +90,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
    {role==='student'&&studentGroups.map(g=>(
     group(g.label,g.icon,<>{STUDENT_NAV_ITEMS.filter(it=>g.hashes.includes(it.hash)).map(item)}</>,g.hashes.includes(selected))
    ))}
+   {role==='student'&&institutionId&&<Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/student/attendance`) as Route} title="Mi historial de asistencia"><ClipboardCheck size={18}/><span className="group-data-[collapsible=icon]:hidden">Mi historial de asistencia</span></Link>}
    {role==='teacher'&&<>
     {group('Docencia',<GraduationCap size={18}/>,<>{TEACHER_NAV_ITEMS.map(item)}</>,['grupos','evaluaciones','perfil'].includes(selected))}
     <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones"><FileText size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>
