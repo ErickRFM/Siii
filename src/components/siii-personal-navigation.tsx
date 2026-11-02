@@ -42,7 +42,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  const base=institutionId&&role!=='context'?`/dashboard/institutions/${institutionId}/${role}`:'/dashboard';
 
  function item(dest: PersonalNavDestination){
-  if(!dest.available)return <span key={dest.hash} className="siii-personal-nav-link text-muted-foreground opacity-60" aria-disabled="true" title={dest.description||"El plan oficial aún no está disponible"}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span><small className="ml-auto text-[9px] uppercase tracking-wider opacity-60 group-data-[collapsible=icon]:hidden">Próximamente</small></span>;
+  if(!dest.available)return <span key={dest.hash} className="siii-personal-nav-link text-muted-foreground opacity-60" aria-disabled="true" title={dest.description||"El plan oficial aún no está disponible"}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span><small className="ml-auto text-[11px] uppercase tracking-wide opacity-80 group-data-[collapsible=icon]:hidden">Próximamente</small></span>;
   const href=(base+'#'+dest.hash) as Route;
   const isCurrent=selected===dest.hash;
   return <Link key={dest.hash} href={href} className={'siii-personal-nav-link'+(isCurrent?' is-current':'')} aria-current={isCurrent?'page':undefined}
@@ -55,7 +55,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  }
 
  const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=>(
-  <details key={label} className="siii-personal-nav-group" open={hasActive||Boolean(expandedGroups[label])}>
+  <details key={label} className="siii-personal-nav-group" open={expandedGroups[label]??hasActive}>
     <summary title={label} onClick={event=>{event.preventDefault();setExpandedGroups(previous=>({...previous,[label]:!(previous[label]??hasActive)}))}}> {icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
     <div>{children}</div>
   </details>
