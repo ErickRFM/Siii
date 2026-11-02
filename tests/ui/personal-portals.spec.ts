@@ -266,7 +266,7 @@ test('teacher portal mobile groups keep cards and toolbar within viewport',async
   await page.setViewportSize({width,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
   const header=await page.locator('#siii-personal .sii-topbar').boundingBox();
-  const heading=await page.getByRole('heading',{name:'Mi docencia'}).boundingBox();
+  const heading=await page.getByRole('heading',{name:'Mis grupos',exact:true}).boundingBox();
   if(width<768)expect(heading!.y).toBeGreaterThanOrEqual(header!.y+header!.height-2);
  }
 });
