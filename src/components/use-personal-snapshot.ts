@@ -52,8 +52,8 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
    // fan out to separate Vercel functions and exhaust Supavisor connections.
    const requested=profile?resources[view]:[];
    const entries:Array<readonly [typeof requested[number],Awaited<ReturnType<typeof readCollection>>]>=[];
-   for(let i=0;i<requested.length;i+=2){
-    const batch=await Promise.all(requested.slice(i,i+2).map(async resource=>[resource,await readCollection(base+'/'+(resource==='requestHistory'?'request-history':resource==='pendingRequests'?'pending-requests':resource),{signal:controller.signal},check)] as const));
+   for(let i=0;i<requested.length;i+=3){
+    const batch=await Promise.all(requested.slice(i,i+3).map(async resource=>[resource,await readCollection(base+'/'+(resource==='requestHistory'?'request-history':resource==='pendingRequests'?'pending-requests':resource),{signal:controller.signal},check)] as const));
     if(controller.signal.aborted)return;
     entries.push(...batch);
    }
