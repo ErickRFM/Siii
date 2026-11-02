@@ -191,7 +191,6 @@ export default function InstitutionAdministration({initialInstitution, actions}:
     void mutate('status', {status: nextStatus, reason: statusReason.trim()});
   }
   const businessAvailable = institution.status === 'active' && !blocked;
-  const academicAvailable = ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasInstitutionCapability(capabilities, `${resource}.read`));
   return <div className="sii-institution-admin siii-glass-workspace">{confirmation}
     {!online && <p role="status" className="sii-catalog-error">Sin conexión. Las operaciones están deshabilitadas; tu borrador se conserva.</p>}
     {error && <p id="institution-admin-error" role="alert" tabIndex={-1} ref={feedback} className="sii-catalog-error">{error}</p>}
