@@ -54,7 +54,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  }
 
  const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=>(
-  <details className="siii-personal-nav-group" open={hasActive||undefined}>
+  <details className="siii-personal-nav-group" open={hasActive ? true : undefined}>
     <summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
     <div>{children}</div>
   </details>
@@ -91,7 +91,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
     group(g.label,g.icon,<>{STUDENT_NAV_ITEMS.filter(it=>g.hashes.includes(it.hash)).map(item)}</>,g.hashes.includes(selected))
    ))}
    {role==='teacher'&&<>
-    {group('Docencia',<GraduationCap size={18}/>,<>{TEACHER_NAV_ITEMS.map(item)}</>,TEACHER_NAV_ITEMS.some(it=>it.hash===selected))}
+    {group('Docencia',<GraduationCap size={18}/>,<>{TEACHER_NAV_ITEMS.map(item)}</>,['grupos','evaluaciones','perfil'].includes(selected))}
     <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones"><FileText size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>
    </>}
   </SidebarContent>
