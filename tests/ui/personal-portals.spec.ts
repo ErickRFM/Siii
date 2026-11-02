@@ -102,10 +102,10 @@ test('V3 revalidation preserves displayed records and search while a valid profi
  await page.route('**/portal/student/profile',async route=>{const response=await route.fetch();await gate;await route.fulfill({response})});
  try{await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();await expect(page.getByRole('status').filter({hasText:'Actualizando'})).toBeVisible()}finally{release()}
 });
-test('V3 refresh keeps the academic search and a denied collection removes all private content',async({page})=>{
+test('V3 refresh preserves a single academic record and a denied collection removes all private content',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(page,'Académico');
- const search=page.getByRole('searchbox',{name:'Buscar en inscripciones'});await search.fill('Álgebra');
- await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();await expect(search).toHaveValue('Álgebra');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
+ await expect(page.getByRole('searchbox',{name:'Buscar en inscripciones'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.route('**/portal/student/courses',route=>route.fulfill({status:403,json:{error:'FORBIDDEN'}}));
  await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.locator('main [role="alert"]')).toContainText('acceso');await expect(page.getByText('Alumna propia Sintético',{exact:true})).toHaveCount(0);await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toHaveCount(0);
 });
