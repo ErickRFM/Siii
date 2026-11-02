@@ -375,3 +375,11 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
  }
  #siii-personal .siii-personal-data-table table{min-width:0}
 }
+
+/* Unified personal shell: same treatment for home and secondary sections */
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal){min-width:0;width:100%;max-width:none;gap:12px}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.siii-student-section-heading,header[aria-label="Sección docente"]){min-height:52px;margin:0;padding:4px 2px 8px}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.siii-student-section-heading,header[aria-label="Sección docente"]) h1{margin:0;font-size:clamp(1.125rem,1.5vw,1.5rem);line-height:1.25}
+#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.siii-personal-data-table,.sii-panel,[data-slot="card"]){min-width:0;max-width:100%}
+#siii-personal .siii-personal-data-table [data-slot="table-container"]{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+@media(max-width:767px){#siii-personal :is(.sii-student-portal,.sii-teacher-portal){padding-inline:0!important}}
