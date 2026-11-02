@@ -6,7 +6,7 @@ import {emptyPersonalSnapshot,usePersonalSnapshot,type PersonalView} from './use
 import {PersonalEnrollments,PersonalHistory} from './personal-academics';
 import {emptyPersonalRequestDraft,type PersonalRequestDraft} from '@/shared/client/personal-request-draft';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
-import {Tabs,TabsContent} from './ui/tabs';
+
 import {RefreshCw,LoaderCircle} from 'lucide-react';
 import {Button} from './ui/button';
 import {Input} from './ui/input';
@@ -96,11 +96,10 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
 
  return <div className="sii-workspace siii-glass-workspace sii-student-portal siii-student-home-shell min-w-0 space-y-3">
   {section!=='home'&&<header className="flex min-w-0 items-center justify-between gap-3 pb-1"><h1 className="min-w-0 text-base font-semibold tracking-tight">{section==='academic'?(academicView==='grades'?(activeHash==='historial'?'Historial académico':'Calificaciones'):academicView==='teachers'?'Mis docentes':'Carga académica'):section==='orders'?'Estado de cuenta':section==='services'?'Mis trámites':'Mi perfil'}</h1><Button size="icon" variant="ghost" aria-label="Actualizar mi información" title="Actualizar mi información" disabled={loading} onClick={()=>void refresh()}><RefreshCw size={16} aria-hidden="true"/></Button></header>}
-  <Tabs value={section} onValueChange={setSection} className="min-w-0 space-y-3">
-   {['home','academic','orders','services','profile'].map(destination=><TabsContent key={destination} value={destination} className="space-y-4">
-    {destination==='academic'?<Tabs value={academicView} onValueChange={value=>setAcademicView(value as PersonalView)} className="space-y-4"><TabsContent value={academicView} className="min-w-0 space-y-4">{status}{content()}</TabsContent></Tabs>:<>{status}{content()}</>}
-   </TabsContent>)}
-  </Tabs>
-  {updatedAt&&<p className="text-sm text-muted-foreground">Última consulta: {updatedAt}. Al actualizar se vuelven a validar tus permisos y vínculos.</p>}
+  <div className="min-w-0 space-y-3" id="siii-student-current-view">
+   {status}
+   {content()}
+  </div>
+  {updatedAt&&<span role="status" className="sr-only">Información actualizada: {updatedAt}. Se revalidaron tus permisos y vínculos.</span>}
  </div>;
 }
