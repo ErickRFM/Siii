@@ -17,6 +17,7 @@ import StudentGlassOverview from './student-glass-overview';
 import {AcademicWeek,weekDates} from './academic-week';
 import type {PersonalProfile,PersonalTeacher,PersonalSchedule,PersonalOrder,PersonalPayment} from '@/modules/portal/contracts';
 import {academicStatus,financeStatus,formatMoney} from '@/modules/portal/contracts';
+import {resolveStudentDestination} from '@/shared/navigation/personal-navigation-registry';
 
 const PersonalRequests=dynamic(()=>import('./personal-requests'),{loading:()=> <SiiSkeleton label="Cargando el formulario de solicitudes"/>});
 
@@ -31,33 +32,33 @@ function Schedule({rows,teachers,timeZone}:{rows:PersonalSchedule[];teachers:Per
  return <div className="space-y-4"><label className="block max-w-xs space-y-2 font-medium">Semana a consultar<Input type="date" value={week} onChange={event=>setWeek(event.target.value)}/></label><p className="text-sm text-muted-foreground">Programación registrada por la institución · Zona horaria: {timeZone}. Las cancelaciones y cambios aparecen con su estado.</p>
   <AcademicWeek week={week} occurrences={visible.map(row=>({...row,teacherName:teachers.filter(teacher=>teacher.sectionId===row.sectionId).map(teacher=>teacher.firstName+' '+teacher.lastName).join(', ')}))} emptyDescription="La institución no tiene clases registradas para ti en esta semana. Consulta otra fecha o solicita a coordinación revisar tu programación."/></div>;
 }
+
 function Profile({profile}:{profile:PersonalProfile}){return <Card><CardHeader><CardTitle>Mi perfil institucional</CardTitle></CardHeader><CardContent className="space-y-4"><dl className="grid gap-4 sm:grid-cols-2">{[['Nombre',profile.firstName+' '+profile.lastName],['Matrícula',profile.enrollmentNumber],['Programa',profile.programName],['Estado académico',academicStatus[profile.status]??profile.status],['Correo institucional',profile.institutionalEmail??'No registrado'],['Correo de acceso verificado',profile.verifiedEmail??'Sin correo verificado']].map(([label,value])=><div key={label}><dt className="text-sm text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-semibold">{value??'No registrado'}</dd></div>)}</dl><p className="text-sm text-muted-foreground">Control Escolar conserva los datos académicos oficiales. Solicita a tu institución cualquier corrección.</p><Link className="sii-outline-button" href="/dashboard/security">Contraseña, MFA y sesiones</Link></CardContent></Card>}
+
 function Statements({orders,payments}:{orders:PersonalOrder[];payments:PersonalPayment[]}){return <div className="space-y-6"><p className="text-sm text-muted-foreground">Consulta informativa de cargos y pagos registrados en Caja. Los pagos electrónicos requieren una pasarela institucional configurada; aquí se muestran abonos externos confirmados.</p>
  <h2 className="text-lg font-semibold">Órdenes de pago</h2><PersonalTable label="Órdenes de pago" rows={orders} searchText={row=>row.orderNumber+' '+row.feeTypeName} columns={[{label:'Orden / concepto',sortValue:row=>row.feeTypeName,render:row=><><strong>{row.feeTypeName}</strong><p className="break-all text-xs text-muted-foreground">{row.orderNumber}</p></>},{label:'Importe',sortValue:row=>row.totalAmountCents,render:row=>formatMoney(row.totalAmountCents,row.currency)},{label:'Pagado',render:row=>formatMoney(row.paidAmountCents,row.currency)},{label:'Saldo',sortValue:row=>Math.max(0,row.totalAmountCents-row.paidAmountCents),render:row=>formatMoney(['pending','partially_paid'].includes(row.status)?row.totalAmountCents-row.paidAmountCents:0,row.currency)},{label:'Estado',render:row=>financeStatus[row.status]??row.status},{label:'Fecha límite',sortValue:row=>row.dueDate,render:row=>row.dueDate?new Date(row.dueDate).toLocaleDateString('es-MX'):'Sin fecha registrada'}]}/>
  <h2 className="text-lg font-semibold">Movimientos registrados</h2><PersonalTable label="Pagos registrados" rows={payments} columns={[{label:'Movimiento',sortValue:row=>row.transactionNumber,render:row=><span className="break-all">{row.transactionNumber}</span>},{label:'Fecha',sortValue:row=>row.createdAt,render:row=>new Date(row.createdAt).toLocaleString('es-MX')},{label:'Importe',sortValue:row=>row.amountCents,render:row=>formatMoney(row.amountCents,row.currency)},{label:'Medio',render:row=>row.paymentMethod==='cash'?'Efectivo':row.paymentMethod==='transfer'?'Transferencia':row.paymentMethod},{label:'Referencia',render:row=>row.reference??'Sin referencia'}]}/></div>}
+
 const studentDestinations=[{id:'home',label:'Inicio',icon:Home},{id:'academic',label:'Académico',icon:GraduationCap},{id:'orders',label:'Finanzas',icon:Wallet},{id:'services',label:'Servicios',icon:FileText},{id:'profile',label:'Perfil',icon:UserRound}] as const;
 
 export default function PersonalPortal({institutionId,institutionName,actorId}:{institutionId:string;institutionName:string;actorId:string}){
  const [section,setSection]=useState('home'),[academicView,setAcademicView]=useState<PersonalView>('courses');
- // The App Router may update a same-page hash through history.pushState (without hashchange).
- // Listen to our navigation event as well as real hash changes, retaining deep-link reloads.
+
  useEffect(()=>{
   const apply=(raw:string)=>{
-   const destination=decodeURIComponent(raw.replace(/^#/,''));
-   const map:Record<string,{section:string;academic?:PersonalView}>={
-    '':{section:'home'},inicio:{section:'home'},inscripciones:{section:'academic',academic:'courses'},
-    calificaciones:{section:'academic',academic:'grades'},historial:{section:'academic',academic:'grades'},
-    docentes:{section:'academic',academic:'teachers'},
-    finanzas:{section:'orders'},ordenes:{section:'orders'},comprobantes:{section:'orders'},tramites:{section:'services'},solicitudes:{section:'services'},documentos:{section:'services'},avisos:{section:'home'},perfil:{section:'profile'}
-   };
-   const selected=map[destination];
-   if(selected){if(selected.academic)setAcademicView(selected.academic);setSection(selected.section)}
+   const resolved=resolveStudentDestination(raw);
+   if(resolved.academicView)setAcademicView(resolved.academicView);
+   setSection(resolved.section);
   };
   const fromHash=()=>apply(window.location.hash);
   const onNavigation=(event:Event)=>apply((event as CustomEvent<string>).detail);
-  fromHash();window.addEventListener('hashchange',fromHash);
+  fromHash();
+  window.addEventListener('hashchange',fromHash);
   window.addEventListener('siii:student-navigation',onNavigation);
-  return ()=>{window.removeEventListener('hashchange',fromHash);window.removeEventListener('siii:student-navigation',onNavigation)};
+  return ()=>{
+    window.removeEventListener('hashchange',fromHash);
+    window.removeEventListener('siii:student-navigation',onNavigation);
+  };
  },[]);
 
  const view:PersonalView=section==='academic'?academicView:section as PersonalView;
@@ -65,6 +66,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   const map:Partial<Record<PersonalView,string>>={home:'inicio',courses:'inscripciones',grades:'calificaciones',teachers:'docentes',orders:'finanzas',services:'tramites',profile:'perfil'};
   window.dispatchEvent(new CustomEvent('siii:student-active-section',{detail:map[view]||'inicio'}));
  },[view]);
+
  const {snapshot,loading,error,updatedAt,refresh,authority,accessChanged,retire}=usePersonalSnapshot(institutionId,'student',actorId,view),profile=snapshot?.profile;
  const permissions=useInstitutionCapabilities();
  const [requestDraft,setRequestDraft]=useState<{authority:string;value:PersonalRequestDraft}|null>(null);
@@ -72,6 +74,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
  useEffect(()=>{if(accessChanged)setRequestDraft(null);else if(authority)setRequestDraft(previous=>previous&&previous.authority!==authority?null:previous)},[authority,accessChanged]);
  function updateRequestDraft(change:SetStateAction<PersonalRequestDraft>){const expected=authority;setRequestDraft(previous=>{if(!expected||currentAuthority.current!==expected)return previous;const value=previous?.authority===expected?previous.value:emptyPersonalRequestDraft();return {authority:expected,value:typeof change==='function'?change(value):change}})}
  const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className={view==='home'?'sr-only':'text-sm text-muted-foreground'}>Actualizando información…</p>:view==='home'?<span className="sr-only" role="status">Consultando tu información institucional</span>:<SiiSkeleton label="Consultando tu información institucional"/>)}{snapshot&&!profile&&view!=='home'&&<SiiEmptyView icon="registry" title={'Expediente aún sin vincular'} description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
+
  function content(){
   if(view==='home')return <StudentGlassOverview snapshot={snapshot??emptyPersonalSnapshot()} profile={profile??null} unlinked={Boolean(snapshot&&!profile&&!error)} institutionName={institutionName} onNavigate={(destination,academic)=>{if(academic)setAcademicView(academic);setSection(destination)}} onRefresh={()=>void refresh()} refreshing={loading}/>;
   if(!snapshot||!profile)return null;
@@ -84,10 +87,14 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
   if(view==='schedule')return <Schedule rows={snapshot.schedule} teachers={snapshot.teachers} timeZone={profile.timeZone}/>;
   return null;
  }
- return <div className={'sii-workspace siii-glass-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}><div className={section==='home'?'siii-home-visually-hidden':''}><SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={section==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/></div>
+
+ return <div className={'sii-workspace siii-glass-workspace space-y-6 sii-student-portal'+(section==='home'?' siii-student-home-shell':'')}>
+  <div className={section==='home'?'siii-home-visually-hidden':''}>
+    <SiiPageIntro eyebrow={'PORTAL ESTUDIANTIL'} title={'Mi vida universitaria'} description={institutionName} actions={section==='home'?undefined:<Button variant="outline" disabled={loading} onClick={()=>void refresh()} aria-label="Actualizar mi información">{loading?'Consultando…':'Actualizar'}</Button>}/>
+  </div>
   <nav aria-label="Contexto del portal" className="siii-student-utility-links flex flex-wrap gap-3 text-sm"><Link className="font-semibold text-primary underline" href="/dashboard">Cambiar institución</Link><Link className="font-semibold text-primary underline" href="/dashboard/security">Cuenta y seguridad</Link></nav>
   <Tabs value={section} onValueChange={setSection} className={'min-w-0 space-y-5'+(section==='home'?' siii-home-tabs':'')}>
-   <TabsList aria-label={'Navegación estudiantil'} className="sii-personal-navigation">
+   <TabsList aria-label={'Navegación estudiantil'} className="sii-personal-navigation md:hidden">
     {studentDestinations.map(item=><TabsTrigger key={item.id} value={item.id} className="min-h-11 gap-2"><item.icon className="size-5" aria-hidden="true"/><span>{item.label}</span></TabsTrigger>)}
    </TabsList>
    {profile&&section!=='home'&&<div className="siii-student-identity-card rounded-xl border bg-card p-5"><p className="text-sm text-muted-foreground">{'Estudiante'} · {academicStatus[profile.status]??profile.status}</p><h2 className="mt-1 text-xl font-semibold">{profile.firstName} {profile.lastName}</h2><p className="mt-1 text-sm">{profile.enrollmentNumber}{profile.programName?' · '+profile.programName:''}</p></div>}

@@ -4,29 +4,69 @@ import type {Route} from 'next';
 import {useEffect,useState,type ReactNode} from 'react';
 import {BookOpen,ChevronDown,FileText,GraduationCap,Heart,HelpCircle,Home,Layers,Settings,Users,Wallet,ClipboardCheck,UserRound,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
 import {SidebarContent,SidebarFooter,SidebarHeader,useSidebar} from './ui/sidebar';
+import {STUDENT_NAV_ITEMS,TEACHER_NAV_ITEMS,type PersonalNavDestination} from '@/shared/navigation/personal-navigation-registry';
 
 type Role='student'|'teacher'|'context';
+
+function iconMap(name: PersonalNavDestination['iconName']): ReactNode {
+  switch(name){
+    case 'home': return <Home size={18}/>;
+    case 'book': return <BookOpen size={18}/>;
+    case 'grades': return <FileText size={18}/>;
+    case 'wallet': return <Wallet size={18}/>;
+    case 'layers': return <Layers size={18}/>;
+    case 'users': return <Users size={18}/>;
+    case 'clipboard': return <ClipboardCheck size={18}/>;
+    case 'file': return <FileText size={18}/>;
+    case 'user': return <UserRound size={18}/>;
+    default: return <Settings size={18}/>;
+  }
+}
+
 /** URL navigation only; the server and existing portal capabilities remain authoritative. */
 export default function SiiiPersonalNavigation({role,institutionId,institutionName,allowed}:{role:Role;institutionId?:string;institutionName?:string;allowed:boolean}){
  const [selected,setSelected]=useState('inicio');
  const {open,setOpen,setOpenMobile,isMobile}=useSidebar();
  useEffect(()=>{
   const sync=(event:Event)=>setSelected((event as CustomEvent<string>).detail||'inicio');
-  const hash=()=>setSelected(window.location.hash.slice(1)||'inicio');hash();
-  window.addEventListener(`siii:${role}-active-section`,sync);window.addEventListener('hashchange',hash);
-  return()=>{window.removeEventListener(`siii:${role}-active-section`,sync);window.removeEventListener('hashchange',hash)};
+  const hash=()=>setSelected(window.location.hash.slice(1)||'inicio');
+  hash();
+  window.addEventListener(`siii:${role}-active-section`,sync);
+  window.addEventListener('hashchange',hash);
+  return()=>{
+    window.removeEventListener(`siii:${role}-active-section`,sync);
+    window.removeEventListener('hashchange',hash);
+  };
  },[role]);
  const base=institutionId&&role!=='context'?`/dashboard/institutions/${institutionId}/${role}`:'/dashboard';
- function item(label:string,hash:string,icon:ReactNode,available=true){
-  if(!available)return <span className="siii-personal-nav-link" aria-disabled="true" title="El plan oficial aún no está disponible">{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span></span>;
-  const href=(base+'#'+hash) as Route;
-  return <Link key={hash} href={href} className={'siii-personal-nav-link'+(selected===hash?' is-current':'')} aria-current={selected===hash?'page':undefined}
-   aria-disabled={!allowed||undefined} tabIndex={allowed?undefined:-1} title={label} onClick={event=>{
+
+ function item(dest: PersonalNavDestination){
+  if(!dest.available)return <span key={dest.hash} className="siii-personal-nav-link text-muted-foreground opacity-60" aria-disabled="true" title={dest.description||"El plan oficial aún no está disponible"}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span><small className="ml-auto text-[9px] uppercase tracking-wider opacity-60 group-data-[collapsible=icon]:hidden">Próximamente</small></span>;
+  const href=(base+'#'+dest.hash) as Route;
+  const isCurrent=selected===dest.hash;
+  return <Link key={dest.hash} href={href} className={'siii-personal-nav-link'+(isCurrent?' is-current':'')} aria-current={isCurrent?'page':undefined}
+   aria-disabled={!allowed||undefined} tabIndex={allowed?undefined:-1} title={dest.label} onClick={event=>{
     if(!allowed){event.preventDefault();return}
-    window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:hash}));setSelected(hash);if(isMobile)setOpenMobile(false);
-   }}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span></Link>;
+    window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:dest.hash}));
+    setSelected(dest.hash);
+    if(isMobile)setOpenMobile(false);
+   }}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span></Link>;
  }
- const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=><details className="siii-personal-nav-group" open={hasActive||undefined}><summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary><div>{children}</div></details>;
+
+ const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=>(
+  <details className="siii-personal-nav-group" open={hasActive||undefined}>
+    <summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
+    <div>{children}</div>
+  </details>
+ );
+
+ const studentGroups=[
+  {label:'Académico',icon:<GraduationCap size={18}/>,hashes:['calificaciones','historial','plan','inscripciones']},
+  {label:'Financiero',icon:<Wallet size={18}/>,hashes:['finanzas','ordenes','comprobantes']},
+  {label:'Trámites',icon:<Layers size={18}/>,hashes:['tramites','solicitudes','documentos']},
+  {label:'Comunidad',icon:<Heart size={18}/>,hashes:['docentes','avisos']},
+ ];
+
  return <>
   <SidebarHeader className="siii-personal-brand">
    <div className="siii-personal-brand-inner">
@@ -46,21 +86,18 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
    </div>
   </SidebarHeader>
   <SidebarContent className="siii-personal-nav-content">
-   {role==='context'?<Link href="/dashboard" className="siii-personal-nav-link is-current" title="Mis contextos"><Home/><span className="group-data-[collapsible=icon]:hidden">Mis contextos</span></Link>:item('Inicio','inicio',<Home/>)}
-   {role==='student'&&<>
-    {group('Académico',<GraduationCap/>,<>{item('Calificaciones','calificaciones',<FileText/>)}{item('Historial académico','historial',<BookOpen/>)}{item('Plan de estudios','plan',<FileText/>,false)}{item('Carga académica','inscripciones',<ClipboardCheck/>)}</>,['calificaciones','historial','plan','inscripciones'].includes(selected))}
-    {group('Financiero',<Wallet/>,<>{item('Estado de cuenta','finanzas',<FileText/>)}{item('Órdenes de pago','ordenes',<Wallet/>)}{item('Comprobantes','comprobantes',<FileText/>)}</>,['finanzas','ordenes','comprobantes'].includes(selected))}
-    {group('Trámites',<Layers/>,<>{item('Mis trámites','tramites',<FileText/>)}{item('Solicitudes','solicitudes',<ClipboardCheck/>)}{item('Documentos','documentos',<FileText/>)}</>,['tramites','solicitudes','documentos'].includes(selected))}
-    {group('Comunidad',<Heart/>,<>{item('Mis docentes','docentes',<Users/>)}{item('Avisos institucionales','avisos',<Users/>)}</>,['docentes','avisos'].includes(selected))}
-   </>}
+   {role==='context'?<Link href="/dashboard" className="siii-personal-nav-link is-current" title="Mis contextos"><Home size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis contextos</span></Link>:item(STUDENT_NAV_ITEMS[0])}
+   {role==='student'&&studentGroups.map(g=>(
+    group(g.label,g.icon,<>{STUDENT_NAV_ITEMS.filter(it=>g.hashes.includes(it.hash)).map(item)}</>,g.hashes.includes(selected))
+   ))}
    {role==='teacher'&&<>
-    {group('Docencia',<GraduationCap/>,<>{item('Mis grupos','grupos',<Users/>)}{item('Evaluaciones','evaluaciones',<ClipboardCheck/>)}{item('Mi perfil','perfil',<UserRound/>)}</>,['grupos','evaluaciones','perfil'].includes(selected))}
-    <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones"><FileText/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>
+    {group('Docencia',<GraduationCap size={18}/>,<>{TEACHER_NAV_ITEMS.map(item)}</>,TEACHER_NAV_ITEMS.some(it=>it.hash===selected))}
+    <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones"><FileText size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>
    </>}
   </SidebarContent>
   <SidebarFooter className="siii-personal-nav-footer">
-   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Ayuda y seguridad"><HelpCircle/><span className="group-data-[collapsible=icon]:hidden">Ayuda y seguridad</span></Link>
-   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Configuración"><Settings/><span className="group-data-[collapsible=icon]:hidden">Configuración</span></Link>
+   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Ayuda y seguridad"><HelpCircle size={18}/><span className="group-data-[collapsible=icon]:hidden">Ayuda y seguridad</span></Link>
+   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Configuración"><Settings size={18}/><span className="group-data-[collapsible=icon]:hidden">Configuración</span></Link>
   </SidebarFooter>
  </>;
 }
