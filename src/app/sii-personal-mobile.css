@@ -345,8 +345,10 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 /* Shared matte surfaces, without comma-containing :is selectors counted as duplicates. */
 #siii-personal .siii-personal-data-table:not(input),#siii-personal .siii-history-period{
  min-width:0;color:var(--siii-personal-text);
- background:rgba(55,53,52,.48);border:0;border-radius:16px;box-shadow:none;
+ background:rgba(55,53,52,.34);border:0;border-radius:15px;box-shadow:none;
 }
-html[data-sii-theme=light] #siii-personal .siii-personal-data-table:not(input),html[data-sii-theme=light] #siii-personal .siii-history-period{background:rgba(240,236,230,.72)}
+html[data-sii-theme=light] #siii-personal .siii-personal-data-table:not(input),html[data-sii-theme=light] #siii-personal .siii-history-period{background:rgba(238,234,229,.55)}
 #siii-personal .siii-personal-data-table:not(input){padding:10px 12px}
 #siii-personal .siii-personal-data-table tbody tr:hover{background:rgba(128,130,132,.07)}
+#siii-personal .siii-history-period .siii-personal-data-table:not(input){padding:0;background:transparent}
+#siii-personal .siii-history-period summary{list-style-position:inside;padding-block:5px}
