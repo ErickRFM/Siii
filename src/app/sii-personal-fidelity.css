@@ -140,7 +140,6 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-overview-date small{display:block;color:var(--siii-personal-muted)}
 #siii-personal .siii-overview-date-dot{width:9px;height:9px;margin:3px 2px;border-radius:50%;background:#d7915f;box-shadow:0 0 8px rgba(215,145,95,.45);flex-shrink:0;animation:siii-date-pulse 3s ease-in-out infinite alternate}
 @keyframes siii-date-pulse{from{opacity:.7;transform:scale(.9)}to{opacity:1;transform:scale(1.1)}}
-#siii-personal .siii-student-home-shell [role=tabpanel]:focus-visible{outline-offset:4px}
 #siii-personal .siii-teacher-home-shell{display:flex;flex-direction:column;gap:0}
 #siii-personal .siii-teacher-home-shell>.sii-kit-page-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
 #siii-personal .siii-teacher-home-shell>nav,#siii-personal .siii-teacher-home-shell>p:last-child,#siii-personal .siii-teacher-home-shell [aria-label="Navegación docente"],#siii-personal .siii-teacher-home-shell [role=tabpanel]~div.flex.flex-wrap{display:none}
@@ -153,13 +152,13 @@ html[data-sii-theme=light] #siii-personal{--siii-personal-edge:rgba(255,255,255,
 html[data-sii-theme=light] #siii-personal [data-sidebar=sidebar]{background:rgba(206,208,198,.70)!important;color:#292d2c!important}
 html[data-sii-theme=light] #siii-personal .siii-personal-nav-link,html[data-sii-theme=light] #siii-personal .siii-personal-nav-group summary{color:#303632!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-hero{background:rgba(183,185,172,.22)!important}
+html[data-sii-theme=light] #siii-personal .siii-overview-primary{background:#d5c9bb;color:#18221c}
 html[data-sii-theme=light] #siii-personal .siii-overview-motto{color:#38423a}
 html[data-sii-theme=light] #siii-personal .siii-personal-account>div{background:#dbddd5;color:#292d2c}
 html[data-sii-theme=light] #siii-personal :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices){color:#303632!important;background:#dbdcd060!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-status{color:#24513e;background:#63aa8c35}
 html[data-sii-theme=light] #siii-personal :is(a,button,summary):focus-visible{outline-color:#374b43}
 /* Correct inherited active-tab paint; the composition itself has no enclosing panel. */
-#siii-personal :is(.siii-student-home-shell,.siii-teacher-home-shell) [role=tabpanel]{background:transparent!important}
 #siii-personal .siii-overview-listrow strong{line-height:17px;overflow-wrap:break-word;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #siii-personal #avisos .siii-overview-listrow{gap:11px;border:0;min-height:48px;padding-block:4px}
 #siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0}
@@ -193,7 +192,7 @@ html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal
 #siii-personal .siii-overview-listrow{padding:7px 0;gap:12px;border-bottom:1px solid #dfddd115;padding-block:5.5px;min-height:54px;display:flex;justify-content:space-between;align-items:center;min-width:0}
 #siii-personal .siii-overview-listrow:last-child{border-bottom:0}
 #siii-personal .siii-overview-listrow :is(strong,small){display:block}
-#siii-personal .siii-overview-primary{font-size:11px;font-weight:450;min-height:42px;border-radius:11px;background:#d8cabe;color:#292823;padding:10px 12px;white-space:normal;display:flex;justify-content:center;align-items:center;width:100%;border:0;margin-top:auto;gap:8px}
+#siii-personal .siii-overview-primary{font-size:12px;font-weight:600;min-height:42px;border-radius:11px;background:#d8cabe;color:#18211b;padding:10px 12px;white-space:normal;display:flex;justify-content:center;align-items:center;width:100%;border:0;margin-top:auto;gap:8px}
 #siii-personal .siii-overview-progress-summary{gap:15px;min-width:0;display:flex;align-items:center}
 #siii-personal .siii-overview-progress-summary :is(strong,small){display:block}
 #siii-personal .siii-overview-progress-summary small{font-size:10px;line-height:15px;display:block;opacity:1;color:var(--siii-personal-muted)}
