@@ -19,7 +19,7 @@ import type {PersonalProfile,PersonalTeacher,PersonalSchedule,PersonalOrder,Pers
 import {academicStatus,financeStatus,formatMoney} from '@/modules/portal/contracts';
 import {resolveStudentDestination} from '@/shared/navigation/personal-navigation-registry';
 
-function PersonalInlineLoading(){return <div role="status" aria-live="polite" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-1 text-sm text-muted-foreground"><LoaderCircle size={16} className="animate-spin" aria-hidden="true"/> Consultando datos…</div>}
+function PersonalInlineLoading(){return <div role="status" aria-live="polite" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-1 text-sm" style={{color:"var(--siii-personal-text)"}}><LoaderCircle size={16} className="animate-spin" aria-hidden="true"/> Consultando datos…</div>}
 const PersonalRequests=dynamic(()=>import('./personal-requests'),{loading:()=> <SiiSkeleton label="Cargando el formulario de solicitudes"/>});
 
 function calendarNow(timeZone:string){
