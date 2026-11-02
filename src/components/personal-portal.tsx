@@ -7,7 +7,7 @@ import {PersonalEnrollments,PersonalHistory} from './personal-academics';
 import {emptyPersonalRequestDraft,type PersonalRequestDraft} from '@/shared/client/personal-request-draft';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {Tabs,TabsContent} from './ui/tabs';
-import {RefreshCw} from 'lucide-react';
+import {RefreshCw,LoaderCircle} from 'lucide-react';
 import {Button} from './ui/button';
 import {Input} from './ui/input';
 import {SiiEmptyView,SiiSkeleton} from './ui/sii-kit';
@@ -19,6 +19,7 @@ import type {PersonalProfile,PersonalTeacher,PersonalSchedule,PersonalOrder,Pers
 import {academicStatus,financeStatus,formatMoney} from '@/modules/portal/contracts';
 import {resolveStudentDestination} from '@/shared/navigation/personal-navigation-registry';
 
+function PersonalInlineLoading(){return <div role="status" aria-live="polite" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-1 text-sm text-muted-foreground"><LoaderCircle size={16} className="animate-spin" aria-hidden="true"/> Consultando datos…</div>}
 const PersonalRequests=dynamic(()=>import('./personal-requests'),{loading:()=> <SiiSkeleton label="Cargando el formulario de solicitudes"/>});
 
 function calendarNow(timeZone:string){
@@ -77,7 +78,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
  const currentAuthority=useRef(authority);useLayoutEffect(()=>{currentAuthority.current=authority},[authority]);
  useEffect(()=>{if(accessChanged)setRequestDraft(null);else if(authority)setRequestDraft(previous=>previous&&previous.authority!==authority?null:previous)},[authority,accessChanged]);
  function updateRequestDraft(change:SetStateAction<PersonalRequestDraft>){const expected=authority;setRequestDraft(previous=>{if(!expected||currentAuthority.current!==expected)return previous;const value=previous?.authority===expected?previous.value:emptyPersonalRequestDraft();return {authority:expected,value:typeof change==='function'?change(value):change}})}
- const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className={view==='home'?'sr-only':'text-sm text-muted-foreground'}>Actualizando información…</p>:view==='home'?<span className="sr-only" role="status">Consultando tu información institucional</span>:<SiiSkeleton label="Consultando tu información institucional"/>)}{snapshot&&!profile&&view!=='home'&&<SiiEmptyView icon="registry" title={'Expediente aún sin vincular'} description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
+ const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className={view==='home'?'sr-only':'text-sm text-muted-foreground'}>Actualizando información…</p>:view==='home'?<span className="sr-only" role="status">Consultando tu información institucional</span>:<PersonalInlineLoading/>)}{snapshot&&!profile&&view!=='home'&&<SiiEmptyView icon="registry" title={'Expediente aún sin vincular'} description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
 
  function content(){
   if(view==='home'&&!snapshot)return loading?<SiiSkeleton label="Consultando tu información institucional"/>:null;
