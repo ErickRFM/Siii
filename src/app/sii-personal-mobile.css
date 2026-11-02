@@ -325,7 +325,7 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 }
 #siii-personal .siii-personal-data-table tbody td{
  font-size:.875rem;line-height:1.45;vertical-align:middle;
- padding:11px 12px;overflow-wrap:anywhere;
+ padding:9px 12px;overflow-wrap:anywhere;
 }
 #siii-personal .siii-personal-data-table tbody td:first-child{font-weight:550}
 #siii-personal .siii-overview-metric[data-long-value=true] .siii-shared-metric-copy>strong{
@@ -349,7 +349,4 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 }
 html[data-sii-theme=light] #siii-personal .sii-student-portal :is(.siii-history-period,.siii-personal-data-table){background:rgba(240,236,230,.72)}
 #siii-personal .sii-student-portal .siii-personal-data-table{padding:10px 12px}
-#siii-personal .siii-personal-data-table thead th{background:transparent}
 #siii-personal .siii-personal-data-table tbody tr:hover{background:rgba(128,130,132,.07)}
-#siii-personal .siii-personal-data-table tbody td{padding:9px 12px}
-#siii-personal .siii-personal-record{border:0;box-shadow:none;background:rgba(130,128,125,.06)}
