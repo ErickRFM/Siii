@@ -141,10 +141,8 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-overview-date-dot{width:9px;height:9px;margin:3px 2px;border-radius:50%;background:#d7915f;box-shadow:0 0 8px rgba(215,145,95,.45);flex-shrink:0;animation:siii-date-pulse 3s ease-in-out infinite alternate}
 @keyframes siii-date-pulse{from{opacity:.7;transform:scale(.9)}to{opacity:1;transform:scale(1.1)}}
 #siii-personal .siii-teacher-home-shell{display:flex;flex-direction:column;gap:0}
-#siii-personal .siii-teacher-home-shell>.sii-kit-page-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
-#siii-personal .siii-teacher-home-shell>nav,#siii-personal .siii-teacher-home-shell>p:last-child,#siii-personal .siii-teacher-home-shell [aria-label="Navegación docente"],#siii-personal .siii-teacher-home-shell [role=tabpanel]~div.flex.flex-wrap{display:none}
-#siii-personal .siii-teacher-home-shell>div:has(>[role=tabpanel]),#siii-personal .siii-teacher-home-shell [role=tabpanel]{margin:0;gap:0}
 #siii-personal .siii-teacher-home-shell>div:has(>.siii-student-dashboard){margin:0}
+@media(max-width:767px){#siii-personal .siii-teacher-home-shell .siii-overview-detail-grid{gap:10px}}
 #siii-personal .siii-teacher-context{min-height:207px}
 #siii-personal :is(a,button,summary):focus-visible{outline:2px solid #eadac6;outline-offset:3px}
 /* Light uses the same neutral material and geometry, with luminance adapted for reading. */
@@ -163,7 +161,6 @@ html[data-sii-theme=light] #siii-personal :is(a,button,summary):focus-visible{ou
 #siii-personal #avisos .siii-overview-listrow{gap:11px;border:0;min-height:48px;padding-block:4px}
 #siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0}
 #siii-personal .siii-overview-term>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-#siii-personal .siii-teacher-home-shell>.sii-page-eyebrow{display:none}
 #siii-personal .siii-personal-nav-group>summary{font-weight:350}
 #siii-personal .siii-personal-nav-link{font-weight:300;gap:12px;padding-inline:13px}
 #siii-personal .siii-personal-nav-group>div>.siii-personal-nav-link{padding-left:24px;font-size:11px}
