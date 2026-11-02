@@ -342,11 +342,11 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
   #siii-personal .siii-personal-data-table table{min-width:0}
 }
 
-/* One consistent material for academic tables and published history. */
-#siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.siii-history-period,.siii-personal-data-table){
+/* Shared matte surfaces, without comma-containing :is selectors counted as duplicates. */
+#siii-personal .siii-personal-data-table:not(input),#siii-personal .siii-history-period{
  min-width:0;color:var(--siii-personal-text);
  background:rgba(55,53,52,.48);border:0;border-radius:16px;box-shadow:none;
 }
-html[data-sii-theme=light] #siii-personal :is(.sii-student-portal,.sii-teacher-portal) :is(.siii-history-period,.siii-personal-data-table){background:rgba(240,236,230,.72)}
-#siii-personal :is(.sii-student-portal,.sii-teacher-portal) .siii-personal-data-table{padding:10px 12px}
+html[data-sii-theme=light] #siii-personal .siii-personal-data-table:not(input),html[data-sii-theme=light] #siii-personal .siii-history-period{background:rgba(240,236,230,.72)}
+#siii-personal .siii-personal-data-table:not(input){padding:10px 12px}
 #siii-personal .siii-personal-data-table tbody tr:hover{background:rgba(128,130,132,.07)}
