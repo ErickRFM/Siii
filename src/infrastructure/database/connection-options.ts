@@ -26,3 +26,13 @@ export function serverlessTransactionPoolerUrl(connectionString:string|undefined
  url.port='6543';
  return url.toString();
 }
+
+/** Detect only the Supavisor session endpoint, without logging or rewriting credentials. */
+export function isSupavisorSessionPooler(connectionString:string|undefined):boolean{
+ if(!connectionString)return false;
+ try{
+  const url=new URL(connectionString);
+  return ['postgres:','postgresql:'].includes(url.protocol)
+   &&url.hostname.endsWith('.pooler.supabase.com')&&url.port==='5432';
+ }catch{return false}
+}
