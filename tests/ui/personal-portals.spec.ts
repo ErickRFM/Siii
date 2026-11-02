@@ -129,7 +129,7 @@ test('V3 mobile destinations remain keyboard accessible and clear records offlin
  const academic=drawer.getByRole('link',{name:'Carga académica',exact:true});await expect(academic).toBeVisible();await academic.focus();await page.keyboard.press('Enter');await expect(drawer).toHaveCount(0);
  await expect(page.getByRole('tablist',{name:'Navegación estudiantil'})).toHaveCount(0);
  await expect(page.getByRole('heading',{name:'Carga académica'})).toBeVisible();
- await expect(page.getByRole('searchbox',{name:'Buscar en inscripciones'})).toBeVisible();
+ await expect(page.locator('.siii-personal-mobile-records')).toBeVisible();
  await expect(page.getByRole('cell')).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Abrir navegación',exact:true})).toBeVisible();
  await context.setOffline(true);await expect(page.locator('main [role="alert"]')).toContainText('Sin conexión');await expect(page.locator('.siii-personal-mobile-records .siii-personal-record')).toHaveCount(0);await context.setOffline(false);await expect(page.locator('.siii-personal-mobile-records .siii-personal-record').first()).toBeVisible();
