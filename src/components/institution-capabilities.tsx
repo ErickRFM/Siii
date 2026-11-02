@@ -3,6 +3,7 @@ import {Button} from '@/components/ui/button';
 
 
 import Link from 'next/link';
+import {fetchWithTimeout,RequestTimeoutError} from '@/shared/client/fetch-with-timeout';
 import {usePathname} from 'next/navigation';
 import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import type {Route} from 'next';
@@ -44,7 +45,7 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
       active = controller;
       if (!background) { setData(null); setLoading(true); setError(''); }
       try {
-        const response = await fetch(`/api/v1/institutions/${institutionId}/capabilities`, { credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
+        const response = await fetchWithTimeout(`/api/v1/institutions/${institutionId}/capabilities`, { credentials: 'same-origin', cache: 'no-store', signal: controller.signal }, 20000);
         if (!response.ok) throw new Error(response.status === 401 ? 'Tu sesión venció. Vuelve a iniciar sesión.' : response.status === 403 ? 'No tienes acceso vigente a esta institución.' : 'No se pudieron consultar tus permisos. Vuelve a intentar.');
         const body = await response.json() as { data: InstitutionCapabilities };
         if (body.data?.institutionId !== institutionId || !Array.isArray(body.data.capabilities) || !Array.isArray(body.data.scopedCapabilities) || !Array.isArray(body.data.grants) || !body.data.assurance) throw new Error('No se pudieron consultar tus permisos. Vuelve a intentar.');
@@ -52,7 +53,7 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
       } catch (cause) {
         if (!controller.signal.aborted) {
           setData(null);
-          setError(cause instanceof TypeError ? 'Sin conexión. Comprueba tu conexión y vuelve a consultar tus permisos.' : cause instanceof Error ? cause.message : 'No se pudieron consultar tus permisos.');
+          setError(cause instanceof RequestTimeoutError ? 'La consulta de permisos tardó demasiado. Reintenta.' : cause instanceof TypeError ? 'Sin conexión. Comprueba tu conexión y vuelve a consultar tus permisos.' : cause instanceof Error ? cause.message : 'No se pudieron consultar tus permisos.');
         }
       } finally {
         if (active === controller) active = null;

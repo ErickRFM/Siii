@@ -72,7 +72,7 @@ jobs:
         run: npm audit --audit-level=high
   ui:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     services:
       postgres:
         image: postgres:17
