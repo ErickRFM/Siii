@@ -216,7 +216,7 @@ export function SiiDataTable<T extends { id: string }>({
             {visible.map((row) => (
               <dl
                 key={row.id}
-                className="siii-personal-record grid min-w-0 grid-cols-2 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3"
+                className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3"
               >
                 {columns.map((column, index) => (
                   <div key={index} className="siii-personal-record-field min-w-0 break-words">
