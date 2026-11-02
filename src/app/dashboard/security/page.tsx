@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import type {Route} from 'next';
-import type {Metadata} from 'next';
+import type {Metadata,Route} from 'next';
 import { redirect } from 'next/navigation';
 import { getIdentity } from '@/shared/auth/session';
 
