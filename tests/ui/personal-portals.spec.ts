@@ -46,8 +46,8 @@ test('student consults official own academic records in both themes across all r
  test.setTimeout(180000);await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await expect(page.getByRole('heading',{name:'Alumna propia Sintético'})).toBeVisible();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
- await personalNavigate(page,'Mis docentes');await expect(page.getByRole('cell').getByText('Docente oficial Asignado',{exact:true})).toBeVisible();await expect(page.getByRole('tabpanel').last()).not.toContainText('private-teacher');
- await personalNavigate(page,'Calificaciones');await expect(page.getByRole('tabpanel').last()).toContainText('8.50');await expect(page.getByRole('tabpanel').last()).not.toContainText('9.99');
+ await personalNavigate(page,'Mis docentes');await expect(page.getByRole('cell').getByText('Docente oficial Asignado',{exact:true})).toBeVisible();await expect(page.locator('#siii-student-current-view')).not.toContainText('private-teacher');
+ await personalNavigate(page,'Calificaciones');await expect(page.locator('#siii-student-current-view')).toContainText('8.50');await expect(page.locator('#siii-student-current-view')).not.toContainText('9.99');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Exportar CSV'}).click();expect((await download).suggestedFilename()).toMatch(/historial-informativo.*\.csv$/);
  await expect(page.getByRole('region',{name:'Calendario semanal'})).toHaveCount(0);await expect(page.getByRole('button',{name:/Cancelar clase/})).toHaveCount(0);
  for(const theme of ['light','dark']){
@@ -86,7 +86,7 @@ test('V3 student home stays institutional and loads only dashboard resources',as
  await expect(page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Carga académica',exact:true})).toBeVisible();
  expect(resources).not.toContain('schedule');expect(resources).toContain('grades');expect(resources).not.toContain('payments');expect(resources).not.toContain('teachers');
  await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
- await personalNavigate(page,'Calificaciones');await expect(page.getByRole('tabpanel').last()).toContainText('8.50');
+ await personalNavigate(page,'Calificaciones');await expect(page.locator('#siii-student-current-view')).toContainText('8.50');
 });
 test('student sidebar opens real academic and finance sections without duplicating operational schedules',async({page})=>{
  await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
@@ -174,7 +174,7 @@ test('cashier records an external payment once and student sees its persistent s
  await page.getByRole('button',{name:'Revisar pago',exact:true}).click();await page.getByRole('button',{name:'Confirmar registro del pago',exact:true}).click();
  await expect(page.getByRole('status').filter({hasText:'Pago registrado'})).toBeVisible();await expect(row).toContainText('Pagada');
  expect((await sql.query('SELECT count(*)::int AS n FROM payment_transactions WHERE order_id=$1',[f.orderId])).rows[0].n).toBe(1);
- const context=await browser.newContext();try{const student=await context.newPage();await login(student);await student.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(student,'Finanzas');await expect(student.getByRole('tabpanel')).toContainText('Pagada');await expect(student.getByRole('tabpanel')).toContainText('BANK-VNEXT-UI')}finally{await context.close()}
+ const context=await browser.newContext();try{const student=await context.newPage();await login(student);await student.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(student,'Finanzas');await expect(student.locator('#siii-student-current-view')).toContainText('Pagada');await expect(student.locator('#siii-student-current-view')).toContainText('BANK-VNEXT-UI')}finally{await context.close()}
 });
 test('revoked personal membership clears displayed data on revalidation and offers an honest error',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
