@@ -8,11 +8,11 @@ import {cn} from '@/lib/utils';
 export default function SiiiWorkspaceHeading({
  title,caption,action,level=1,className
 }:{title:string;caption?:ReactNode;action?:ReactNode;level?:1|2;className?:string}){
- const titleClass='min-w-0 text-base font-semibold leading-tight tracking-tight text-foreground';
+ const titleClass='min-w-0 text-base font-semibold leading-tight tracking-tight';
  return <header className={cn('siii-workspace-heading flex min-w-0 flex-wrap items-center justify-between gap-3 pb-1',className)}>
   <div className="min-w-0 space-y-1">
    {level===1?<h1 className={titleClass}>{title}</h1>:<h2 className={titleClass}>{title}</h2>}
-   {caption&&<div className="text-xs leading-relaxed text-muted-foreground">{caption}</div>}
+   {caption&&<div className="text-xs leading-relaxed opacity-80">{caption}</div>}
   </div>
   {action&&<div className="flex shrink-0 items-center gap-2">{action}</div>}
  </header>;
