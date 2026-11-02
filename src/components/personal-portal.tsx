@@ -82,7 +82,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
 
  function content(){
   if(view==='home'&&!snapshot)return loading?<PersonalInlineLoading/>:null;
-   if(view==='home')return <StudentGlassOverview snapshot={snapshot??emptyPersonalSnapshot()} profile={profile??null} unlinked={Boolean(snapshot&&!profile&&!error)} institutionName={institutionName} onNavigate={(destination,academic)=>{if(academic)setAcademicView(academic);setSection(destination)}} onRefresh={()=>void refresh()} refreshing={loading}/>;
+   if(view==='home')return <StudentGlassOverview snapshot={snapshot??emptyPersonalSnapshot()} profile={profile??null} unlinked={Boolean(snapshot&&!profile&&!error)} institutionName={institutionName} onNavigate={(destination,academic)=>{const hash=destination==='academic'?(academic==='grades'?'calificaciones':academic==='teachers'?'docentes':'inscripciones'):({home:'inicio',orders:'finanzas',services:'tramites',profile:'perfil'} as Record<string,string>)[destination]??'inicio';window.location.hash=hash;}} onRefresh={()=>void refresh()} refreshing={loading}/>;
   if(!snapshot||!profile)return null;
   if(view==='courses')return <PersonalEnrollments courses={snapshot.courses} teachers={snapshot.teachers}/>;
   if(view==='teachers')return <PersonalTable label="Docentes asignados" rows={snapshot.teachers} searchText={row=>row.firstName+' '+row.lastName+' '+row.courseName} columns={[{label:'Docente',sortValue:row=>row.lastName+' '+row.firstName,render:row=><strong>{row.firstName} {row.lastName}</strong>},{label:'Materia',sortValue:row=>row.courseName,render:row=>row.courseName},{label:'Grupo',render:row=>row.sectionCode},{label:'Periodo',render:row=>row.termName}]}/>;
