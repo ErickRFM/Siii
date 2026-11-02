@@ -81,6 +81,8 @@ export function SiiDataTable<T extends { id: string }>({
   const last = Math.max(0, Math.ceil(ordered.length / pageSize) - 1);
   const current = Math.min(page, last);
   const visible = ordered.slice(current * pageSize, current * pageSize + pageSize);
+  // A single official record has nothing meaningful to sort: keep its labels plain.
+  const hasUsefulSorting=ordered.length>1;
   const sortable = columns
     .map((column, index) => ({ ...column, index }))
     .filter((column) => column.sortValue);
@@ -100,7 +102,7 @@ export function SiiDataTable<T extends { id: string }>({
 
   return (
     <div className={cn('sii-data-table siii-personal-data-table min-w-0 space-y-2', className)}>
-      {(searchText || sortable.length > 0) && (
+      {(searchText || (sortable.length > 0 && hasUsefulSorting)) && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           {searchText && (
             <label className="block min-w-0 flex-1 text-sm font-medium">
@@ -116,7 +118,7 @@ export function SiiDataTable<T extends { id: string }>({
               />
             </label>
           )}
-          {sortable.length > 0 && (
+          {sortable.length > 0 && hasUsefulSorting && (
             <div className="flex flex-wrap items-end gap-2 md:hidden">
               <label className="min-w-0 flex-1 space-y-2 text-sm font-medium">
                 Ordenar por
@@ -168,7 +170,7 @@ export function SiiDataTable<T extends { id: string }>({
                         key={index}
                         scope="col"
                         aria-sort={
-                          column.sortValue
+                          column.sortValue && hasUsefulSorting
                             ? sortIndex === index
                               ? direction === 'asc'
                                 ? 'ascending'
@@ -178,7 +180,7 @@ export function SiiDataTable<T extends { id: string }>({
                         }
                         className="whitespace-nowrap"
                       >
-                        {column.sortValue ? (
+                        {column.sortValue && hasUsefulSorting ? (
                           <button
                             type="button"
                             className="inline-flex min-h-9 items-center gap-1 rounded-md bg-transparent px-1 text-left text-xs font-semibold shadow-none hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
