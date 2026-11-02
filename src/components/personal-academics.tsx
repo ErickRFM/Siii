@@ -10,9 +10,9 @@ import type {PersonalCourse,PersonalTeacher,PersonalGrade} from '@/modules/porta
 import {academicStatus} from '@/modules/portal/contracts';
 
 export function PersonalEnrollments({courses,teachers}:{courses:PersonalCourse[];teachers:PersonalTeacher[]}){
- return <div className="space-y-4"><p className="text-sm text-muted-foreground">Inscripciones oficiales por periodo. Los cambios de inscripción requieren autorización de Control Escolar.</p><PersonalTable rows={courses} label="Inscripciones" searchText={row=>[row.courseCode,row.courseName,row.sectionCode,row.termName].join(' ')} columns={[
-  {label:'Materia',sortValue:row=>row.courseName,render:row=><><strong>{row.courseName}</strong><p className="text-sm text-muted-foreground">{row.courseCode} · {row.credits} créditos registrados</p></>},
-  {label:'Grupo / periodo',sortValue:row=>row.termName+' '+row.sectionCode,render:row=><>{row.sectionCode}<p className="text-sm text-muted-foreground">{row.termName}</p></>},
+ return <div className="min-w-0 space-y-2"><PersonalTable rows={courses} label="Inscripciones" searchText={row=>[row.courseCode,row.courseName,row.sectionCode,row.termName].join(' ')} columns={[
+  {label:'Materia',sortValue:row=>row.courseName,render:row=><><strong>{row.courseName}</strong><p className="text-xs text-muted-foreground">{row.courseCode} · {row.credits} créditos</p></>},
+  {label:'Grupo / periodo',sortValue:row=>row.termName+' '+row.sectionCode,render:row=><>{row.sectionCode}<p className="text-xs text-muted-foreground">{row.termName}</p></>},
   {label:'Docente asignado',render:row=>teachers.filter(teacher=>teacher.sectionId===row.sectionId).map(teacher=>`${teacher.firstName} ${teacher.lastName}`).join(', ')||'Sin asignación vigente'},
   {label:'Inscripción',sortValue:row=>row.enrollmentStatus??'',render:row=>academicStatus[row.enrollmentStatus??'']??row.enrollmentStatus},
   {label:'Estado del grupo',render:row=>academicStatus[row.sectionStatus]??row.sectionStatus},
@@ -36,7 +36,7 @@ export function PersonalHistory({rows}:{rows:PersonalGrade[]}){
    <label className="min-w-[170px] flex-1 space-y-1 text-xs font-medium text-muted-foreground"><span className="sr-only">Periodo académico</span><NativeSelect value={term} onChange={event=>setTerm(event.target.value)} aria-label="Periodo académico"><option value="">Todos los periodos</option>{periods.map(period=><option key={period.id} value={period.id}>{period.name}</option>)}</NativeSelect></label>
    <Button size="sm" variant="outline" disabled={!filtered.length} onClick={()=>downloadHistory(filtered)}>Exportar CSV</Button>
   </div>
-  {periods.filter(period=>filtered.some(row=>row.termId===period.id)).map(period=><details key={period.id} open className="min-w-0 rounded-xl bg-card p-3"><summary className="cursor-pointer py-2 text-sm font-semibold">{period.name}</summary><div className="mt-1"><PersonalTable label={`Resultados de ${period.name}`} rows={filtered.filter(row=>row.termId===period.id)} columns={[
+  {periods.filter(period=>filtered.some(row=>row.termId===period.id)).map(period=><details key={period.id} open className="siii-history-period min-w-0 rounded-xl p-3"><summary className="cursor-pointer py-1 text-sm font-semibold">{period.name}</summary><div className="mt-1"><PersonalTable label={`Resultados de ${period.name}`} rows={filtered.filter(row=>row.termId===period.id)} columns={[
    {label:'Materia',sortValue:row=>row.courseName,render:row=><>{row.courseCode} · {row.courseName}</>},{label:'Grupo',sortValue:row=>row.sectionCode,render:row=>row.sectionCode},{label:'Créditos',sortValue:row=>row.credits,render:row=>row.credits},{label:'Calificación',sortValue:row=>row.scoreHundredths,render:row=><strong>{(row.scoreHundredths/100).toFixed(2)}</strong>},{label:'Publicación',sortValue:row=>row.publishedAt,render:row=>`v${row.version} · ${new Date(row.publishedAt).toLocaleDateString('es-MX')}`},
   ]}/></div></details>)}
   {!filtered.length&&<SiiEmptyView icon="grades" title={query||term?'Sin resultados para estos filtros':'Sin calificaciones publicadas'} description={query||term?'Cambia la búsqueda o el periodo.':'Las calificaciones aparecerán cuando la institución las publique.'}/>}
