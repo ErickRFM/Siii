@@ -256,13 +256,13 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table th{
 html[data-sii-theme] #siii-personal .siii-personal-data-table td{
  line-height:1.5;vertical-align:middle;
 }
-#siii-personal .siii-personal-record{gap:0!important;padding:10px 16px!important}
+#siii-personal .siii-personal-record{gap:8px!important;padding:10px 14px!important}
 #siii-personal .siii-personal-record-field{min-width:0;padding:9px 0}
 #siii-personal .siii-personal-record-value{overflow-wrap:anywhere}
 #siii-personal .siii-personal-data-table :is(button,a):focus-visible{
  outline:2px solid currentColor;outline-offset:2px;
 }
-@media(min-width:420px) and (max-width:767px){
+@media(min-width:420px) and (max-width:1023px){
  #siii-personal .siii-personal-record{
   grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;
  }
