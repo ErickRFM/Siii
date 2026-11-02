@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
-import {databaseConnectionOptions} from './connection-options';
+import {databaseConnectionOptions,serverlessTransactionPoolerUrl} from './connection-options';
 import * as schema from '../../../db/schema';
 import { logger } from '@/shared/logging';
 import {APPLICATION_ROLE_QUERY,assertRoleInspection,type ApplicationRoleInspection} from './role-policy';
@@ -18,7 +18,7 @@ type DatabaseState={pool:pg.Pool;roleCheck?:Promise<void>};
 const globalState=globalThis as typeof globalThis & {__siiiDatabaseState?:DatabaseState};
 const state:DatabaseState=(process.env.VERCEL==='1'?globalState.__siiiDatabaseState:undefined) ?? (() : DatabaseState => {
  const instancePool=new pg.Pool({
-  ...databaseConnectionOptions(process.env.DATABASE_URL,process.env.SIII_DATABASE_CA),
+  ...databaseConnectionOptions(serverlessTransactionPoolerUrl(process.env.DATABASE_URL,process.env.VERCEL==='1'&&process.env.SIII_DB_TRANSACTION_POOLER==='1'),process.env.SIII_DATABASE_CA),
   max:configured,
   connectionTimeoutMillis:5000,
   idleTimeoutMillis:1000,
