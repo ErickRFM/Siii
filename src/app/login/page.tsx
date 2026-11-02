@@ -3,6 +3,7 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
+import {fetchWithTimeout,RequestTimeoutError} from '@/shared/client/fetch-with-timeout';
 import {GraduationCap,ShieldCheck,Smartphone,ArrowRight,Eye,EyeOff,AlertTriangle} from 'lucide-react';
 import {SiiBrand} from '@/components/sii-brand';
 import SiiThemeToggle from '@/components/sii-theme-toggle';
@@ -40,11 +41,11 @@ export default function LoginPage(){
   const element=event.currentTarget;
   const form=new FormData(element);
   try{
-   const response=await fetch('/api/v1/auth/login',{
+   const response=await fetchWithTimeout('/api/v1/auth/login',{
     method:'POST',credentials:'same-origin',cache:'no-store',
     headers:{'content-type':'application/json'},
     body:JSON.stringify({username:String(form.get('username')??'').trim(),password:String(form.get('password')??'')}),
-   });
+   },20000);
    const body=await response.json().catch(()=>null);
    if(!response.ok){
     setCredentialsInvalid(response.status===401);
@@ -65,9 +66,8 @@ export default function LoginPage(){
    }
    if(body?.ok!==true){setError('No fue posible validar el acceso. Vuelve a intentar.');return;}
    router.replace('/dashboard');
-   router.refresh();
-  }catch{
-   setError('No pudimos conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.');
+  }catch(cause){
+   setError(cause instanceof RequestTimeoutError?'El servidor tardó demasiado en responder. Revisa tu conexión e inténtalo nuevamente.':'No pudimos conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.');
   }finally{
    setLoading(false);
   }
@@ -79,11 +79,11 @@ export default function LoginPage(){
   const form=event.currentTarget;
   const factor=String(new FormData(form).get('factor')??'');
   try{
-   const response=await fetch('/api/v1/auth/mfa/challenge',{
+   const response=await fetchWithTimeout('/api/v1/auth/mfa/challenge',{
     method:'POST',credentials:'same-origin',cache:'no-store',
     headers:{'content-type':'application/json'},
     body:JSON.stringify({[useRecovery?'recoveryCode':'code']:factor}),
-   });
+   },20000);
    const body=await response.json().catch(()=>null);
    if(!response.ok){
     const code=body?.error?.code;
@@ -96,9 +96,9 @@ export default function LoginPage(){
     return;
    }
    if(body?.ok!==true){setError('No fue posible validar el acceso. Vuelve a intentar.');return;}
-   form.reset();router.replace('/dashboard');router.refresh();
-  }catch{
-   setError('No pudimos conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.');
+   form.reset();router.replace('/dashboard');
+  }catch(cause){
+   setError(cause instanceof RequestTimeoutError?'La verificación tardó demasiado. Comprueba tu conexión e inténtalo nuevamente.':'No pudimos conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.');
   }finally{
    setLoading(false);
   }

@@ -2,6 +2,7 @@
 
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {CollectionReadError,readCollection} from '@/shared/client/read-collection';
+import {fetchWithTimeout,RequestTimeoutError} from '@/shared/client/fetch-with-timeout';
 import {ASSURANCE_CHANGED_EVENT} from '@/shared/auth/assurance-events';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 import type {PersonalProfile,PersonalCourse,PersonalTeachingGroup,PersonalTeacher,PersonalSchedule,PersonalGrade,PersonalOrder,PersonalPayment,PersonalAnnouncement,PersonalServiceRequest,PersonalRequestEvent} from '@/modules/portal/contracts';
@@ -33,7 +34,7 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
    if(!allowed){setState({...initial(scope,view),accessChanged:!permissions.loading&&Boolean(permissions.data),loading:permissions.loading,error:permissions.loading?'':'Tu acceso cambió. Actualiza los permisos o inicia sesión nuevamente.'});return}
    if(!navigator.onLine)throw new Error('OFFLINE');
    const base=`/api/v1/institutions/${institutionId}/portal/${kind}`;
-   const response=await fetch(base+'/profile',{signal:controller.signal,cache:'no-store'});
+   const response=await fetchWithTimeout(base+'/profile',{signal:controller.signal,cache:'no-store'},20000);
    if(!response.ok)throw new CollectionReadError(response.status);
    const context=response.headers.get('x-siii-portal-context');
    const authority=response.headers.get('x-siii-portal-authority');
@@ -46,7 +47,7 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
    const entries=profile?await Promise.all(resources[view].map(async resource=>[resource,await readCollection(base+'/'+(resource==='requestHistory'?'request-history':resource==='pendingRequests'?'pending-requests':resource),{signal:controller.signal},check)] as const)):[];
    if(!controller.signal.aborted)setState({scope,view,context,authority,accessChanged:false,snapshot:{...empty,...Object.fromEntries(entries.map(([resource,result])=>[resource,result.data])),truncatedResources:Object.fromEntries(entries.filter(([,result])=>result.truncated).map(([resource])=>[resource,true])),profile},loading:false,error:'',updatedAt:new Date().toLocaleString('es-MX')});
   }catch(cause){
-   if(!controller.signal.aborted){const accessChanged=cause instanceof CollectionReadError&&[401,403].includes(cause.status)||cause instanceof Error&&cause.message==='CONTEXT_CHANGED';controller.abort();setState({...initial(scope,view),accessChanged,loading:false,error:!navigator.onLine?'Sin conexión. Reconecta para consultar información vigente.':accessChanged?'Tu acceso o expediente cambió. Actualiza o inicia sesión nuevamente.':cause instanceof Error&&cause.message==='PROFILE_CHANGED'?'La información cambió durante la consulta. Actualiza para comprobar tu acceso.':'No se pudo consultar esta sección. Reintenta para obtener información vigente.'})}
+   if(!controller.signal.aborted){const accessChanged=cause instanceof CollectionReadError&&[401,403].includes(cause.status)||cause instanceof Error&&cause.message==='CONTEXT_CHANGED';controller.abort();setState({...initial(scope,view),accessChanged,loading:false,error:!navigator.onLine?'Sin conexión. Reconecta para consultar información vigente.':accessChanged?'Tu acceso o expediente cambió. Actualiza o inicia sesión nuevamente.':cause instanceof Error&&cause.message==='PROFILE_CHANGED'?'La información cambió durante la consulta. Actualiza para comprobar tu acceso.':cause instanceof RequestTimeoutError?'La consulta tardó demasiado. Reintenta cuando la conexión esté estable.':'No se pudo consultar esta sección. Reintenta para obtener información vigente.'})}
   }finally{if(active.current===controller)active.current=null}
  },[actorId,institutionId,kind,scope,view,allowed,permissions.loading]);
  useEffect(()=>{
