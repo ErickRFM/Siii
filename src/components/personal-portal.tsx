@@ -8,6 +8,7 @@ import {emptyPersonalRequestDraft,type PersonalRequestDraft} from '@/shared/clie
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 
 import {RefreshCw,LoaderCircle} from 'lucide-react';
+import SiiiWorkspaceHeading from './ui/siii-workspace-heading';
 import {Button} from './ui/button';
 import {Input} from './ui/input';
 import {SiiEmptyView,SiiSkeleton} from './ui/sii-kit';
@@ -95,7 +96,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
  }
 
  return <div className="sii-workspace siii-glass-workspace sii-student-portal siii-student-home-shell min-w-0 space-y-3">
-  {section!=='home'&&<header className="flex min-w-0 items-center justify-between gap-3 pb-1"><h1 className="min-w-0 text-base font-semibold tracking-tight">{section==='academic'?(academicView==='grades'?(activeHash==='historial'?'Historial académico':'Calificaciones'):academicView==='teachers'?'Mis docentes':'Carga académica'):section==='orders'?'Estado de cuenta':section==='services'?'Mis trámites':'Mi perfil'}</h1><Button size="icon" variant="ghost" aria-label="Actualizar mi información" title="Actualizar mi información" disabled={loading} onClick={()=>void refresh()}><RefreshCw size={16} aria-hidden="true"/></Button></header>}
+  {section!=='home'&&<SiiiWorkspaceHeading title={section==='academic'?(academicView==='grades'?(activeHash==='historial'?'Historial académico':'Calificaciones'):academicView==='teachers'?'Mis docentes':'Carga académica'):section==='orders'?'Estado de cuenta':section==='services'?'Mis trámites':'Mi perfil'} action={<Button size="icon" variant="ghost" aria-label="Actualizar mi información" title="Actualizar mi información" disabled={loading} onClick={()=>void refresh()}><RefreshCw size={16} aria-hidden="true"/></Button>}/>} 
   <section className="min-w-0 space-y-3" id="siii-student-current-view" aria-label="Contenido estudiantil">
    {status}
    {content()}
