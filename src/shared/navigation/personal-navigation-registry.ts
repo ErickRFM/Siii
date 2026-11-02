@@ -31,7 +31,7 @@ export const STUDENT_NAV_ITEMS: readonly PersonalNavDestination[] = [
   },
   {
     id: 'calificaciones',
-    label: 'Calificaciones e historial',
+    label: 'Calificaciones',
     hash: 'calificaciones',
     section: 'academic',
     subView: 'grades',

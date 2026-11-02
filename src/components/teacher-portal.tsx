@@ -1,11 +1,12 @@
 "use client";
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
+import {Home,LibraryBig,ClipboardCheck,UserRound} from 'lucide-react';
 import {usePersonalSnapshot} from './use-personal-snapshot';
 import TeacherGradebook from './teacher-gradebook';
 import {hasAnyCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {PersonalTable} from './personal-table';
-import {Tabs,TabsContent} from './ui/tabs';
+import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
 import TeacherGlassOverview from './teacher-glass-overview';
 import {Button} from './ui/button';
 import {NativeSelect} from './ui/native-select';
@@ -17,6 +18,8 @@ import {resolveTeacherDestination,type TeacherNavSection} from '@/shared/navigat
 
 type Group=PersonalTeachingGroup;
 type View=TeacherNavSection;
+
+const destinations=[{id:'home',label:'Inicio',icon:Home},{id:'groups',label:'Mis grupos',icon:LibraryBig},{id:'evaluations',label:'Evaluaciones',icon:ClipboardCheck},{id:'profile',label:'Mi perfil',icon:UserRound}] as const;
 
 function evaluationState(group:Group){if(group.published)return 'Resultados publicados';if(group.termStatus!=='active'||group.sectionStatus!=='open')return 'Captura cerrada';if(!group.componentCount)return 'Sin evaluaciones configuradas';return `${group.savedScoreCount??0} / ${(group.componentCount??0)*(group.enrolledCount??0)} notas guardadas`;}
 
@@ -59,6 +62,7 @@ export default function TeacherPortal({institutionId,institutionName,actorId,ins
   {snapshot&&!profile&&view!=='home'&&<SiiEmptyView icon="registry" title="Perfil docente aún sin vincular" description="Tu cuenta tiene acceso al portal. Solicita a la institución vincularla con tu registro docente oficial. No puedes consultar grupos ni calificaciones hasta completar el vínculo."/>}
   {profile&&view!=='home'&&<Card className="siii-teacher-profile-hero siii-glass-surface"><CardContent className="space-y-1 p-5"><p className="text-sm text-muted-foreground">Docente · {academicStatus[profile.status]??profile.status} · Vínculo institucional vigente</p><h2 className="text-xl font-semibold">{profile.firstName} {profile.lastName}</h2><p className="text-sm text-muted-foreground">Número de empleado: {profile.employeeNumber??'No registrado'}</p></CardContent></Card>}
   <Tabs value={view} onValueChange={value=>setView(value as View)} className="min-w-0 space-y-5">
+   <TabsList aria-label="Navegación docente" className="sii-teacher-navigation grid h-auto w-full grid-cols-2 gap-1 bg-muted p-1 sm:grid-cols-4 md:hidden">{destinations.map(item=><TabsTrigger key={item.id} value={item.id} disabled={item.id==='evaluations'&&!canEvaluate} className="min-h-11 gap-2 whitespace-normal"><item.icon className="size-4 shrink-0" aria-hidden="true"/>{item.label}</TabsTrigger>)}</TabsList>
    <TabsContent value="home"><TeacherGlassOverview profile={profile??null} groups={inTerm} institutionId={institutionId} institutionName={institutionName} incomplete={incompleteGroups} unlinked={Boolean(snapshot&&!profile&&!error)} loading={loading} canEvaluate={canEvaluate} onGroups={()=>setView('groups')} onOpen={open} onRefresh={()=>void refresh()}/></TabsContent>
    {profile&&<>
     {(view==='home'||view==='groups')&&<div className="flex flex-wrap items-end gap-4"><label className="min-w-0 flex-1 space-y-2 text-sm font-medium">Periodo académico<NativeSelect value={term} onChange={event=>setTerm(event.target.value)}><option value="">Todos los periodos asignados</option>{terms.map(([id,name])=><option key={id} value={id}>{name}</option>)}</NativeSelect></label>{view==='groups'&&<label className="min-w-0 flex-1 space-y-2 text-sm font-medium">Estado del grupo<NativeSelect value={state} onChange={event=>setState(event.target.value)}><option value="">Todos los estados</option>{Array.from(new Set(groups.map(group=>group.sectionStatus))).map(status=><option key={status} value={status}>{academicStatus[status]??status}</option>)}</NativeSelect></label>}</div>}
