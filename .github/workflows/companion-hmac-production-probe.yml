@@ -11,8 +11,32 @@ permissions:
 jobs:
   verify-successor:
     runs-on: ubuntu-24.04
-    timeout-minutes: 4
+    timeout-minutes: 6
     steps:
+      - name: Wake Compañero Render backend before the signed probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Render Free can cold-start for more than the Vercel function's
+          # 25-second upstream timeout. Wait for an HTTP response from the
+          # application before asking SIII to perform the signed handshake.
+          ready=0
+          for attempt in $(seq 1 15); do
+            code="$(curl --silent --output /dev/null --write-out '%{http_code}'               --max-time 12 --connect-timeout 6               'https://compa-ero-de-esc.onrender.com/health' || true)"
+            # 404 is also evidence the Ktor application is serving requests,
+            # if this version does not expose /health. Reject proxy 5xx.
+            if [[ "$code" =~ ^(2[0-9][0-9]|404)$ ]]; then
+              ready=1
+              echo "COMPANION_BACKEND_READY_HTTP=$code"
+              break
+            fi
+            echo "COMPANION_BACKEND_NOT_READY_ATTEMPT=$attempt STATUS=$code"
+            sleep 5
+          done
+          if [[ "$ready" != 1 ]]; then
+            echo "COMPANION_BACKEND_COLD_START_TIMEOUT" >&2
+            exit 1
+          fi
       - name: Verify read-only production handshake (200, 401, nonce replay)
         shell: bash
         env:
