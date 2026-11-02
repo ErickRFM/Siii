@@ -81,7 +81,7 @@ export default function PersonalPortal({institutionId,institutionName,actorId}:{
  const status=<>{error&&<div role="alert" className="sii-catalog-error">{error} <Button variant="outline" onClick={()=>void refresh()}>Reintentar consulta</Button></div>}{loading&&(snapshot?<p role="status" className={view==='home'?'sr-only':'text-sm text-muted-foreground'}>Actualizando información…</p>:view==='home'?<span className="sr-only" role="status">Consultando tu información institucional</span>:<PersonalInlineLoading/>)}{snapshot&&!profile&&view!=='home'&&<SiiEmptyView icon="registry" title={'Expediente aún sin vincular'} description="Tu acceso está vigente. La institución debe vincular tu cuenta con el registro oficial para mostrar información académica."/>}</>;
 
  function content(){
-  if(view==='home'&&!snapshot)return loading?<SiiSkeleton label="Consultando tu información institucional"/>:null;
+  if(view==='home'&&!snapshot)return loading?<PersonalInlineLoading/>:null;
    if(view==='home')return <StudentGlassOverview snapshot={snapshot??emptyPersonalSnapshot()} profile={profile??null} unlinked={Boolean(snapshot&&!profile&&!error)} institutionName={institutionName} onNavigate={(destination,academic)=>{if(academic)setAcademicView(academic);setSection(destination)}} onRefresh={()=>void refresh()} refreshing={loading}/>;
   if(!snapshot||!profile)return null;
   if(view==='courses')return <PersonalEnrollments courses={snapshot.courses} teachers={snapshot.teachers}/>;
