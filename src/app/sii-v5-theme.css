@@ -4,4 +4,4 @@
 html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell))):not(:has(:is(.siii-student-dashboard,.siii-teacher-dashboard))){background:var(--solid-bg)!important;color:var(--solid-text)!important}
 html[data-sii-theme] #siii-personal [data-sidebar=sidebar]{background:var(--solid-side)!important;color:var(--solid-text)!important;border:1px solid var(--solid-edge)!important;box-shadow:none!important;backdrop-filter:none!important}
 html[data-sii-theme] #siii-personal .siii-student-aside>.siii-overview-panel{background:var(--solid-panel)!important;border:1px solid var(--solid-edge)!important;box-shadow:none!important;backdrop-filter:none!important}
-html[data-sii-theme] #siii-personal .siii-overview-hero .siii-overview-refresh{background:var(--solid-raised)!important;color:var(--solid-text)!important}
+html[data-sii-theme] #siii-personal .siii-overview-hero .siii-overview-refresh{background:var(--solid-raised)!important;color:var(--solid-text)}
