@@ -19,7 +19,7 @@ for(const theme of ['light','dark'] as const){
   const current=await page.locator('html').getAttribute('data-sii-theme');
   if(current!==theme)await toggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
-  const card=page.locator('.sii-auth-form-wrap');
+  const card=page.locator('[data-siii-login-form="v3"]');
   await expect(card).toBeVisible();
   await expect(page.getByLabel('Usuario institucional')).toBeVisible();
   await expect(page.getByLabel('Contraseña',{exact:true})).toBeVisible();
