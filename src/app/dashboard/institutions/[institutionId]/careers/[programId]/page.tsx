@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
 import { uuid } from '@/shared/auth/validation';
+import { careerAdministrationAssuranceAllows } from '@/shared/auth/privileged-policy';
 import { SiiPageIntro } from '@/components/ui/sii-kit';
 import CareerAdministration from '@/components/career-administration';
 
@@ -19,6 +20,7 @@ export default async function CareerAdministrationPage({
     institutionId, programId, status: 'active',
   });
   if (!actor) notFound();
+  if (!careerAdministrationAssuranceAllows(actor.identity)) redirect('/dashboard/security');
 
   return <>
     <SiiPageIntro
