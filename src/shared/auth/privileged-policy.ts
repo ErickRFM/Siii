@@ -4,8 +4,12 @@ import {hasFreshStepUp} from './mfa-session-policy';
 export type Assurance={mfaConfigured:boolean;mfaVerified:boolean;stepUpAt:Date|null};
 export const PRIVILEGED_ROLES=['admin','super_admin','control_escolar'] as const;
 export function requiresPrivilegedMfa(grants:readonly Grant[],now=new Date()){
- return grants.some(grant=>(PRIVILEGED_ROLES.some(role=>role===grant.role) || (grant.role==='coordinator'&&grant.scopeType==='program'))&&grant.revokedAt===null
+ return grants.some(grant=>PRIVILEGED_ROLES.some(role=>role===grant.role)&&grant.revokedAt===null
   &&(grant.validUntil===null||grant.validUntil>now));
+}
+/** Additional assurance only for a career-administration workspace, not ordinary academic coordinator reads. */
+export function careerAdministrationAssuranceAllows(assurance:Assurance){
+ return assurance.mfaConfigured&&assurance.mfaVerified;
 }
 export function privilegedAssuranceAllows(grants:readonly Grant[],assurance:Assurance,now=new Date(),critical=false){
  if(!Number.isFinite(now.getTime()))return false;
