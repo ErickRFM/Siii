@@ -81,8 +81,8 @@ export function SiiDataTable<T extends { id: string }>({
   const last = Math.max(0, Math.ceil(ordered.length / pageSize) - 1);
   const current = Math.min(page, last);
   const visible = ordered.slice(current * pageSize, current * pageSize + pageSize);
-  // A single official record has nothing meaningful to sort: keep its labels plain.
-  const hasUsefulSorting=ordered.length>1;
+  // Keep sort controls stable while filtering a multi-record collection.
+  const hasUsefulSorting=rows.length>1;
   const hasUsefulSearch=Boolean(searchText)&&(rows.length>1||Boolean(query.trim()));
   const sortable = columns
     .map((column, index) => ({ ...column, index }))
