@@ -4,7 +4,6 @@ import type {PersonalProfile} from '@/modules/portal/contracts';
 import {academicStatus,financeStatus,formatMoney,requestStatusLabel,requestTypeLabel} from '@/modules/portal/contracts';
 import type {PersonalSnapshot,PersonalView} from './use-personal-snapshot';
 import {institutionalStudentSummary} from './student-dashboard-metrics';
-import SiiiHeroRibbon from './siii-hero-ribbon';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
 import {SiiiGlassMetric,SiiiGlassPanel,SiiiGlassPanelHeading,SiiiGlassMetricsRow} from './ui/siii-glass-kit';
@@ -35,8 +34,6 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
      {profile?.enrollmentNumber&&<span>{profile.enrollmentNumber}</span>}
      <span>{profile?(academicStatus[profile.status]||profile.status):unlinked?'Expediente aún sin vincular':refreshing?'Consultando tu expediente':'Información no disponible'}</span>
     </div>
-    <SiiiHeroRibbon/>
-    <p className="siii-overview-motto">“Formando<br/>profesionales<br/>para el futuro”<small>— {institutionName}</small></p>
    </header>
    {partial&&<p role="status" className="siii-overview-empty">Parte de tu expediente supera los límites de consulta. Los indicadores afectados se ocultan para evitar cifras engañosas.</p>}
    <SiiiGlassMetricsRow className="siii-overview-metrics" aria-label="Resumen institucional">
