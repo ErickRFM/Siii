@@ -366,7 +366,7 @@ test('solid theme keeps home, academic records and requests in one material syst
  test.setTimeout(120000);
  await page.setViewportSize({width:1440,height:900});
  await login(page);
- await page.goto(/dashboard/institutions/${f.tenant}/student);
+ await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await expect(page.locator('.siii-student-dashboard')).toBeVisible();
  for(const theme of ['dark','light'] as const){
   if(await page.locator('html').getAttribute('data-sii-theme')!==theme){
