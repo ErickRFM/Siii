@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import {BookOpen,ClipboardCheck,FileText,GraduationCap,RefreshCw,Users} from 'lucide-react';
 import type {PersonalProfile,PersonalTeachingGroup} from '@/modules/portal/contracts';
-import SiiiHeroRibbon from './siii-hero-ribbon';
 import SiiiGlassCalendar from './siii-glass-calendar';
 import {SiiiProgressRing} from './siii-glass-progress';
 import {SiiiGlassMetric,SiiiGlassMetricsRow,SiiiGlassPanel,SiiiGlassPanelHeading} from './ui/siii-glass-kit';
@@ -22,7 +21,6 @@ export default function TeacherGlassOverview({profile,groups,institutionId,insti
     <button type="button" className="siii-overview-refresh" aria-label="Actualizar mi información" disabled={loading} onClick={onRefresh}><RefreshCw size={16}/></button>
     <span className="siii-overview-eyebrow">Buen día,</span><h2>{profile?.firstName??'Mi docencia'}<span className="sr-only"> {profile?.lastName}</span></h2><p>{institutionName}</p>
     <div className="siii-overview-tags"><span>Docente</span><span>{profile?profile.employeeNumber??'Vínculo institucional vigente':loading?'Consultando perfil':unlinked?'Perfil docente aún sin vincular':'Información no disponible'}</span></div>
-    <SiiiHeroRibbon/><p className="siii-overview-motto">“Formando<br/>profesionales<br/>para el futuro”<small>— {institutionName}</small></p>
    </header>
    <SiiiGlassMetricsRow className="siii-overview-metrics siii-teacher-metrics">
     <SiiiGlassMetric label="Grupos asignados" value={known?groups.length:'—'} icon={<Users/>} tone="amber"/>
