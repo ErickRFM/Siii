@@ -119,6 +119,11 @@ export function canGrant(subject: Subject, targetRole: P1Role, targetScope: Gran
     || targetRole === 'super_admin' || (targetRole === 'admin' && targetScope.scopeType !== 'institution')
     || (expiresAt !== null && (!validDate(expiresAt) || expiresAt <= now))) return false;
   if (!can(subject, 'roles.assign', { institutionId: targetScope.institutionId, status: 'active' }, now)) return false;
+  // A program-scoped coordinator is the career administrator. Only the institutional
+  // super administrator may designate one; an ordinary admin cannot self-replicate.
+  if (targetRole === 'coordinator' && targetScope.scopeType === 'program' &&
+      !subject.grants.some(grant => validGrant(grant, now) && grant.role === 'super_admin' &&
+        grant.scopeType === 'institution' && grant.institutionId === targetScope.institutionId)) return false;
   const delegated = ROLE_CAPABILITIES[targetRole].filter(capability => targetScope.scopeType === 'institution' || !TENANT_WIDE.has(capability));
   return subject.grants.some(grant => validGrant(grant, now) && scopeContains(grant, targetScope)
     && (grant.validUntil === null || (expiresAt !== null && expiresAt <= grant.validUntil))
@@ -131,6 +136,10 @@ export function canManageTarget(subject:Subject,targetGrants:readonly Grant[],in
  if(!can(subject,'memberships.manage',{institutionId,status:'active'},now))return false;
  const live=targetGrants.filter(grant=>grant.institutionId===institutionId&&validGrant(grant,now));
  if(live.some(grant=>grant.role==='super_admin'))return false;
+ // Prevent a delegated career administrator from being suspended/edited by another
+ // ordinary institutional administrator. Role revocation uses canRevoke separately.
+ if(live.some(grant=>grant.role==='coordinator'&&grant.scopeType==='program')&&
+    !subject.grants.some(grant=>validGrant(grant,now)&&grant.role==='super_admin'&&grant.scopeType==='institution'&&grant.institutionId===institutionId))return false;
  return !live.some(grant=>grant.role==='admin')||subject.grants.some(grant=>validGrant(grant,now)&&grant.institutionId===institutionId&&grant.scopeType==='institution'&&grant.role==='super_admin');
 }
 
