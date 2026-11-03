@@ -1,8 +1,8 @@
 {
   "generatedAt": "2026-11-03T07:24:00Z",
-  "review": "SIII Solid V2: reviewed 1.5 KiB canonical-theme expansion for operational action dock/workbench. No new stylesheet import, no increased important declarations.",
-  "totalBytes": 255655,
-  "totalImportant": 432,
+  "review": "2026-11-03 SIII V2: reviewed canonical solid-theme growth for app-wide PageContainer architecture, contextual action dock, accessible admin jump links and mobile login. No additional global stylesheet imported.",
+  "totalBytes": 256842,
+  "totalImportant": 436,
   "totalDup": 437,
   "files": [
     {
@@ -142,11 +142,11 @@
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 15387,
-      "rules": 85,
-      "classes": 76,
+      "bytes": 16574,
+      "rules": 93,
+      "classes": 81,
       "orphanCandidates": 0,
-      "important": 56,
+      "important": 60,
       "duplicateSelectors": 16
     },
     {
