@@ -21,6 +21,12 @@ describe('personal motion, loading and role coherence',()=>{
   expect(css).toContain('.siii-overview-shortcuts>:is(button,a):hover');
   expect(css).toContain('.siii-overview-primary:hover');
  });
+ it('never paints capabilities from another institution during a route switch',()=>{
+  const provider=read('src/components/institution-capabilities.tsx');
+  expect(provider).toContain('const scopedData=data?.institutionId===institutionId?data:null');
+  expect(provider).toContain('loading:loading||Boolean(institutionId&&switchingInstitution)');
+  expect(provider).toContain("error:switchingInstitution?'':error");
+ });
  it('keeps compact loading while preserving a stable teacher home and independent filters',()=>{
   const teacher=read('src/components/teacher-portal.tsx');
   expect(read('src/app/sii-kit-components.css')).toContain('min-height:92px');
