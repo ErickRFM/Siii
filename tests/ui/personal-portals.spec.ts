@@ -361,3 +361,40 @@ test('personal home animates once, keeps refresh visible and honors reduced moti
  await expect.poll(()=>page.locator('.siii-overview-hero').evaluate(node=>getComputedStyle(node).animationName)).toBe('none');
  await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();
 });
+
+test('solid theme keeps home, academic records and requests in one material system',async({page})=>{
+ test.setTimeout(120000);
+ await page.setViewportSize({width:1440,height:900});
+ await login(page);
+ await page.goto(/dashboard/institutions/${f.tenant}/student);
+ await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+ for(const theme of ['dark','light'] as const){
+  if(await page.locator('html').getAttribute('data-sii-theme')!==theme){
+   await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
+  }
+  await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
+  const materials=await page.locator('#siii-personal').evaluate(root=>{
+   const get=(selector:string)=>getComputedStyle(root.querySelector(selector)!);
+   return {
+    shell:getComputedStyle(root).backgroundColor,
+    hero:get('.siii-overview-hero').backgroundColor,
+    panel:get('.siii-overview-panel').backgroundColor,
+    blur:get('.siii-overview-hero').backdropFilter
+   };
+  });
+  expect(materials.hero).toBe(materials.panel);
+  expect(materials.hero).not.toBe('rgba(0, 0, 0, 0)');
+  expect(materials.blur).toBe('none');
+  expect(materials.shell).not.toBe(materials.hero);
+ }
+ await page.evaluate(()=>{window.location.hash='tramites'});
+ await expect(page.getByRole('heading',{name:'Mis trámites',exact:true})).toBeVisible();
+ const form=page.locator('.siii-requests-layout');
+ await expect(form).toBeVisible();
+ const columns=await form.evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length);
+ expect(columns).toBe(2);
+ await page.setViewportSize({width:390,height:844});
+ const compact=await form.evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length);
+ expect(compact).toBe(1);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
+});
