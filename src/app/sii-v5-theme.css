@@ -37,8 +37,8 @@ html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-col
 html[data-sii-theme] #siii-personal .siii-overview-quick{color:var(--solid-accent)!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#fff!important}
 html[data-sii-theme=dark] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#24131b!important}
-html[data-sii-theme] #siii-personal section#avisos{background-color:var(--solid-panel)!important;backdrop-filter:none!important}
+html[data-sii-theme] #siii-personal .siii-student-aside>section#avisos{background:var(--solid-panel)!important;backdrop-filter:none!important}
 html[data-sii-theme] .sii-app.sii-ui :is(.sii-catalog-pagination span[aria-live],.sii-result-count,.sii-security-coming,.sii-security-aside>p){color:var(--solid-muted)!important}
 html[data-sii-theme] .sii-app.sii-ui .sii-topbar :is(.text-muted-foreground,.sii-topbar-label){color:var(--solid-muted)!important}
-@media(max-width:767px){html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(3){grid-column:auto}}
+@media(max-width:767px){html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1fr)}html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(3){grid-column:auto}html[data-sii-theme] #siii-personal .siii-overview-detail-grid>.siii-overview-panel{min-width:0}html[data-sii-theme] #siii-personal .siii-overview-detail-grid .siii-overview-listrow{min-width:0}}
 @media(forced-colors:active){html[data-sii-theme] #siii-personal section#avisos{background-color:Canvas!important;color:CanvasText!important}}
