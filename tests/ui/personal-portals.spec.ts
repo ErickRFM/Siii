@@ -263,7 +263,7 @@ test('teacher portal mobile groups keep cards and toolbar within viewport',async
 });
 
 
-test('borderless student overview and academic records do not reintroduce duplicate navigation',async({page})=>{
+test('solid student overview and academic records preserve one navigation owner',async({page})=>{
  await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
  const hero=page.locator('#siii-personal .siii-overview-hero');await expect(hero).toBeVisible();
  for(const theme of ['dark','light'] as const){
@@ -271,7 +271,7 @@ test('borderless student overview and academic records do not reintroduce duplic
   for(const width of [320,360,390,430,768]){
    await page.setViewportSize({width,height:844});
    const paint=await hero.evaluate(el=>({border:getComputedStyle(el).borderTopWidth,shadow:getComputedStyle(el).boxShadow}));
-   expect(paint.border).toBe('0px');expect(paint.shadow).toBe('none');
+   expect(paint.border).toBe('1px');expect(paint.shadow).toBe('none');
    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
   }
   await personalNavigate(page,'Académico');
