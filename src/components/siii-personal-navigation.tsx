@@ -29,8 +29,8 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  const [expandedGroups,setExpandedGroups]=useState<Record<string,boolean>>({});
  const {open,setOpen,setOpenMobile,isMobile}=useSidebar();
  useEffect(()=>{
-  const sync=(event:Event)=>setSelected((event as CustomEvent<string>).detail||'inicio');
-  const hash=()=>setSelected(window.location.hash.slice(1)||'inicio');
+  const sync=(event:Event)=>{setSelected((event as CustomEvent<string>).detail||'inicio');setExpandedGroups({})};
+  const hash=()=>{setSelected(window.location.hash.slice(1)||'inicio');setExpandedGroups({})};
   hash();
   window.addEventListener(`siii:${role}-active-section`,sync);
   window.addEventListener('hashchange',hash);
