@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Reconciled PR #153 personal density/performance with PR #155 canonical CSS owners; preserve mobile CSS and remove 40 shadowed global declarations and 2 unused keyframes.",
-  "totalBytes": 254140,
+  "generatedAt": "2026-11-03T07:24:00Z",
+  "review": "SIII Solid V2: reviewed 1.5 KiB canonical-theme expansion for operational action dock/workbench. No new stylesheet import, no increased important declarations.",
+  "totalBytes": 255655,
   "totalImportant": 432,
   "totalDup": 437,
   "files": [
@@ -142,9 +142,9 @@
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 13872,
-      "rules": 60,
-      "classes": 44,
+      "bytes": 15387,
+      "rules": 85,
+      "classes": 76,
       "orphanCandidates": 0,
       "important": 56,
       "duplicateSelectors": 16
