@@ -15,7 +15,7 @@ import './sii-kit-components.css';
 import './sii-interactions.css';
 import './sii-tailwind.css';
 import './sii-workspaces.css';
-// Final scoped paint layer: shared glass tokens override legacy visual skins without altering their behavior.
+// Legacy portal styles remain available for layout compatibility; V2 solid tokens own final paint.
 import './sii-glass.css';
 import './sii-personal-fidelity.css';
 import './sii-admin-coherence.css';
@@ -30,8 +30,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#efe8e3' },
-    { media: '(prefers-color-scheme: dark)', color: '#0d0f12' },
+    { media: '(prefers-color-scheme: light)', color: '#f3f5f8' },
+    { media: '(prefers-color-scheme: dark)', color: '#101319' },
   ],
 };
 export const metadata:Metadata={
