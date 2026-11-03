@@ -2,7 +2,7 @@
   "generatedAt": "2026-11-03T07:24:00Z",
   "review": "SIII V2 senior UI audit 2026-11-03: consolidated two-theme contrast corrections and compact academic workbench into canonical CSS; reviewed 1,026B and 11 specificity guards needed to override legacy material selectors, no new stylesheet. Retire legacy CSS in later architectural cleanup.",
   "totalBytes": 269935,
-  "totalImportant": 451,
+  "totalImportant": 455,
   "totalDup": 447,
   "files": [
     {
@@ -155,7 +155,7 @@
       "rules": 100,
       "classes": 85,
       "orphanCandidates": 0,
-      "important": 71,
+      "important": 75,
       "duplicateSelectors": 16
     },
     {
