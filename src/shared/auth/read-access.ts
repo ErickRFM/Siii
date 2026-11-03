@@ -13,7 +13,7 @@ export function readVisibility(subject:Subject,access:InstitutionAccess,sessionI
  const requiresMfa=exists(db.select({one:sql`1`}).from(requiredGrant)
   .leftJoin(requiredProgram,and(eq(requiredGrant.programId,requiredProgram.id),eq(requiredProgram.institutionId,access.institutionId)))
   .leftJoin(requiredCampus,and(eq(requiredGrant.campusId,requiredCampus.id),eq(requiredCampus.institutionId,access.institutionId)))
-  .where(and(eq(requiredGrant.membershipId,access.membershipId),inArray(requiredGrant.role,['admin','super_admin','control_escolar']),
+  .where(and(eq(requiredGrant.membershipId,access.membershipId),or(inArray(requiredGrant.role,['admin','super_admin','control_escolar']),and(eq(requiredGrant.role,'coordinator'),eq(requiredGrant.scopeType,'program'))),
    isNull(requiredGrant.revokedAt),or(isNull(requiredGrant.expiresAt),sql`${requiredGrant.expiresAt}>clock_timestamp()`),
    or(eq(requiredGrant.scopeType,'institution'),and(eq(requiredGrant.scopeType,'program'),eq(requiredProgram.status,'active')),and(eq(requiredGrant.scopeType,'campus'),eq(requiredCampus.status,'active'))))));
  const verifiedFactor=and(isNotNull(mfaFactors.enabledAt),isNull(mfaFactors.revokedAt),
