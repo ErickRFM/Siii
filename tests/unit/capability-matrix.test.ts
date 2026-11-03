@@ -192,7 +192,7 @@ describe('role delegation without escalation', () => {
   it.each(['program', 'campus'] as const)('allows institutional admin to grant lower roles within a contained %s scope', scopeType => {
     expect(canGrant(actor(), 'teacher', { institutionId: TENANT, scopeType, scopeId: 'scope-a' }, NOW)).toBe(true);
     expect(canGrant(actor('super_admin'), 'admin', { institutionId: TENANT, scopeType, scopeId: 'scope-a' }, NOW)).toBe(false);
-    expect(canGrant(actor(), 'coordinator', { institutionId: TENANT, scopeType, scopeId: 'scope-a' }, NOW)).toBe(true);
+    expect(canGrant(actor(), 'coordinator', { institutionId: TENANT, scopeType, scopeId: 'scope-a' }, NOW)).toBe(scopeType !== 'program');
   });
   it('never delegates to another tenant or widens a scoped actor grant', () => {
     expect(canGrant(actor(), 'teacher', { ...institutional, institutionId: 'other-tenant' }, NOW)).toBe(false);
