@@ -1,8 +1,8 @@
 {
   "generatedAt": "2026-11-03T07:24:00Z",
-  "review": "2026-11-03 SIII V2: reviewed canonical solid-theme growth for app-wide PageContainer architecture, contextual action dock, accessible admin jump links and mobile login. No additional global stylesheet imported.",
-  "totalBytes": 256842,
-  "totalImportant": 436,
+  "review": "SIII V2 senior UI audit 2026-11-03: consolidated two-theme contrast corrections and compact academic workbench into canonical CSS; reviewed 1,026B and 11 specificity guards needed to override legacy material selectors, no new stylesheet. Retire legacy CSS in later architectural cleanup.",
+  "totalBytes": 257868,
+  "totalImportant": 447,
   "totalDup": 437,
   "files": [
     {
@@ -142,11 +142,11 @@
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 16574,
-      "rules": 93,
-      "classes": 81,
+      "bytes": 17600,
+      "rules": 100,
+      "classes": 85,
       "orphanCandidates": 0,
-      "important": 60,
+      "important": 71,
       "duplicateSelectors": 16
     },
     {
