@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { can, canGrant, canManageTarget, type Grant, type Subject } from '@/shared/auth/capabilities';
-import { requiresPrivilegedMfa } from '@/shared/auth/privileged-policy';
+import { requiresPrivilegedMfa, careerAdministrationAssuranceAllows } from '@/shared/auth/privileged-policy';
 
 const now = new Date('2026-11-03T12:00:00.000Z');
 const institutionId = 'university-a';
@@ -37,9 +37,11 @@ describe('administración por carrera', () => {
     expect(canManageTarget(actor(grant('super_admin')), target, institutionId, now)).toBe(true);
   });
 
-  it('requires MFA for the career administrator and ignores revoked grants', () => {
+  it('requires MFA in the career-admin workspace without changing academic coordinator behavior', () => {
     const scoped = grant('coordinator', { scopeType: 'program', scopeId: programId });
-    expect(requiresPrivilegedMfa([scoped], now)).toBe(true);
+    expect(requiresPrivilegedMfa([scoped], now)).toBe(false);
+    expect(careerAdministrationAssuranceAllows({mfaConfigured:true,mfaVerified:true,stepUpAt:null})).toBe(true);
+    expect(careerAdministrationAssuranceAllows({mfaConfigured:false,mfaVerified:false,stepUpAt:null})).toBe(false);
     expect(requiresPrivilegedMfa([grant('coordinator')], now)).toBe(false);
     expect(requiresPrivilegedMfa([{ ...scoped, revokedAt: now }], now)).toBe(false);
     expect(requiresPrivilegedMfa([{ ...scoped, validUntil: now }], now)).toBe(false);
