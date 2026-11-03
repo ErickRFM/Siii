@@ -9,6 +9,7 @@ describe('privileged institutional assurance',()=>{
  it('requires real MFA for all three privileged profiles but not expired or revoked grants',()=>{
   for(const role of ['admin','super_admin','control_escolar'] as const)expect(requiresPrivilegedMfa([grant({role})],now)).toBe(true);
   expect(requiresPrivilegedMfa([grant({validUntil:now}),grant({revokedAt:now}),grant({role:'coordinator'})],now)).toBe(false);
+  expect(requiresPrivilegedMfa([grant({role:'coordinator',scopeType:'program',scopeId:'career-1'})],now)).toBe(true);
  });
  it('a password-only step-up cannot satisfy privileged access',()=>{
   expect(privilegedAssuranceAllows([grant()],{mfaConfigured:false,mfaVerified:false,stepUpAt:now},now,false)).toBe(false);
