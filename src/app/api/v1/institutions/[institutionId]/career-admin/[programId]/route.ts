@@ -7,6 +7,7 @@ import {
 } from '../../../../../../../../db/schema';
 import { authorizeCapability } from '@/shared/auth/session';
 import { can } from '@/shared/auth/capabilities';
+import { careerAdministrationAssuranceAllows } from '@/shared/auth/privileged-policy';
 import { readVisibility } from '@/shared/auth/read-access';
 import { jsonError } from '@/shared/auth/guards';
 import { uuid } from '@/shared/auth/validation';
@@ -29,7 +30,7 @@ export const GET = withErrors(async (_req: NextRequest, ctx: RouteContext) => {
   }
   const resource = { institutionId, programId, status: 'active' };
   const actor = await authorizeCapability(institutionId, 'groups.manage', resource);
-  if (!actor) return jsonError('FORBIDDEN', 403);
+  if (!actor || !careerAdministrationAssuranceAllows(actor.identity)) return jsonError('FORBIDDEN', 403);
 
   const eligible = actor.access.grants.filter(grant =>
     can({ ...actor.subject, grants: [grant] }, 'groups.manage', resource),
