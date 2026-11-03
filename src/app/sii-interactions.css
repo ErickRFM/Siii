@@ -9,8 +9,8 @@
   to { transform: translate3d(0, 0, 0); }
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* Animate the actual workspace; do not animate the whole shell on every navigation. */
-  .sii-app .sii-page > :first-child {
+  /* Personal portals already animate their own sections. */
+  .sii-app:not(#siii-personal) .sii-page > :first-child {
     animation: sii-ui-enter 280ms var(--sii-interaction-curve) both;
   }
   .sii-app :is(.sii-catalog-tab, .sii-outline-button, .sii-quick-switch-trigger, .sii-theme-toggle) {
