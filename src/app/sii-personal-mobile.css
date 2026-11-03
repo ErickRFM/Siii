@@ -344,7 +344,6 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
   #siii-personal .siii-personal-data-table table{min-width:0}
 }
 
-@media(prefers-reduced-motion:reduce){#siii-personal .siii-personal-data-table tbody tr{transition:none}}
 /* Shared matte surfaces, without comma-containing :is selectors counted as duplicates. */
 #siii-personal .siii-personal-data-table:not(input),#siii-personal .siii-history-period{
  min-width:0;color:var(--siii-personal-text);
