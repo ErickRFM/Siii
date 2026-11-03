@@ -18,9 +18,8 @@ html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-chi
 html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(n+2){min-height:180px}
 html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-heading{padding:0 0 18px;border-bottom:1px solid var(--solid-edge)}
 html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-heading h1{font-size:clamp(22px,2vw,30px);font-weight:750;letter-spacing:-.03em}
-@media(max-width:1279px){html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){html[data-sii-theme] #siii-personal .siii-v2-action-dock{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:767px){html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1fr)}html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:auto;min-height:220px}}
+@media(max-width:767px){html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:auto;min-height:220px}}
 
 /* WCAG-AA solid-theme admin jump links. */
 html[data-sii-theme=light] .sii-app.sii-ui  .sii-workspace-section-nav a{color:#812b48;background:#fff;border:1px solid #dce2e9}
