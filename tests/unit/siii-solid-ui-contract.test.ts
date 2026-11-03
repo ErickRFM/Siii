@@ -38,4 +38,23 @@ describe('SIII Solid institutional design contract',()=>{
   expect(student).toContain('No es el promedio oficial');
   expect(student).toContain('No se registran vencimientos próximos');
  });
+ it('applies the MIT-derived page scaffold across student and faculty, and one contextual action dock',()=>{
+  const frame=read('src/components/ui/siii-workspace-frame.tsx');
+  const actions=read('src/components/ui/siii-dashboard-actions.tsx');
+  const student=read('src/components/personal-portal.tsx');
+  const teacher=read('src/components/teacher-portal.tsx');
+  const studentHome=read('src/components/student-glass-overview.tsx');
+  const teacherHome=read('src/components/teacher-glass-overview.tsx');
+  expect(frame).toContain('Copyright 2023 Kiranism');
+  expect(frame).toContain('role="status"');
+  expect(actions).toContain('aria-label={title}');
+  for(const source of [student,teacher])expect(source).toContain('<SiiiWorkspaceFrame');
+  for(const source of [studentHome,teacherHome]){
+   expect(source).toContain('<SiiiDashboardActions>');
+   expect(source.split('<SiiiDashboardActions>').length-1).toBe(1);
+   expect(source).not.toContain('<h3>Accesos rápidos</h3>');
+  }
+  expect(read('docs/design/SIII_V2_OPEN_SOURCE_SOURCES.md')).toContain('MIT License');
+  expect(read('src/components/ui/sii-kit.tsx')).toContain('data-slot="siii-page-intro"');
+ });
 });
