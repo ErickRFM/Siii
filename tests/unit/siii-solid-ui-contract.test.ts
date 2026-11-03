@@ -11,7 +11,7 @@ describe('SIII Solid institutional design contract',()=>{
   expect(imports.at(-1)).toBe('sii-v5-theme.css');
   expect(css).toContain('--solid-bg:#f3f5f8');
   expect(css).toContain('--solid-bg:#101319');
-  expect(css).toContain('--solid-panel:#fff');
+  expect(css).toContain('--solid-panel:#ffffff');
   expect(css).toContain('--solid-panel:#1a2029');
   expect(css).toContain('background:var(--solid-panel)!important');
   expect(css).toContain('backdrop-filter:none');
