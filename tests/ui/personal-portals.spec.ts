@@ -336,3 +336,28 @@ test('student home avoids unused personal collection requests',async({page})=>{
  await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
  expect(unnecessary).toEqual([]);
 });
+
+test('personal home animates once, keeps refresh visible and honors reduced motion',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await login(page);
+ await page.goto(`/dashboard/institutions/${f.tenant}/student`);
+ await expect(page.locator('.siii-student-dashboard')).toBeVisible();
+ const visual=await page.locator('#siii-personal').evaluate(root=>{
+  const find=(selector:string)=>root.querySelector<HTMLElement>(selector)!;
+  return {
+   background:getComputedStyle(root,'::before').animationName,
+   page:getComputedStyle(find('.sii-page > :first-child')).animationName,
+   hero:getComputedStyle(find('.siii-overview-hero')).animationName,
+   aside:getComputedStyle(find('.siii-student-aside')).animationName,
+   refresh:parseFloat(getComputedStyle(find('.siii-overview-refresh')).opacity),
+  };
+ });
+ expect(visual.background).toBe('none');
+ expect(visual.page).toBe('none');
+ expect(visual.hero).toContain('siii-personal-rise');
+ expect(visual.aside).toBe('none');
+ expect(visual.refresh).toBeGreaterThan(.5);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await expect.poll(()=>page.locator('.siii-overview-hero').evaluate(node=>getComputedStyle(node).animationName)).toBe('none');
+ await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();
+});
