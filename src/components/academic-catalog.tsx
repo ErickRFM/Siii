@@ -1,4 +1,5 @@
 'use client';
+import SiiiWorkspaceHeading from './ui/siii-workspace-heading';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
@@ -224,7 +225,7 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
           onClick={()=>choose(t.id)}><span aria-hidden="true">{t.icon}</span>{t.label}</Button>)}
       </div>
       <div className="sii-catalog-summary">
-        <div><span className="sii-section-kicker">CATÁLOGO INSTITUCIONAL</span><h2>{selected.label}</h2><p>{selected.description}</p></div>
+        <SiiiWorkspaceHeading level={2} title={selected.label} caption={selected.description}/>
         <span className="sii-small-count">{loading?'Cargando…':`${rows.length} ${rows.length===1?'registro':'registros'} en esta página`}</span>
       </div>
       {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}

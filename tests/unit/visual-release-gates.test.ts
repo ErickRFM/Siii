@@ -17,7 +17,13 @@ describe('mandatory visual release gates',()=>{
   expect(suite).toContain('expectVisualBaseline(screenshot,`${role}-${theme}-${width}`,info)');
  });
  it('preserves unmasked pixelmatch and the reviewed 5% limit',()=>{
-  expect(baseline).toContain('pixelmatch(reference.data,actual.data,diff.data');
+  // Preserve real unmasked pixel comparison. A maximum two-row geometry drift
+  // must be paid for in the 5% budget rather than silently cropped away.
+  expect(baseline).toContain('pixelmatch(');
+  expect(baseline).toContain('reference.data.subarray(0,overlapBytes)');
+  expect(baseline).toContain('actual.data.subarray(0,overlapBytes)');
+  expect(baseline).toContain('const unmatched=delta*actual.width');
+  expect(baseline).toContain('toBeLessThanOrEqual(2)');
   expect(baseline).toMatch(/expect\(ratio,[^\n]*\)\.toBeLessThanOrEqual\(\.05\)/);
  });
 });

@@ -88,9 +88,11 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-overview-metrics{display:grid;grid-template-columns:1.18fr 1.25fr 1fr 1fr;gap:12px;align-items:stretch}
 #siii-personal .siii-shared-glass-metric{display:flex;align-items:center;gap:13px;padding:12px 14px;min-height:83px;height:83px;border-radius:14px!important;overflow:hidden;grid-column:auto;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.015)),rgba(60,57,53,.42)!important;border:0!important;box-shadow:none!important;backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15)}
 #siii-personal .siii-shared-metric-copy{min-width:0;flex:1;display:grid;gap:5px;align-content:center}
-#siii-personal .siii-shared-metric-copy>span{font-size:10px;font-weight:350;line-height:13px;white-space:normal;word-break:normal;overflow-wrap:normal}
+#siii-personal .siii-shared-metric-copy>span{font-size:12px;font-weight:400;line-height:15px;white-space:normal;word-break:normal;overflow-wrap:normal}
 #siii-personal .siii-shared-metric-copy>strong{font-size:23px;font-weight:550;line-height:26px;letter-spacing:-.025em;white-space:nowrap}
 #siii-personal .siii-shared-metric-copy>small{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#siii-personal .siii-shared-glass-metric[data-long-value=true]{padding:9px 12px}
+#siii-personal .siii-shared-glass-metric[data-long-value=true] .siii-shared-metric-copy>strong{font-size:clamp(15px,1.25vw,18px);line-height:20px;white-space:normal;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #siii-personal .siii-overview-metric-icon{width:42px;height:44px;border-radius:10px;display:grid;place-items:center;flex:0 0 42px;box-shadow:inset 0 0 9px #ffffff13;background:#af886059;color:#ffe2b6}
 #siii-personal .siii-overview-metric-icon svg{width:24px;height:24px;stroke-width:1.7}
 #siii-personal [data-tone=blue]>.siii-overview-metric-icon,#siii-personal .siii-reference-row-icon[data-tone=blue]{background:#4466b26b;color:#d6e6ff}
@@ -101,29 +103,29 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-overview-detail-grid>.siii-overview-panel{min-height:287px;display:flex;flex-direction:column;grid-column:auto}
 #siii-personal .siii-reference-row-icon{display:grid;place-items:center;width:40px;height:42px;border-radius:10px;flex:0 0 40px;box-shadow:inset 0 0 8px #ffffff18}
 #siii-personal .siii-overview-listrow>div{flex:1;min-width:0}
-#siii-personal .siii-overview-listrow small{font-size:10px;line-height:16px;font-weight:330;color:var(--siii-personal-muted);opacity:1}
+#siii-personal .siii-overview-listrow small{font-size:11px;line-height:16px;font-weight:330;color:var(--siii-personal-muted);opacity:1}
 #siii-personal .siii-overview-grade{font-size:17px;font-weight:450;padding:7px 8px;border-radius:7px;background:#8ba99728}
 #siii-personal .siii-overview-listrow>svg{flex-shrink:0}
 @keyframes siii-status-ping{0%{box-shadow:0 0 0 0 rgba(103,195,149,.5)}70%{box-shadow:0 0 0 6px rgba(103,195,149,0)}100%{box-shadow:0 0 0 0 rgba(103,195,149,0)}}
-#siii-personal .siii-overview-status{font-size:8px;font-weight:400;line-height:12px;padding:2px 6px;border-radius:7px;white-space:nowrap;background:#67c39523;color:#b8e3ce;position:relative;display:inline-flex;align-items:center}
+#siii-personal .siii-overview-status{font-size:10px;font-weight:400;line-height:12px;padding:2px 6px;border-radius:7px;white-space:nowrap;background:#67c39523;color:#b8e3ce;position:relative;display:inline-flex;align-items:center}
 #siii-personal .siii-overview-status::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#67c395;margin-right:4px;flex-shrink:0;animation:siii-status-ping 2.4s ease-out infinite}
 #siii-personal .siii-overview-balance{font-size:27px;font-weight:500;line-height:35px;margin:7px 0 4px}
 #siii-personal :is(.siii-overview-subtle,.siii-overview-empty){font-size:11px;font-weight:350;line-height:17px;color:var(--siii-personal-muted);opacity:1}
 #siii-personal .siii-overview-detail-grid .siii-overview-empty{margin:auto 0}
 #siii-personal .siii-overview-progress{min-height:201px;padding:13px 16px}
 
-#siii-personal .siii-overview-term-bars>p{font-size:10px;font-weight:350;line-height:14px}
+#siii-personal .siii-overview-term-bars>p{font-size:11px;font-weight:350;line-height:14px}
 #siii-personal .siii-overview-track,#siii-personal .siii-overview-track svg{height:12px;border-radius:20px}
-#siii-personal .siii-overview-term-bars>small{font-size:9px;line-height:13px;font-weight:330}
+#siii-personal .siii-overview-term-bars>small{font-size:11px;line-height:15px;font-weight:330}
 #siii-personal .siii-student-aside>.siii-overview-panel{padding:14px;border-radius:15px!important}
 #siii-personal .siii-overview-calendar{min-height:202px}
 #siii-personal .siii-calendar-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 #siii-personal .siii-calendar-header>strong{font-size:13px;line-height:20px;font-weight:450}
 #siii-personal .siii-calendar-controls{display:flex;gap:12px}
 #siii-personal .siii-calendar-controls button{width:24px;min-width:24px;height:24px;padding:0;background:none!important;border:0;font-size:20px;line-height:20px;font-weight:200}
-#siii-personal .siii-calendar-days{gap:0;margin-top:10px;font-size:10px;line-height:14px}
+#siii-personal .siii-calendar-days{gap:0;margin-top:10px;font-size:11px;line-height:14px}
 #siii-personal .siii-calendar-days>span{min-height:23px;font-weight:350}
-#siii-personal .siii-calendar-weekday{font-size:9px;color:var(--siii-personal-muted)}
+#siii-personal .siii-calendar-weekday{font-size:11px;color:var(--siii-personal-muted)}
 #siii-personal .siii-glass-calendar>p{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 #siii-personal .siii-calendar-today{background:#d5c2ad;color:#332e28;border-radius:9px;font-weight:500;max-width:28px;justify-self:center;width:100%}
 #siii-personal #avisos{min-height:207px}
@@ -135,20 +137,14 @@ html[data-sii-theme=light] #siii-personal .siii-topbar-restore{background:rgba(0
 #siii-personal .siii-overview-shortcuts>:is(button,a){display:flex;align-items:center;gap:10px;min-height:48px;border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02))!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 4px 14px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(10px);padding:9px 10px;text-align:left;font-size:10px;line-height:13px;font-weight:350;transition:all .18s ease}
 #siii-personal .siii-overview-shortcuts svg{width:21px;height:21px;flex:0 0 21px;stroke-width:1.5}
 #siii-personal .siii-overview-dates{min-height:170px}
-#siii-personal .siii-overview-date{display:flex;gap:13px;align-items:start;margin-top:13px;font-size:10px;line-height:15px}
+#siii-personal .siii-overview-date{display:flex;gap:13px;align-items:start;margin-top:13px;font-size:11px;line-height:15px}
 #siii-personal .siii-overview-date strong{font-weight:400;font-size:11px}
 #siii-personal .siii-overview-date small{display:block;color:var(--siii-personal-muted)}
 #siii-personal .siii-overview-date-dot{width:9px;height:9px;margin:3px 2px;border-radius:50%;background:#d7915f;box-shadow:0 0 8px rgba(215,145,95,.45);flex-shrink:0;animation:siii-date-pulse 3s ease-in-out infinite alternate}
 @keyframes siii-date-pulse{from{opacity:.7;transform:scale(.9)}to{opacity:1;transform:scale(1.1)}}
-#siii-personal .siii-student-home-shell>.siii-home-tabs>[role=tablist],#siii-personal .siii-student-home-shell>.siii-student-utility-links,#siii-personal .siii-student-home-shell>p:last-child{display:none}
-#siii-personal .siii-student-home-shell .siii-home-tabs{margin:0;gap:0}
-#siii-personal .siii-student-home-shell [role=tabpanel]{margin:0}
-#siii-personal .siii-student-home-shell [role=tabpanel]:focus-visible{outline-offset:4px}
 #siii-personal .siii-teacher-home-shell{display:flex;flex-direction:column;gap:0}
-#siii-personal .siii-teacher-home-shell>.sii-kit-page-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
-#siii-personal .siii-teacher-home-shell>nav,#siii-personal .siii-teacher-home-shell>p:last-child,#siii-personal .siii-teacher-home-shell [aria-label="Navegación docente"],#siii-personal .siii-teacher-home-shell [role=tabpanel]~div.flex.flex-wrap{display:none}
-#siii-personal .siii-teacher-home-shell>div:has(>[role=tabpanel]),#siii-personal .siii-teacher-home-shell [role=tabpanel]{margin:0;gap:0}
 #siii-personal .siii-teacher-home-shell>div:has(>.siii-student-dashboard){margin:0}
+@media(max-width:767px){#siii-personal .siii-teacher-home-shell .siii-overview-detail-grid{gap:10px}}
 #siii-personal .siii-teacher-context{min-height:207px}
 #siii-personal :is(a,button,summary):focus-visible{outline:2px solid #eadac6;outline-offset:3px}
 /* Light uses the same neutral material and geometry, with luminance adapted for reading. */
@@ -156,18 +152,17 @@ html[data-sii-theme=light] #siii-personal{--siii-personal-edge:rgba(255,255,255,
 html[data-sii-theme=light] #siii-personal [data-sidebar=sidebar]{background:rgba(206,208,198,.70)!important;color:#292d2c!important}
 html[data-sii-theme=light] #siii-personal .siii-personal-nav-link,html[data-sii-theme=light] #siii-personal .siii-personal-nav-group summary{color:#303632!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-hero{background:rgba(183,185,172,.22)!important}
+html[data-sii-theme=light] #siii-personal .siii-overview-primary{background:#d5c9bb;color:#18221c}
 html[data-sii-theme=light] #siii-personal .siii-overview-motto{color:#38423a}
 html[data-sii-theme=light] #siii-personal .siii-personal-account>div{background:#dbddd5;color:#292d2c}
 html[data-sii-theme=light] #siii-personal :is(.sii-command-trigger,.sii-topbar-actions>button,.siii-topbar-notices){color:#303632!important;background:#dbdcd060!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-status{color:#24513e;background:#63aa8c35}
 html[data-sii-theme=light] #siii-personal :is(a,button,summary):focus-visible{outline-color:#374b43}
 /* Correct inherited active-tab paint; the composition itself has no enclosing panel. */
-#siii-personal :is(.siii-student-home-shell,.siii-teacher-home-shell) [role=tabpanel]{background:transparent!important}
 #siii-personal .siii-overview-listrow strong{line-height:17px;overflow-wrap:break-word;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #siii-personal #avisos .siii-overview-listrow{gap:11px;border:0;min-height:48px;padding-block:4px}
 #siii-personal .siii-overview-heading>h3,#siii-personal .siii-overview-panel>h3{font-size:12px;line-height:18px;letter-spacing:0;margin:0}
 #siii-personal .siii-overview-term>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-#siii-personal .siii-teacher-home-shell>.sii-page-eyebrow{display:none}
 #siii-personal .siii-personal-nav-group>summary{font-weight:350}
 #siii-personal .siii-personal-nav-link{font-weight:300;gap:12px;padding-inline:13px}
 #siii-personal .siii-personal-nav-group>div>.siii-personal-nav-link{padding-left:24px;font-size:11px}
@@ -192,11 +187,11 @@ html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal
 #siii-personal .siii-overview-tags{margin-top:13px;gap:8px;display:flex;flex-wrap:wrap}
 #siii-personal .siii-overview-detail-grid{grid-template-columns:1.3333fr 1fr 1fr;gap:12px;display:grid}
 #siii-personal .siii-overview-heading{gap:8px;min-height:20px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;min-width:0}
-#siii-personal .siii-overview-quick{padding:0;min-height:24px;gap:4px;font-size:9px;line-height:13px;font-weight:350;display:inline-flex;justify-content:space-between;align-items:center;min-width:0;border:0;background:transparent;text-align:left}
+#siii-personal .siii-overview-quick{padding:0;min-height:24px;gap:4px;font-size:11px;line-height:16px;font-weight:500;display:inline-flex;justify-content:space-between;align-items:center;min-width:0;border:0;background:transparent;text-align:left}
 #siii-personal .siii-overview-listrow{padding:7px 0;gap:12px;border-bottom:1px solid #dfddd115;padding-block:5.5px;min-height:54px;display:flex;justify-content:space-between;align-items:center;min-width:0}
 #siii-personal .siii-overview-listrow:last-child{border-bottom:0}
 #siii-personal .siii-overview-listrow :is(strong,small){display:block}
-#siii-personal .siii-overview-primary{font-size:11px;font-weight:450;min-height:42px;border-radius:11px;background:#d8cabe;color:#292823;padding:10px 12px;white-space:normal;display:flex;justify-content:center;align-items:center;width:100%;border:0;margin-top:auto;gap:8px}
+#siii-personal .siii-overview-primary{font-size:12px;font-weight:600;min-height:42px;border-radius:11px;background:#d8cabe;color:#18211b;padding:10px 12px;white-space:normal;display:flex;justify-content:center;align-items:center;width:100%;border:0;margin-top:auto;gap:8px}
 #siii-personal .siii-overview-progress-summary{gap:15px;min-width:0;display:flex;align-items:center}
 #siii-personal .siii-overview-progress-summary :is(strong,small){display:block}
 #siii-personal .siii-overview-progress-summary small{font-size:10px;line-height:15px;display:block;opacity:1;color:var(--siii-personal-muted)}
@@ -207,7 +202,6 @@ html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal
 #siii-personal .siii-overview-shortcuts{gap:10px;margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 #siii-personal .siii-student-home-shell{display:flex;flex-direction:column;gap:0;min-width:0}
 #siii-personal .siii-student-home-shell>.siii-home-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0}
-#siii-personal .siii-student-home-shell>.siii-home-tabs{display:flex;flex-direction:column;min-width:0}
 #siii-personal :is(.siii-overview-calendar,#avisos){scroll-margin-top:85px}
 #siii-personal .text-muted-foreground{color:#e5dfd8!important}
 html[data-sii-theme=light] #siii-personal .text-muted-foreground{color:#454b46!important}
@@ -263,7 +257,7 @@ html[data-sii-theme=dark] #siii-personal .siii-student-aside>#avisos,html[data-s
 @media(max-width:767px){#siii-personal .siii-overview-term-bars{margin-top:0}}
 #siii-personal #avisos .siii-overview-listrow{position:relative}
 #siii-personal #avisos .siii-overview-listrow small{padding-right:54px}
-#siii-personal #avisos .siii-overview-listrow time{position:absolute;right:0;bottom:7px;font-size:9px;line-height:12px;color:var(--siii-personal-muted)}
+#siii-personal #avisos .siii-overview-listrow time{position:absolute;right:0;bottom:7px;font-size:11px;line-height:12px;color:var(--siii-personal-muted)}
 html[data-sii-theme=dark] #siii-personal .sii-command-trigger kbd{color:#f7f2ea}
 #siii-personal .siii-calendar-header>strong{font-size:14px}
 #siii-personal .siii-overview-motto small{width:130px;max-width:130px;white-space:normal;overflow:visible;line-height:13px}
@@ -272,10 +266,10 @@ html[data-sii-theme=dark] #siii-personal .sii-command-trigger kbd{color:#f7f2ea}
 
 /* Glass tactile physics and staggered entrance sequence */
 @keyframes siii-personal-rise{
- from{opacity:0;transform:translate3d(0,10px,0)}
- to{opacity:1;transform:translate3d(0,0,0)}
+ from{transform:translate3d(0,6px,0)}
+ to{transform:translate3d(0,0,0)}
 }
-#siii-personal .siii-shared-glass-metric{transition:transform 260ms cubic-bezier(.16,1,.3,1),box-shadow 260ms cubic-bezier(.16,1,.3,1),border-color 200ms ease;will-change:transform}
+#siii-personal .siii-shared-glass-metric{transition:transform 260ms cubic-bezier(.16,1,.3,1),box-shadow 260ms cubic-bezier(.16,1,.3,1),border-color 200ms ease}
 #siii-personal .siii-overview-panel{transition:transform 280ms cubic-bezier(.16,1,.3,1),box-shadow 280ms cubic-bezier(.16,1,.3,1),border-color 200ms ease}
 #siii-personal .siii-overview-shortcuts>:is(button,a){transition:transform 220ms cubic-bezier(.16,1,.3,1),box-shadow 220ms ease,border-color 200ms ease}
 #siii-personal .siii-personal-nav-link{transition:transform 200ms cubic-bezier(.16,1,.3,1),background-color 160ms ease}
@@ -308,7 +302,9 @@ html[data-sii-theme=dark] #siii-personal .sii-command-trigger kbd{color:#f7f2ea}
  #siii-personal .siii-shared-glass-metric:nth-child(2){animation:siii-personal-rise 380ms cubic-bezier(.16,1,.3,1) both;animation-delay:75ms}
  #siii-personal .siii-shared-glass-metric:nth-child(3){animation:siii-personal-rise 380ms cubic-bezier(.16,1,.3,1) both;animation-delay:110ms}
  #siii-personal .siii-shared-glass-metric:nth-child(4){animation:siii-personal-rise 380ms cubic-bezier(.16,1,.3,1) both;animation-delay:145ms}
- #siii-personal .siii-overview-detail-grid{animation:siii-personal-rise 420ms cubic-bezier(.16,1,.3,1) both;animation-delay:170ms}
+ #siii-personal .siii-overview-detail-grid>:where(.siii-overview-panel){animation:siii-personal-rise 350ms cubic-bezier(.16,1,.3,1) both;animation-delay:95ms}
+ #siii-personal .siii-overview-detail-grid>:nth-child(2){animation-delay:140ms}
+ #siii-personal .siii-overview-detail-grid>:nth-child(3){animation-delay:185ms}
  #siii-personal .siii-overview-progress{animation:siii-personal-rise 440ms cubic-bezier(.16,1,.3,1) both;animation-delay:200ms}
  #siii-personal .siii-student-aside{animation:siii-personal-rise 460ms cubic-bezier(.16,1,.3,1) both;animation-delay:150ms}
 }

@@ -16,10 +16,12 @@ export async function personalNavigate(page:Page,label:string){
   // destination, not by the top-level tab name (Servicios -> Trámites).
   const group=nav.locator('.siii-personal-nav-group').filter({hasText:targetName});
   await expect(group).toHaveCount(1);
-  // A transiently hidden link does not imply the disclosure is closed.
-  // Clicking an already-open group would close it and hide the destination.
-  if(await group.getAttribute('open')===null)await group.locator('summary').click();
-  await expect(group).toHaveAttribute('open','',{timeout:10000});
+  // Active-route updates can settle while a disclosure is opening.
+  // Retry the real user action only if the link is still hidden.
+  await expect(async()=>{
+   if(await group.getAttribute('open')===null)await group.locator('summary').click();
+   await expect(link).toBeVisible({timeout:1000});
+  }).toPass({timeout:12000,intervals:[150,300,650]});
  }
  await expect(link).toBeVisible();
  await link.click();

@@ -169,7 +169,7 @@ test('privileged MFA remains required after fresh step-up and cannot be revoked'
   expect((await sql.query("SELECT count(*)::int AS total FROM auth_mfa_factors WHERE user_id=(SELECT id FROM platform_users WHERE username=$1) AND enabled_at IS NOT NULL AND revoked_at IS NULL AND secret_encrypted IS NOT NULL",[users.protected])).rows[0].total).toBe(1);
   // Client step-up state can settle before router.refresh restores streamed page metadata.
   await expect(page).toHaveURL(/\/dashboard\/security$/);
-  await expect(page).toHaveTitle('SII · Sistema Institucional Integral');
+  await expect(page).toHaveTitle('Cuenta y seguridad | SIII');
   await expect(page.getByRole('heading',{name:'Cuenta y seguridad.',exact:true})).toBeVisible();
   await accessible(page);
 });

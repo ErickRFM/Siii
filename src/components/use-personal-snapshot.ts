@@ -24,15 +24,13 @@ export function usePersonalSnapshot(institutionId:string,kind:'student'|'teacher
  const scope=`${actorId}:${institutionId}:${kind}:${permissionContext}`;
  const [state,setState]=useState<State>(()=>initial(scope,view));
  const active=useRef<AbortController|null>(null);
- const lastCheckedAt=useRef(0);
  const refresh=useCallback(async(background=false)=>{
   // Coalesce focus + visibility while a request is active. Returning to a page
   // always revalidates: a record link can change without changing capabilities.
-  // Browser focus can fire immediately after visibilitychange. Do not request the
-  // same five resources again unless the user explicitly refreshes or returns.
-  if(background&&(active.current||Date.now()-lastCheckedAt.current<8000))return;
+  // A direct focus event MUST always revalidate identity and academic authority:
+  // suppress duplicate background checks only while another check is active.
+  if(background&&active.current)return;
   active.current?.abort();const controller=new AbortController();active.current=controller;
-  lastCheckedAt.current=Date.now();
   setState(previous=>previous.scope===scope&&previous.view===view?{...previous,loading:true,error:''}:initial(scope,view));
   try{
    if(!allowed){setState({...initial(scope,view),accessChanged:!permissions.loading&&Boolean(permissions.data),loading:permissions.loading,error:permissions.loading?'':'Tu acceso cambió. Actualiza los permisos o inicia sesión nuevamente.'});return}

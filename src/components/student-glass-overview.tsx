@@ -74,7 +74,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     <SiiiGlassPanelHeading title="Mi progreso académico registrado" action={quick('Historial','academic','grades')}/>
     <div className="siii-overview-progress-body">
      <div className="siii-overview-progress-summary">
-      <SiiiProgressRing value={!m.incomplete.courses&&!m.incomplete.grades&&profile?m.publicationRatio:null} label="Proporción de inscripciones consultadas con calificación publicada" size={140}/>
+      <SiiiProgressRing value={!m.incomplete.courses&&!m.incomplete.grades&&profile?m.publicationRatio:null} label="Proporción de inscripciones consultadas con calificación publicada" size={m.published.length<=1?112:140}/>
       <div><small>Créditos con nota publicada</small><strong>{!profile?'—':m.incomplete.courses||m.incomplete.grades?'—':m.creditsWithPublishedGrade}</strong><small>{!profile?'Sin datos vinculados':m.incomplete.courses||m.incomplete.grades?'Datos incompletos':`${m.publishedEnrolledSections} de ${m.enrolledSections} inscripciones consultadas`}</small></div>
      </div>
      <div className="siii-overview-term-bars">

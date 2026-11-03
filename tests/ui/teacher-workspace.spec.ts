@@ -32,7 +32,7 @@ test('saved teacher grade draft survives reload; closed term remains read-only',
  await sql.query("UPDATE academic_terms SET status='inactive' WHERE id=$1",[f.term]);await page.reload();await personalNavigate(page,'Mis grupos');await page.getByRole('button',{name:'Evaluar SYS-202'}).click();await expect(page.getByText(/Periodo cerrado.*consulta/)).toBeVisible();await expect(page.getByRole('button',{name:'Guardar',exact:true})).toHaveCount(0);
 });
 test('unlinked and offline states give truthful recovery guidance',async({page})=>{
- const f=await portalFixture(sql);await sql.query('UPDATE teacher_account_links SET revoked_at=now() WHERE membership_id=$1',[f.teacher.member]);await enter(page,f);await expect(page.getByText('Perfil docente aún sin vincular',{exact:true})).toBeVisible();await personalNavigate(page,'Mis grupos');await expect(page.locator('.sii-teacher-navigation [role="tab"]').filter({hasText:'Evaluaciones'})).toBeDisabled();
+ const f=await portalFixture(sql);await sql.query('UPDATE teacher_account_links SET revoked_at=now() WHERE membership_id=$1',[f.teacher.member]);await enter(page,f);await expect(page.getByText('Perfil docente aún sin vincular',{exact:true})).toBeVisible();await personalNavigate(page,'Mis grupos');await expect(page.getByRole('region',{name:'Evaluaciones docentes'})).toHaveCount(0);await expect(page.getByRole('button',{name:/Evaluar SYS-/})).toHaveCount(0);
  await page.context().setOffline(true);await expect(page.getByRole('alert').filter({hasText:'Sin conexión'})).toBeVisible();await page.context().setOffline(false);await expect(page.getByText('Perfil docente aún sin vincular',{exact:true})).toBeVisible();
 });
 

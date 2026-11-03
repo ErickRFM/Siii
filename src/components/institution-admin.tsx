@@ -4,6 +4,8 @@ import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {NativeSelect} from '@/components/ui/native-select';
 import {SiiNavIcon} from './sii-nav-icon';
+import SiiiWorkspaceHeading from './ui/siii-workspace-heading';
+import {RefreshCw} from 'lucide-react';
 
 import {useInstitutionConfirmation} from './sii-confirmation';
 
@@ -11,7 +13,7 @@ import Link from 'next/link';
 import type {Route} from 'next';
 import {useCallback, useEffect, useRef, useState, type FormEvent} from 'react';
 import type {InstitutionAdminDTO} from '@/shared/institution-admin/policy';
-import {hasInstitutionCapability, SecurityActionLink, useInstitutionCapabilities} from './institution-capabilities';
+import {SecurityActionLink, useInstitutionCapabilities} from './institution-capabilities';
 import './institution-admin.css';
 
 type Actions = {updateSettings: boolean; changeStatus: boolean; readAudit: boolean};
@@ -108,7 +110,7 @@ export default function InstitutionAdministration({initialInstitution, actions}:
   const base = `/api/v1/institutions/${institutionId}`;
   const returnTo = `/dashboard/institutions/${institutionId}/admin`;
   const online = useOnline();
-  const {data: capabilities, refresh: refreshCapabilities} = useInstitutionCapabilities();
+  const {refresh: refreshCapabilities} = useInstitutionCapabilities();
   const [institution, setInstitution] = useState(initialInstitution);
   const [draft, setDraft] = useState(() => editable(initialInstitution));
   const [reason, setReason] = useState('');
@@ -189,23 +191,15 @@ export default function InstitutionAdministration({initialInstitution, actions}:
     void mutate('status', {status: nextStatus, reason: statusReason.trim()});
   }
   const businessAvailable = institution.status === 'active' && !blocked;
-  const academicAvailable = ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasInstitutionCapability(capabilities, `${resource}.read`));
   return <div className="sii-institution-admin siii-glass-workspace">{confirmation}
     {!online && <p role="status" className="sii-catalog-error">Sin conexión. Las operaciones están deshabilitadas; tu borrador se conserva.</p>}
     {error && <p id="institution-admin-error" role="alert" tabIndex={-1} ref={feedback} className="sii-catalog-error">{error}</p>}
     {notice && <p role="status" className="sii-catalog-notice">{notice}</p>}
     {(needsSecurity || blocked || (!archived && !actions.updateSettings && !actions.changeStatus)) && <div className="sii-info-banner sii-admin-security-banner"><div className="sii-admin-security-copy"><strong>Revisa tu seguridad de cuenta</strong><p>Confirma tu identidad para volver a consultar las acciones disponibles.</p></div><SecurityActionLink returnTo={returnTo}/></div>}
     <section className="sii-panel sii-administration-summary" aria-label="Contexto de administración">
-      <div><span className="sii-admin-summary-label">CONTEXTO INSTITUCIONAL</span><h2>{institution.name}</h2><p className="sii-admin-summary-meta">{institution.code} · <strong data-status={institution.status}>{statusLabels[institution.status]}</strong> · Versión {institution.version}</p><p className="sii-admin-summary-date">Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
-      <Button variant="outline" type="button" className="sii-outline-button" disabled={saving || loading || !online} onClick={() => void reload()}>Recargar configuración vigente</Button>
+      <div><SiiiWorkspaceHeading level={2} title={institution.name} caption={<>{institution.code} · <strong data-status={institution.status}>{statusLabels[institution.status]}</strong> · Versión {institution.version}</>} action={<Button size="icon" variant="ghost" type="button" aria-label="Recargar configuración vigente" title="Recargar configuración vigente" disabled={saving || loading || !online} onClick={() => void reload()}><RefreshCw size={16} aria-hidden="true"/></Button>}/><p className="sii-admin-summary-date">Actualizada: <time dateTime={institution.updatedAt}>{formatDate(institution.updatedAt)}</time></p></div>
       {archived ? <p>Esta institución está archivada. Su configuración y estado son de solo lectura.</p> : !businessAvailable ? <p>La administración se limita a configuración, estado e historial. Las operaciones institucionales ordinarias permanecen bloqueadas.</p> : null}
     </section>
-    {businessAvailable && <nav className="sii-panel sii-administration-links" aria-label="Áreas administrativas">
-      {academicAvailable && <Link href={`/dashboard/institutions/${institutionId}/academic`}><span aria-hidden="true"><SiiNavIcon name="book"/></span>Campus, programas, periodos, planes y materias</Link>}
-      {hasInstitutionCapability(capabilities, 'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`}><span aria-hidden="true"><SiiNavIcon name="users"/></span>Usuarios y membresías</Link>}
-      {hasInstitutionCapability(capabilities, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`}><span aria-hidden="true"><SiiNavIcon name="roles"/></span>Roles y permisos por ámbito</Link>}
-      {hasInstitutionCapability(capabilities, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`}><span aria-hidden="true"><SiiNavIcon name="mail"/></span>Invitaciones y altas</Link>}
-    </nav>}
     <nav className="sii-workspace-section-nav" aria-label="Secciones de administración"><a href="#institution-settings">Configuración</a><a href="#institution-state">Estado institucional</a>{actions.readAudit&&<a href="#institution-history">Historial y auditoría</a>}</nav>
     <div className="sii-administration-grid" aria-busy={loading || saving}>
       <section id="institution-settings" className="sii-panel sii-administration-card"><h2 ref={settingsHeading} tabIndex={-1}>Configuración institucional</h2>

@@ -81,6 +81,9 @@ export function SiiDataTable<T extends { id: string }>({
   const last = Math.max(0, Math.ceil(ordered.length / pageSize) - 1);
   const current = Math.min(page, last);
   const visible = ordered.slice(current * pageSize, current * pageSize + pageSize);
+  // Keep sort controls stable while filtering a multi-record collection.
+  const hasUsefulSorting=rows.length>1;
+  const hasUsefulSearch=Boolean(searchText)&&(rows.length>1||Boolean(query.trim()));
   const sortable = columns
     .map((column, index) => ({ ...column, index }))
     .filter((column) => column.sortValue);
@@ -100,9 +103,9 @@ export function SiiDataTable<T extends { id: string }>({
 
   return (
     <div className={cn('sii-data-table siii-personal-data-table min-w-0 space-y-2', className)}>
-      {(searchText || sortable.length > 0) && (
+      {(hasUsefulSearch || (sortable.length > 0 && hasUsefulSorting)) && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {searchText && (
+          {hasUsefulSearch && (
             <label className="block min-w-0 flex-1 text-sm font-medium">
               <span className="sr-only">Buscar en {label.toLocaleLowerCase('es-MX')}</span>
               <Input
@@ -116,7 +119,7 @@ export function SiiDataTable<T extends { id: string }>({
               />
             </label>
           )}
-          {sortable.length > 0 && (
+          {sortable.length > 0 && hasUsefulSorting && (
             <div className="flex flex-wrap items-end gap-2 md:hidden">
               <label className="min-w-0 flex-1 space-y-2 text-sm font-medium">
                 Ordenar por
@@ -168,7 +171,7 @@ export function SiiDataTable<T extends { id: string }>({
                         key={index}
                         scope="col"
                         aria-sort={
-                          column.sortValue
+                          column.sortValue && hasUsefulSorting
                             ? sortIndex === index
                               ? direction === 'asc'
                                 ? 'ascending'
@@ -178,10 +181,10 @@ export function SiiDataTable<T extends { id: string }>({
                         }
                         className="whitespace-nowrap"
                       >
-                        {column.sortValue ? (
+                        {column.sortValue && hasUsefulSorting ? (
                           <button
                             type="button"
-                            className="inline-flex min-h-9 items-center gap-1 rounded-md bg-transparent px-1 text-left text-xs font-semibold shadow-none hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                            className="inline-flex min-h-7 items-center gap-1 rounded-sm bg-transparent px-0.5 text-left text-xs font-semibold shadow-none transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                             onClick={() => chooseSort(index)}
                             aria-label={`Ordenar por ${column.label}`}
                           >
@@ -216,10 +219,10 @@ export function SiiDataTable<T extends { id: string }>({
             {visible.map((row) => (
               <dl
                 key={row.id}
-                className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3"
+                className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3 min-[460px]:grid-cols-2"
               >
                 {columns.map((column, index) => (
-                  <div key={index} className="siii-personal-record-field min-w-0 break-words">
+                  <div key={index} className={cn('siii-personal-record-field min-w-0 break-words',index===0&&'min-[460px]:col-span-2')}>
                     <dt className="siii-personal-record-label text-xs font-medium text-muted-foreground">
                       {column.label}
                     </dt>

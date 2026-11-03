@@ -46,8 +46,8 @@ test('student consults official own academic records in both themes across all r
  test.setTimeout(180000);await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await expect(page.getByRole('heading',{name:'Alumna propia Sintético'})).toBeVisible();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
  await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
- await personalNavigate(page,'Mis docentes');await expect(page.getByRole('cell').getByText('Docente oficial Asignado',{exact:true})).toBeVisible();await expect(page.getByRole('tabpanel').last()).not.toContainText('private-teacher');
- await personalNavigate(page,'Calificaciones');await expect(page.getByRole('tabpanel').last()).toContainText('8.50');await expect(page.getByRole('tabpanel').last()).not.toContainText('9.99');
+ await personalNavigate(page,'Mis docentes');await expect(page.getByRole('cell').getByText('Docente oficial Asignado',{exact:true})).toBeVisible();await expect(page.locator('#siii-student-current-view')).not.toContainText('private-teacher');
+ await personalNavigate(page,'Calificaciones');await expect(page.locator('#siii-student-current-view')).toContainText('8.50');await expect(page.locator('#siii-student-current-view')).not.toContainText('9.99');
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Exportar CSV'}).click();expect((await download).suggestedFilename()).toMatch(/historial-informativo.*\.csv$/);
  await expect(page.getByRole('region',{name:'Calendario semanal'})).toHaveCount(0);await expect(page.getByRole('button',{name:/Cancelar clase/})).toHaveCount(0);
  for(const theme of ['light','dark']){
@@ -86,7 +86,7 @@ test('V3 student home stays institutional and loads only dashboard resources',as
  await expect(page.getByRole('navigation',{name:'Navegación institucional'}).getByRole('link',{name:'Carga académica',exact:true})).toBeVisible();
  expect(resources).not.toContain('schedule');expect(resources).toContain('grades');expect(resources).not.toContain('payments');expect(resources).not.toContain('teachers');
  await personalNavigate(page,'Académico');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
- await personalNavigate(page,'Calificaciones');await expect(page.getByRole('tabpanel').last()).toContainText('8.50');
+ await personalNavigate(page,'Calificaciones');await expect(page.locator('#siii-student-current-view')).toContainText('8.50');
 });
 test('student sidebar opens real academic and finance sections without duplicating operational schedules',async({page})=>{
  await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
@@ -102,10 +102,10 @@ test('V3 revalidation preserves displayed records and search while a valid profi
  await page.route('**/portal/student/profile',async route=>{const response=await route.fetch();await gate;await route.fulfill({response})});
  try{await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();await expect(page.getByRole('status').filter({hasText:'Actualizando'})).toBeVisible()}finally{release()}
 });
-test('V3 refresh keeps the academic search and a denied collection removes all private content',async({page})=>{
+test('V3 refresh preserves a single academic record and a denied collection removes all private content',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(page,'Académico');
- const search=page.getByRole('searchbox',{name:'Buscar en inscripciones'});await search.fill('Álgebra');
- await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();await expect(search).toHaveValue('Álgebra');await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
+ await expect(page.getByRole('searchbox',{name:'Buscar en inscripciones'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.getByRole('button',{name:'Actualizar mi información'})).toBeEnabled();await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toBeVisible();
  await page.route('**/portal/student/courses',route=>route.fulfill({status:403,json:{error:'FORBIDDEN'}}));
  await page.getByRole('button',{name:'Actualizar mi información'}).click();await expect(page.locator('main [role="alert"]')).toContainText('acceso');await expect(page.getByText('Alumna propia Sintético',{exact:true})).toHaveCount(0);await expect(page.getByRole('cell').getByText('Álgebra institucional',{exact:true})).toHaveCount(0);
 });
@@ -129,7 +129,7 @@ test('V3 mobile destinations remain keyboard accessible and clear records offlin
  const academic=drawer.getByRole('link',{name:'Carga académica',exact:true});await expect(academic).toBeVisible();await academic.focus();await page.keyboard.press('Enter');await expect(drawer).toHaveCount(0);
  await expect(page.getByRole('tablist',{name:'Navegación estudiantil'})).toHaveCount(0);
  await expect(page.getByRole('heading',{name:'Carga académica'})).toBeVisible();
- await expect(page.getByRole('searchbox',{name:'Buscar en inscripciones'})).toBeVisible();
+ await expect(page.locator('.siii-personal-mobile-records')).toBeVisible();
  await expect(page.getByRole('cell')).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Abrir navegación',exact:true})).toBeVisible();
  await context.setOffline(true);await expect(page.locator('main [role="alert"]')).toContainText('Sin conexión');await expect(page.locator('.siii-personal-mobile-records .siii-personal-record')).toHaveCount(0);await context.setOffline(false);await expect(page.locator('.siii-personal-mobile-records .siii-personal-record').first()).toBeVisible();
@@ -163,7 +163,7 @@ for(const departure of ['hidden','blur'] as const)test(`V3 return after ${depart
 });
 test('teacher sees only assigned groups and can open the existing real gradebook',async({page})=>{
  await login(page,f.teacher);await page.goto(`/dashboard/institutions/${f.tenant}/teacher`);await expect(page.getByRole('heading',{name:'Docente oficial Asignado'})).toBeVisible();
- await expect(page.getByRole('tabpanel')).toContainText('SYS-101');await expect(page.getByRole('tabpanel')).not.toContainText('SYS-202');
+ await expect(page.getByRole('region',{name:'Inicio docente'})).toContainText('SYS-101');await expect(page.getByRole('region',{name:'Inicio docente'})).not.toContainText('SYS-202');
  await personalNavigate(page,'Mis grupos');await page.getByRole('button',{name:'Evaluar SYS-101'}).click();await expect(page.getByRole('heading',{name:'Libro de calificaciones'})).toBeVisible();
 });
 test('cashier records an external payment once and student sees its persistent statement',async({page,browser})=>{
@@ -174,7 +174,7 @@ test('cashier records an external payment once and student sees its persistent s
  await page.getByRole('button',{name:'Revisar pago',exact:true}).click();await page.getByRole('button',{name:'Confirmar registro del pago',exact:true}).click();
  await expect(page.getByRole('status').filter({hasText:'Pago registrado'})).toBeVisible();await expect(row).toContainText('Pagada');
  expect((await sql.query('SELECT count(*)::int AS n FROM payment_transactions WHERE order_id=$1',[f.orderId])).rows[0].n).toBe(1);
- const context=await browser.newContext();try{const student=await context.newPage();await login(student);await student.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(student,'Finanzas');await expect(student.getByRole('tabpanel')).toContainText('Pagada');await expect(student.getByRole('tabpanel')).toContainText('BANK-VNEXT-UI')}finally{await context.close()}
+ const context=await browser.newContext();try{const student=await context.newPage();await login(student);await student.goto(`/dashboard/institutions/${f.tenant}/student`);await personalNavigate(student,'Finanzas');await expect(student.locator('#siii-student-current-view')).toContainText('Pagada');await expect(student.locator('#siii-student-current-view')).toContainText('BANK-VNEXT-UI')}finally{await context.close()}
 });
 test('revoked personal membership clears displayed data on revalidation and offers an honest error',async({page})=>{
  await login(page);await page.goto(`/dashboard/institutions/${f.tenant}/student`);await expect(page.getByText('Alumna propia Sintético',{exact:true})).toBeVisible();
@@ -209,7 +209,7 @@ test('denied cashier payment retires the private order and student list',async({
 test('teacher and treasury personal workspaces remain usable across both themes and all requested widths',async({page})=>{
  test.setTimeout(180000);
  for(const [kind,actor] of [['teacher',f.teacher],['financials',f.admin]] as const){
-  await login(page,actor);await page.goto(`/dashboard/institutions/${f.tenant}/${kind}`);await expect(page.getByRole('tabpanel')).toBeVisible();
+  await login(page,actor);await page.goto(`/dashboard/institutions/${f.tenant}/${kind}`);await expect(kind==='teacher'?page.getByRole('region',{name:'Inicio docente'}):page.getByRole('tabpanel')).toBeVisible();
   for(const theme of ['light','dark']){
    if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='dark'?'Activar tema oscuro':'Activar tema claro'}).click();
    for(const width of [360,390,768,1024,1366,1600,1920]){
@@ -221,27 +221,18 @@ test('teacher and treasury personal workspaces remain usable across both themes 
  }
 });
 
-test('student official tables support accessible desktop and mobile sorting',async({page})=>{
+test('single published enrollment uses a calm responsive table without redundant sorting',async({page})=>{
  await login(page);
  await page.goto(`/dashboard/institutions/${f.tenant}/student`);
  await personalNavigate(page,'Académico');
  const region=page.getByRole('region',{name:'Inscripciones'});
- const firstHeader=region.getByRole('columnheader').first();
- await expect(firstHeader).toHaveAttribute('aria-sort','none');
- const sort=region.getByRole('button',{name:'Ordenar por Materia'});
- await sort.click();
- await expect(firstHeader).toHaveAttribute('aria-sort','ascending');
- await sort.click();
- await expect(firstHeader).toHaveAttribute('aria-sort','descending');
+ await expect(region.getByRole('columnheader').first()).not.toHaveAttribute('aria-sort','none');
+ await expect(region.getByRole('button',{name:'Ordenar por Materia'})).toHaveCount(0);
  await page.setViewportSize({width:390,height:844});
- const mobileSort=page.getByRole('combobox',{name:'Ordenar Inscripciones'});
- await expect(mobileSort).toBeVisible();
- await mobileSort.selectOption({label:'Materia'});
- await expect(page.getByRole('button',{name:'Cambiar a orden descendente'})).toBeEnabled();
- await expect(page.getByRole('region',{name:'Inscripciones'}).locator('dl').first()).toBeVisible();
+ await expect(page.getByRole('combobox',{name:'Ordenar Inscripciones'})).toHaveCount(0);
+ await expect(region.locator('dl').first()).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
 });
-
 
 test('mobile student academic pages have a compact heading, one navigation and no document overflow',async({page})=>{
  test.setTimeout(180000);await login(page);await page.goto('/dashboard/institutions/'+f.tenant+'/student');
@@ -266,7 +257,7 @@ test('teacher portal mobile groups keep cards and toolbar within viewport',async
   await page.setViewportSize({width,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+2);
   const header=await page.locator('#siii-personal .sii-topbar').boundingBox();
-  const heading=await page.getByRole('heading',{name:'Mi docencia'}).boundingBox();
+  const heading=await page.getByRole('heading',{name:'Mis grupos',exact:true}).boundingBox();
   if(width<768)expect(heading!.y).toBeGreaterThanOrEqual(header!.y+header!.height-2);
  }
 });
