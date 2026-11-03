@@ -185,7 +185,7 @@ html[data-sii-theme=light] .siii-personal-rail[data-mobile=true]{--siii-personal
 #siii-personal .siii-overview-tags{margin-top:13px;gap:8px;display:flex;flex-wrap:wrap}
 #siii-personal .siii-overview-detail-grid{grid-template-columns:1.3333fr 1fr 1fr;gap:12px;display:grid}
 #siii-personal .siii-overview-heading{gap:8px;min-height:20px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;min-width:0}
-#siii-personal .siii-overview-quick{padding:0;min-height:32px;gap:4px;font-size:11px;line-height:16px;font-weight:500;display:inline-flex;justify-content:space-between;align-items:center;min-width:0;border:0;background:transparent;text-align:left}
+#siii-personal .siii-overview-quick{padding:0;min-height:24px;gap:4px;font-size:11px;line-height:16px;font-weight:500;display:inline-flex;justify-content:space-between;align-items:center;min-width:0;border:0;background:transparent;text-align:left}
 #siii-personal .siii-overview-listrow{padding:7px 0;gap:12px;border-bottom:1px solid #dfddd115;padding-block:5.5px;min-height:54px;display:flex;justify-content:space-between;align-items:center;min-width:0}
 #siii-personal .siii-overview-listrow:last-child{border-bottom:0}
 #siii-personal .siii-overview-listrow :is(strong,small){display:block}
@@ -267,7 +267,7 @@ html[data-sii-theme=dark] #siii-personal .sii-command-trigger kbd{color:#f7f2ea}
  from{transform:translate3d(0,6px,0)}
  to{transform:translate3d(0,0,0)}
 }
-#siii-personal .siii-shared-glass-metric{transition:transform 260ms cubic-bezier(.16,1,.3,1),box-shadow 260ms cubic-bezier(.16,1,.3,1),border-color 200ms ease;will-change:transform}
+#siii-personal .siii-shared-glass-metric{transition:transform 260ms cubic-bezier(.16,1,.3,1),box-shadow 260ms cubic-bezier(.16,1,.3,1),border-color 200ms ease}
 #siii-personal .siii-overview-panel{transition:transform 280ms cubic-bezier(.16,1,.3,1),box-shadow 280ms cubic-bezier(.16,1,.3,1),border-color 200ms ease}
 #siii-personal .siii-overview-shortcuts>:is(button,a){transition:transform 220ms cubic-bezier(.16,1,.3,1),box-shadow 220ms ease,border-color 200ms ease}
 #siii-personal .siii-personal-nav-link{transition:transform 200ms cubic-bezier(.16,1,.3,1),background-color 160ms ease}
@@ -300,7 +300,9 @@ html[data-sii-theme=dark] #siii-personal .sii-command-trigger kbd{color:#f7f2ea}
  #siii-personal .siii-shared-glass-metric:nth-child(2){animation:siii-personal-rise 380ms cubic-bezier(.16,1,.3,1) both;animation-delay:75ms}
  #siii-personal .siii-shared-glass-metric:nth-child(3){animation:siii-personal-rise 380ms cubic-bezier(.16,1,.3,1) both;animation-delay:110ms}
  #siii-personal .siii-shared-glass-metric:nth-child(4){animation:siii-personal-rise 380ms cubic-bezier(.16,1,.3,1) both;animation-delay:145ms}
- #siii-personal .siii-overview-detail-grid{animation:siii-personal-rise 420ms cubic-bezier(.16,1,.3,1) both;animation-delay:170ms}
+ #siii-personal .siii-overview-detail-grid>:where(.siii-overview-panel){animation:siii-personal-rise 350ms cubic-bezier(.16,1,.3,1) both;animation-delay:95ms}
+ #siii-personal .siii-overview-detail-grid>:nth-child(2){animation-delay:140ms}
+ #siii-personal .siii-overview-detail-grid>:nth-child(3){animation-delay:185ms}
  #siii-personal .siii-overview-progress{animation:siii-personal-rise 440ms cubic-bezier(.16,1,.3,1) both;animation-delay:200ms}
  #siii-personal .siii-student-aside{animation:siii-personal-rise 460ms cubic-bezier(.16,1,.3,1) both;animation-delay:150ms}
 }
