@@ -10,13 +10,16 @@ import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle} from '@/compon
 export function SiiPageIntro({eyebrow,title,description,actions,hero=false}:{
  eyebrow:string;title:string;description:string;actions?:ReactNode;hero?:boolean;
 }){
- return <>
-   <div className="sii-page-eyebrow">{eyebrow}<span className="sii-page-eyebrow-line"/></div>
-   <div className={(hero?'sii-page-heading sii-kit-page-heading sii-kit-page-heading--hero':'sii-page-heading sii-kit-page-heading')+' flex flex-wrap items-start justify-between gap-4'}><div className="min-w-0">
-     <h1>{title}<span className="sii-welcome-period">.</span></h1>
+ return <header data-slot="siii-page-intro" className="siii-v2-page-intro min-w-0">
+   <div className="sii-page-eyebrow">{eyebrow}</div>
+   <div className={(hero?'sii-page-heading sii-kit-page-heading sii-kit-page-heading--hero':'sii-page-heading sii-kit-page-heading')+' flex flex-wrap items-start justify-between gap-4'}>
+    <div className="min-w-0">
+     <h1>{title}</h1>
      <p>{description}</p>
-   </div>{actions}</div>
- </>;
+    </div>
+    {actions&&<div className="siii-v2-page-actions flex min-w-0 shrink-0 flex-wrap gap-2">{actions}</div>}
+   </div>
+ </header>;
 }
 export function SiiSectionHeader({eyebrow,title,description,right,outside=false,workspace=false}:{
  eyebrow:string;title:string;description?:string;right?:ReactNode;outside?:boolean;workspace?:boolean;
