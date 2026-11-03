@@ -14,7 +14,7 @@ export function SiiPageIntro({eyebrow,title,description,actions,hero=false}:{
    <div className="sii-page-eyebrow">{eyebrow}</div>
    <div className={(hero?'sii-page-heading sii-kit-page-heading sii-kit-page-heading--hero':'sii-page-heading sii-kit-page-heading')+' flex flex-wrap items-start justify-between gap-4'}>
     <div className="min-w-0">
-     <h1>{title}</h1>
+     <h1 aria-label={title.endsWith('.')?title:`${title}.`}>{title}</h1>
      <p>{description}</p>
     </div>
     {actions&&<div className="siii-v2-page-actions flex min-w-0 shrink-0 flex-wrap gap-2">{actions}</div>}
