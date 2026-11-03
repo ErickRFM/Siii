@@ -140,6 +140,13 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
  await page.evaluate(async()=>{await document.fonts.ready});
  if(await page.locator('html').getAttribute('data-sii-theme')!==theme)await page.getByRole('button',{name:theme==='light'?'Activar tema claro':'Activar tema oscuro',exact:true}).click();
  await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
+ // Independent evidence capture ensures both mobile and desktop V2 views are archived
+ // even if a later accessibility, layout or strict PNG baseline assertion fails.
+ for(const captureWidth of [1344,390]){
+  await page.setViewportSize({width:captureWidth,height:896});
+  await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
+  await page.screenshot({path:`.p0-local/fidelity/${role}-${theme}-${captureWidth}.png`,animations:'disabled',fullPage:true});
+ }
  let visualBaselineFailure:unknown;
  for(const width of [1344,390]){
   await page.setViewportSize({width,height:896});await expect(page.locator('.siii-overview-metrics>section')).toHaveCount(4);
