@@ -5,7 +5,7 @@ import { db } from '@/infrastructure/database';
 import { academicPrograms } from '../../../../../../db/schema';
 import { getIdentity, getInstitutionAccess } from '@/shared/auth/session';
 import { can } from '@/shared/auth/capabilities';
-import { privilegedAssuranceAllows } from '@/shared/auth/privileged-policy';
+import { privilegedAssuranceAllows, careerAdministrationAssuranceAllows } from '@/shared/auth/privileged-policy';
 import { uuid } from '@/shared/auth/validation';
 import { SiiPageIntro } from '@/components/ui/sii-kit';
 
@@ -19,7 +19,7 @@ export default async function CareersPage({ params }: { params: Promise<{ instit
   if (!uuid.safeParse(institutionId).success) notFound();
   const access = (await getInstitutionAccess(user.id)).find(value => value.institutionId === institutionId);
   if (!access) notFound();
-  if (!privilegedAssuranceAllows(access.grants, user)) {
+  if (!privilegedAssuranceAllows(access.grants, user) || !careerAdministrationAssuranceAllows(user)) {
     redirect('/dashboard/security');
   }
   const subject = { id: user.id, active: user.isActive, mustChangePassword: user.mustChangePassword, grants: access.grants };
