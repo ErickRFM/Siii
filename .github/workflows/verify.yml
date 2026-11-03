@@ -1,7 +1,8 @@
 name: Verify SIS
 on:
+  # Branches with PRs run once through pull_request; only deployed main needs push CI.
   push:
-    branches: [main, 'feat/**', 'fix/**', 'chore/p0-1-release-gates', 'codex/**']
+    branches: [main]
   pull_request:
     branches: [main, 'feat/**', 'chore/p0-1-release-gates', 'codex/**']
 permissions:
