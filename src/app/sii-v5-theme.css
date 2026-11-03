@@ -14,8 +14,8 @@ html[data-sii-theme] #siii-personal .siii-v2-action-heading strong{font-size:13p
 html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
 html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts>:is(button,a){min-height:55px;font-size:12px}
 html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1.32fr) minmax(0,.9fr);gap:12px}
-html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:span 2;min-height:375px}
-html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(n+2){min-height:180px}
+html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:auto;min-height:285px}
+html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(3){grid-column:1/-1;min-height:220px}
 html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-heading{padding:0 0 18px;border-bottom:1px solid var(--solid-edge)}
 html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-heading h1{font-size:clamp(22px,2vw,30px);font-weight:750;letter-spacing:-.03em}
 @media(max-width:900px){html[data-sii-theme] #siii-personal .siii-v2-action-dock{grid-template-columns:minmax(0,1fr)}}
@@ -31,3 +31,14 @@ html[data-sii-theme] .sii-app.sii-ui .siii-v2-page-intro h1{font-size:clamp(23px
 html[data-sii-theme] .sii-app.sii-ui .siii-v2-page-intro p{max-width:68ch;font-size:13px;color:var(--solid-muted);line-height:1.6}
 html[data-sii-theme] #siii-personal #avisos{background:var(--solid-panel)!important;backdrop-filter:none!important}
 @media(max-width:430px){html[data-sii-theme] .sii-login .sii-auth-story-content{display:none!important}html[data-sii-theme] .sii-login .sii-auth-story{display:none!important}}
+
+/* V2 audit: compact academic workbench, no empty spanning cards. */
+html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1.14fr) minmax(0,1fr)}
+html[data-sii-theme] #siii-personal .siii-overview-quick{color:var(--solid-accent)!important}
+html[data-sii-theme=light] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#fff!important}
+html[data-sii-theme=dark] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#24131b!important}
+html[data-sii-theme] #siii-personal section#avisos{background-color:var(--solid-panel)!important;backdrop-filter:none!important}
+html[data-sii-theme] .sii-app.sii-ui :is(.sii-catalog-pagination span[aria-live],.sii-result-count,.sii-security-coming,.sii-security-aside>p){color:var(--solid-muted)!important}
+html[data-sii-theme] .sii-app.sii-ui .sii-topbar :is(.text-muted-foreground,.sii-topbar-label){color:var(--solid-muted)!important}
+@media(max-width:767px){html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(3){grid-column:auto}}
+@media(forced-colors:active){html[data-sii-theme] #siii-personal section#avisos{background-color:Canvas!important;color:CanvasText!important}}
