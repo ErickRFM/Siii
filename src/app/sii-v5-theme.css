@@ -45,3 +45,9 @@ html[data-sii-theme] .sii-app.sii-ui .sii-topbar :is(.text-muted-foreground,.sii
 
 /* Semantic muted surfaces override translucent legacy backgrounds without disabling tab behavior. */
 html[data-sii-theme] .sii-app.sii-ui :is(.sii-workspace .bg-muted,.sii-grading-navigation){background:var(--solid-raised)!important;color:var(--solid-text);border-color:var(--solid-edge)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* Solid accessibility contract: components formerly inherited muted text over glass-gray backdrops. */
+html[data-sii-theme] .sii-app.sii-ui .sii-grading-navigation{background:var(--solid-raised);color:var(--solid-text)}
+html[data-sii-theme] .sii-app.sii-ui .sii-grading-navigation [role=tab]{color:var(--solid-text)}
+html[data-sii-theme] .sii-app.sii-ui [data-slot=empty-description]{color:var(--solid-text)}
+html[data-sii-theme] .sii-app.sii-ui .sii-users article[role=listitem]{background:var(--solid-panel);color:var(--solid-text)}
