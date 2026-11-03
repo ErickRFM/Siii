@@ -33,10 +33,13 @@ describe('trusted capability disclosure',()=>{
   const grant={...access.grants[0],role:'admin' as const,scopeType:'institution' as const,scopeId:null};
   expect(disclose({...subject,grants:[grant]},{...access,roles:['admin'],grants:[grant]},assurance,now).capabilities).not.toContain('admissions.manage');
  });
- it('does not invent links from a scoped grant to courses, terms, users or future domains',()=>{
-  const data=disclose(subject,access,assurance,now);
+ it('discloses only backed career catalog capabilities after coordinator MFA verification',()=>{
+  const data=disclose(subject,access,{mfaConfigured:true,mfaVerified:true,stepUpAt:now},now);
   expect(data.capabilities).toEqual([]);
   expect(data.scopedCapabilities[0].capabilities).toEqual(['programs.read','programs.manage','curricula.read','curricula.manage']);
+  const unverified=disclose(subject,access,assurance,now);
+  expect(unverified.restricted).toBe(true);
+  expect(unverified.scopedCapabilities[0].capabilities).toEqual([]);
  });
  it('exposes onboarding assurance without operable capabilities or delegation',()=>{
   const privileged={...access,roles:['admin'] as const,grants:[{...access.grants[0],role:'admin' as const,scopeType:'institution' as const,scopeId:null}]};
