@@ -184,7 +184,7 @@ export function SiiDataTable<T extends { id: string }>({
                         {column.sortValue && hasUsefulSorting ? (
                           <button
                             type="button"
-                            className="inline-flex min-h-9 items-center gap-1 rounded-md bg-transparent px-1 text-left text-xs font-semibold shadow-none hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                            className="inline-flex min-h-7 items-center gap-1 rounded-sm bg-transparent px-0.5 text-left text-xs font-semibold shadow-none transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                             onClick={() => chooseSort(index)}
                             aria-label={`Ordenar por ${column.label}`}
                           >
@@ -222,7 +222,7 @@ export function SiiDataTable<T extends { id: string }>({
                 className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3 min-[460px]:grid-cols-2"
               >
                 {columns.map((column, index) => (
-                  <div key={index} className="siii-personal-record-field min-w-0 break-words">
+                  <div key={index} className={cn('siii-personal-record-field min-w-0 break-words',index===0&&'min-[460px]:col-span-2')}>
                     <dt className="siii-personal-record-label text-xs font-medium text-muted-foreground">
                       {column.label}
                     </dt>
