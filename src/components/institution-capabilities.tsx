@@ -76,7 +76,16 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
       document.removeEventListener('visibilitychange', visible);
     };
   }, [institutionId, revision, pathname]);
-  return <Context.Provider value={{ data, loading, error, refresh }}>{children}</Context.Provider>;
+  // Scope the painted projection synchronously, before the route-change effect.
+  // An old institution may have finished loading while React is navigating to another.
+  const switchingInstitution=lastInstitution.current!==institutionId;
+  const scopedData=data?.institutionId===institutionId?data:null;
+  return <Context.Provider value={{
+    data:scopedData,
+    loading:loading||Boolean(institutionId&&switchingInstitution),
+    error:switchingInstitution?'':error,
+    refresh
+  }}>{children}</Context.Provider>;
 }
 export function useInstitutionCapabilities() { return useContext(Context); }
 
