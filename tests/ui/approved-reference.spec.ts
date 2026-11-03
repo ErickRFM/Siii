@@ -196,6 +196,13 @@ for(const role of ['student','teacher'] as const)for(const theme of ['dark','lig
    return {border:style.borderTopWidth,shadow:style.boxShadow,blur:style.backdropFilter,left:box.left,right:box.right,width:box.width};
   }));
   expect(appearance.length).toBeGreaterThan(4);
+  // A viewport can have no horizontal scroll while academic cards are crushed
+  // into letter-by-letter columns. Guard actual panel width as well.
+  if(width<=430){
+   const panelWidths=await page.locator('#siii-personal .siii-overview-detail-grid>.siii-overview-panel').evaluateAll(nodes=>nodes.map(el=>el.getBoundingClientRect().width));
+   expect(panelWidths.length).toBeGreaterThanOrEqual(2);
+   expect(Math.min(...panelWidths),'academic cards must stack at mobile widths').toBeGreaterThanOrEqual(300);
+  }
   for(const surface of appearance){
    expect(surface.border).toBe('1px');
    expect(surface.shadow).toBe('none');
