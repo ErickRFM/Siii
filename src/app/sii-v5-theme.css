@@ -36,7 +36,7 @@ html[data-sii-theme] #siii-personal #avisos{background:var(--solid-panel)!import
 html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1.14fr) minmax(0,1fr)}
 html[data-sii-theme] #siii-personal .siii-overview-quick{color:var(--solid-accent)!important}
 html[data-sii-theme=light] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#fff!important}
-html[data-sii-theme=dark] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#24131b!important}
+html[data-sii-theme=dark] #siii-personal .siii-overview-primary{background:var(--solid-accent)!important;color:#0a0c13!important}
 html[data-sii-theme] #siii-personal .siii-student-aside>section#avisos{background:var(--solid-panel)!important;backdrop-filter:none!important}
 html[data-sii-theme] .sii-app.sii-ui :is(.sii-catalog-pagination span[aria-live],.sii-result-count,.sii-security-coming,.sii-security-aside>p){color:var(--solid-muted)!important}
 html[data-sii-theme] .sii-app.sii-ui .sii-topbar :is(.text-muted-foreground,.sii-topbar-label){color:var(--solid-muted)!important}
