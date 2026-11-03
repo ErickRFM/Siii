@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {BookOpen,ClipboardCheck,FileText,GraduationCap,RefreshCw,Users} from 'lucide-react';
 import type {PersonalProfile,PersonalTeachingGroup} from '@/modules/portal/contracts';
 import SiiiGlassCalendar from './siii-glass-calendar';
+import {SiiiDashboardActions} from './ui/siii-dashboard-actions';
 import {SiiiProgressRing} from './siii-glass-progress';
 import {SiiiGlassMetric,SiiiGlassMetricsRow,SiiiGlassPanel,SiiiGlassPanelHeading} from './ui/siii-glass-kit';
 
@@ -22,6 +23,7 @@ export default function TeacherGlassOverview({profile,groups,institutionId,insti
     <span className="siii-overview-eyebrow">Buen día,</span><h2>{profile?.firstName??'Mi docencia'}<span className="sr-only"> {profile?.lastName}</span></h2><p>{institutionName}</p>
     <div className="siii-overview-tags"><span>Docente</span><span>{profile?profile.employeeNumber??'Vínculo institucional vigente':loading?'Consultando perfil':unlinked?'Perfil docente aún sin vincular':'Información no disponible'}</span></div>
    </header>
+   <SiiiDashboardActions><button type="button" onClick={onGroups}><Users/>Mis grupos</button><button type="button" disabled={!canEvaluate} onClick={()=>editable[0]?onOpen(editable[0].id,'capture'):onGroups()}><ClipboardCheck/>Evaluaciones</button><Link onClick={()=>window.dispatchEvent(new CustomEvent('siii:teacher-navigation',{detail:'perfil'}))} href={`/dashboard/institutions/${institutionId}/teacher#perfil`}><Users/>Mi perfil</Link><Link href={`/dashboard/institutions/${institutionId}/grading/corrections`}><FileText/>Rectificaciones</Link></SiiiDashboardActions>
    <SiiiGlassMetricsRow className="siii-overview-metrics siii-teacher-metrics">
     <SiiiGlassMetric label="Grupos asignados" value={known?groups.length:'—'} icon={<Users/>} tone="amber"/>
     <SiiiGlassMetric label="Captura habilitada" value={known?editable.length:'—'} icon={<ClipboardCheck/>} tone="blue"/>
@@ -38,7 +40,7 @@ export default function TeacherGlassOverview({profile,groups,institutionId,insti
   <aside className="siii-student-aside" aria-label="Información docente complementaria">
    <SiiiGlassPanel className="siii-overview-calendar"><h3 className="sr-only">Calendario</h3><SiiiGlassCalendar timeZone={profile?.timeZone??'America/Mexico_City'}/></SiiiGlassPanel>
    <SiiiGlassPanel className="siii-teacher-context"><SiiiGlassPanelHeading title="Contexto institucional"/><p className="siii-overview-subtle">{institutionName}</p><div className="siii-overview-listrow"><div><strong>{profile?'Perfil docente vigente':unlinked?'Vinculación pendiente':'Información no disponible'}</strong><small>{profile?.employeeNumber??(unlinked?'Solicita a la institución vincular tu registro oficial.':'Actualiza la consulta para validar tu perfil.')}</small></div></div><p className="siii-overview-empty">Las solicitudes de rectificación requieren un procedimiento autorizado por la institución.</p></SiiiGlassPanel>
-   <SiiiGlassPanel><h3>Accesos rápidos</h3><div className="siii-overview-shortcuts"><button type="button" onClick={onGroups}><Users/>Mis grupos</button><button type="button" disabled={!canEvaluate} onClick={()=>editable[0]?onOpen(editable[0].id,'capture'):onGroups()}><ClipboardCheck/>Evaluaciones</button><Link onClick={()=>window.dispatchEvent(new CustomEvent('siii:teacher-navigation',{detail:'perfil'}))} href={`/dashboard/institutions/${institutionId}/teacher#perfil`}><Users/>Mi perfil</Link><Link href={`/dashboard/institutions/${institutionId}/grading/corrections`}><FileText/>Rectificaciones</Link></div></SiiiGlassPanel>
+
    <SiiiGlassPanel className="siii-overview-dates"><h3>Periodos asignados</h3>{terms.slice(0,3).map(term=><div className="siii-overview-date" key={term.termId}><span className="siii-overview-date-dot"/><div><strong>{term.termName}</strong><small>{term.termStart} · {term.termEnd}</small></div></div>)}{!terms.length&&<p className="siii-overview-empty">Sin periodos asignados disponibles.</p>}</SiiiGlassPanel>
   </aside>
  </div>;
