@@ -23,4 +23,12 @@ html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-headin
 @media(max-width:767px){html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1fr)}html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:auto;min-height:220px}}
 
 /* WCAG-AA solid-theme admin jump links. */
-html[data-sii-theme=light] .sii-app.sii-ui .sii-workspace-section-nav a{color:#812b48!important;background:#fff;border:1px solid #dce2e9}
+html[data-sii-theme=light] .sii-app.sii-ui  .sii-workspace-section-nav a{color:#812b48;background:#fff;border:1px solid #dce2e9}
+
+/* SIII V2 page intros: one shared admin/workspace hierarchy. */
+html[data-sii-theme] .sii-app.sii-ui .siii-v2-page-intro{background:var(--solid-panel);border:1px solid var(--solid-edge);border-radius:13px;padding:19px 23px;margin-bottom:18px}
+html[data-sii-theme] .sii-app.sii-ui .siii-v2-page-intro .sii-page-eyebrow{font-size:11px;color:var(--solid-muted);font-weight:680;letter-spacing:.08em;text-transform:uppercase}
+html[data-sii-theme] .sii-app.sii-ui .siii-v2-page-intro h1{font-size:clamp(23px,2.1vw,31px);font-weight:760;letter-spacing:-.035em;color:var(--solid-text)}
+html[data-sii-theme] .sii-app.sii-ui .siii-v2-page-intro p{max-width:68ch;font-size:13px;color:var(--solid-muted);line-height:1.6}
+html[data-sii-theme] #siii-personal #avisos{background:var(--solid-panel)!important;backdrop-filter:none!important}
+@media(max-width:430px){html[data-sii-theme] .sii-login .sii-auth-story-content{display:none!important}html[data-sii-theme] .sii-login .sii-auth-story{display:none!important}}
