@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SIII · Centro de agentes</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:#e8ebf4;background:radial-gradient(900px 500px at 82% -10%,#202b42 0%,transparent 70%),#0d111a}
+main{max-width:1100px;margin:auto;padding:48px 22px 92px}.eyebrow{font-size:12px;font-weight:700;letter-spacing:.19em;color:#a6b6cd}h1{font-weight:650;font-size:clamp(28px,5vw,50px);letter-spacing:-.04em;margin:10px 0}p{color:#9da9bd;line-height:1.7}.head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}.pulse{border:1px solid #354254;border-radius:999px;padding:10px 15px;background:#182334;color:#cad9eb;font-size:13px}.pulse:before{content:'';display:inline-block;width:7px;height:7px;margin-right:10px;border-radius:50%;background:#73d5ac;box-shadow:0 0 0 4px #73d5ac1b}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:35px 0}.stat{padding:21px;border:1px solid #2a3341;border-radius:20px;background:#181e2a}.stat b{display:block;font-size:30px;margin-bottom:8px}.stat small{color:#9aa9c0}.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.agent{min-height:170px;padding:20px;border:1px solid #2b3748;border-radius:21px;background:linear-gradient(160deg,#20283a,#141b29);box-shadow:0 12px 40px #05081020}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#29364b;font-size:22px}.status{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#b8c3d2}.running .status{color:#86d0f5}.needs-review .status{color:#86eac2}.blocked .status{color:#f4b68a}.agent h2{font-size:17px;margin:23px 0 4px}.agent p{font-size:12px;margin:0}.track{height:4px;background:#374053;border-radius:6px;overflow:hidden;margin:16px 0 0}.track i{display:block;height:100%;width:14%;background:#8bd5c2;border-radius:6px}.running .track i{animation:load 1.6s ease-in-out infinite}.needs-review .track i{width:100%}.blocked .track i{width:100%;background:#eab28a}@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(730%)}}.empty{border:1px dashed #39465a;padding:35px;border-radius:24px;margin-top:14px}.foot{margin-top:30px;font-size:12px;color:#8191a7}.queue{margin-top:24px;padding:16px 18px;border:1px solid #293445;background:#141c2a;border-radius:15px;color:#b8c8df;font-size:13px}@media(max-width:600px){.stats{gap:7px}.stat{padding:13px}.stat b{font-size:22px}main{padding:26px 14px 60px}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="head"><div><div class="eyebrow">SIII / ENGINEERING / AGENTS</div><h1>Centro de agentes</h1><p>Trabajo coordinado por bloques, con aislamiento y validación antes de integrar.</p></div><div class="pulse" id="heartbeat">Estado local · actualizando</div></header>
+<section class="stats" aria-label="Resumen de agentes"><div class="stat"><b id="total">0</b><small>Agentes</small></div><div class="stat"><b id="active">0</b><small>En ejecución</small></div><div class="stat"><b id="review">0</b><small>Por revisar</small></div></section>
+<section id="agents" class="agents" aria-label="Ejecuciones"></section><div id="queue"></div>
+<div class="foot">Datos del ejecutor local · consulta cada 2 segundos · sin controles de ejecución, secretos ni merges. Este panel no sustituye el CI de GitHub.</div>
+</main>
+<script>
+const icons={ui:'◈',api:'⌘',qa:'✓',security:'◇',integration:'↔'};
+const title=(id)=>String(id||'agent').replace(/[-_]/g,' ');
+const el=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;if(text!==undefined)n.textContent=text;return n};
+async function refresh(){
+ try{
+  const res=await fetch('/api/status',{cache:'no-store'});if(!res.ok)throw new Error('HTTP');
+  const data=(await res.json()).report;const tasks=data?.tasks??[];
+  document.getElementById('heartbeat').textContent=data?'Último estado recibido':'Sin ejecuciones';
+  document.getElementById('total').textContent=tasks.length;
+  document.getElementById('active').textContent=tasks.filter(t=>t.status==='running').length;
+  document.getElementById('review').textContent=tasks.filter(t=>t.status==='needs-review').length;
+  const target=document.getElementById('agents');target.replaceChildren();
+  if(!tasks.length)target.appendChild(el('p','empty','Todavía no hay ejecuciones locales. Ejecuta el runner con --execute para iniciar agentes.'));
+  for(const task of tasks){
+   const card=el('article','agent '+task.status);
+   const top=el('div','top');top.appendChild(el('div','icon',icons[task.id.split('-')[0]]??'✳'));top.appendChild(el('span','status',task.status));card.appendChild(top);
+   card.appendChild(el('h2','',title(task.id)));
+   card.appendChild(el('p','',String(task.changedFiles??0)+' archivos modificados · '+(task.reason||'Sin incidencias')));
+   const track=el('div','track');track.appendChild(el('i'));card.appendChild(track);target.appendChild(card);
+  }
+  const queue=document.getElementById('queue');queue.replaceChildren();
+  if(data?.waitingForMergedPRs?.length)queue.appendChild(el('div','queue','Pendientes de integración previa: '+data.waitingForMergedPRs.join(', ')));
+ }catch{document.getElementById('heartbeat').textContent='Sin conexión local';}
+}
+refresh();setInterval(refresh,2000);
+</script>
+</body></html>
