@@ -113,6 +113,7 @@ async function main() {
   const date = new Date().toISOString().replace(/[:.]/g, '-');
   const runDir = resolve(dirname(root), '.siii-agent-runs', date);
   const worktreeRoot = resolve(dirname(root), '.siii-agent-worktrees');
+  await mkdir(dirname(runDir), { recursive: true });
   await mkdir(runDir, { recursive: false });
   await mkdir(worktreeRoot, { recursive: true });
   const report = { repository: plan.repository, baseSha: commit, mode: 'local-codex-worktree',
