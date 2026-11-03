@@ -5,3 +5,19 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
 html[data-sii-theme] #siii-personal [data-sidebar=sidebar]{background:var(--solid-side)!important;color:var(--solid-text)!important;border:1px solid var(--solid-edge)!important;box-shadow:none!important;backdrop-filter:none!important}
 html[data-sii-theme] #siii-personal .siii-student-aside>.siii-overview-panel{background:var(--solid-panel)!important;border:1px solid var(--solid-edge)!important;box-shadow:none!important;backdrop-filter:none!important}
 html[data-sii-theme] #siii-personal .siii-overview-hero .siii-overview-refresh{background:var(--solid-raised)!important;color:var(--solid-text)}
+
+/* SIII V2 operational architecture: one action dock, one workbench, no duplicate side card. */
+html[data-sii-theme] #siii-personal .siii-v2-action-dock{display:grid;grid-template-columns:134px minmax(0,1fr);gap:16px;align-items:center;padding:14px 16px;border:1px solid var(--solid-edge);border-radius:13px;background:var(--solid-panel)}
+html[data-sii-theme] #siii-personal .siii-v2-action-heading{display:grid;gap:5px;min-width:0}
+html[data-sii-theme] #siii-personal .siii-v2-action-heading span{font-size:10px;letter-spacing:.11em;text-transform:uppercase;font-weight:650;color:var(--solid-muted)}
+html[data-sii-theme] #siii-personal .siii-v2-action-heading strong{font-size:13px;line-height:1.35;color:var(--solid-text)}
+html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts>:is(button,a){min-height:55px;font-size:12px}
+html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1.32fr) minmax(0,.9fr);gap:12px}
+html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:span 2;min-height:375px}
+html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:nth-child(n+2){min-height:180px}
+html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-heading{padding:0 0 18px;border-bottom:1px solid var(--solid-edge)}
+html[data-sii-theme] #siii-personal .siii-workspace-frame .siii-workspace-heading h1{font-size:clamp(22px,2vw,30px);font-weight:750;letter-spacing:-.03em}
+@media(max-width:1279px){html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){html[data-sii-theme] #siii-personal .siii-v2-action-dock{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:767px){html[data-sii-theme] #siii-personal .siii-v2-action-dock .siii-overview-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-sii-theme] #siii-personal .siii-overview-detail-grid{grid-template-columns:minmax(0,1fr)}html[data-sii-theme] #siii-personal .siii-overview-detail-grid>section:first-child{grid-row:auto;min-height:220px}}
