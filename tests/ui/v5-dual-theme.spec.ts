@@ -16,6 +16,6 @@ for(const theme of ['light','dark'] as const){
 test('night palette uses neutral charcoal and survives reload',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('sii-theme','dark'));
  await page.goto('/login');await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');
- expect(await page.locator('html').evaluate(el=>getComputedStyle(el).getPropertyValue('--siii-v5-background').trim())).toBe('#0D0F12');
+ expect(await page.locator('html').evaluate(el=>getComputedStyle(el).getPropertyValue('--solid-bg').trim())).toBe('#101319');
  await page.reload();await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');
 });
