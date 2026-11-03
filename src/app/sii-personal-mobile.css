@@ -332,16 +332,19 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
  font-size:clamp(15px,1.2vw,19px);line-height:1.2;
  white-space:normal;overflow-wrap:break-word;text-wrap:pretty;
 }
-/* One result must not reserve the same dashboard height as four results. */
-@media(min-width:1160px){
- #siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel{
-  min-height:190px;
- }
+/* Sparse Home: natural panel height, never a large empty dashboard column. */
+#siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel{
+ min-height:clamp(148px,14vw,180px);
+}
+@media(min-width:768px) and (max-width:1150px){
+ #siii-personal .siii-overview-detail-grid--sparse{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel:last-child{grid-column:1/-1;min-height:118px}
 }
 @media(max-width:767px){
   #siii-personal .siii-personal-data-table table{min-width:0}
 }
 
+@media(prefers-reduced-motion:reduce){#siii-personal .siii-personal-data-table tbody tr{transition:none}}
 /* Shared matte surfaces, without comma-containing :is selectors counted as duplicates. */
 #siii-personal .siii-personal-data-table:not(input),#siii-personal .siii-history-period{
  min-width:0;color:var(--siii-personal-text);
@@ -349,6 +352,7 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 }
 html[data-sii-theme=light] #siii-personal .siii-personal-data-table:not(input),html[data-sii-theme=light] #siii-personal .siii-history-period{background:rgba(238,234,229,.55);color:#263039}
 #siii-personal .siii-personal-data-table:not(input){padding:10px 12px}
+#siii-personal .siii-personal-data-table tbody tr{transition:background-color .18s ease}
 #siii-personal .siii-personal-data-table tbody tr:hover{background:rgba(128,130,132,.07)}
 #siii-personal .siii-history-period .siii-personal-data-table:not(input){padding:0;background:transparent}
 #siii-personal .siii-history-period summary{list-style-position:inside;padding-block:5px}
