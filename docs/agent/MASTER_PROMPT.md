@@ -97,7 +97,7 @@ login con sesión por cookie, cambio de contraseña, membresías, roles con prot
 
 ### 5.2 Modelo de autorización: RBAC + alcance + relación
 
-Una decisión = `can(actor, acción, recurso, contexto)`. Un único módulo (`src/shared/auth/policy.ts`) la implementa; **ninguna ruta** compara roles a mano.
+Una decisión = `can(actor, acción, recurso, contexto)`. Un único módulo (`src/shared/auth/capabilities.ts`) la implementa; **ninguna ruta** compara roles a mano. (Corrección 2026-11-03: el módulo real es `capabilities.ts`, no un `policy.ts`; este prompt citaba un nombre que nunca existió en el repositorio.)
 
 1. **Permiso por rol** (catálogo abajo).
 2. **Alcance** en `role_assignments`: `scope_type` (`institution | campus | program | section`) + `scope_id`. Un coordinador de un programa no ve otro programa.
