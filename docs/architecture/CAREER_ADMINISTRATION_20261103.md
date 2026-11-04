@@ -19,7 +19,8 @@ exportación masiva hasta incorporar paginación.
 El admin de carrera no puede elevar roles, gestionar cuentas globales, ver otras
 carreras ni cambiar el catálogo institucional. La restricción se aplica en
 `canGrant`, `canManageTarget`, `readVisibility` y el endpoint, no únicamente en UI.
-Una delegación de carrera exige MFA y las operaciones críticas de roles exigen
+El nuevo panel administrativo de carrera exige MFA, sin imponerlo a las lecturas
+académicas ordinarias de un coordinador. Las operaciones críticas de roles exigen
 step-up. SIII conserva el registro de auditoría e invalida sesiones al cambiar grants.
 
 ## Compatibilidad / límites operativos
