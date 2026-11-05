@@ -51,3 +51,17 @@ html[data-sii-theme] .sii-app.sii-ui .sii-grading-navigation{background:var(--so
 html[data-sii-theme] .sii-app.sii-ui .sii-grading-navigation [role=tab]{color:var(--solid-text)}
 html[data-sii-theme] .sii-app.sii-ui [data-slot=empty-description]{color:var(--solid-text)}
 html[data-sii-theme] .sii-app.sii-ui .sii-users article[role=listitem]{background:var(--solid-panel);color:var(--solid-text)}
+
+/* WCAG-AA on theme toggles: never animate an old panel color against a new text token.
+   Keep muted labels and status messages legible on solid administrative surfaces. */
+html[data-sii-theme] .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-metric,.sii-security-card,.sii-security-aside,.sii-institution-item,article[role=listitem]){
+  transition-property:none!important;
+}
+html[data-sii-theme] .sii-app.sii-ui :is(.siii-glass-workspace .text-muted-foreground,.sii-security-workspace p,.sii-security-workspace [role=status],.sii-catalog-pagination span[aria-live],.sii-result-count){
+  color:var(--solid-muted)!important;
+  opacity:1!important;
+  transition-property:none!important;
+}
+html[data-sii-theme] .sii-app.sii-ui :is(.sii-security-card,.sii-security-aside,.sii-security-secondary,.sii-users article[role=listitem]){
+  transition-property:none!important;
+}
