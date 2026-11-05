@@ -19,7 +19,8 @@ test.beforeEach(async()=>{
  const person=(await sql.query("INSERT INTO people(first_name,last_name) VALUES('QA Invitador','Local') RETURNING id")).rows[0].id;username='inviter-'+suffix;
  const user=(await sql.query('INSERT INTO platform_users(person_id,username,password_hash) VALUES($1,$2,$3) RETURNING id',[person,username,hash])).rows[0].id;
  const member=(await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id',[institutionId,user])).rows[0].id;
- await sql.query("INSERT INTO role_assignments(membership_id,institution_id,role) VALUES($1,$2,'admin')",[member,institutionId]);
+ // A program-scoped coordinator is a career administrator, delegated only by super-admin.
+ await sql.query("INSERT INTO role_assignments(membership_id,institution_id,role) VALUES($1,$2,'super_admin')",[member,institutionId]);
  const factor=(await sql.query("INSERT INTO auth_mfa_factors(user_id,secret_encrypted,enabled_at) VALUES($1,$2,now()-interval '1 minute') RETURNING id",[user,sealMfaSecret('JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',user)])).rows[0].id;
  loginRecovery=randomBytes(16).toString('hex').toUpperCase();stepRecovery=randomBytes(16).toString('hex').toUpperCase();
  for(const code of [loginRecovery,stepRecovery])await sql.query('INSERT INTO auth_mfa_recovery_codes(user_id,factor_id,code_hash) VALUES($1,$2,$3)',[user,factor,digestRecoveryCode(code,user)]);

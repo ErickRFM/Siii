@@ -22,4 +22,10 @@ La recuperación de publicación puede materializar ocurrencias desde patrones o
 
 Activar solo después de migrar mediante el proceso autorizado y configurar SIII_COMPANION_RESULTS_TARGETS_JSON con la credencial de archivo exclusiva; SIII_COMPANION_RESULTS_ENABLED permanece deshabilitado por defecto. No se ejecutó migración sobre producción ni se publicaron datos QA remotos. QA-UNIV conserva los usuarios existentes y requiere alta/verificación/vinculación nativa oficial con MFA. FCM y dispositivos físicos siguen sin certificar.
 
+## Estado de evidencia verificable (2026-11-03)
+
+- **Verificado (CI de `main`):** run `verify.yml` `41586201078` sobre `1d7d799` — jobs `verify`, `ui` y `Companion live contract` en verde; artefacto `companion-live-contract` adjunto. El gate de 7 suites nativas reportó `tests=1,1,9,11,5,8,4` con `failures=0 errors=0 skipped=0`.
+- **Verificado (local):** `npm run typecheck`, `npm run lint`, `npm test` (1060 unitarias) en verde; `npm run db:drift` (gate schema↔migraciones) en verde.
+- **No verificado:** los conteos "49 focalizadas" y "9 PostgreSQL/HTTP" de la sección *Validación ejecutada* no se re-ejecutaron aquí; quedan **PENDIENTES** de evidencia de integración contra base real. La aplicación de 0027 en producción y la certificación E2E remota permanecen **NO VERIFICADAS**; ver `docs/operations/SIII_MIGRATION_0027_RUNBOOK.md`.
+
 Contraparte: https://github.com/ErickRFM/Compa-ero-de-esc/pull/243. El rollout exige bandera global y destino attendance:archive válido del tenant: otras instituciones mantienen su consulta existente. La cadena real de 39 casos pasó en CI con el backend previo equivalente (4b18d63e); el receiver fijado añade únicamente traducciones y una prueba accesible. La ausencia de las intervenciones remotas impide afirmar certificación E2E remota.
