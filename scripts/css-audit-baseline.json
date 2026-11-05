@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T21:00:00Z",
-  "review": "Reconciled PR #153 personal density/performance with PR #155 canonical CSS owners; preserve mobile CSS and remove 40 shadowed global declarations and 2 unused keyframes.",
-  "totalBytes": 254140,
-  "totalImportant": 432,
-  "totalDup": 437,
+  "generatedAt": "2026-11-03T07:24:00Z",
+  "review": "SIII V2 senior UI audit 2026-11-03: consolidated two-theme contrast corrections and compact academic workbench into canonical CSS; reviewed 1,026B and 11 specificity guards needed to override legacy material selectors, no new stylesheet. Retire legacy CSS in later architectural cleanup.",
+  "totalBytes": 269935,
+  "totalImportant": 455,
+  "totalDup": 447,
   "files": [
     {
       "file": "src/app/academic-v2.css",
@@ -22,6 +22,15 @@
       "orphanCandidates": 0,
       "important": 0,
       "duplicateSelectors": 2
+    },
+    {
+      "file": "src/app/login/login-v3.css",
+      "bytes": 9579,
+      "rules": 90,
+      "classes": 33,
+      "orphanCandidates": 0,
+      "important": 4,
+      "duplicateSelectors": 10
     },
     {
       "file": "src/app/sii-admin-coherence.css",
@@ -142,11 +151,11 @@
     },
     {
       "file": "src/app/sii-v5-theme.css",
-      "bytes": 13872,
-      "rules": 60,
-      "classes": 44,
+      "bytes": 20088,
+      "rules": 100,
+      "classes": 85,
       "orphanCandidates": 0,
-      "important": 56,
+      "important": 75,
       "duplicateSelectors": 16
     },
     {

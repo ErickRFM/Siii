@@ -25,7 +25,7 @@ test('super administrator navigates every integrated module through effective pe
  const modules=[['registry','Estudiantes y docentes','Personas académicas'],['operations','Grupos e inscripciones','Operación académica'],['grading','Calificaciones','Calificaciones'],['scheduling','Horarios y aulas','Planificador institucional'],['services','Servicios universitarios','Atención institucional']];
  for(const [id,label,heading] of modules){await page.getByRole('link',{name:label,exact:true}).first().click();const response=await page.request.get('/api/v1/institutions/'+tenant+'/capabilities');expect(response.status()).toBe(200);const permissions=(await response.json()).data;expect(permissions.institutionId).toBe(tenant);expect(permissions.restricted).toBe(false);await expect(page).toHaveURL(new RegExp('/'+id+'$'));await expect(page.getByRole('heading',{level:1})).toContainText(heading);await expect(page.locator('main [role="alert"]')).toHaveCount(0);await expect(page.getByRole('link',{name:label,exact:true}).first()).toHaveAttribute('aria-current','page')}
 });
-test('authenticated management surfaces reuse matte glass across modules, themes and mobile',async({page})=>{
+test('authenticated management surfaces use opaque solid panels across modules, themes and mobile',async({page})=>{
  test.setTimeout(120000);
  await fixture('super_admin');await login(page);
  for(const theme of ['light','dark']){
@@ -43,7 +43,7 @@ test('authenticated management surfaces reuse matte glass across modules, themes
    });
    expect(visual.background).not.toBe('rgba(0, 0, 0, 0)');
    expect(visual.shadow).toBe('none');
-   expect(visual.border).toBe('0px');
+   expect(visual.border).toBe('1px');
   }
   await page.setViewportSize({width:390,height:844});
   await page.goto('/dashboard/institutions/'+tenant+'/registry');

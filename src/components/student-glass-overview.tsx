@@ -4,8 +4,8 @@ import type {PersonalProfile} from '@/modules/portal/contracts';
 import {academicStatus,financeStatus,formatMoney,requestStatusLabel,requestTypeLabel} from '@/modules/portal/contracts';
 import type {PersonalSnapshot,PersonalView} from './use-personal-snapshot';
 import {institutionalStudentSummary} from './student-dashboard-metrics';
-import SiiiHeroRibbon from './siii-hero-ribbon';
 import SiiiGlassCalendar from './siii-glass-calendar';
+import {SiiiDashboardActions} from './ui/siii-dashboard-actions';
 import {SiiiProgressRing} from './siii-glass-progress';
 import {SiiiGlassMetric,SiiiGlassPanel,SiiiGlassPanelHeading,SiiiGlassMetricsRow} from './ui/siii-glass-kit';
 import {BookOpen,BellRing,BadgeCheck,Sparkles,Database,ChartNoAxesCombined,Mail,Contact,ChevronRight,FileText,GraduationCap,RefreshCw,Wallet,Code2,Network,SquareRadical,Receipt,LibraryBig} from 'lucide-react';
@@ -35,10 +35,12 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
      {profile?.enrollmentNumber&&<span>{profile.enrollmentNumber}</span>}
      <span>{profile?(academicStatus[profile.status]||profile.status):unlinked?'Expediente aún sin vincular':refreshing?'Consultando tu expediente':'Información no disponible'}</span>
     </div>
-    <SiiiHeroRibbon/>
-    <p className="siii-overview-motto">“Formando<br/>profesionales<br/>para el futuro”<small>— {institutionName}</small></p>
    </header>
    {partial&&<p role="status" className="siii-overview-empty">Parte de tu expediente supera los límites de consulta. Los indicadores afectados se ocultan para evitar cifras engañosas.</p>}
+   <SiiiDashboardActions><button type="button" onClick={()=>onNavigate('orders')}><Receipt aria-hidden="true"/>Estado de cuenta</button>
+     <button type="button" onClick={()=>onNavigate('services')}><FileText aria-hidden="true"/>Mis trámites</button>
+     <button type="button" onClick={()=>onNavigate('academic','teachers')}><GraduationCap aria-hidden="true"/>Mis docentes</button>
+     <button type="button" onClick={()=>onNavigate('academic','courses')}><LibraryBig aria-hidden="true"/>Mis inscripciones</button></SiiiDashboardActions>
    <SiiiGlassMetricsRow className="siii-overview-metrics" aria-label="Resumen institucional">
     <SiiiGlassMetric label="Promedio publicado" value={m.incomplete.grades||m.gradeMean===null||!profile?'—':m.gradeMean.toFixed(2)} description={m.incomplete.grades?'Consulta parcial de calificaciones':'No es el promedio oficial'} icon={<BookOpen size={21}/>} tone="amber"/>
     <SiiiGlassMetric label="Créditos publicados" value={m.incomplete.grades||!profile?'—':m.creditsWithPublishedGrade} description={m.incomplete.grades?'Consulta parcial de créditos':'El plan oficial no está disponible'} accessory={<SiiiProgressRing size={54} value={!m.incomplete.courses&&!m.incomplete.grades&&profile?m.publicationRatio:null} label="Inscripciones consultadas con nota publicada; no representa créditos del plan oficial"/>} icon={<GraduationCap size={21}/>} tone="blue"/>
@@ -100,15 +102,7 @@ export default function StudentGlassOverview({snapshot,profile,institutionName,o
     {snapshot.announcements.map(notice=>{const Icon=/reinscrip|inscripci[oó]n/i.test(notice.title)?BadgeCheck:/convocatoria/i.test(notice.title)?Sparkles:BellRing;const age=publishedAge(notice.publishedAt);return <article key={notice.id} className="siii-overview-listrow"><Icon size={17} aria-hidden="true"/><div><strong>{notice.title}</strong><small>{notice.body}</small></div>{age&&<time dateTime={notice.publishedAt!}>{age}</time>}</article>})}
     {!snapshot.announcements.length&&<p className="siii-overview-empty">{profile?'No hay avisos vigentes.':'Los avisos estarán disponibles después de validar tu acceso.'}</p>}
    </SiiiGlassPanel>
-   <SiiiGlassPanel >
-    <h3>Accesos rápidos</h3>
-    <div className="siii-overview-shortcuts">
-     <button type="button" onClick={()=>onNavigate('orders')}><Receipt aria-hidden="true"/>Estado de cuenta</button>
-     <button type="button" onClick={()=>onNavigate('services')}><FileText aria-hidden="true"/>Mis trámites</button>
-     <button type="button" onClick={()=>onNavigate('academic','teachers')}><GraduationCap aria-hidden="true"/>Mis docentes</button>
-     <button type="button" onClick={()=>onNavigate('academic','courses')}><LibraryBig aria-hidden="true"/>Mis inscripciones</button>
-    </div>
-   </SiiiGlassPanel>
+
    <SiiiGlassPanel className="siii-overview-dates">
     <h3>Próximas fechas</h3>
     {deadlines.map(order=><div className="siii-overview-date" key={order.id}><span className="siii-overview-date-dot" aria-hidden="true"/><div><strong>{order.feeTypeName}</strong><small>Vencimiento: {new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(order.dueDate!))}</small></div></div>)}

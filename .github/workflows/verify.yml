@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, reopened, synchronize, edited]
     branches: [main, 'feat/**', 'chore/p0-1-release-gates', 'codex/**']
 permissions:
   contents: read

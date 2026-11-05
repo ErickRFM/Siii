@@ -42,7 +42,7 @@ export default function PersonalRequests({institutionId,rows,history,canCreate,d
   }catch{if(!controller.signal.aborted)setError('No se pudo confirmar el envío. Conservamos los datos revisados; reintenta para comprobar el mismo folio.')}
   finally{if(active.current===controller)active.current=null;if(!controller.signal.aborted)setSaving(false)}
  }
- return <div className="space-y-6">
+ return <div className="siii-requests-layout grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
   <Card><CardHeader><CardTitle><h2>Nueva solicitud</h2></CardTitle></CardHeader><CardContent className="space-y-4">
    <p className="text-sm text-muted-foreground">La institución revisará tu solicitud. Enviarla o recibir una aprobación no emite una constancia ni modifica por sí mismo tus inscripciones.</p>
    <p className="text-sm text-muted-foreground">Si se requieren documentos, tu institución te indicará el canal autorizado para entregarlos.</p>

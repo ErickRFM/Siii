@@ -116,7 +116,7 @@ test('role assignment requires real step-up and revokes the selected scoped gran
   await page.goto(`/dashboard/institutions/${institutionId}/roles`);
   await expect(page.getByRole('heading', { name: 'Roles y ámbitos.' })).toBeVisible();
   await page.getByLabel('Membresía').selectOption(targetMembershipId);
-  await page.getByLabel('Ámbito').selectOption('program');
+  await page.getByLabel('Ámbito',{exact:true}).selectOption('program');
   await page.getByLabel('Programa').selectOption(programId);
   await expect(page.getByLabel('Perfil')).toBeEnabled();
   await page.getByLabel('Perfil').selectOption('coordinator');
@@ -136,7 +136,7 @@ test('role assignment requires real step-up and revokes the selected scoped gran
   await expect(page.getByRole('button', { name: 'Renovar códigos de recuperación', exact: true })).toBeEnabled();
   await page.getByRole('link', { name: 'Volver y reintentar la operación', exact: true }).click();
   await page.getByLabel('Membresía').selectOption(targetMembershipId);
-  await page.getByLabel('Ámbito').selectOption('program');
+  await page.getByLabel('Ámbito',{exact:true}).selectOption('program');
   await page.getByLabel('Programa').selectOption(programId);
   await expect(page.getByLabel('Perfil')).toBeEnabled();
   await page.getByLabel('Perfil').selectOption('coordinator');

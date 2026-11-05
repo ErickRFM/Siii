@@ -153,6 +153,11 @@ for(const module of modules)test('layout evidence and responsive composition: '+
  for(const width of [1440,1024,768,390,360]){
   await page.setViewportSize({width,height:1000});
   await page.screenshot({path:`.p0-local/layout-polish/${stage}-${module}-${width}.png`,fullPage:true,animations:'disabled'});
+  if(module==='users'&&width===360){
+   const cards=page.getByRole('list',{name:'Usuarios institucionales'});
+   await expect(cards.getByRole('listitem').first()).toBeVisible();
+   await expect(cards.getByRole('button',{name:/Ver perfil de/}).first()).toBeVisible();
+  }
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2);
   expect(overflow,module+' at '+width).toBe(false);
  }

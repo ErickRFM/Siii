@@ -10,13 +10,26 @@ import type {PersonalCourse,PersonalTeacher,PersonalGrade} from '@/modules/porta
 import {academicStatus} from '@/modules/portal/contracts';
 
 export function PersonalEnrollments({courses,teachers}:{courses:PersonalCourse[];teachers:PersonalTeacher[]}){
- return <div className="min-w-0 space-y-2"><PersonalTable rows={courses} label="Inscripciones" searchText={row=>[row.courseCode,row.courseName,row.sectionCode,row.termName].join(' ')} columns={[
+ // Summary is derived exclusively from the same authorized academic records as the table.
+ const sectionIds=new Set(courses.map(course=>course.sectionId));
+ const assignedSections=new Set(teachers.filter(teacher=>sectionIds.has(teacher.sectionId)).map(teacher=>teacher.sectionId));
+ const credits=courses.reduce((sum,course)=>sum+course.credits,0);
+ return <section className="siii-v2-academic-workspace min-w-0 space-y-5" aria-label="Carga académica oficial">
+  {courses.length>0&&<dl className="grid min-w-0 gap-3 sm:grid-cols-3" aria-label="Resumen de inscripciones">
+   <div className="rounded-xl border bg-card px-5 py-4"><dt className="text-xs font-semibold text-muted-foreground">Materias inscritas</dt><dd className="mt-2 text-3xl font-bold tabular-nums">{courses.length}</dd></div>
+   <div className="rounded-xl border bg-card px-5 py-4"><dt className="text-xs font-semibold text-muted-foreground">Créditos registrados</dt><dd className="mt-2 text-3xl font-bold tabular-nums">{credits}</dd></div>
+   <div className="rounded-xl border bg-card px-5 py-4"><dt className="text-xs font-semibold text-muted-foreground">Grupos con docente</dt><dd className="mt-2 text-3xl font-bold tabular-nums">{assignedSections.size}<span className="ml-2 text-sm font-medium text-muted-foreground">de {sectionIds.size}</span></dd></div>
+  </dl>}
+  <div className="min-w-0 space-y-3"><div className="flex flex-wrap items-center justify-between gap-3">
+   <div><h2 className="text-base font-bold">Materias y grupos</h2><p className="mt-1 text-sm text-muted-foreground">Información registrada por tu institución. Consulta los periodos y docentes asignados.</p></div>
+  </div>
+  <PersonalTable rows={courses} label="Inscripciones" searchText={row=>[row.courseCode,row.courseName,row.sectionCode,row.termName].join(' ')} columns={[
   {label:'Materia',sortValue:row=>row.courseName,render:row=><><strong>{row.courseName}</strong><p className="text-xs text-muted-foreground">{row.courseCode} · {row.credits} créditos</p></>},
   {label:'Grupo / periodo',sortValue:row=>row.termName+' '+row.sectionCode,render:row=><>{row.sectionCode}<p className="text-xs text-muted-foreground">{row.termName}</p></>},
   {label:'Docente asignado',render:row=>teachers.filter(teacher=>teacher.sectionId===row.sectionId).map(teacher=>`${teacher.firstName} ${teacher.lastName}`).join(', ')||'Sin asignación vigente'},
   {label:'Inscripción',sortValue:row=>row.enrollmentStatus??'',render:row=>academicStatus[row.enrollmentStatus??'']??row.enrollmentStatus},
   {label:'Estado del grupo',render:row=>academicStatus[row.sectionStatus]??row.sectionStatus},
- ]}/></div>;
+ ]}/></div></section>;
 }
 
 function downloadHistory(rows:PersonalGrade[]){

@@ -7,7 +7,7 @@ const markup=(node:ReturnType<typeof createElement>)=>renderToStaticMarkup(node)
 describe('SIII Premium UI Kit - server-compatible component contracts',()=>{
  it('renders the institutional heading with a real h1',()=>{
    const html=markup(createElement(SiiPageIntro,{eyebrow:'CONTROL ESCOLAR',title:'Inicio',description:'Permisos institucionales'}));
-   expect(html).toContain('<h1>Inicio');expect(html).toContain('Permisos institucionales');
+   expect(html).toContain('<h1 aria-label="Inicio.">Inicio</h1>');expect(html).toContain('Permisos institucionales');
  });
  it('keeps workspace headings semantically readable',()=>{
    const html=markup(createElement(SiiSectionHeader,{eyebrow:'DOCENCIA',title:'Calificaciones',workspace:true,description:'Registros oficiales'}));

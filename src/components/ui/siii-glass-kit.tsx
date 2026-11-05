@@ -1,6 +1,6 @@
 import type {HTMLAttributes,ReactNode} from 'react';
 
-/** Structural glass panel. Layout is shared; each portal owns its data and actions. */
+/** Solid institutional surface. Legacy export name is retained for portal compatibility. */
 export function SiiiGlassPanel({className='',children,...props}:HTMLAttributes<HTMLElement>){
  return <section {...props} className={['siii-overview-panel',className].filter(Boolean).join(' ')}>{children}</section>;
 }
@@ -16,7 +16,7 @@ export function SiiiGlassPanelHeading({title,action}:{title:string;action?:React
 }
 
 
-/** Shared institutional metric — presentational only: all values come from authorized read models. */
+/** Shared solid institutional metric — values come from authorized read models. */
 export function SiiiGlassMetric({label,value,description,icon,accessory,tone='amber',className=''}:{
  label:string;value:ReactNode;description?:ReactNode;icon?:ReactNode;
  tone?:'amber'|'blue'|'green'|'terracotta';className?:string;accessory?:ReactNode;
