@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import argon2 from 'argon2';
@@ -58,6 +58,13 @@ async function readCareer(id: string, cookie: string, institution = institutionI
 }
 
 describe.sequential('career administration read authority, tenant isolation and revocation', () => {
+  // Every synthetic request uses the same non-Vercel IP ('unknown'). The shared
+  // integration server is reused by many test files; prior login/MFA requests
+  // must not consume this suite's legitimate MFA challenge budget.
+  // The real login, challenge, recovery-code consumption and permissions still run.
+  beforeEach(async () => {
+    await database.query("DELETE FROM auth_throttle WHERE scope = 'login_ip'");
+  });
   beforeAll(async () => {
     await database.connect();
     hash = await argon2.hash(password, { type: argon2.argon2id, memoryCost: 65536, timeCost: 3, parallelism: 1 });
