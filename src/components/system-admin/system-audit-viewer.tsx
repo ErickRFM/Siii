@@ -361,15 +361,14 @@ export function SystemAuditViewer({
         <ol className="sii-administration-events space-y-3">
           {rows.map((entry) => (
             <li key={entry.id}>
-              <button
-                type="button"
-                className="w-full text-left p-4 rounded-xl border bg-card/60 hover:bg-card hover:border-primary/40 transition-all space-y-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              <article
+                className="w-full text-left p-4 rounded-xl border bg-card/60 hover:bg-card hover:border-primary/40 transition-all space-y-2 cursor-pointer"
                 onClick={() => setSelectedEntry(entry)}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm">{actionLabels[entry.action] ?? entry.action}</span>
-                    <span className="font-mono text-xs text-muted-foreground">({entry.action})</span>
+                    <h3 className="font-semibold text-sm">{actionLabels[entry.action] ?? 'Operación institucional'}</h3>
+                    <span className="font-mono text-xs text-muted-foreground">Acción: {entry.action}</span>
                   </div>
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Clock className="size-3" />
@@ -377,29 +376,23 @@ export function SystemAuditViewer({
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <User className="size-3 text-primary" />
-                    <span>Responsable: {entry.actor?.label ?? 'Sistema / sin actor institucional'}</span>
-                  </span>
-                  <span>•</span>
-                  <span>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>
+                    Responsable: <strong className="text-foreground">{entry.actor?.label ?? 'Sistema / sin actor institucional'}</strong>
+                  </p>
+                  <p>
                     Recurso:{' '}
                     <strong className="text-foreground">
-                      {entry.target ? `${targetLabels[entry.target.kind] ?? entry.target.kind} · ${entry.target.id}` : 'Sin recurso institucional asociado'}
+                      {entry.target ? `${targetLabels[entry.target.kind] ?? 'Recurso institucional'} · ${entry.target.id}` : 'Sin recurso institucional asociado'}
                     </strong>
-                  </span>
-                  {entry.reason && (
-                    <>
-                      <span>•</span>
-                      <span className="truncate max-w-[280px]">Motivo: "{entry.reason}"</span>
-                    </>
-                  )}
-                  <span className="ml-auto text-primary font-semibold flex items-center gap-0.5">
-                    Ver diff <ChevronRight className="size-3" />
-                  </span>
+                  </p>
+                  <p className="font-medium text-foreground">{entry.reason ?? 'Sin motivo registrado'}</p>
                 </div>
-              </button>
+
+                <div className="pt-1 flex items-center justify-end text-xs text-primary font-semibold">
+                  Ver diff <ChevronRight className="size-3" />
+                </div>
+              </article>
             </li>
           ))}
         </ol>
