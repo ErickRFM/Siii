@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
-import { SiiPanel, SiiStatusBadge } from '@/components/ui/sii-institutional';
 import { SiiDrawer } from '@/components/ui/sii-workspace';
 
 export type AuditEntry = {
@@ -61,7 +60,7 @@ const actionLabels: Record<string, string> = {
   'invitation.resend': 'Reenvío de invitación',
   'invitation.revoke': 'Invitación revocada',
   'invitation.accept': 'Invitación aceptada',
-  'invitation.reject': 'Invitación rechazada',
+  'invitation.reject': 'Rechazo de invitación',
 };
 
 const changeLabels: Record<string, string> = {
@@ -199,7 +198,7 @@ export function SystemAuditViewer({
   function applyFilters(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (draft.action.trim() && !/^[a-z][a-z0-9_.-]{0,99}$/.test(draft.action.trim())) {
-      setFilterError('Escribe un identificador de acción válido (ej. institution.settings.update).');
+      setFilterError('Escribe un identificador de acción válido, por ejemplo institution.settings.update.');
       return;
     }
     if (draft.from && draft.to && new Date(draft.from) > new Date(draft.to)) {
@@ -214,16 +213,20 @@ export function SystemAuditViewer({
   }
 
   return (
-    <SiiPanel className="space-y-5">
+    <section
+      className="sii-panel sii-administration-card space-y-5"
+      aria-label="Auditoría institucional"
+      aria-busy={loading}
+    >
       {/* Panel Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border">
+      <div className="sii-catalog-toolbar flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="size-5 text-emerald-500" />
-            <h2 className="text-lg font-bold tracking-tight">Historial y Auditoría de Plataforma</h2>
+            <h2 className="text-lg font-bold tracking-tight">Auditoría institucional</h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            Registro inmutable de cambios de configuración, miembros y concesiones.
+            Historial autorizado de esta institución. Los filtros de fechas usan tu hora local.
           </p>
         </div>
 
@@ -235,7 +238,7 @@ export function SystemAuditViewer({
             setPages([null]);
             setRefresh((v) => v + 1);
           }}
-          className="gap-2"
+          className="sii-outline-button gap-2"
         >
           <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           <span>Actualizar auditoría</span>
@@ -248,7 +251,8 @@ export function SystemAuditViewer({
           role="alert"
           tabIndex={-1}
           ref={filterFeedback}
-          className="p-3 text-xs rounded-xl bg-destructive/10 text-destructive border border-destructive/20 font-medium"
+          id="institution-audit-filter-error"
+          className="sii-catalog-error"
         >
           {filterError}
         </p>
@@ -256,8 +260,9 @@ export function SystemAuditViewer({
 
       <form
         onSubmit={applyFilters}
-        className="p-4 rounded-xl border bg-card/40 space-y-3"
+        className="sii-catalog-form sii-administration-filters p-4 rounded-xl border bg-card/40 space-y-3"
         aria-label="Filtros de auditoría"
+        aria-describedby={filterError ? 'institution-audit-filter-error' : undefined}
       >
         <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           <Filter className="size-3.5" />
@@ -265,20 +270,22 @@ export function SystemAuditViewer({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="block space-y-1 text-xs font-medium">
+          <label htmlFor="institution-audit-action" className="block space-y-1 text-xs font-medium">
             <span>Acción exacta</span>
             <Input
+              id="institution-audit-action"
               maxLength={100}
               value={draft.action}
               onChange={(e) => setDraft({ ...draft, action: e.target.value })}
               disabled={!online}
-              placeholder="Ej. institution.settings.update"
+              placeholder="Todas las acciones"
             />
           </label>
 
-          <label className="block space-y-1 text-xs font-medium">
-            <span>Recurso del sistema</span>
+          <label htmlFor="institution-audit-kind" className="block space-y-1 text-xs font-medium">
+            <span>Tipo de recurso</span>
             <NativeSelect
+              id="institution-audit-kind"
               value={draft.targetKind}
               disabled={!online}
               onChange={(e) => setDraft({ ...draft, targetKind: e.target.value })}
@@ -292,9 +299,10 @@ export function SystemAuditViewer({
             </NativeSelect>
           </label>
 
-          <label className="block space-y-1 text-xs font-medium">
+          <label htmlFor="institution-audit-from" className="block space-y-1 text-xs font-medium">
             <span>Desde</span>
             <Input
+              id="institution-audit-from"
               type="datetime-local"
               value={draft.from}
               disabled={!online}
@@ -302,9 +310,10 @@ export function SystemAuditViewer({
             />
           </label>
 
-          <label className="block space-y-1 text-xs font-medium">
+          <label htmlFor="institution-audit-to" className="block space-y-1 text-xs font-medium">
             <span>Hasta</span>
             <Input
+              id="institution-audit-to"
               type="datetime-local"
               value={draft.to}
               disabled={!online}
@@ -319,6 +328,7 @@ export function SystemAuditViewer({
             variant="ghost"
             size="sm"
             disabled={!online}
+            className="sii-outline-button"
             onClick={() => {
               setDraft(emptyFilters);
               setFilters(emptyFilters);
@@ -328,8 +338,8 @@ export function SystemAuditViewer({
           >
             Limpiar filtros
           </Button>
-          <Button type="submit" variant="secondary" size="sm" disabled={!online}>
-            Aplicar consulta
+          <Button type="submit" variant="secondary" size="sm" disabled={!online} className="sii-outline-button">
+            Aplicar filtros de auditoría
           </Button>
         </div>
       </form>
@@ -337,86 +347,89 @@ export function SystemAuditViewer({
       {/* Events List */}
       {loading ? (
         <p role="status" className="text-sm text-muted-foreground p-6 text-center">
-          Consultando registros de auditoría…
+          Consultando auditoría…
         </p>
       ) : error ? (
-        <div role="alert" className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm font-medium">
+        <p role="alert" className="sii-catalog-error">
           {error}
-        </div>
+        </p>
       ) : !rows.length ? (
         <p role="status" className="text-sm text-muted-foreground p-8 text-center italic">
-          No hay eventos registrados para esta consulta de auditoría.
+          No hay eventos para esta consulta.
         </p>
       ) : (
-        <div className="space-y-3">
+        <ol className="sii-administration-events space-y-3">
           {rows.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              className="w-full text-left p-4 rounded-xl border bg-card/60 hover:bg-card hover:border-primary/40 transition-all space-y-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              onClick={() => setSelectedEntry(entry)}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <SiiStatusBadge variant="active">
-                    {actionLabels[entry.action] ?? entry.action}
-                  </SiiStatusBadge>
-                  <span className="font-mono text-xs text-muted-foreground">{entry.action}</span>
+            <li key={entry.id}>
+              <button
+                type="button"
+                className="w-full text-left p-4 rounded-xl border bg-card/60 hover:bg-card hover:border-primary/40 transition-all space-y-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() => setSelectedEntry(entry)}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm">{actionLabels[entry.action] ?? entry.action}</span>
+                    <span className="font-mono text-xs text-muted-foreground">({entry.action})</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="size-3" />
+                    <time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time>
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="size-3" />
-                  <span>{formatDate(entry.createdAt)}</span>
-                </span>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <User className="size-3 text-primary" />
-                  <span>{entry.actor?.label ?? 'Sistema / Sin actor explícito'}</span>
-                </span>
-                <span>•</span>
-                <span>
-                  Recurso:{' '}
-                  <strong className="text-foreground">
-                    {entry.target ? `${targetLabels[entry.target.kind] ?? entry.target.kind} (${entry.target.id.slice(0, 8)}…)` : 'N/A'}
-                  </strong>
-                </span>
-                {entry.reason && (
-                  <>
-                    <span>•</span>
-                    <span className="truncate max-w-[280px]">Motivo: "{entry.reason}"</span>
-                  </>
-                )}
-                <span className="ml-auto text-primary font-semibold flex items-center gap-0.5">
-                  Ver diff <ChevronRight className="size-3" />
-                </span>
-              </div>
-            </button>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <User className="size-3 text-primary" />
+                    <span>Responsable: {entry.actor?.label ?? 'Sistema / sin actor institucional'}</span>
+                  </span>
+                  <span>•</span>
+                  <span>
+                    Recurso:{' '}
+                    <strong className="text-foreground">
+                      {entry.target ? `${targetLabels[entry.target.kind] ?? entry.target.kind} · ${entry.target.id}` : 'Sin recurso institucional asociado'}
+                    </strong>
+                  </span>
+                  {entry.reason && (
+                    <>
+                      <span>•</span>
+                      <span className="truncate max-w-[280px]">Motivo: "{entry.reason}"</span>
+                    </>
+                  )}
+                  <span className="ml-auto text-primary font-semibold flex items-center gap-0.5">
+                    Ver diff <ChevronRight className="size-3" />
+                  </span>
+                </div>
+              </button>
+            </li>
           ))}
-        </div>
+        </ol>
       )}
 
       {/* Pagination Controls */}
-      <nav className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
+      <nav className="sii-catalog-pagination flex flex-wrap items-center justify-between gap-3 pt-2 text-xs" aria-label="Paginación de auditoría">
         <div className="flex gap-2">
           <Button
             variant="outline"
+            type="button"
             size="sm"
+            className="sii-outline-button"
             disabled={pages.length === 1 || loading || !online}
             onClick={() => setPages((v) => v.slice(0, -1))}
           >
-            ← Página anterior
+            Auditoría: página anterior
           </Button>
           <Button
             variant="outline"
+            type="button"
             size="sm"
+            className="sii-outline-button"
             disabled={!nextCursor || loading || !online}
             onClick={() => setPages((v) => [...v, nextCursor])}
           >
-            Siguiente página →
+            Auditoría: siguiente página
           </Button>
         </div>
-        <span className="text-muted-foreground font-medium">Página {pages.length}</span>
+        <span aria-live="polite" className="text-muted-foreground font-medium">Página de auditoría {pages.length}</span>
       </nav>
 
       {/* Side-by-side Diff Inspector Drawer */}
@@ -431,8 +444,8 @@ export function SystemAuditViewer({
         {selectedEntry && (
           <div className="space-y-5 pt-2">
             <div className="p-3 rounded-xl bg-muted/60 space-y-1.5 text-xs">
-              <p><strong>Responsable:</strong> {selectedEntry.actor?.label ?? 'Sistema / Automatizado'}</p>
-              <p><strong>Recurso impactado:</strong> {selectedEntry.target ? `${targetLabels[selectedEntry.target.kind] ?? selectedEntry.target.kind} (${selectedEntry.target.id})` : 'Sin recurso directo'}</p>
+              <p><strong>Responsable:</strong> {selectedEntry.actor?.label ?? 'Sistema / sin actor institucional'}</p>
+              <p><strong>Recurso impactado:</strong> {selectedEntry.target ? `${targetLabels[selectedEntry.target.kind] ?? selectedEntry.target.kind} · ${selectedEntry.target.id}` : 'Sin recurso institucional asociado'}</p>
               <p><strong>Motivo declarado:</strong> {selectedEntry.reason ?? 'Sin motivo registrado'}</p>
             </div>
 
@@ -445,14 +458,14 @@ export function SystemAuditViewer({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="p-3 rounded-xl border bg-destructive/5 border-destructive/20 space-y-2">
                   <h4 className="text-xs font-bold text-destructive uppercase tracking-wider">
-                    Estado Anterior (Before)
+                    Antes
                   </h4>
                   <RenderDiff value={selectedEntry.changes.before} />
                 </div>
 
                 <div className="p-3 rounded-xl border bg-emerald-500/5 border-emerald-500/20 space-y-2">
                   <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                    Estado Posterior (After)
+                    Después
                   </h4>
                   <RenderDiff value={selectedEntry.changes.after} />
                 </div>
@@ -461,6 +474,6 @@ export function SystemAuditViewer({
           </div>
         )}
       </SiiDrawer>
-    </SiiPanel>
+    </section>
   );
 }
