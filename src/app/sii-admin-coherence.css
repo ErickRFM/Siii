@@ -55,7 +55,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar {
   -webkit-backdrop-filter:blur(16px) saturate(105%);
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar {
-  background:rgba(236,232,226,.92)!important;border-right:1px solid rgba(20,25,35,.08)!important;
+  background:rgba(236,232,226,.92)!important;border-right:0!important;
   box-shadow:none!important;
 }
 html[data-sii-theme="dark"] .sii-app.sii-ui:has(.siii-glass-workspace){

@@ -35,7 +35,7 @@ html[data-sii-theme="dark"] .sii-app {
     radial-gradient(ellipse at 10% 0%,rgba(168,70,104,.19),transparent 55%),
     linear-gradient(168deg,rgba(78,22,45,.98),rgba(46,15,31,.99) 57%,rgba(35,13,28,.99));
   box-shadow:12px 0 40px rgba(40,14,30,.10);
-  border-right:1px solid rgba(255,255,255,.07);
+  border-right:0;
 }
 html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   background:radial-gradient(ellipse at 8% 0%,rgba(113,37,67,.26),transparent 53%),
