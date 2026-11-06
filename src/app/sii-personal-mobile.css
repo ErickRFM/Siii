@@ -84,25 +84,7 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
 #siii-personal .siii-personal-record-label {font-size:.78rem;line-height:1.4}
 #siii-personal .siii-personal-record-value {font-size:.9rem;line-height:1.5;color:var(--siii-interior-text)}
 #siii-personal .siii-personal-record-value :is(button,a) {max-width:100%;white-space:normal;text-align:left}
-#siii-personal .siii-student-academic-links {
-  display:grid;gap:12px;min-width:0;max-width:100%;
-  padding:16px;border-radius:16px;background:var(--siii-interior-subtle);
-}
-#siii-personal .siii-student-academic-links-title {font-weight:650;font-size:.86rem}
-#siii-personal .siii-student-academic-links>div {
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;
-}
-#siii-personal .siii-student-academic-links .sii-outline-button {
-  display:flex;align-items:center;justify-content:center;
-  width:100%;min-width:0;min-height:44px;max-width:100%;
-  margin:0!important;text-align:center;white-space:normal;
-  background:var(--siii-interior-panel)!important;color:var(--siii-interior-text)!important;
-  border:0!important;box-shadow:none!important;border-radius:12px;
-}
 #siii-personal :is(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) [role=tab]:focus-visible,
-#siii-personal .siii-student-academic-links a:focus-visible {
-  outline:2px solid currentColor;outline-offset:2px;
-}
 @media(max-width:767px) {
   #siii-personal:has(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) .sii-main {min-width:0;padding-right:0}
   #siii-personal:has(.sii-student-portal:not(.siii-student-home-shell),.sii-teacher-portal:not(.siii-teacher-home-shell)) .sii-topbar {
@@ -239,27 +221,7 @@ html[data-sii-theme=light] #siii-personal:has(:is(.sii-student-portal:not(.siii-
 }
 
 
-/* Borderless matte glass: surface separation comes from tone and blur, not outlines.
-   Keep inner row separators and interactive keyboard focus indicators. */
-html[data-sii-theme] #siii-personal :is(
- .siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric,
- .siii-glass-surface,.siii-student-identity-card,.siii-teacher-profile-hero,
- .siii-personal-record,.siii-student-academic-links,.sii-kit-empty,.sii-empty,
- .sii-panel
-){
- border:0!important;
- border-width:0!important;
- box-shadow:none!important;
-}
-html[data-sii-theme] #siii-personal:has(:is(.siii-student-dashboard,.siii-teacher-dashboard)) :is(
- .siii-overview-hero,.siii-overview-panel,.siii-shared-glass-metric,
- .siii-glass-surface,.siii-student-aside>.siii-overview-panel,
- .siii-overview-detail-grid>.siii-overview-panel
-){
- border:0!important;
- border-width:0!important;
- box-shadow:none!important;
-}
+/* Legacy borderless glass overrides retired by the opaque Solid UI contract. */
 /* Preserve functional table structure without a frame around the table. */
 html[data-sii-theme] #siii-personal .siii-personal-data-table :is(
  [data-slot=table-container],table,[role=table]
@@ -274,13 +236,13 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table th{
 html[data-sii-theme] #siii-personal .siii-personal-data-table td{
  line-height:1.5;vertical-align:middle;
 }
-#siii-personal .siii-personal-record{gap:0!important;padding:10px 16px!important}
+#siii-personal .siii-personal-record{gap:8px!important;padding:10px 14px!important}
 #siii-personal .siii-personal-record-field{min-width:0;padding:9px 0}
 #siii-personal .siii-personal-record-value{overflow-wrap:anywhere}
 #siii-personal .siii-personal-data-table :is(button,a):focus-visible{
  outline:2px solid currentColor;outline-offset:2px;
 }
-@media(min-width:420px) and (max-width:767px){
+@media(min-width:420px) and (max-width:1023px){
  #siii-personal .siii-personal-record{
   grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;
  }
@@ -333,19 +295,6 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 #siii-personal .sii-student-portal:not(.siii-student-home-shell) .sii-kit-page-heading{
  margin-bottom:4px;align-items:center;
 }
-#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card{
- display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;
- padding:12px 16px!important;min-height:0;background:var(--siii-interior-panel)!important;
-}
-#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card h2{
- margin:0;font-size:1rem;line-height:1.35;flex:0 1 auto;
-}
-#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card p{
- margin:0;font-size:.82rem;line-height:1.4;
-}
-#siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card p:last-child{
- color:var(--siii-interior-muted);flex:1 1 230px;
-}
 #siii-personal .siii-personal-data-table table{
  width:100%;table-layout:fixed;min-width:740px;
 }
@@ -356,22 +305,33 @@ html[data-sii-theme] #siii-personal .siii-personal-data-table td{
 }
 #siii-personal .siii-personal-data-table tbody td{
  font-size:.875rem;line-height:1.45;vertical-align:middle;
- padding:11px 12px;overflow-wrap:anywhere;
+ padding:9px 12px;overflow-wrap:anywhere;
 }
 #siii-personal .siii-personal-data-table tbody td:first-child{font-weight:550}
 #siii-personal .siii-overview-metric[data-long-value=true] .siii-shared-metric-copy>strong{
  font-size:clamp(15px,1.2vw,19px);line-height:1.2;
  white-space:normal;overflow-wrap:break-word;text-wrap:pretty;
 }
-/* One result must not reserve the same dashboard height as four results. */
-@media(min-width:1160px){
- #siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel{
-  min-height:190px;
- }
+/* Sparse Home: natural panel height, never a large empty dashboard column. */
+#siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel{
+ min-height:clamp(148px,14vw,180px);
+}
+@media(min-width:768px) and (max-width:1150px){
+ #siii-personal .siii-overview-detail-grid--sparse{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #siii-personal .siii-overview-detail-grid--sparse>.siii-overview-panel:last-child{grid-column:1/-1;min-height:118px}
 }
 @media(max-width:767px){
- #siii-personal .sii-student-portal:not(.siii-student-home-shell) .siii-student-identity-card{
-  display:grid;gap:4px;padding:12px!important;
- }
- #siii-personal .siii-personal-data-table table{min-width:0}
+  #siii-personal .siii-personal-data-table table{min-width:0}
 }
+
+/* Shared matte surfaces, without comma-containing :is selectors counted as duplicates. */
+#siii-personal .siii-personal-data-table:not(input),#siii-personal .siii-history-period{
+ min-width:0;color:var(--siii-personal-text);
+ background:rgba(55,53,52,.34);border:0;border-radius:15px;box-shadow:none;
+}
+html[data-sii-theme=light] #siii-personal .siii-personal-data-table:not(input),html[data-sii-theme=light] #siii-personal .siii-history-period{background:rgba(238,234,229,.55);color:#263039}
+#siii-personal .siii-personal-data-table:not(input){padding:10px 12px}
+#siii-personal .siii-personal-data-table tbody tr{transition:background-color .18s ease}
+#siii-personal .siii-personal-data-table tbody tr:hover{background:rgba(128,130,132,.07)}
+#siii-personal .siii-history-period .siii-personal-data-table:not(input){padding:0;background:transparent}
+#siii-personal .siii-history-period summary{list-style-position:inside;padding-block:5px}

@@ -40,6 +40,16 @@ describe('shared personal table UX and safety',()=>{
   expect(html).toContain('Mostrando 1–4 de 4 registros');
   expect(html).toContain('No publicada');
  });
+ it('keeps one official record simple while preserving multi-row search and sorting',()=>{
+  const columns=[{label:'Materia',sortValue:(row:RecordRow)=>row.name,render:(row:RecordRow)=>row.name}];
+  const single=renderToStaticMarkup(<PersonalTable rows={[records[0]]} label="Inscripciones" searchText={row=>row.name} columns={columns}/>);
+  expect(single).toContain('Álgebra 10');
+  expect(single).not.toContain('Buscar en inscripciones');
+  expect(single).not.toContain('Ordenar por Materia');
+  const multiple=renderToStaticMarkup(<PersonalTable rows={records.slice(0,2)} label="Inscripciones" searchText={row=>row.name} columns={columns}/>);
+  expect(multiple).toContain('Buscar en inscripciones');
+  expect(multiple).toContain('Ordenar por Materia');
+ });
  it('paginates without fabricating records',()=>{
   const many=Array.from({length:21},(_,i)=>({id:String(i),name:'Registro '+i}));
   const html=renderToStaticMarkup(<PersonalTable rows={many} label="Expedientes" columns={[{label:'Nombre',render:row=>row.name}]}/>);

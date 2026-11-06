@@ -26,10 +26,11 @@ function iconMap(name: PersonalNavDestination['iconName']): ReactNode {
 /** URL navigation only; the server and existing portal capabilities remain authoritative. */
 export default function SiiiPersonalNavigation({role,institutionId,institutionName,allowed}:{role:Role;institutionId?:string;institutionName?:string;allowed:boolean}){
  const [selected,setSelected]=useState('inicio');
+ const [expandedGroups,setExpandedGroups]=useState<Record<string,boolean>>({});
  const {open,setOpen,setOpenMobile,isMobile}=useSidebar();
  useEffect(()=>{
-  const sync=(event:Event)=>setSelected((event as CustomEvent<string>).detail||'inicio');
-  const hash=()=>setSelected(window.location.hash.slice(1)||'inicio');
+  const sync=(event:Event)=>{setSelected((event as CustomEvent<string>).detail||'inicio');setExpandedGroups({})};
+  const hash=()=>{setSelected(window.location.hash.slice(1)||'inicio');setExpandedGroups({})};
   hash();
   window.addEventListener(`siii:${role}-active-section`,sync);
   window.addEventListener('hashchange',hash);
@@ -41,7 +42,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  const base=institutionId&&role!=='context'?`/dashboard/institutions/${institutionId}/${role}`:'/dashboard';
 
  function item(dest: PersonalNavDestination){
-  if(!dest.available)return <span key={dest.hash} className="siii-personal-nav-link text-muted-foreground opacity-60" aria-disabled="true" title={dest.description||"El plan oficial aún no está disponible"}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span><small className="ml-auto text-[9px] uppercase tracking-wider opacity-60 group-data-[collapsible=icon]:hidden">Próximamente</small></span>;
+  if(!dest.available)return <span key={dest.hash} className="siii-personal-nav-link text-muted-foreground opacity-60" aria-disabled="true" title={dest.description||"El plan oficial aún no está disponible"}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span><small className="ml-auto text-[11px] uppercase tracking-wide opacity-80 group-data-[collapsible=icon]:hidden">Próximamente</small></span>;
   const href=(base+'#'+dest.hash) as Route;
   const isCurrent=selected===dest.hash;
   return <Link key={dest.hash} href={href} className={'siii-personal-nav-link'+(isCurrent?' is-current':'')} aria-current={isCurrent?'page':undefined}
@@ -54,8 +55,8 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
  }
 
  const group=(label:string,icon:ReactNode,children:ReactNode,hasActive=false)=>(
-  <details className="siii-personal-nav-group" open={hasActive ? true : undefined}>
-    <summary title={label}>{icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
+  <details key={label} className="siii-personal-nav-group" open={expandedGroups[label]??hasActive}>
+    <summary title={label} onClick={event=>{event.preventDefault();setExpandedGroups(previous=>({...previous,[label]:!(previous[label]??hasActive)}))}}> {icon}<span className="group-data-[collapsible=icon]:hidden">{label}</span><ChevronDown size={13} className="group-data-[collapsible=icon]:hidden"/></summary>
     <div>{children}</div>
   </details>
  );
@@ -90,6 +91,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
    {role==='student'&&studentGroups.map(g=>(
     group(g.label,g.icon,<>{STUDENT_NAV_ITEMS.filter(it=>g.hashes.includes(it.hash)).map(item)}</>,g.hashes.includes(selected))
    ))}
+   {role==='student'&&institutionId&&<Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/student/attendance`) as Route} title="Mi historial de asistencia"><ClipboardCheck size={18}/><span className="group-data-[collapsible=icon]:hidden">Mi historial de asistencia</span></Link>}
    {role==='teacher'&&<>
     {group('Docencia',<GraduationCap size={18}/>,<>{TEACHER_NAV_ITEMS.map(item)}</>,['grupos','evaluaciones','perfil'].includes(selected))}
     <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones"><FileText size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>

@@ -7,8 +7,11 @@ for(const theme of ['light','dark'] as const){
    await page.setViewportSize({width,height:900});await page.goto('/login');
    await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
    await expect(page.getByLabel('Usuario institucional')).toBeVisible();
+   await expect(page.locator('[data-siii-login-form="v3"]')).toBeVisible();
+   await expect(page.getByRole('heading',{name:'Tu espacio académico empieza aquí.'})).toBeVisible();
+   if(width>=1024)await expect(page.locator('.siii-login-v3-showcase')).toBeVisible();
    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-   if(width<=430){await expect(page.locator('.sii-auth-story-content')).toBeHidden();const field=await page.getByLabel('Usuario institucional').boundingBox();expect(field!.y).toBeLessThan(500)}
+   if(width<=430){await expect(page.locator('.siii-login-v3-showcase')).toBeHidden();const field=await page.getByLabel('Usuario institucional').boundingBox();expect(field!.y).toBeLessThan(500)}
   }
  });
 }
@@ -16,6 +19,6 @@ for(const theme of ['light','dark'] as const){
 test('night palette uses neutral charcoal and survives reload',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('sii-theme','dark'));
  await page.goto('/login');await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');
- expect(await page.locator('html').evaluate(el=>getComputedStyle(el).getPropertyValue('--siii-v5-background').trim())).toBe('#0D0F12');
+ expect(await page.locator('html').evaluate(el=>getComputedStyle(el).getPropertyValue('--solid-bg').trim())).toBe('#101319');
  await page.reload();await expect(page.locator('html')).toHaveAttribute('data-sii-theme','dark');
 });

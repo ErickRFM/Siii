@@ -206,7 +206,8 @@ export default function MfaSecurity() {
               <Input id="mfa-enrollment-code" ref={codeInput} name="code" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={!ready}
                 aria-invalid={Boolean(enrollmentCodeError) || invalidField === 'mfa-enrollment-code'}
                 aria-describedby={'mfa-enrollment-code-help' + (enrollmentCodeError ? ' mfa-enrollment-format-error' : '') + (error ? ' mfa-error' : '')}
-                onChange={event => setEnrollmentCodeError(/[^0-9]/.test(event.currentTarget.value) ? enrollmentCodeMessage : '')}
+                onInput={event => setEnrollmentCodeError(/[^0-9]/.test(event.currentTarget.value) ? enrollmentCodeMessage : '')}
+                onKeyDown={event => { if (event.key.length === 1 && !/[0-9]/.test(event.key)) setEnrollmentCodeError(enrollmentCodeMessage); }}
                 onBlur={event => { if (event.currentTarget.value && !enrollmentCodeFormat.test(event.currentTarget.value)) setEnrollmentCodeError(enrollmentCodeMessage); }}
                 onInvalid={event => { event.preventDefault(); setEnrollmentCodeError(enrollmentCodeMessage); codeInput.current?.focus(); }}/>
               {enrollmentCodeError && <p id="mfa-enrollment-format-error" className="sii-auth-error" role="alert">{enrollmentCodeError}</p>}

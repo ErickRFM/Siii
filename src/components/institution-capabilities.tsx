@@ -76,7 +76,16 @@ export function InstitutionCapabilitiesProvider({ institutionId, children }: { i
       document.removeEventListener('visibilitychange', visible);
     };
   }, [institutionId, revision, pathname]);
-  return <Context.Provider value={{ data, loading, error, refresh }}>{children}</Context.Provider>;
+  // Scope the painted projection synchronously, before the route-change effect.
+  // An old institution may have finished loading while React is navigating to another.
+  const switchingInstitution=lastInstitution.current!==institutionId;
+  const scopedData=data?.institutionId===institutionId?data:null;
+  return <Context.Provider value={{
+    data:scopedData,
+    loading:loading||Boolean(institutionId&&switchingInstitution),
+    error:switchingInstitution?'':error,
+    refresh
+  }}>{children}</Context.Provider>;
 }
 export function useInstitutionCapabilities() { return useContext(Context); }
 
@@ -116,6 +125,8 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
       <div className="flex flex-wrap gap-2.5">
         {!data.restricted&&personalModuleLinks(data.capabilities,data.roles,data.scopedCapabilities).map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-outline-button">{module.label}</Link>)}
         {!data.restricted && ['programs', 'courses', 'curricula', 'terms', 'campuses'].some(resource => hasAnyCapability(data, `${resource}.read`)) && <Link href={`/dashboard/institutions/${institutionId}/academic`} className="sii-outline-button">Abrir catálogo académico →</Link>}
+        {!data.restricted && (hasInstitutionCapability(data, 'roles.assign') || data.grants.some(grant => grant.role === 'coordinator' && grant.scopeType === 'program')) &&
+          <Link href={`/dashboard/institutions/${institutionId}/careers` as Route} className="sii-outline-button">Administrar carreras</Link>}
         {hasInstitutionCapability(data, 'users.read') && <Link href={`/dashboard/institutions/${institutionId}/users`} className="sii-outline-button">Usuarios y membresías</Link>}
         {hasInstitutionCapability(data, 'roles.assign') && <Link href={`/dashboard/institutions/${institutionId}/roles`} className="sii-outline-button">Roles y ámbitos</Link>}
         {hasInstitutionCapability(data, 'invitations.manage') && <Link href={`/dashboard/institutions/${institutionId}/invitations`} className="sii-outline-button">Invitaciones</Link>}

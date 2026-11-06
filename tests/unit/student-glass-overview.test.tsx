@@ -40,6 +40,7 @@ it('uses a compact detail grid for sparse authorized data and preserves long KPI
  const snapshot:PersonalSnapshot={profile,courses:[],teachers:[],schedule:[],grades:[],orders:[],payments:[],groups:[],requests:[],pendingRequests:[],requestHistory:[],announcements:[]};
  const html=renderToStaticMarkup(<StudentGlassOverview snapshot={snapshot} profile={profile} institutionName="Institución de prueba" onNavigate={()=>{}} onRefresh={()=>{}} refreshing={false}/>);
  expect(html).toContain('siii-overview-detail-grid--sparse');
+ expect(html).toContain('width="112" height="112"');
  expect(html).toContain('data-long-value="true"');
  expect(html).toContain('Sin cargos pendientes');
 });

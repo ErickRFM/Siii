@@ -81,6 +81,9 @@ export function SiiDataTable<T extends { id: string }>({
   const last = Math.max(0, Math.ceil(ordered.length / pageSize) - 1);
   const current = Math.min(page, last);
   const visible = ordered.slice(current * pageSize, current * pageSize + pageSize);
+  // Keep sort controls stable while filtering a multi-record collection.
+  const hasUsefulSorting=rows.length>1;
+  const hasUsefulSearch=Boolean(searchText)&&(rows.length>1||Boolean(query.trim()));
   const sortable = columns
     .map((column, index) => ({ ...column, index }))
     .filter((column) => column.sortValue);
@@ -99,12 +102,12 @@ export function SiiDataTable<T extends { id: string }>({
   }
 
   return (
-    <div className={cn('sii-data-table siii-personal-data-table min-w-0 space-y-4', className)}>
-      {(searchText || sortable.length > 0) && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          {searchText && (
-            <label className="block min-w-0 flex-1 space-y-2 text-sm font-medium">
-              Buscar en {label.toLocaleLowerCase('es-MX')}
+    <div className={cn('sii-data-table siii-personal-data-table min-w-0 space-y-2', className)}>
+      {(hasUsefulSearch || (sortable.length > 0 && hasUsefulSorting)) && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {hasUsefulSearch && (
+            <label className="block min-w-0 flex-1 text-sm font-medium">
+              <span className="sr-only">Buscar en {label.toLocaleLowerCase('es-MX')}</span>
               <Input
                 type="search"
                 value={query}
@@ -112,11 +115,11 @@ export function SiiDataTable<T extends { id: string }>({
                   setQuery(e.target.value);
                   setPage(0);
                 }}
-                placeholder="Escribe para buscar"
+                placeholder={`Buscar en ${label.toLocaleLowerCase('es-MX')}`}
               />
             </label>
           )}
-          {sortable.length > 0 && (
+          {sortable.length > 0 && hasUsefulSorting && (
             <div className="flex flex-wrap items-end gap-2 md:hidden">
               <label className="min-w-0 flex-1 space-y-2 text-sm font-medium">
                 Ordenar por
@@ -158,7 +161,7 @@ export function SiiDataTable<T extends { id: string }>({
 
       {visible.length ? (
         <>
-          <div className="hidden min-w-0 md:block">
+          <div className="hidden min-w-0 lg:block">
             <SiiScrollRegion label={label}>
               <Table scrollable={false}>
                 <TableHeader>
@@ -168,7 +171,7 @@ export function SiiDataTable<T extends { id: string }>({
                         key={index}
                         scope="col"
                         aria-sort={
-                          column.sortValue
+                          column.sortValue && hasUsefulSorting
                             ? sortIndex === index
                               ? direction === 'asc'
                                 ? 'ascending'
@@ -178,10 +181,10 @@ export function SiiDataTable<T extends { id: string }>({
                         }
                         className="whitespace-nowrap"
                       >
-                        {column.sortValue ? (
+                        {column.sortValue && hasUsefulSorting ? (
                           <button
                             type="button"
-                            className="inline-flex min-h-11 items-center gap-2 rounded-md text-left font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                            className="inline-flex min-h-7 items-center gap-1 rounded-sm bg-transparent px-0.5 text-left text-xs font-semibold shadow-none transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                             onClick={() => chooseSort(index)}
                             aria-label={`Ordenar por ${column.label}`}
                           >
@@ -212,14 +215,14 @@ export function SiiDataTable<T extends { id: string }>({
             </SiiScrollRegion>
           </div>
 
-          <section className="siii-personal-mobile-records space-y-3 md:hidden" aria-label={label}>
+          <section className="siii-personal-mobile-records space-y-2 lg:hidden" aria-label={label}>
             {visible.map((row) => (
               <dl
                 key={row.id}
-                className="siii-personal-record grid min-w-0 grid-cols-1 gap-3 rounded-xl border bg-card p-4"
+                className="siii-personal-record grid min-w-0 grid-cols-1 gap-x-3 gap-y-2 rounded-xl border-0 bg-card p-3 min-[460px]:grid-cols-2"
               >
                 {columns.map((column, index) => (
-                  <div key={index} className="siii-personal-record-field min-w-0 break-words">
+                  <div key={index} className={cn('siii-personal-record-field min-w-0 break-words',index===0&&'min-[460px]:col-span-2')}>
                     <dt className="siii-personal-record-label text-xs font-medium text-muted-foreground">
                       {column.label}
                     </dt>
@@ -234,7 +237,7 @@ export function SiiDataTable<T extends { id: string }>({
 
           <nav
             aria-label={`Paginación de ${label}`}
-            className="flex flex-wrap items-center justify-between gap-3"
+            className={cn("flex flex-wrap items-center justify-between gap-2",last===0&&"sr-only")}
           >
             <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
               Mostrando {current * pageSize + 1}–{current * pageSize + visible.length} de{' '}

@@ -1,8 +1,10 @@
 name: Verify SIS
 on:
+  # Branches with PRs run once through pull_request; only deployed main needs push CI.
   push:
-    branches: [main, 'feat/**', 'fix/**', 'chore/p0-1-release-gates', 'codex/**']
+    branches: [main]
   pull_request:
+    types: [opened, reopened, synchronize, edited]
     branches: [main, 'feat/**', 'chore/p0-1-release-gates', 'codex/**']
 permissions:
   contents: read
@@ -44,6 +46,8 @@ jobs:
         run: npm rebuild argon2 esbuild
       - name: Lockfile integrity
         run: git diff --exit-code -- package-lock.json
+      - name: Schema and migration drift
+        run: npm run db:drift
       - name: CSS source usage audit (read-only)
         run: node scripts/audit-css.mjs
       - name: CSS exact-duplicate gate and orphan inventory

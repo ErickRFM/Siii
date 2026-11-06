@@ -32,7 +32,7 @@
 .sii-kit-module-icon svg{width:23px;height:23px;fill:none}
 .sii-kit-module-card--disabled{opacity:1;border-style:dashed}
 .sii-kit-module-card--disabled:hover{transform:none!important;box-shadow:var(--sii-kit-shadow)!important;border-color:var(--sii-kit-border)!important}
-.sii-kit-skeleton{display:grid;gap:12px;padding:18px;border:1px solid var(--sii-kit-border);background:var(--sii-kit-surface);border-radius:16px;min-height:132px}
+.sii-kit-skeleton{display:grid;gap:8px;padding:14px;border:1px solid var(--sii-kit-border);background:var(--sii-kit-surface);border-radius:14px;min-height:92px}
 .sii-kit-skeleton-block{display:block;height:15px;max-width:100%;background:linear-gradient(90deg,var(--sii-surface-soft) 0%,var(--sii-primary-soft) 48%,var(--sii-surface-soft) 100%);background-size:220% 100%;border-radius:6px;animation:sii-kit-shimmer 1.6s ease infinite}
 .sii-kit-skeleton-block:nth-child(1){width:38%}
 .sii-kit-skeleton-block:nth-child(2){width:78%}

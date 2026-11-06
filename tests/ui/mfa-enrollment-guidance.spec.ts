@@ -47,6 +47,6 @@ test('manual key fragments stay local, restart requires a password and six app d
  await expect(page.getByRole('region',{name:'Guarda estos códigos de recuperación'}).locator('code')).toHaveCount(10);await expect(page.getByLabel('Clave manual del autenticador')).toHaveCount(0);
  const refreshed=await securityRefresh;expect(refreshed.status()).toBe(200);
  await expect.poll(()=>previousTitle?.evaluate(title=>title.isConnected)).toBe(false);
- await expect(page).toHaveTitle('SII · Sistema Institucional Integral');
+ await expect(page).toHaveTitle('Cuenta y seguridad | SIII');
  const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();expect(axe.violations).toEqual([]);
 });

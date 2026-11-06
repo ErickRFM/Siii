@@ -29,7 +29,8 @@ test.beforeAll(async () => {
     const personId = (await sql.query("INSERT INTO people(first_name,last_name) VALUES($1,'Local') RETURNING id", [`QA ${profile}`])).rows[0].id;
     const userId = (await sql.query('INSERT INTO platform_users(person_id,username,password_hash) VALUES($1,$2,$3) RETURNING id', [personId, username, hash])).rows[0].id;
     const membershipId = (await sql.query('INSERT INTO institution_memberships(institution_id,user_id) VALUES($1,$2) RETURNING id', [institutionId, userId])).rows[0].id;
-    const role = profile === 'coordinator' ? 'coordinator' : profile === 'guest' ? 'guest' : 'admin';
+    // This fixture delegates a coordinator of a career: only a verified institutional super-admin may do so.
+    const role = profile === 'coordinator' ? 'coordinator' : profile === 'guest' ? 'guest' : profile === 'admin' ? 'super_admin' : 'admin';
     await sql.query("INSERT INTO role_assignments(membership_id,institution_id,role,scope_type,scope_program_id) VALUES($1,$2,$3,$4,$5)", [membershipId, institutionId, role, profile === 'coordinator' ? 'program' : 'institution', profile === 'coordinator' ? programId : null]);
     if (profile === 'guest') targetMembershipId = membershipId;
     if (profile === 'admin'||profile==='protected') {
@@ -115,7 +116,7 @@ test('role assignment requires real step-up and revokes the selected scoped gran
   await page.goto(`/dashboard/institutions/${institutionId}/roles`);
   await expect(page.getByRole('heading', { name: 'Roles y ámbitos.' })).toBeVisible();
   await page.getByLabel('Membresía').selectOption(targetMembershipId);
-  await page.getByLabel('Ámbito').selectOption('program');
+  await page.getByLabel('Ámbito',{exact:true}).selectOption('program');
   await page.getByLabel('Programa').selectOption(programId);
   await expect(page.getByLabel('Perfil')).toBeEnabled();
   await page.getByLabel('Perfil').selectOption('coordinator');
@@ -135,7 +136,7 @@ test('role assignment requires real step-up and revokes the selected scoped gran
   await expect(page.getByRole('button', { name: 'Renovar códigos de recuperación', exact: true })).toBeEnabled();
   await page.getByRole('link', { name: 'Volver y reintentar la operación', exact: true }).click();
   await page.getByLabel('Membresía').selectOption(targetMembershipId);
-  await page.getByLabel('Ámbito').selectOption('program');
+  await page.getByLabel('Ámbito',{exact:true}).selectOption('program');
   await page.getByLabel('Programa').selectOption(programId);
   await expect(page.getByLabel('Perfil')).toBeEnabled();
   await page.getByLabel('Perfil').selectOption('coordinator');
@@ -169,7 +170,7 @@ test('privileged MFA remains required after fresh step-up and cannot be revoked'
   expect((await sql.query("SELECT count(*)::int AS total FROM auth_mfa_factors WHERE user_id=(SELECT id FROM platform_users WHERE username=$1) AND enabled_at IS NOT NULL AND revoked_at IS NULL AND secret_encrypted IS NOT NULL",[users.protected])).rows[0].total).toBe(1);
   // Client step-up state can settle before router.refresh restores streamed page metadata.
   await expect(page).toHaveURL(/\/dashboard\/security$/);
-  await expect(page).toHaveTitle('SII · Sistema Institucional Integral');
+  await expect(page).toHaveTitle('Cuenta y seguridad | SIII');
   await expect(page.getByRole('heading',{name:'Cuenta y seguridad.',exact:true})).toBeVisible();
   await accessible(page);
 });

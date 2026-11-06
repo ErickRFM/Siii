@@ -59,9 +59,9 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
 .sii-app--collapsed .sii-nav-glyph{width:21px;height:21px}
 .sii-app .sii-topbar{
   min-height:76px;height:auto;padding:14px clamp(18px,2.9vw,46px);
-  border-bottom:1px solid var(--sii-kit-border);
+  border-bottom:0;
   background:var(--sii-kit-surface);
-  box-shadow:0 1px 0 rgba(255,255,255,.04);
+  box-shadow:none;
   backdrop-filter:blur(22px) saturate(1.2);-webkit-backdrop-filter:blur(22px) saturate(1.2);
 }
 .sii-app .sii-topbar-actions{gap:10px}

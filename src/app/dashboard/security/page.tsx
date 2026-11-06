@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type {Route} from 'next';
+import type {Metadata,Route} from 'next';
 import { redirect } from 'next/navigation';
 import { getIdentity } from '@/shared/auth/session';
 
@@ -10,6 +10,7 @@ import {SiiPageIntro} from '@/components/ui/sii-kit';
 import {SiiNavIcon} from '@/components/sii-nav-icon';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {title:'Cuenta y seguridad | SIII'};
 
 export default async function SecurityPage({searchParams}:{searchParams:Promise<{returnTo?:string}>}) {
   const user = await getIdentity();

@@ -19,14 +19,19 @@ for(const theme of ['light','dark'] as const){
   const current=await page.locator('html').getAttribute('data-sii-theme');
   if(current!==theme)await toggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-sii-theme',theme);
-  const card=page.locator('.sii-auth-form-wrap');
+  const card=page.locator('[data-siii-login-form="v3"]');
   await expect(card).toBeVisible();
   await expect(page.getByLabel('Usuario institucional')).toBeVisible();
   await expect(page.getByLabel('Contraseña',{exact:true})).toBeVisible();
   mkdirSync('.p0-local',{recursive:true});
-  expectVisualBaseline(await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-390.png',fullPage:true,animations:'disabled'}),`login-${theme}-390`,info);
+  const mobileEvidence=await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-390.png',fullPage:true,animations:'disabled'});
   await page.setViewportSize({width:1440,height:900});
-  expectVisualBaseline(await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-1440.png',fullPage:true,animations:'disabled'}),`login-${theme}-1440`,info);
+  const desktopEvidence=await page.screenshot({path:'.p0-local/ux-matrix-login-'+theme+'-1440.png',fullPage:true,animations:'disabled'});
+  // Capture both requested viewports before failing on any missing or mismatched V2 reference.
+  // No auto-approval, masking or threshold changes: references require an explicit reviewed commit.
+  let baselineError:unknown;
+  try{expectVisualBaseline(mobileEvidence,`v2-login-${theme}-390`,info)}catch(error){baselineError=error}
+  try{expectVisualBaseline(desktopEvidence,`v2-login-${theme}-1440`,info)}catch(error){baselineError??=error}
   await page.setViewportSize({width:390,height:844});
   const viewport=await page.evaluate(()=>({document:document.documentElement.scrollWidth,window:window.innerWidth}));
   expect(viewport.document).toBeLessThanOrEqual(viewport.window+1);
@@ -35,5 +40,6 @@ for(const theme of ['light','dark'] as const){
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect.poll(()=>card.evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
   await expect(page.getByLabel('Usuario institucional')).toBeEditable();
+  if(baselineError)throw baselineError;
  });
 }

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "repository": "ErickRFM/Siii",
+  "base": "main",
+  "tasks": [
+    {
+      "id": "ui-consistency",
+      "agent": "ui",
+      "title": "Auditar navegación, estados, cargas y coherencia visual",
+      "branch": "codex/agents-ui-consistency",
+      "writes": [
+        "src/app/dashboard/**",
+        "src/components/**"
+      ],
+      "dependsOn": []
+    },
+    {
+      "id": "api-contracts",
+      "agent": "backend",
+      "title": "Auditar API y sincronización institucional con Compañero",
+      "branch": "codex/agents-api-contracts",
+      "writes": [
+        "src/app/api/**",
+        "src/integrations/**"
+      ],
+      "dependsOn": []
+    },
+    {
+      "id": "security-review",
+      "agent": "security",
+      "title": "Verificar autorización por tenant y controles de seguridad",
+      "branch": "codex/agents-security-review",
+      "writes": [
+        "src/shared/auth/**",
+        "src/middleware.ts"
+      ],
+      "dependsOn": []
+    },
+    {
+      "id": "qa-regression",
+      "agent": "qa",
+      "title": "Agregar regresiones sobre resultados auditados",
+      "branch": "codex/agents-qa-regression",
+      "writes": [
+        "tests/unit/**",
+        "tests/integration/**",
+        "tests/ui/**"
+      ],
+      "dependsOn": [
+        "ui-consistency",
+        "api-contracts",
+        "security-review"
+      ]
+    },
+    {
+      "id": "integration-gate",
+      "agent": "integration",
+      "title": "Consolidar evidencia y verificar CI antes de proponer merge",
+      "branch": "codex/agents-integration-gate",
+      "writes": [
+        "docs/agent/**",
+        "docs/operations/**"
+      ],
+      "dependsOn": [
+        "qa-regression"
+      ]
+    }
+  ]
+}
