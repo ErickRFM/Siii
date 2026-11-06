@@ -45,11 +45,13 @@ describe('QA-style timetable recovery (disposable PostgreSQL)',()=>{
   const f=await fixture();
   await pool.query("update institutional_teachers set status='inactive' where id=$1",[f.teacher.id]);
   let preview=await db.transaction(tx=>previewOccurrenceRecovery(tx,f.inst.id,f.section.id));
+  if(!preview)throw Error('Missing scoped preview');
   expect(preview.ready).toBe(false);expect(preview.blockers).toContain('TEACHER_REQUIRED');
   await expect(db.transaction(tx=>materializeSectionOccurrences(tx,f.inst.id,f.section.id))).rejects.toThrow('TEACHER_REQUIRED');
   await pool.query("update institutional_teachers set status='active' where id=$1",[f.teacher.id]);
   await pool.query('update classrooms set capacity=10 where id=$1',[f.room.id]);
   preview=await db.transaction(tx=>previewOccurrenceRecovery(tx,f.inst.id,f.section.id));
+  if(!preview)throw Error('Missing scoped preview');
   expect(preview.ready).toBe(false);expect(preview.blockers).toContain('ROOM_UNAVAILABLE');
   await expect(db.transaction(tx=>materializeSectionOccurrences(tx,f.inst.id,f.section.id))).rejects.toThrow('ROOM_UNAVAILABLE');
  });
