@@ -149,9 +149,7 @@ export function SystemAuditViewer({
   useEffect(() => {
     const controller = new AbortController();
     abort.current = controller;
-    setLoading(true);
     setError('');
-    setRows([]);
     setNextCursor(null);
 
     const query = new URLSearchParams({ limit: '10' });
@@ -344,7 +342,7 @@ export function SystemAuditViewer({
       </form>
 
       {/* Events List */}
-      {loading ? (
+      {loading && !rows.length ? (
         <p role="status" className="text-sm text-muted-foreground p-6 text-center">
           Consultando auditoría…
         </p>
