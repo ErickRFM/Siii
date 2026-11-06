@@ -74,6 +74,23 @@ describe.sequential('authorized outbox observation and audited snapshot reconcil
   const response=await request(),data=(await response.json()).data;expect(data.summary.accepted).toBeGreaterThanOrEqual(1);expect(data.summary.failed).toBeGreaterThanOrEqual(1);expect(data.summary.retrying).toBeGreaterThanOrEqual(1);expect(data.projectionStatus).toBe('unverified');
   expect(data.events.filter((event:{sectionId:string})=>event.sectionId===sectionId).map((event:{state:string})=>event.state).sort()).toEqual(['accepted','failed','queued']);
  });
+
+ it('preflight is read-only, bounded and requires current integration plus academic authority',async()=>{
+  const sectionId=await section(),url=base+'/api/v1/institutions/'+tenant+'/companion-sync/preflight?sectionId='+sectionId;
+  const access=await fetch(url,{headers:{cookie:admin}});
+  expect(access.status).toBe(200);expect(access.headers.get('cache-control')).toBe('no-store');
+  expect((await access.json()).data).toMatchObject({sectionId,activePatterns:0,existingOccurrences:0,expectedSourceVersion:0,missingOccurrences:0,ready:false,estimateOnly:true});
+  expect((await sql.query('select 1 from academic_section_versions where section_id=$1',[sectionId])).rows).toHaveLength(0);
+  expect((await sql.query('select 1 from academic_section_outbox where section_id=$1',[sectionId])).rows).toHaveLength(0);
+  for(const cookie of ['',student,noMfa]){
+   const response=await fetch(url,{headers:{cookie}});
+   expect(response.status).toBe(403);expect(await response.json()).not.toHaveProperty('data');
+  }
+  expect((await fetch(base+'/api/v1/institutions/'+foreign+'/companion-sync/preflight?sectionId='+sectionId,{headers:{cookie:admin}})).status).toBe(403);
+  expect((await fetch(url+'&sectionId='+sectionId,{headers:{cookie:admin}})).status).toBe(422);
+  expect((await fetch(base+'/api/v1/institutions/'+tenant+'/companion-sync/preflight?sectionId='+randomUUID(),{headers:{cookie:admin}})).status).toBe(404);
+ });
+
  it('recovers the exact failed teacher archive job only with fresh scoped administration',async()=>{
   const teacher=(await sql.query("INSERT INTO institutional_teachers(institution_id,employee_number,first_name,last_name) VALUES($1,$2,'Synthetic','Archive teacher') RETURNING id",[tenant,'EMP-'+randomBytes(5).toString('hex').toUpperCase()])).rows[0].id;
   await sql.query("INSERT INTO class_session_reconciliation(institution_id,teacher_id,page,attempts,state) VALUES($1,$2,2,8,'failed')",[tenant,teacher]);
