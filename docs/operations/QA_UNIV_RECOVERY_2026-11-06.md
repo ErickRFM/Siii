@@ -1,0 +1,5 @@
+# QA-UNIV — recuperación controlada
+
+Sección SEC-QA1: tres patrones activos, lunes/miércoles/viernes 09:00–11:00, término 2026-QA, docente y aula válidos; inicialmente 0 ocurrencias, 0 versiones y 0 eventos outbox (SELECT del 6-nov-2026).
+
+La fuente oficial es SIII. Antes de escribir hay que comprobar permisos institucionales academic.manage e integrations.manage, versión actual y banderas de entrega. La ruta autorizada POST /api/v1/institutions/:id/companion-sync recibe {sectionId,materializeOccurrences:true,expectedSourceVersion,reason}; no utilizar SQL manual. El resultado 201 solo acredita encolado: no equivale a proyección aplicada en Ktor/Mongo ni lectura Android. Certificar recepción mediante projection-status projected y appliedSourceVersion, posteriormente acceso real por alumno/docente, revocaciones y no cruce de instituciones. No modificar SII-001. Los cambios de calificaciones de Compañero requerirán un inbox firmado y revisión humana; nunca enviar notas directamente a /grading.
