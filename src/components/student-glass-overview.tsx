@@ -110,9 +110,9 @@ export default function StudentGlassOverview({
   );
 
   return (
-    <div className="siii-student-dashboard flex flex-col lg:flex-row gap-6">
+    <div className="siii-student-dashboard">
       {/* Main Column */}
-      <div className="siii-student-main flex-1 min-w-0 space-y-6">
+      <div className="siii-student-main">
         {/* Compact Hero Banner */}
         <header className="siii-overview-hero relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-r from-card/90 via-card/60 to-primary/5 p-5 sm:p-6 backdrop-blur-xl space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -567,7 +567,7 @@ export default function StudentGlassOverview({
       </div>
 
       {/* Right Column / Sidebar */}
-      <aside className="siii-student-aside w-full lg:w-80 shrink-0 space-y-5" aria-label="Información complementaria">
+      <aside className="siii-student-aside" aria-label="Información complementaria">
         {/* Calendar Widget Card */}
         <SiiiGlassPanel className="siii-overview-calendar p-4 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl">
           <h3 className="sr-only">Calendario</h3>
