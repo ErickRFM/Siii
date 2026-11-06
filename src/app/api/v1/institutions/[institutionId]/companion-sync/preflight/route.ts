@@ -18,5 +18,6 @@ export const GET=withDomainErrors(async(req:NextRequest,ctx:Context)=>{
  const actor=await authorizeInstitution(id,'integrations.manage');
  if(!actor||!await authorizeInstitution(id,'academic.manage'))return jsonError('FORBIDDEN',403);
  const data=await domainTransaction(actor,{permission:'integrations.manage'},tx=>previewOccurrenceRecovery(tx,id,sections[0]));
+ if(!data)return jsonError('SECTION_NOT_FOUND',404);
  return NextResponse.json({data},{headers:noCache});
 });

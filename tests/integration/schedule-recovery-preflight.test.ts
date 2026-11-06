@@ -37,7 +37,7 @@ describe('QA-style timetable recovery (disposable PostgreSQL)',()=>{
  });
  it('cannot inspect or materialize a section belonging to another institution',async()=>{
   const a=await fixture(),b=await fixture();
-  await expect(db.transaction(tx=>previewOccurrenceRecovery(tx,b.inst.id,a.section.id))).rejects.toThrow('SECTION_UNAVAILABLE');
+  expect(await db.transaction(tx=>previewOccurrenceRecovery(tx,b.inst.id,a.section.id))).toBeNull();
   await expect(db.transaction(tx=>materializeSectionOccurrences(tx,b.inst.id,a.section.id))).rejects.toThrow('SECTION_UNAVAILABLE');
   expect((await pool.query('select count(*)::int n from class_occurrences where section_id=$1',[a.section.id])).rows[0].n).toBe(0);
  });

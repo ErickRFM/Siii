@@ -1,13 +1,12 @@
 import {and,eq,inArray,isNull} from 'drizzle-orm';
 import {academicSections,academicTerms,classrooms,classOccurrences,schedulePatterns,sectionTeachers,institutionalTeachers,academicSectionVersions} from '../../../db/schema';
 import type {Transaction} from '@/shared/http/request-context';
-import {DomainConflict} from '@/modules/consolidation/domain-boundary';
 import {occurrenceDates} from './validation';
 
 /** Bounded read-only estimate; POST revalidates everything under locks. */
 export async function previewOccurrenceRecovery(tx:Transaction,tenant:string,sectionId:string){
  const [section]=await tx.select().from(academicSections).where(and(eq(academicSections.institutionId,tenant),eq(academicSections.id,sectionId))).limit(1);
- if(!section)throw new DomainConflict('SECTION_UNAVAILABLE');
+ if(!section)return null;
  const [term]=await tx.select().from(academicTerms).where(and(eq(academicTerms.institutionId,tenant),eq(academicTerms.id,section.termId))).limit(1);
  const [counter]=await tx.select({sourceVersion:academicSectionVersions.sourceVersion}).from(academicSectionVersions).where(and(eq(academicSectionVersions.institutionId,tenant),eq(academicSectionVersions.sectionId,sectionId))).limit(1);
  const patterns=await tx.select().from(schedulePatterns).where(and(eq(schedulePatterns.institutionId,tenant),eq(schedulePatterns.sectionId,sectionId))).limit(101);
