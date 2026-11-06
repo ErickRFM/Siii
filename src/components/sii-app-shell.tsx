@@ -281,7 +281,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
             {item.label}
            </BreadcrumbPage>
           ) : (
-           <BreadcrumbLink asChild className={`text-muted-foreground hover:text-foreground transition-colors ${item.className ?? ''}`}>
+           <BreadcrumbLink asChild className={`font-medium text-foreground hover:text-primary focus-visible:underline transition-colors ${item.className ?? ''}`}>
             <Link href={item.href as Route} title={item.label}>
              {item.label}
             </Link>
