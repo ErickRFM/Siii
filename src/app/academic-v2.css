@@ -38,7 +38,7 @@
 .sii-catalog-error,.sii-catalog-notice{padding:12px 14px;border-radius:11px;font-size:12px;line-height:1.5}
 .sii-catalog-error{background:#fff0f2;color:#921935;border:1px solid #df9eae}
 .sii-catalog-notice{background:#e4faed;color:#126243;border:1px solid #a7e0bb}
-.sii-catalog-footnote,.sii-catalog-limit{margin-top:17px;font-size:11px;color:var(--sii-muted);line-height:1.65}
+.sii-catalog-footnote{margin-top:17px;font-size:11px;color:var(--sii-muted);line-height:1.65}
 .sii-catalog-create{position:sticky;top:16px}
 .sii-security-notice .password-form label{color:#573614}
 .sii-security-notice .password-form input{color:#1d2937;background:#fff;border-color:#b5a280}
