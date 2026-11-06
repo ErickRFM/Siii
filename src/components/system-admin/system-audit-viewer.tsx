@@ -5,7 +5,6 @@ import {
   Filter,
   RefreshCw,
   Clock,
-  User,
   ShieldCheck,
   ChevronRight,
   ArrowLeftRight,
@@ -361,10 +360,7 @@ export function SystemAuditViewer({
         <ol className="sii-administration-events space-y-3">
           {rows.map((entry) => (
             <li key={entry.id}>
-              <article
-                className="w-full text-left p-4 rounded-xl border bg-card/60 hover:bg-card hover:border-primary/40 transition-all space-y-2 cursor-pointer"
-                onClick={() => setSelectedEntry(entry)}
-              >
+              <article className="p-4 rounded-xl border bg-card/60 hover:bg-card hover:border-primary/40 transition-all space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-sm">{actionLabels[entry.action] ?? 'Operación institucional'}</h3>
@@ -389,8 +385,17 @@ export function SystemAuditViewer({
                   <p className="font-medium text-foreground">{entry.reason ?? 'Sin motivo registrado'}</p>
                 </div>
 
-                <div className="pt-1 flex items-center justify-end text-xs text-primary font-semibold">
-                  Ver diff <ChevronRight className="size-3" />
+                <div className="pt-1 flex items-center justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-primary font-semibold gap-1 h-auto p-1"
+                    onClick={() => setSelectedEntry(entry)}
+                  >
+                    <span>Ver diff</span>
+                    <ChevronRight className="size-3.5" />
+                  </Button>
                 </div>
               </article>
             </li>
