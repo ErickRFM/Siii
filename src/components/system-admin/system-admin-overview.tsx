@@ -73,9 +73,9 @@ export function SystemAdminOverview({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
               {institution.name}
-            </h1>
+            </h2>
             <SiiStatusBadge variant={statusVariantMap[institution.status]}>
               {statusLabelMap[institution.status]}
             </SiiStatusBadge>
