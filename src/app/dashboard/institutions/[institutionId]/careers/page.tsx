@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';

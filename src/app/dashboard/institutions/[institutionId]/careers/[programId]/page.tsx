@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
 import { uuid } from '@/shared/auth/validation';
