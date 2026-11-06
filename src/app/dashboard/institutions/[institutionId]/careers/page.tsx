@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
@@ -51,7 +52,7 @@ export default async function CareersPage({ params }: { params: Promise<{ instit
       {programs.length === 0 && <p>Aún no hay carreras activas dentro de tus permisos.</p>}
       {programs.map(program => <div key={program.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-current/10 py-3">
         <div><h2 className="font-semibold">{program.name}</h2><p className="text-sm opacity-70">{program.code} · {program.level.replaceAll('_', ' ')}</p></div>
-        <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/careers/${program.id}`}>
+        <Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/careers/${program.id}` as Route}>
           Administrar carrera →
         </Link>
       </div>)}

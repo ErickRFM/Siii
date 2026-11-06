@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
 import { uuid } from '@/shared/auth/validation';
@@ -27,7 +28,7 @@ export default async function CareerAdministrationPage({
       eyebrow="ADMINISTRACIÓN ACOTADA"
       title="Administración de carrera"
       description={`${actor.access.institutionName} · Estudiantes, docentes y grupos vinculados a esta carrera.`}
-      actions={<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/careers`}>← Carreras</Link>}
+      actions={<Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}/careers` as Route}>← Carreras</Link>}
     />
     <CareerAdministration institutionId={institutionId} programId={programId} />
   </>;
