@@ -157,7 +157,7 @@ export function SystemAdminOverview({
             {academicAvailable && (
               <Link
                 href={`/dashboard/institutions/${institution.id}/academic` as Route}
-                className="group flex flex-col justify-between p-4 rounded-xl border bg-card/60 hover:border-primary/50 hover:bg-card transition-all"
+                className="group flex flex-col justify-between p-4 rounded-xl border bg-card hover:border-primary/50 transition-all"
               >
                 <div className="flex items-center justify-between text-muted-foreground group-hover:text-primary mb-3">
                   <Layers className="size-5" />
@@ -177,7 +177,7 @@ export function SystemAdminOverview({
             {capabilities.includes('users.read') && (
               <Link
                 href={`/dashboard/institutions/${institution.id}/users` as Route}
-                className="group flex flex-col justify-between p-4 rounded-xl border bg-card/60 hover:border-primary/50 hover:bg-card transition-all"
+                className="group flex flex-col justify-between p-4 rounded-xl border bg-card hover:border-primary/50 transition-all"
               >
                 <div className="flex items-center justify-between text-muted-foreground group-hover:text-primary mb-3">
                   <Users className="size-5" />
@@ -197,7 +197,7 @@ export function SystemAdminOverview({
             {capabilities.includes('roles.assign') && (
               <Link
                 href={`/dashboard/institutions/${institution.id}/roles` as Route}
-                className="group flex flex-col justify-between p-4 rounded-xl border bg-card/60 hover:border-primary/50 hover:bg-card transition-all"
+                className="group flex flex-col justify-between p-4 rounded-xl border bg-card hover:border-primary/50 transition-all"
               >
                 <div className="flex items-center justify-between text-muted-foreground group-hover:text-primary mb-3">
                   <KeyRound className="size-5" />
@@ -217,7 +217,7 @@ export function SystemAdminOverview({
             {capabilities.includes('invitations.manage') && (
               <Link
                 href={`/dashboard/institutions/${institution.id}/invitations` as Route}
-                className="group flex flex-col justify-between p-4 rounded-xl border bg-card/60 hover:border-primary/50 hover:bg-card transition-all"
+                className="group flex flex-col justify-between p-4 rounded-xl border bg-card hover:border-primary/50 transition-all"
               >
                 <div className="flex items-center justify-between text-muted-foreground group-hover:text-primary mb-3">
                   <FileCheck2 className="size-5" />
