@@ -208,8 +208,8 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: ErickRFM/Compa-ero-de-esc
-          # Fixed V24 receiver: institutional entry, durable notices, attendance history and revocation.
-          ref: c0ccd27b0eec9bd1a0f583be5e0b0fd484e8a00b
+          # Fixed current Compañero main receiver: run the real source-to-Ktor projection contract against the reviewed production code.
+          ref: 3f7dd471fd131d34eaee3af80cd9a98b45fd31da
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
