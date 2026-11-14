@@ -208,8 +208,8 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: ErickRFM/Compa-ero-de-esc
-          # Fixed V24 receiver: institutional entry, durable notices, attendance history and revocation.
-          ref: c0ccd27b0eec9bd1a0f583be5e0b0fd484e8a00b
+          # Fixed current Compañero main receiver: run the real source-to-Ktor projection contract against the reviewed production code.
+          ref: 6e77b4d472bbe89d51f1651746e7b7d941316488
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -267,7 +267,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = 'c0ccd27b0eec9bd1a0f583be5e0b0fd484e8a00b'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '6e77b4d472bbe89d51f1651746e7b7d941316488'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Disposable service diagnostics
         if: always()
