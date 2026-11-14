@@ -45,7 +45,7 @@ html[data-sii-theme] .sii-app.sii-ui .sii-grading-navigation [role=tab]{color:va
 html[data-sii-theme] .sii-app.sii-ui [data-slot=empty-description]{color:var(--solid-text)}
 html[data-sii-theme] .sii-app.sii-ui .sii-users article[role=listitem]{background:var(--solid-panel);color:var(--solid-text);transition:none}
 @media(prefers-contrast:more){
-  html[data-sii-theme] #siii-personal *{animation:none!important;transition:none!important}
-  html[data-sii-theme] #siii-personal .siii-overview-quick{opacity:1!important;color:var(--solid-accent)!important}
+  html[data-sii-theme] #siii-personal *{animation:none;transition:none}
+  html[data-sii-theme] #siii-personal .siii-overview-quick{opacity:1;color:var(--solid-accent)}
 }
 
