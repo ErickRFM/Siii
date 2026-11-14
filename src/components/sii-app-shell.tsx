@@ -86,6 +86,7 @@ function getBreadcrumbSegments(
        section === 'users' ? 'Usuarios' :
        section === 'invitations' ? 'Invitaciones' :
        section === 'financials' ? 'Caja y finanzas' :
+       section === 'careers' ? 'Carreras' :
        section === 'student' ? 'Mi vida universitaria' :
        section === 'teacher' ? 'Mi docencia' :
        section === 'grading' ? 'Calificaciones' :
@@ -106,7 +107,7 @@ function getBreadcrumbSegments(
       const subLabel =
         section === 'grading' && subSection === 'corrections'
           ? 'Rectificaciones'
-          : section === 'student' && subSection === 'attendance'
+          : (section === 'student' || section === 'teacher') && subSection === 'attendance'
           ? 'Historial de asistencia'
           : subSection;
 

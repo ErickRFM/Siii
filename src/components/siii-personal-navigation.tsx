@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import type {Route} from 'next';
 import {useEffect,useState,type ReactNode} from 'react';
-import {BookOpen,ChevronDown,FileText,GraduationCap,Heart,HelpCircle,Home,Layers,Settings,Users,Wallet,ClipboardCheck,UserRound,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
+import {BookOpen,ChevronDown,FileText,GraduationCap,Heart,Home,Layers,Settings,Users,Wallet,ClipboardCheck,UserRound,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
 import {SidebarContent,SidebarFooter,SidebarHeader,useSidebar} from './ui/sidebar';
 import {STUDENT_NAV_ITEMS,TEACHER_NAV_ITEMS,type PersonalNavDestination} from '@/shared/navigation/personal-navigation-registry';
 
@@ -98,8 +98,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
    </>}
   </SidebarContent>
   <SidebarFooter className="siii-personal-nav-footer">
-   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Ayuda y seguridad"><HelpCircle size={18}/><span className="group-data-[collapsible=icon]:hidden">Ayuda y seguridad</span></Link>
-   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Configuración"><Settings size={18}/><span className="group-data-[collapsible=icon]:hidden">Configuración</span></Link>
+   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Cuenta y seguridad"><Settings size={18}/><span className="group-data-[collapsible=icon]:hidden">Cuenta y seguridad</span></Link>
   </SidebarFooter>
  </>;
 }
