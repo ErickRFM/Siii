@@ -1,5 +1,6 @@
 'use client';
 import {useCallback,useEffect,useState} from 'react';
+import Link from 'next/link';
 import {Button} from '@/components/ui/button';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
 import {SiiEmptyView,SiiSectionHeader} from '@/components/ui/sii-kit';
@@ -27,23 +28,39 @@ const evidenceLabel=(claim:Claim)=>!claim.student?'Sin expediente con esa matrí
  :claim.evidence.profileMatchesRecord?'Solo coincide el correo de perfil (no verificado)'
  :'Los correos no coinciden';
 
-/** Control panel for enrollment claims that the auto-link rule could not approve. */
-export default function StudentClaimReview({institutionId}:{institutionId:string}){
+const HEADER={eyebrow:'VINCULACIÓN DE CUENTAS',title:'Solicitudes de vinculación pendientes'};
+
+/**
+ * Control panel for enrollment claims that the auto-link rule could not approve.
+ * `assured` is the server's answer to users.manage with privileged assurance (fresh step-up):
+ * without it the panel only explains how to unlock review, never fetching or raising an alert.
+ */
+export default function StudentClaimReview({institutionId,assured}:{institutionId:string;assured:boolean}){
+ if(!assured)return <section className="sii-panel sii-catalog-table-panel" aria-label={HEADER.title}>
+  <SiiSectionHeader workspace {...HEADER} description="Revisar y vincular expedientes requiere confirmar tu identidad recientemente."/>
+  <p className="sii-empty" role="status">Confirma tu identidad en <Link href="/dashboard/security" className="underline underline-offset-2">Seguridad</Link> para revisar las solicitudes pendientes.</p>
+ </section>;
+ return <AssuredClaimReview institutionId={institutionId}/>;
+}
+
+function AssuredClaimReview({institutionId}:{institutionId:string}){
  const {ask,confirmation}=useInstitutionConfirmation();
  const [claims,setClaims]=useState<Claim[]>([]);
  const [truncated,setTruncated]=useState(false);
  const [loading,setLoading]=useState(true);
  const [busy,setBusy]=useState<string|null>(null);
  const [error,setError]=useState('');
+ const [loadError,setLoadError]=useState('');
  const [notice,setNotice]=useState('');
  const path=`/api/v1/institutions/${institutionId}/student-links/claims`;
  const refresh=useCallback(async()=>{
   setLoading(true);
   try{
    const response=await fetch(path,{cache:'no-store'});const body=await response.json().catch(()=>null);
-   if(!response.ok){setError(describe(body?.error?.code));setClaims([]);return;}
-   setClaims(body.data);setTruncated(!!body.truncated);
-  }catch{setError(describe(undefined));}
+   // Load failures are reported as status, not alert: no user action failed yet.
+   if(!response.ok){setLoadError(describe(body?.error?.code));setClaims([]);return;}
+   setLoadError('');setClaims(body.data);setTruncated(!!body.truncated);
+  }catch{setLoadError(describe(undefined));}
   finally{setLoading(false);}
  },[path]);
  useEffect(()=>{void refresh();},[refresh]);
@@ -67,12 +84,13 @@ export default function StudentClaimReview({institutionId}:{institutionId:string
 
  return <section className="sii-panel sii-catalog-table-panel" aria-label="Solicitudes de vinculación pendientes" aria-busy={loading}>
   {confirmation}
-  <SiiSectionHeader workspace eyebrow="VINCULACIÓN DE CUENTAS" title="Solicitudes de vinculación pendientes"
+  <SiiSectionHeader workspace {...HEADER}
    description="Estudiantes que reclamaron una matrícula sin coincidencia verificada de correo. Revisa la evidencia antes de decidir."
    right={<span className="sii-small-count">{loading?'Cargando…':`${claims.length} pendientes${truncated?' (primeras 200)':''}`}</span>}/>
   {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   {loading?<div className="sii-empty" role="status">Cargando solicitudes…</div>
+   :loadError?<p className="sii-empty" role="status">{loadError}</p>
    :claims.length===0?<SiiEmptyView icon="users" title="No hay solicitudes pendientes." description="Las vinculaciones con correo verificado se aprueban automáticamente."/>
    :<SiiScrollRegion label="Tabla de solicitudes de vinculación, desplazamiento horizontal"><Table scrollable={false} className="sii-catalog-table">
     <TableHeader><TableRow><TableHead scope="col">Matrícula</TableHead><TableHead scope="col">Cuenta solicitante</TableHead><TableHead scope="col">Expediente</TableHead><TableHead scope="col">Evidencia</TableHead><TableHead scope="col">Acciones</TableHead></TableRow></TableHeader>
