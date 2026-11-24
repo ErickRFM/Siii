@@ -5,16 +5,12 @@ import React, {
   type ReactNode,
   type HTMLAttributes,
 } from 'react';
-import Link from 'next/link';
-import type { Route } from 'next';
 import { cn } from '@/lib/utils';
-import { SiiNavIcon, type SiiNavIconName } from '@/components/sii-nav-icon';
+import type { SiiNavIconName } from '@/components/sii-nav-icon';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { SiiSkeleton } from '@/components/ui/sii-kit';
+import { SiiEmptyView, SiiMetricTile, SiiSkeleton } from '@/components/ui/sii-kit';
 
 export { default as SiiAppShell } from '@/components/sii-app-shell';
 
@@ -214,63 +210,8 @@ export function SiiMetric({
   accessory,
   className,
 }: SiiMetricProps) {
-  const toneClasses = {
-    amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-    blue: 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
-    green: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-    rose: 'bg-primary-soft text-primary',
-    terracotta: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
-  };
-
-  return (
-    <Card
-      className={cn(
-        'sii-metric sii-kit-metric sii-glass-role-metric siii-glass-surface overflow-hidden',
-        className
-      )}
-    >
-      <CardContent className="flex h-full flex-col gap-2 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-[.12em] text-muted-foreground">
-            {label}
-          </span>
-          {icon && (
-            <span
-              className={cn(
-                'grid size-10 shrink-0 place-items-center rounded-xl',
-                toneClasses[tone]
-              )}
-              aria-hidden="true"
-            >
-              {typeof icon === 'string' ? <SiiNavIcon name={icon as SiiNavIconName} /> : icon}
-            </span>
-          )}
-        </div>
-        <span
-          className={cn(
-            'sii-metric-value text-3xl font-bold tracking-tight tabular-nums',
-            typeof value === 'string' && 'sii-metric-value--text'
-          )}
-        >
-          {value}
-        </span>
-        {description && <div className="text-xs text-muted-foreground">{description}</div>}
-        {caption && !description && (
-          <span className="sii-metric-caption text-xs text-muted-foreground">{caption}</span>
-        )}
-        {accessory && <div className="mt-1">{accessory}</div>}
-        {href && actionLabel && (
-          <Link
-            href={href as Route}
-            className="sii-metric-link mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-semibold text-primary"
-          >
-            {actionLabel}
-            <span aria-hidden="true">↗</span>
-          </Link>
-        )}
-      </CardContent>
-    </Card>
-  );
+  return <SiiMetricTile label={label} value={value} caption={description?undefined:caption} description={description}
+    icon={icon} tone={tone} href={href} actionLabel={actionLabel} accessory={accessory} className={className}/>;
 }
 
 /**
@@ -344,18 +285,8 @@ export function SiiEmptyState({
   action,
   className,
 }: SiiEmptyStateProps) {
-  return (
-    <Empty className={cn('sii-empty sii-kit-empty border rounded-xl p-8', className)}>
-      <EmptyHeader>
-        <EmptyMedia variant="icon" className="sii-kit-empty-icon">
-          <SiiNavIcon name={icon} />
-        </EmptyMedia>
-        <EmptyTitle className="sii-kit-empty-title text-base font-semibold">{title}</EmptyTitle>
-        <EmptyDescription className="text-sm text-muted-foreground">{description}</EmptyDescription>
-      </EmptyHeader>
-      {action && <div className="mt-4">{action}</div>}
-    </Empty>
-  );
+  return <SiiEmptyView icon={icon} title={title} description={description} action={action}
+    className={cn('rounded-xl p-8',className)} actionContainerClassName="mt-4"/>;
 }
 
 /**

@@ -5,6 +5,7 @@ import {SiiNavIcon,type SiiNavIconName} from '../sii-nav-icon';
 import {Badge} from '@/components/ui/badge';
 import {Card,CardContent} from '@/components/ui/card';
 import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle} from '@/components/ui/empty';
+import {cn} from '@/lib/utils';
 
 /** Reusable presentation primitives. Server and client compatible; no permission decisions. */
 export function SiiPageIntro({eyebrow,title,description,actions,hero=false}:{
@@ -28,18 +29,27 @@ export function SiiSectionHeader({eyebrow,title,description,right,outside=false,
    <div className="min-w-0"><span className="sii-section-kicker">{eyebrow}</span><h2>{title}</h2>{description&&<p>{description}</p>}</div>{right}
  </div>;
 }
-export function SiiMetricTile({label,value,caption,icon,tone='rose',href,actionLabel}:{
- label:string;value:ReactNode;caption?:string;icon:SiiNavIconName;tone?:'rose'|'amber'|'blue';href?:string;actionLabel?:string;
+export function SiiMetricTile({label,value,caption,description,icon,tone='rose',href,actionLabel,accessory,className}:{
+ label:string;value:ReactNode;caption?:string;description?:ReactNode;icon?:SiiNavIconName|ReactNode;
+ tone?:'rose'|'amber'|'blue'|'green'|'terracotta';href?:string;actionLabel?:string;accessory?:ReactNode;className?:string;
 }){
- const toneClass=tone==='amber'?'bg-amber-500/10 text-amber-700 dark:text-amber-300':tone==='blue'?'bg-sky-500/10 text-sky-700 dark:text-sky-300':'bg-primary-soft text-primary';
- return <Card className="sii-metric sii-kit-metric sii-glass-role-metric siii-glass-surface overflow-hidden">
+ const toneClass={
+  amber:'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  blue:'bg-sky-500/10 text-sky-700 dark:text-sky-300',
+  green:'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  rose:'bg-primary-soft text-primary',
+  terracotta:'bg-orange-500/10 text-orange-700 dark:text-orange-300',
+ }[tone];
+ return <Card className={cn('sii-metric sii-kit-metric sii-glass-role-metric siii-glass-surface overflow-hidden',className)}>
    <CardContent className="flex h-full flex-col gap-2 p-5">
     <div className="flex items-start justify-between gap-3">
      <span className="text-xs font-semibold uppercase tracking-[.12em] text-muted-foreground">{label}</span>
-     <span className={'grid size-10 shrink-0 place-items-center rounded-xl '+toneClass} aria-hidden="true"><SiiNavIcon name={icon}/></span>
+     {icon&&<span className={'grid size-10 shrink-0 place-items-center rounded-xl '+toneClass} aria-hidden="true">{typeof icon==='string'?<SiiNavIcon name={icon as SiiNavIconName}/>:icon}</span>}
     </div>
-    <span className={'sii-metric-value text-3xl font-bold tracking-tight'+(typeof value==='string'?' sii-metric-value--text':'')}>{value}</span>
+    <span className={'sii-metric-value text-3xl font-bold tracking-tight tabular-nums'+(typeof value==='string'?' sii-metric-value--text':'')}>{value}</span>
+    {description&&<div className="text-xs text-muted-foreground">{description}</div>}
     {caption&&<span className="sii-metric-caption text-xs text-muted-foreground">{caption}</span>}
+    {accessory&&<div className="mt-1">{accessory}</div>}
     {href&&actionLabel&&<Link href={href as Route} className="sii-metric-link mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-semibold text-primary">{actionLabel}<span aria-hidden="true">↗</span></Link>}
    </CardContent>
  </Card>;
@@ -51,16 +61,17 @@ export function SiiStatusPill({children,live=false}:{
    {live&&<span className="sii-online-dot"/>}{children}
  </Badge>;
 }
-export function SiiEmptyView({icon,title,description,action}:{
+export function SiiEmptyView({icon,title,description,action,className,actionContainerClassName}:{
  icon:SiiNavIconName;title:string;description:string;action?:ReactNode;
+ className?:string;actionContainerClassName?:string;
 }){
- return <Empty className="sii-empty sii-kit-empty border">
+ return <Empty className={cn('sii-empty sii-kit-empty border',className)}>
    <EmptyHeader>
     <EmptyMedia variant="icon" className="sii-kit-empty-icon"><SiiNavIcon name={icon}/></EmptyMedia>
     <EmptyTitle className="sii-kit-empty-title">{title}</EmptyTitle>
     <EmptyDescription>{description}</EmptyDescription>
    </EmptyHeader>
-   {action}
+   {action&&actionContainerClassName?<div className={actionContainerClassName}>{action}</div>:action}
  </Empty>;
 }
 export function SiiModuleTile({title,description,icon,href,disabledReason}:{
