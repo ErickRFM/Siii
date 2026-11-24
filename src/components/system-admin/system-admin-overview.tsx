@@ -16,7 +16,8 @@ import {
   Settings2,
 } from 'lucide-react';
 import type { InstitutionAdminDTO } from '@/shared/institution-admin/policy';
-import { SiiMetric, SiiStatusBadge, SiiPanel } from '@/components/ui/sii-institutional';
+import { SiiMetricTile } from '@/components/ui/sii-kit';
+import { SiiStatusBadge, SiiPanel } from '@/components/ui/sii-institutional';
 import { Button } from '@/components/ui/button';
 
 export interface SystemAdminOverviewProps {
@@ -109,7 +110,7 @@ export function SystemAdminOverview({
 
       {/* KPI Metrics Dashboard Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SiiMetric
+        <SiiMetricTile
           label="Estado Operativo"
           value={statusLabelMap[institution.status]}
           tone={institution.status === 'active' ? 'green' : 'amber'}
@@ -120,21 +121,21 @@ export function SystemAdminOverview({
               : 'Operaciones restringidas por estado administrativo'
           }
         />
-        <SiiMetric
+        <SiiMetricTile
           label="Revisión de Seguridad"
           value={`v${institution.version}`}
           tone="blue"
           icon={<ShieldAlert className="size-5" />}
           description="Secuencia de auditoría verificada en PostgreSQL"
         />
-        <SiiMetric
+        <SiiMetricTile
           label="Catálogo Académico"
           value={academicAvailable ? 'Habilitado' : 'Restringido'}
           tone={academicAvailable ? 'green' : 'terracotta'}
           icon={<Layers className="size-5" />}
           description="Programas, planes, materias y periodos"
         />
-        <SiiMetric
+        <SiiMetricTile
           label="Zona Horaria IANA"
           value={institution.timezone.split('/')[1] ?? institution.timezone}
           tone="amber"

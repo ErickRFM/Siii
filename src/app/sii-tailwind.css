@@ -113,7 +113,7 @@
 .sii-ui [data-sidebar="menu-button"] {white-space:normal}
 .sii-ui [data-sidebar="menu-button"][data-active="true"] {
   background:hsl(var(--sidebar-accent));color:hsl(var(--sidebar-accent-foreground));
-  box-shadow:inset 3px 0 hsl(var(--sidebar-primary));
+  box-shadow:none;
 }
 .sii-app :is(.sii-topbar,.sii-panel,.sii-module-card,.sii-metric,.sii-catalog-table-panel,.sii-catalog-create,.sii-catalog-tabs,.sii-security-card),
 .sii-auth .sii-auth-card {

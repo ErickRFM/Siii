@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { MouseEventHandler } from 'react';
 
 export function SiiMark({ compact = false }: { compact?: boolean }) {
   return (
@@ -13,9 +14,9 @@ export function SiiMark({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function SiiBrand({ light = false }: { light?: boolean }) {
+export function SiiBrand({ light = false, onClick }: { light?: boolean; onClick?: MouseEventHandler<HTMLAnchorElement> }) {
   return (
-    <Link className={light ? 'sii-brand sii-brand--light' : 'sii-brand'} href="/dashboard" aria-label="SII, ir al inicio institucional">
+    <Link className={light ? 'sii-brand sii-brand--light' : 'sii-brand'} href="/dashboard" aria-label="SII, ir al inicio institucional" onClick={onClick}>
       <SiiMark />
       <span className="sii-brand-name">SII</span>
       <span className="sii-brand-caption">Sistema Institucional<br/>Integral</span>

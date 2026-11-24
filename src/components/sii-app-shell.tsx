@@ -19,7 +19,7 @@ import {Avatar,AvatarFallback} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {Breadcrumb,BreadcrumbItem,BreadcrumbLink,BreadcrumbList,BreadcrumbPage,BreadcrumbSeparator} from '@/components/ui/breadcrumb';
 import {Button} from '@/components/ui/button';
-import {Sidebar,SidebarContent,SidebarFooter,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarHeader,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarProvider,SidebarSeparator,useSidebar} from '@/components/ui/sidebar';
+import {Sidebar,SidebarContent,SidebarFooter,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarHeader,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarProvider,useSidebar} from '@/components/ui/sidebar';
 
 function iconForModule(id:string):SiiNavIconName {
   switch(id){
@@ -152,6 +152,7 @@ export default function SiiAppShell({actorId,firstName,fullName,defaultInstituti
 
 function Shell({firstName,fullName,active,institutionId,institutionAdministrationAvailable,personalShell,institutionName,pathname,children}:{firstName:string;fullName:string;active:DashboardActive;institutionId?:string;institutionAdministrationAvailable:boolean;personalShell:boolean;institutionName?:string;pathname:string;children:ReactNode}) {
  const {data,loading,error}=useInstitutionCapabilities();
+ const {isMobile,setOpenMobile}=useSidebar();
  const verifying=Boolean(institutionId && loading && !data);
  const unavailableLabel=!institutionId?'Selecciona institución':verifying?'Verificando…':error?'No disponible':'Restringido';
  const modules=academicModuleLinks(data&&!data.restricted?data.capabilities:[]);
@@ -200,13 +201,13 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
  }
  const breadcrumbs=getBreadcrumbSegments(pathname,institutionId,institutionName,activeModule,personal);
  return <>
-  <Sidebar collapsible="icon" className={'border-sidebar-border bg-sidebar'+(personalShell?' siii-personal-rail':'')}>
+  <Sidebar collapsible="icon" className={'border-transparent bg-sidebar'+(personalShell?' siii-personal-rail':'')}>
    <nav aria-label="Navegación institucional" className="flex h-full min-h-0 flex-col">
    {personalShell?<SiiiPersonalNavigation role={personalRole} institutionId={institutionId} institutionName={institutionName} allowed={Boolean(data&&!data.restricted&&personal.some(module=>module.id===personalRole))}/>:<>
-   <SidebarHeader className="border-b border-sidebar-border px-3 py-4 group-data-[collapsible=icon]:px-1">
+   <SidebarHeader className="px-3 py-4 group-data-[collapsible=icon]:px-1">
     <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col">
-     <div className="group-data-[collapsible=icon]:hidden"><SiiBrand light/></div>
-     <Link href="/dashboard" aria-label="SII, ir al inicio institucional" className="hidden group-data-[collapsible=icon]:grid"><SiiMark compact/></Link>
+     <div className="group-data-[collapsible=icon]:hidden"><SiiBrand light onClick={()=>{if(isMobile)setOpenMobile(false)}}/></div>
+     <Link href="/dashboard" aria-label="SII, ir al inicio institucional" onClick={()=>{if(isMobile)setOpenMobile(false)}} className="hidden group-data-[collapsible=icon]:grid"><SiiMark compact/></Link>
      <CollapseButton/>
     </div>
    </SidebarHeader>
@@ -237,7 +238,6 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
       </SidebarMenu>
      </SidebarGroupContent>
     </SidebarGroup>
-    <SidebarSeparator/>
     <SidebarGroup>
      <SidebarGroupLabel>Gestión académica</SidebarGroupLabel>
      <SidebarGroupContent aria-busy={verifying}><nav aria-label="Gestión académica">
@@ -253,9 +253,9 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
      </nav></SidebarGroupContent>
     </SidebarGroup>
    </SidebarContent>
-   <SidebarFooter className="border-t border-sidebar-border p-3">
+   <SidebarFooter className="p-3">
     <div className="flex items-center gap-2 rounded-md bg-sidebar-accent/70 px-2 py-2 group-data-[collapsible=icon]:justify-center">
-     <Avatar className="size-8 border border-sidebar-border"><AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
+     <Avatar className="size-8"><AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
      <span className="min-w-0 group-data-[collapsible=icon]:hidden"><strong className="block truncate text-xs text-sidebar-foreground">{fullName}</strong><small className="block truncate text-[10px] text-sidebar-foreground/60">Sesión institucional</small></span>
     </div>
     <p className="mt-2 hidden items-center gap-2 px-1 text-[10px] text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden"><span className="size-1.5 rounded-full bg-emerald-400"/>Plataforma institucional · Acceso protegido</p>
@@ -362,9 +362,10 @@ function MobileTrigger(){
 }
 
 function ShellLink({href,label,icon,active}:{href:Route|string;label:string;icon:SiiNavIconName;active:boolean}){
+ const {isMobile,setOpenMobile}=useSidebar();
  return <SidebarMenuItem>
   <SidebarMenuButton asChild isActive={active} tooltip={label} className="h-10 gap-3 text-[13px] font-semibold">
-   <Link href={href as Route} aria-current={active?'page':undefined} onClick={()=>{const hash=String(href).split('#')[1];if(String(href).includes('/student#')&&hash)window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:hash}))}}>
+   <Link href={href as Route} aria-current={active?'page':undefined} onClick={()=>{const hash=String(href).split('#')[1];if(String(href).includes('/student#')&&hash)window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:hash}));if(isMobile)setOpenMobile(false)}}>
     <SiiNavIcon name={icon}/><span>{label}</span>
    </Link>
   </SidebarMenuButton>

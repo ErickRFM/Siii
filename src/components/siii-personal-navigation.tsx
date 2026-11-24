@@ -40,6 +40,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
   };
  },[role]);
  const base=institutionId&&role!=='context'?`/dashboard/institutions/${institutionId}/${role}`:'/dashboard';
+ const closeMobileNavigation=()=>{if(isMobile)setOpenMobile(false)};
 
  function item(dest: PersonalNavDestination){
   if(!dest.available)return <span key={dest.hash} className="siii-personal-nav-link text-muted-foreground opacity-60" aria-disabled="true" title={dest.description||"El plan oficial aún no está disponible"}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span><small className="ml-auto text-[11px] uppercase tracking-wide opacity-80 group-data-[collapsible=icon]:hidden">Próximamente</small></span>;
@@ -50,7 +51,7 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
     if(!allowed){event.preventDefault();return}
     window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:dest.hash}));
     setSelected(dest.hash);
-    if(isMobile)setOpenMobile(false);
+    closeMobileNavigation();
    }}>{iconMap(dest.iconName)}<span className="group-data-[collapsible=icon]:hidden">{dest.label}</span></Link>;
  }
 
@@ -72,7 +73,8 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
   <SidebarHeader className="siii-personal-brand">
    <div className="siii-personal-brand-inner">
     <Link href={(role==='context'?base:base+'#inicio') as Route} aria-label="SIII, ir al inicio institucional" className="siii-personal-brand-link" onClick={()=>{
-     if(role!=='context'){window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:'inicio'}));setSelected('inicio');if(isMobile)setOpenMobile(false)}
+     closeMobileNavigation();
+     if(role!=='context'){window.dispatchEvent(new CustomEvent(`siii:${role}-navigation`,{detail:'inicio'}));setSelected('inicio')}
     }}>
      <span className="siii-personal-mark" aria-hidden="true"><svg viewBox="0 0 34 40" fill="none"><path d="M22 5 10 13c-2 1.4-2 3.7.2 5.2l5.8 4-7.3 5.4c-2.2 1.7-2.3 4.1-.3 5.8l2.7 2.1c1.3 1.1 3 1.1 4.4.1l11.8-8.3c2.1-1.5 2.1-3.9 0-5.4l-5.7-4 7.4-5.5c2-1.6 2-4 .1-5.5L26 5c-1.2-.9-2.7-.9-4 0Z" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round"/></svg></span>
      <span className="group-data-[collapsible=icon]:hidden"><strong>SIII</strong><small>{institutionName??'Sistema Institucional Integral'}</small></span>
@@ -87,18 +89,18 @@ export default function SiiiPersonalNavigation({role,institutionId,institutionNa
    </div>
   </SidebarHeader>
   <SidebarContent className="siii-personal-nav-content">
-   {role==='context'?<Link href="/dashboard" className="siii-personal-nav-link is-current" title="Mis contextos"><Home size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis contextos</span></Link>:item(STUDENT_NAV_ITEMS[0])}
+   {role==='context'?<Link href="/dashboard" className="siii-personal-nav-link is-current" title="Mis contextos" onClick={closeMobileNavigation}><Home size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis contextos</span></Link>:item(STUDENT_NAV_ITEMS[0])}
    {role==='student'&&studentGroups.map(g=>(
     group(g.label,g.icon,<>{STUDENT_NAV_ITEMS.filter(it=>g.hashes.includes(it.hash)).map(item)}</>,g.hashes.includes(selected))
    ))}
-   {role==='student'&&institutionId&&<Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/student/attendance`) as Route} title="Mi historial de asistencia"><ClipboardCheck size={18}/><span className="group-data-[collapsible=icon]:hidden">Mi historial de asistencia</span></Link>}
+   {role==='student'&&institutionId&&<Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/student/attendance`) as Route} title="Mi historial de asistencia" onClick={closeMobileNavigation}><ClipboardCheck size={18}/><span className="group-data-[collapsible=icon]:hidden">Mi historial de asistencia</span></Link>}
    {role==='teacher'&&<>
     {group('Docencia',<GraduationCap size={18}/>,<>{TEACHER_NAV_ITEMS.map(item)}</>,['grupos','evaluaciones','perfil'].includes(selected))}
-    <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones"><FileText size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>
+    <Link className="siii-personal-nav-link" href={(`/dashboard/institutions/${institutionId}/grading/corrections`) as Route} title="Mis rectificaciones" onClick={closeMobileNavigation}><FileText size={18}/><span className="group-data-[collapsible=icon]:hidden">Mis rectificaciones</span></Link>
    </>}
   </SidebarContent>
   <SidebarFooter className="siii-personal-nav-footer">
-   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Cuenta y seguridad"><Settings size={18}/><span className="group-data-[collapsible=icon]:hidden">Cuenta y seguridad</span></Link>
+   <Link className="siii-personal-nav-link" href="/dashboard/security" title="Cuenta y seguridad" onClick={closeMobileNavigation}><Settings size={18}/><span className="group-data-[collapsible=icon]:hidden">Cuenta y seguridad</span></Link>
   </SidebarFooter>
  </>;
 }
