@@ -2,7 +2,7 @@ import {and,eq,isNull,gt,or,asc} from 'drizzle-orm';
 import {db} from '@/infrastructure/database';
 import {institutions,institutionMemberships,roleAssignments,academicPrograms,campuses,platformUsers} from '../../../db/schema';
 import type {Transaction} from '@/shared/http/request-context';
-import {can,type Capability,type Grant,type Subject} from './capabilities';
+import {ACADEMIC_MANAGE_CAPABILITIES,can,type Capability,type Grant,type Subject} from './capabilities';
 import type {Permission,Role} from './roles';
 
 export type StoredGrant=Grant&{id:string};
@@ -32,7 +32,7 @@ export async function institutionAccess(userId:string,executor:typeof db|Transac
 export function legacyCapabilities(permission:Permission):readonly Capability[]{
  if(permission==='users.manage')return ['memberships.manage'];
  if(permission==='academic.read')return ['programs.read','curricula.read','courses.read','campuses.read','terms.read'];
- if(permission==='academic.manage')return ['programs.manage','curricula.manage','courses.manage','campuses.manage','terms.manage'];
+ if(permission==='academic.manage')return ACADEMIC_MANAGE_CAPABILITIES;
  return [permission];
 }
 export function legacyAllows(subject:Subject,permission:Permission,institutionId:string,now=new Date()){

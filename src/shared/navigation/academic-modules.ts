@@ -1,4 +1,6 @@
-const MANAGEMENT=['programs','curricula','courses','campuses','terms'].map(resource=>resource+'.manage');
+import {ACADEMIC_MANAGE_CAPABILITIES} from '@/shared/auth/capabilities';
+// Registry, operations, scheduling and services pages authorize with legacy `academic.manage`.
+const MANAGEMENT=ACADEMIC_MANAGE_CAPABILITIES;
 const MODULES=[{id:'registry',label:'Estudiantes y docentes',glyph:'▣'},{id:'operations',label:'Grupos e inscripciones',glyph:'▤'},{id:'grading',label:'Calificaciones',glyph:'▦'},{id:'scheduling',label:'Horarios y aulas',glyph:'◷'},{id:'services',label:'Servicios universitarios',glyph:'✉'},{id:'admissions',label:'Admisiones',glyph:'▣'}] as const;
 export const allAcademicModuleLinks = MODULES;
 export type AcademicModule=typeof MODULES[number]['id'];

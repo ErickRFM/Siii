@@ -22,7 +22,12 @@ export const CAPABILITIES = Object.freeze({
 export type Capability = keyof typeof CAPABILITIES;
 
 const CATALOG_READ: readonly Capability[] = ['programs.read', 'curricula.read', 'courses.read', 'campuses.read', 'terms.read'];
-const CATALOG_MANAGE: readonly Capability[] = ['programs.manage', 'curricula.manage', 'courses.manage', 'campuses.manage', 'terms.manage'];
+const CATALOG_MANAGE: readonly Capability[] = Object.freeze(['programs.manage', 'curricula.manage', 'courses.manage', 'campuses.manage', 'terms.manage']);
+/**
+ * Single source for the legacy `academic.manage` permission: pages and APIs that
+ * authorize with it, and the navigation that projects it, must agree on this set.
+ */
+export const ACADEMIC_MANAGE_CAPABILITIES: readonly Capability[] = CATALOG_MANAGE;
 const ALL_CAPABILITIES = Object.freeze(Object.keys(CAPABILITIES) as Capability[]);
 const readonlyCapabilities = (...capabilities: Capability[]): readonly Capability[] => Object.freeze(capabilities);
 
