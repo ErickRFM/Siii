@@ -209,7 +209,7 @@ jobs:
         with:
           repository: ErickRFM/Compa-ero-de-esc
           # Fixed current Compañero main receiver: run the real source-to-Ktor projection contract against the reviewed production code.
-          ref: 6e77b4d472bbe89d51f1651746e7b7d941316488
+          ref: bfb9e3c146d47e2dd7ac121c357cfc0c830380f6
           path: .p0-local/companion-contract
           persist-credentials: false
       - name: Receiver Java 17 runtime
@@ -267,7 +267,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = '6e77b4d472bbe89d51f1651746e7b7d941316488'
+          test "$(git -C .p0-local/companion-contract rev-parse HEAD)" = 'bfb9e3c146d47e2dd7ac121c357cfc0c830380f6'
           test -z "$(git -C .p0-local/companion-contract status --porcelain)"
       - name: Disposable service diagnostics
         if: always()
