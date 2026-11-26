@@ -347,6 +347,8 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-overview-listrow small{opacit
 html[data-sii-theme="dark"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#efe6df!important}
 html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="text-sidebar-foreground/"]{color:#43362f!important}
 .sii-app.sii-ui [data-sidebar="sidebar"] [data-sidebar="group-label"]{opacity:1}
+/* The AA opacity override above must not resurrect labels in the icon rail, where they overlap icons. */
+.sii-app.sii-ui [data-collapsible="icon"] [data-sidebar="sidebar"] [data-sidebar="group-label"]{display:none}
 
 /* Screenshot-aligned command search and compact authenticated identity. */
 .sii-app.sii-ui .sii-topbar .sii-topbar-start{min-width:0;display:flex;align-items:center;gap:15px;flex:1}

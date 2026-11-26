@@ -1,5 +1,6 @@
 'use client';
 
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +18,7 @@ export default function LoginPage(){
  const [showPassword,setShowPassword]=useState(false);
  const [challenge,setChallenge]=useState<{expiresAt:string}|null>(null);
  const [useRecovery,setUseRecovery]=useState(false);
- const [offline,setOffline]=useState(false);
+ const offline=!useOnlineStatus();
  const [factorInvalid,setFactorInvalid]=useState(false);
  const factorRef=useRef<HTMLInputElement>(null);
  const router=useRouter();
@@ -25,11 +26,6 @@ export default function LoginPage(){
  const [credentialsInvalid,setCredentialsInvalid]=useState(false);
  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
  useEffect(()=>{if(challenge)factorRef.current?.focus();},[challenge,useRecovery]);
- useEffect(()=>{
-  const update=()=>setOffline(!navigator.onLine);
-  update();window.addEventListener('online',update);window.addEventListener('offline',update);
-  return()=>{window.removeEventListener('online',update);window.removeEventListener('offline',update);};
- },[]);
 
  async function submit(event:FormEvent<HTMLFormElement>){
   event.preventDefault();

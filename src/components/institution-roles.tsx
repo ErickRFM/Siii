@@ -1,4 +1,5 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {Button} from '@/components/ui/button';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
 import {NativeSelect} from '@/components/ui/native-select';
@@ -46,7 +47,7 @@ export default function InstitutionRoles({ institutionId }: { institutionId: str
   const [securityRequired, setSecurityRequired] = useState(false);
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState(false);
-  const [online, setOnline] = useState(true);
+  const online = useOnlineStatus();
   const [membershipId, setMembershipId] = useState('');
   const [role, setRole] = useState('');
   const [scopeType, setScopeType] = useState<ScopeType>('institution');
@@ -59,11 +60,6 @@ export default function InstitutionRoles({ institutionId }: { institutionId: str
   const base = `/api/v1/institutions/${institutionId}`;
   const returnTo = `/dashboard/institutions/${institutionId}/roles`;
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    update(); window.addEventListener('online', update); window.addEventListener('offline', update);
-    return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); };
-  }, []);
   const readPages = useCallback(async <T,>(path: string, signal: AbortSignal): Promise<T[]> => {
     const rows: T[] = []; let cursor: string | null = null;
     do {
