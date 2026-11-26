@@ -1,4 +1,6 @@
 'use client';
+import {SiiPagination} from '@/components/ui/sii-pagination';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 import SiiiWorkspaceHeading from './ui/siii-workspace-heading';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -84,15 +86,10 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
 
   const [nextCursor,setNextCursor]=useState<string|null>(null);
   const [history,setHistory]=useState<Array<string|null>>([null]);
-  const [online,setOnline]=useState(true);
+  const online=useOnlineStatus();
   const [programsError,setProgramsError]=useState('');
   const activeRequest=useRef<AbortController|null>(null);
   const currentCursor=history[history.length-1];
-  useEffect(()=>{
-    const update=()=>setOnline(navigator.onLine);
-    update();window.addEventListener('online',update);window.addEventListener('offline',update);
-    return ()=>{window.removeEventListener('online',update);window.removeEventListener('offline',update);};
-  },[]);
   const load=useCallback(async(resource:CatalogResource,signal?:AbortSignal,cursor:string|null=null)=>{
     activeRequest.current?.abort();
     const controller=new AbortController();activeRequest.current=controller;
@@ -262,11 +259,8 @@ export default function AcademicCatalog({institutionId}:{institutionId:string}) 
               </div>:<span>{row.status==='archived'?'Archivado':'Solo consulta'}</span>}</TableCell>}
             </TableRow>)}</TableBody>
           </Table></SiiScrollRegion>}
-          <nav className="sii-catalog-pagination" aria-label="Paginación del catálogo">
-            <Button variant="outline" type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!online} onClick={()=>void page('previous')}>Página anterior</Button>
-            <span aria-live="polite">Página {history.length}</span>
-            <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!online} onClick={()=>void page('next')}>Siguiente página</Button>
-          </nav>
+          <SiiPagination label="Paginación del catálogo" page={history.length} canPrevious={history.length>1} canNext={Boolean(nextCursor)}
+            disabled={loading||saving||!online} onPrevious={()=>void page('previous')} onNext={()=>void page('next')}/>
         </section>
         {canCreate&&<aside className="sii-panel sii-catalog-create">
           <span className="sii-section-kicker">NUEVO REGISTRO</span><h3>Agregar {selected.label.toLowerCase()}</h3>

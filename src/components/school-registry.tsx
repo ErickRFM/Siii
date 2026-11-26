@@ -1,4 +1,5 @@
 'use client';
+import {SiiPagination} from '@/components/ui/sii-pagination';
 import {SiiEmptyView} from '@/components/ui/sii-kit';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -139,11 +140,8 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
        <TableCell>{row.status}</TableCell>
        <TableCell><Button variant="outline" type="button" ref={node=>{if(node)editButtons.current.set(row.id,node);else editButtons.current.delete(row.id)}} disabled={saving||!!editing} onClick={()=>{returnFocusId.current=row.id;setEditing({...row});setError('');setNotice('')}}>Editar</Button> <Button variant="outline" type="button" disabled={saving||!!editing||!['active','inactive'].includes(row.status)} onClick={()=>void changeStatus(row)}>{row.status==='active'?'Desactivar':'Reactivar'}</Button></TableCell>
       </TableRow>)}</TableBody></Table></SiiScrollRegion>}
-    <nav className="sii-catalog-pagination" aria-label="Paginación del registro">
-     <Button variant="outline" type="button" className="sii-outline-button" disabled={history.length===1||loading||saving||!!editing} onClick={()=>void page('previous')}>Página anterior</Button>
-     <span aria-live="polite">Página {history.length}</span>
-     <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor||loading||saving||!!editing} onClick={()=>void page('next')}>Siguiente página</Button>
-    </nav>
+    <SiiPagination label="Paginación del registro" page={history.length} canPrevious={history.length>1} canNext={Boolean(nextCursor)}
+     disabled={loading||saving||!!editing} onPrevious={()=>void page('previous')} onNext={()=>void page('next')}/>
    </section>
    {editing?<section className="sii-panel sii-catalog-create" aria-label="Edición de expediente">
     <span className="sii-section-kicker">CORRECCIÓN INSTITUCIONAL</span><h3>Editar {kind==='students'?'estudiante':'docente'} · {editing.enrollmentNumber??editing.employeeNumber}</h3>

@@ -1,4 +1,5 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {Button} from '@/components/ui/button';
 import {NativeSelect} from '@/components/ui/native-select';
 import {Input} from '@/components/ui/input';
@@ -37,11 +38,12 @@ async function post<T>(action:string,body:Record<string,unknown>,signal?:AbortSi
   return result as T;
 }
 export default function InvitationAccept(){
+  const offline=!useOnlineStatus();
  const {ask,confirmation}=useInstitutionConfirmation();
   // The bearer never enters rendered state, storage, a link, or a query string.
   const bearer=useRef<InvitationBearer|null>(null),readGeneration=useRef(0),feedback=useRef<HTMLParagraphElement>(null),decisionPending=useRef(false);
   const [invalidFields,setInvalidFields]=useState<string[]>([]);
-  const [preview,setPreview]=useState<Preview|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[offline,setOffline]=useState(false);
+  const [preview,setPreview]=useState<Preview|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false);
   const [showPassword,setShowPassword]=useState(false),[showConfirmPassword,setShowConfirmPassword]=useState(false);
   const [mode,setMode]=useState<'existing'|'new'>('new'),[consent,setConsent]=useState(false),[terminal,setTerminal]=useState<'accepted'|'rejected'|null>(null),[acceptedMode,setAcceptedMode]=useState<'existing'|'new'|null>(null),[invalidPassword,setInvalidPassword]=useState(false),[notice,setNotice]=useState('');
   const refresh=useCallback(async(signal?:AbortSignal)=>{
@@ -76,7 +78,6 @@ export default function InvitationAccept(){
     void refresh(controller.signal);
     return()=>{controller.abort();window.removeEventListener('siii:invitation-fragment',receive);};
   },[refresh]);
-  useEffect(()=>{const update=()=>setOffline(!navigator.onLine);update();window.addEventListener('online',update);window.addEventListener('offline',update);return()=>{window.removeEventListener('online',update);window.removeEventListener('offline',update);};},[]);
   useEffect(()=>{if(error)feedback.current?.focus();},[error]);
   async function decide(action:'accept'|'reject',event?:FormEvent<HTMLFormElement>){
     event?.preventDefault();if(decisionPending.current)return;

@@ -1,4 +1,5 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 
@@ -52,7 +53,7 @@ export default function MfaSecurity() {
   const [codes, setCodes] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [offline, setOffline] = useState(false);
+  const offline = !useOnlineStatus();
   const [recovery, setRecovery] = useState(false);
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -73,11 +74,6 @@ export default function MfaSecurity() {
       .catch(cause => { if (!controller.signal.aborted) { setSessionExpired(cause instanceof MfaRequestError && cause.code === 'UNAUTHENTICATED'); setError(errorMessage(cause)); } })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, []);
-  useEffect(() => {
-    const update = () => setOffline(!navigator.onLine);
-    update(); window.addEventListener('online', update); window.addEventListener('offline', update);
-    return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); };
   }, []);
   useEffect(() => { if (error) feedback.current?.focus(); }, [error]);
   useEffect(() => { if (enrollment && !busy) codeInput.current?.focus(); }, [enrollment, busy]);

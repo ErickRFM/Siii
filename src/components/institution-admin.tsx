@@ -1,4 +1,5 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
@@ -57,13 +58,7 @@ async function request<T>(url: string, signal?: AbortSignal, method = 'GET', bod
   return result as T;
 }
 function useOnline() {
-  const [online, setOnline] = useState(true);
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    update(); window.addEventListener('online', update); window.addEventListener('offline', update);
-    return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); };
-  }, []);
-  return online;
+  return useOnlineStatus();
 }
 function editable(institution: InstitutionAdminDTO): Editable { return {name: institution.name, shortName: institution.shortName, code: institution.code, timezone: institution.timezone}; }
 function formatDate(value: string) { return new Date(value).toLocaleString('es-MX'); }

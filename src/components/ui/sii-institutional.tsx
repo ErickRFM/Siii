@@ -242,10 +242,10 @@ export function SiiStatusBadge({
       : 'muted');
 
   const variantStyles = {
-    active: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
-    pending: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
-    completed: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30',
-    cancelled: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30',
+    active: 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/30',
+    pending: 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/30',
+    completed: 'bg-sky-500/10 text-sky-800 dark:text-sky-300 border-sky-500/30',
+    cancelled: 'bg-rose-500/10 text-rose-800 dark:text-rose-300 border-rose-500/30',
     live: 'sii-badge--live',
     archived: 'bg-muted text-muted-foreground border-border',
     muted: 'sii-badge--muted',
