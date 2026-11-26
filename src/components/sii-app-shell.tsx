@@ -212,7 +212,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
     </div>
    </SidebarHeader>
    <SidebarContent className="px-2 py-3">
-    {institutionId&&personal.length>0&&<SidebarGroup><SidebarGroupLabel>Mi espacio</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{personal.map(module=><ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}`} label={module.label} icon={module.icon} active={active===module.id}/>)}</SidebarMenu></SidebarGroupContent></SidebarGroup>}
+    {institutionId&&personal.length>0&&<SidebarGroup><SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Mi espacio</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{personal.map(module=><ShellLink key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}`} label={module.label} icon={module.icon} active={active===module.id}/>)}</SidebarMenu></SidebarGroupContent></SidebarGroup>}
     {institutionId&&personal.some(item=>item.id==='student')&&<SidebarGroup className="siii-student-sidebar-group group-data-[collapsible=icon]:hidden">
       <StudentSidebarDisclosure label="Académico"><SidebarMenu>
        <ShellLink href={'/dashboard/institutions/'+institutionId+'/student#inicio'} label="Inicio estudiantil" icon="home" active={active==='student'&&studentSection==='inicio'}/>
@@ -226,7 +226,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
       </SidebarMenu></StudentSidebarDisclosure>
     </SidebarGroup>}
     <SidebarGroup>
-     <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+     <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Plataforma</SidebarGroupLabel>
      <SidebarGroupContent>
       <SidebarMenu>
        <ShellLink href="/dashboard" label="Inicio" icon="home" active={active==='overview'}/>
@@ -239,7 +239,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
      </SidebarGroupContent>
     </SidebarGroup>
     <SidebarGroup>
-     <SidebarGroupLabel>Gestión académica</SidebarGroupLabel>
+     <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Gestión académica</SidebarGroupLabel>
      <SidebarGroupContent aria-busy={verifying}><nav aria-label="Gestión académica">
       <SidebarMenu>
        {institutionId&&academicAvailable?<ShellLink href={`/dashboard/institutions/${institutionId}/academic` as Route} label="Catálogo académico" icon="book" active={active==='academic'}/>:
