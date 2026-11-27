@@ -13,6 +13,7 @@ describe('consolidated permission navigation',()=>{
   expect(academicModuleLinks(['institutions.manage']).map(x=>x.id)).toEqual(['financials']);
   expect(academicModuleLinks(['groups.manage']).map(x=>x.id)).toEqual(['careers']);
   expect(academicModuleLinks(manage).map(x=>x.id)).not.toContain('financials');
+  expect(academicModuleLinks(['integrations.manage']).map(x=>x.id)).toEqual(['companion']);
  });
  it('connects the existing admissions screen only with its own capability',()=>{
   expect(academicModuleLinks(['admissions.manage']).map(x=>x.id)).toEqual(['admissions']);
