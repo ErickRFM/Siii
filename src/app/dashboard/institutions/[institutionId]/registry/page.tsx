@@ -6,6 +6,7 @@ import { getIdentity,authorizeInstitution } from '@/shared/auth/session';
 import { legacyAllows } from '@/shared/auth/institution-policy';
 import SchoolRegistry from '@/components/school-registry';
 import StudentClaimReview from '@/components/student-claim-review';
+import TeacherAccountLinks from '@/components/registry/teacher-account-links';
 export const dynamic='force-dynamic';
 type Props={params:Promise<{institutionId:string}>};
 export default async function RegistryPage({params}:Props){
@@ -23,5 +24,6 @@ export default async function RegistryPage({params}:Props){
   <SchoolRegistry key={institutionId} institutionId={institutionId}/>
   {/* Presentation only: the claims API re-checks users.manage with privileged assurance. */}
   {canReviewClaims&&<StudentClaimReview key={'claims-'+institutionId} institutionId={institutionId} assured={claimsAssured}/>}
+  {canReviewClaims&&<TeacherAccountLinks key={'teacher-links-'+institutionId} institutionId={institutionId} assured={claimsAssured}/>}
  </>;
 }
