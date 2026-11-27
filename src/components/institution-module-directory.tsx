@@ -15,7 +15,9 @@ const modules:readonly {id:string;title:string;icon:SiiNavIconName;description:s
  {id:'scheduling',title:'Horarios y aulas',icon:'calendar',description:'Aulas, horarios e instancias de clase.'},
  {id:'grading',title:'Calificaciones',icon:'grades',description:'Evaluación y actas de los docentes asignados.'},
  {id:'services',title:'Servicios universitarios',icon:'services',description:'Avisos, solicitudes, tutorías y talleres.'},
- {id:'admissions',title:'Admisiones',icon:'registry',description:'Solicitudes de ingreso y acceso al portal de aspirantes.'}
+ {id:'admissions',title:'Admisiones',icon:'registry',description:'Convocatorias, solicitudes y dictámenes de ingreso.'},
+ {id:'careers',title:'Carreras',icon:'layers',description:'Coordinación de carreras y grupos por programa.'},
+ {id:'financials',title:'Caja y finanzas',icon:'services',description:'Conceptos, órdenes y registro de pagos externos.'}
 ];
 
 function Directory({institutionId,institutionName}:Institution){
