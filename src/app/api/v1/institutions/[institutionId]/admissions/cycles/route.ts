@@ -8,14 +8,18 @@ import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
 import {audit,requestId} from '@/shared/http/request-context';
 import {domainTransaction,withDomainErrors,DomainAccessDenied} from '@/modules/consolidation/domain-boundary';
 
+/** Operator list: the public portal reads open cycles server-side, so this route is never anonymous. */
 export async function GET(request: Request, { params }: { params: Promise<{ institutionId: string }> }) {
   const { institutionId } = await params;
   try {
+    const user = await getIdentity();
+    if (!user) return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Sesión requerida' } }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
+    if (!await authorizeCapability(institutionId, 'admissions.manage')) return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'No tienes acceso a esta institución' } }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
     const cycles = await db.select().from(admissionCycles)
       .where(eq(admissionCycles.institutionId, institutionId))
       .orderBy(desc(admissionCycles.startDate));
 
-    return NextResponse.json({ data: cycles }, { status: 200 });
+    return NextResponse.json({ data: cycles }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return NextResponse.json({ error: { code: 'CYCLES_FETCH_FAILED', message: 'No se pudieron consultar las convocatorias' } }, { status: 500 });
   }

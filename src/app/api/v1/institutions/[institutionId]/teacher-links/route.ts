@@ -5,6 +5,7 @@ import { and,eq,isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/infrastructure/database';
 import { teacherAccountLinks,institutionalTeachers,institutionMemberships,roleAssignments,securityAuditLog } from '../../../../../../../db/schema';
+import { liveGrant } from '@/shared/auth/institution-policy';
 import { authorizeInstitution } from '@/shared/auth/session';
 import { assertSameOrigin,jsonError } from '@/shared/auth/guards';
 import { gradeLinkCreate,gradeLinkRevoke } from '@/modules/grading/validation';
@@ -33,7 +34,8 @@ export const POST=withDomainErrors(async (req:NextRequest,ctx:Ctx)=>{
   const [member]=await tx.select({id:institutionMemberships.id}).from(institutionMemberships)
    .where(and(eq(institutionMemberships.id,p.data.membershipId),eq(institutionMemberships.institutionId,institutionId),eq(institutionMemberships.status,'active'))).limit(1);
   const [role]=await tx.select({id:roleAssignments.id}).from(roleAssignments)
-   .where(and(eq(roleAssignments.membershipId,p.data.membershipId),eq(roleAssignments.role,'teacher'),isNull(roleAssignments.revokedAt))).limit(1);
+   // A revoked or expired teacher grant cannot anchor a new identity link (audit B1).
+   .where(and(eq(roleAssignments.membershipId,p.data.membershipId),eq(roleAssignments.role,'teacher'),liveGrant(new Date()))).limit(1);
   if(!teacher||!member||!role)return null;
   const [link]=await tx.insert(teacherAccountLinks).values({...p.data,institutionId}).returning();
   await tx.insert(securityAuditLog).values({requestId:requestId(req.headers),institutionId,actorUserId:access.identity.id,action:'teacher.identity.link',target:'teacher:'+teacher.id});
