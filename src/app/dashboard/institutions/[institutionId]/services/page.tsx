@@ -4,6 +4,9 @@ import { notFound,redirect } from 'next/navigation';
 import { getIdentity,authorizeInstitution } from '@/shared/auth/session';
 
 import UniversityServices from '@/components/university-services';
+import {WorkshopEnrollments} from '@/components/services/workshop-enrollments';
+import {TutoringCases} from '@/components/services/tutoring-cases';
+import {legacyAllows} from '@/shared/auth/institution-policy';
 export const dynamic='force-dynamic';
 type Props={params:Promise<{institutionId:string}>};
 export default async function UniversityServicesPage({params}:Props){
@@ -12,8 +15,13 @@ export default async function UniversityServicesPage({params}:Props){
  const {institutionId}=await params;
  const authorization=await authorizeInstitution(institutionId,'academic.manage');
  const access=authorization?.access;if(!access)notFound();
+ // Tutoring notes need users.manage; privileged assurance (fresh step-up) unlocks the data.
+ const canTutor=legacyAllows(authorization.subject,'users.manage',institutionId);
+ const tutoringAssured=canTutor&&!!await authorizeInstitution(institutionId,'users.manage');
  return <>
   <SiiPageIntro eyebrow="SERVICIOS UNIVERSITARIOS" title="Atención institucional" description={access.institutionName+' · Avisos, trámites y talleres.'} actions={<Link href={`/dashboard/institutions/${institutionId}`} className="sii-outline-button">← Institución</Link>}/>
   <UniversityServices institutionId={institutionId}/>
+  <WorkshopEnrollments key={'workshop-enrollments-'+institutionId} institutionId={institutionId}/>
+  {canTutor&&<TutoringCases key={'tutoring-'+institutionId} institutionId={institutionId} assured={tutoringAssured}/>}
  </>;
 }
