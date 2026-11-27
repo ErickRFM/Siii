@@ -1,4 +1,6 @@
 'use client';
+import {SiiDateTimeField} from '@/components/ui/sii-date-time-field';
+import {toLocalInputValue} from '@/shared/format/date-time';
 import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {userFacingError} from '@/shared/client/user-facing-error';
 import {CapabilityState,hasInstitutionCapability,useInstitutionCapabilities} from './institution-capabilities';
@@ -25,6 +27,7 @@ const tabs:{id:Module;label:string}[]=[
  {id:'requests',label:'Trámites estudiantiles'},
  {id:'workshops',label:'Talleres'},
 ];
+const WORKSHOP_DURATIONS=[{label:'1 hora',hours:1},{label:'2 horas',hours:2},{label:'3 horas',hours:3}] as const;
 export default function UniversityServices({institutionId}:{institutionId:string}){
  const online=useOnlineStatus();
  const {ask,confirmation,cancel:cancelConfirmation}=useInstitutionConfirmation();
@@ -33,6 +36,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
  const base=`/api/v1/institutions/${institutionId}`;
  const [createOpen,setCreateOpen]=useState(false),[dirty,setDirty]=useState(false);
  const [tab,setTab]=useState<Module>('announcements'),[rows,setRows]=useState<RecordRow[]>([]);
+ const [workshopStart,setWorkshopStart]=useState(''),[workshopEnd,setWorkshopEnd]=useState('');
  const [students,setStudents]=useState<Person[]>([]),[teachers,setTeachers]=useState<Person[]>([]);
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState('');
  const [peopleError,setPeopleError]=useState(''),[peopleRevision,setPeopleRevision]=useState(0),[peopleLoading,setPeopleLoading]=useState(true);
@@ -82,7 +86,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
   :{title:String(v.get('title')??''),description:String(v.get('description')??''),
    teacherId:String(v.get('teacherId')??''),startsAt:new Date(String(v.get('startsAt')??'')).toISOString(),
    endsAt:new Date(String(v.get('endsAt')??'')).toISOString(),capacity:Number(v.get('capacity'))};
-  if(await execute(payload)){form.reset();setCreateOpen(false);setDirty(false)}
+  if(await execute(payload)){form.reset();setWorkshopStart('');setWorkshopEnd('');setCreateOpen(false);setDirty(false)}
  }
  function navigateTabs(event:KeyboardEvent<HTMLButtonElement>,current:Module){
   if(saving)return;
@@ -155,7 +159,9 @@ export default function UniversityServices({institutionId}:{institutionId:string
       <label>Descripción<Textarea name="description" minLength={10} required/></label>
       <label>Facilitador<NativeSelect disabled={peopleLoading} name="teacherId" defaultValue="" required><option value="" disabled>Seleccionar docente</option>
        {teachers.filter(x=>x.status==='active').map(x=><option key={x.id} value={x.id}>{x.employeeNumber} · {x.firstName} {x.lastName}</option>)}</NativeSelect></label>
-      <label>Inicio<Input name="startsAt" type="datetime-local" required/></label><label>Fin<Input name="endsAt" type="datetime-local" required/></label>
+      <SiiDateTimeField id="workshop-starts-at" name="startsAt" label="Inicio" value={workshopStart} onChange={value=>{setWorkshopStart(value);setWorkshopEnd('');}} min={toLocalInputValue(Date.now())} required/>
+      <SiiDateTimeField id="workshop-ends-at" name="endsAt" label="Fin" value={workshopEnd} onChange={setWorkshopEnd} min={workshopStart||undefined} required disabled={!workshopStart}
+       presets={workshopStart?WORKSHOP_DURATIONS.map(item=>({label:item.label,hours:item.hours+(new Date(workshopStart).getTime()-Date.now())/3600000})):[]}/>
       <label>Cupo<Input name="capacity" type="number" min={1} max={1000} defaultValue={25} required/></label></>}
      <Button variant="default" type="submit" className="sii-submit" disabled={saving||(tab==='requests'&&!students.length)||(tab==='workshops'&&!teachers.length)}>{saving?"Guardando…":"Crear borrador / solicitud"}</Button>
     </fieldset></form>
