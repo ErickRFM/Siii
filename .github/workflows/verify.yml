@@ -217,6 +217,24 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          # Reuse resolved plugins and dependencies between runs; the receiver ref is pinned, so the key is stable.
+          cache: gradle
+          cache-dependency-path: |
+            .p0-local/companion-contract/**/*.gradle*
+            .p0-local/companion-contract/gradle/libs.versions.toml
+            .p0-local/companion-contract/gradle/wrapper/gradle-wrapper.properties
+      - name: Resolve receiver Gradle plugins with retry
+        working-directory: .p0-local/companion-contract
+        shell: bash
+        # Plugin portal / Maven Central resolution failed intermittently (KSP plugin not found, HTTP 429).
+        # Only dependency resolution is retried; the contract tests below still run exactly once.
+        run: |
+          for attempt in 1 2 3; do
+            if ./gradlew help --no-configuration-cache --console=plain; then exit 0; fi
+            echo "Gradle resolution attempt $attempt failed; retrying in $((attempt * 30))s"
+            sleep $((attempt * 30))
+          done
+          exit 1
       - name: Real source to outbox Ktor Mongo and authorized academic reads
         working-directory: .p0-local/companion-contract
         shell: bash
