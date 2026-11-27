@@ -38,9 +38,10 @@ export function SiiDateTimeField({id,label,value,onChange,name,min,max,presets=[
  });
  const summaryId=id+'-summary',hintId=hint?id+'-hint':undefined;
  const summary=value?`Vence el ${formatDeadline(value)} (${formatRelative(value)}).`:empty?.summary;
- return <div className="sii-datetime-field grid gap-2" role="group" aria-labelledby={id+'-label'}>
+ // Only the input carries the label, so getByLabel(label) resolves to a single control.
+ return <div className="sii-datetime-field grid gap-2">
   <label id={id+'-label'} htmlFor={id}>{label}</label>
-  {(options.length>0||empty)&&<div className="flex flex-wrap gap-1.5" aria-label={'Atajos para '+label.toLocaleLowerCase('es-MX')}>
+  {(options.length>0||empty)&&<div className="flex flex-wrap gap-1.5" role="group" aria-label="Atajos de fecha">
    {empty&&!required&&<PresetButton pressed={!value} disabled={disabled} onClick={()=>onChange('')}>{empty.label}</PresetButton>}
    {options.map(option=><PresetButton key={option.label} pressed={!!value&&value===option.value} disabled={disabled||!option.value}
     onClick={()=>option.value&&onChange(option.value)}>{option.label}</PresetButton>)}

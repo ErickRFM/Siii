@@ -1,4 +1,6 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
+import {userFacingError} from '@/shared/client/user-facing-error';
 import {CapabilityState,hasInstitutionCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {SiiDrawer} from './ui/sii-workspace';
 import {Tabs,TabsList,TabsTrigger,TabsContent} from './ui/tabs';
@@ -11,21 +13,6 @@ import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/compon
 import SiiScrollRegion from './sii-scroll-region';
 import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
-function userFacingError(code:string){
- const messages:Record<string,string>={
-  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
-  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
-  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
-  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
-  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
-  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
-  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
-  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
-  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
-  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
- };
- return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
-}
 
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
@@ -37,6 +24,7 @@ const minutes=(x:string)=>{const [h,m]=x.split(':').map(Number);return h*60+m};
 const clock=(m:number)=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 const initialWeek=()=>{const d=new Date(),day=d.getDay()||7;d.setDate(d.getDate()-(day-1));return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 export default function SchedulingStudio({institutionId}:{institutionId:string}){
+ const online=useOnlineStatus();
  const {ask,confirmation,cancel:cancelConfirmation}=useInstitutionConfirmation();
  const {data:capabilities}=useInstitutionCapabilities();
  const allowed=['programs','courses','curricula','terms','campuses'].every(resource=>hasInstitutionCapability(capabilities,resource+'.manage'));
@@ -88,7 +76,7 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
    const r=await fetch(`${base}/${path}`,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    if(!r.ok){const v=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};throw Error(v.error?.code??'REQUEST_FAILED')}
    setNotice('La operación quedó registrada.');await Promise.all([refresh(),weekLoader.current?.()]);return true;
-  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
+  }catch(e){setError(userFacingError(e));return false}
   finally{savingRef.current=false;setSaving(false)}
  }
  async function addRoom(event:FormEvent<HTMLFormElement>){
@@ -130,7 +118,7 @@ export default function SchedulingStudio({institutionId}:{institutionId:string})
 </TabsContent>
  </Tabs>
  <SiiDrawer open={panel!==null} busy={saving} onOpenChange={open=>{if(!open)void closePanel()}} title={panel==='room'?'Añadir aula':'Programar clase recurrente'} description="Revisa los datos antes de guardar. Se comprobarán el cupo y los conflictos de aula, docente y estudiantes.">
-  {confirmation}{error&&<p role="alert" id="schedule-form-error" className="sii-catalog-error">{error}</p>}
+  {confirmation}{!online&&<p className="sii-catalog-error" role="status">Sin conexión. Puedes consultar lo que ya está cargado; los cambios no se guardarán hasta que vuelvas a conectarte.</p>}{error&&<p role="alert" id="schedule-form-error" className="sii-catalog-error">{error}</p>}
   <div onChange={()=>setDirty(true)}><fieldset className="sii-form-fields" disabled={saving||loading} aria-describedby={error?'schedule-form-error':undefined}>
   {panel==='room'?<>
     <form className="sii-catalog-form" onSubmit={e=>void addRoom(e)}>
