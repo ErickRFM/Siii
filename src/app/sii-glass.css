@@ -149,10 +149,9 @@ html[data-sii-theme="dark"] .sii-app .sii-sidebar {
   backdrop-filter:blur(18px);
 }
 .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .rounded-xl.border.bg-card,.sii-workspace .rounded-xl.border) {
-  background:var(--sii-glass-panel)!important;
-  border-color:transparent!important;
-  box-shadow:none!important;
-  backdrop-filter:blur(17px) saturate(108%);
+  background:var(--sii-glass-panel);
+  border-color:transparent;
+  box-shadow:none;
   border-radius:17px;
 }
 .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-sidebar,.sii-topbar) {
@@ -259,7 +258,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
 }
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-sidebar,
 html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar{background:rgba(255,249,242,.48)!important;color:#302b29!important}
-html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,255,255,.68)!important;color:#302b29!important}
+html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-institution-item,.sii-access-panel,.sii-workspace .bg-card,.sii-workspace .bg-muted){background:rgba(255,255,255,.68);color:#302b29}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.siii-teacher-metric,.siii-teacher-work){background:rgba(255,251,246,.57)!important;color:#302b29!important}
 html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-muted{color:#675a53}
 html[data-sii-theme="light"] .sii-app.sii-ui :is(.sii-personal-navigation,.sii-teacher-navigation) [data-state=active]{background:rgba(92,72,60,.17)!important;color:#302b29!important}
@@ -306,10 +305,10 @@ html[data-sii-theme="light"] .sii-app.sii-ui{--sii-kit-bg:#e9dcd0;--sii-kit-surf
 .sii-app.sii-ui [data-sidebar="menu-button"]{border-radius:11px;min-height:38px;transition:background .16s ease,color .16s ease}
 .sii-app.sii-ui [data-sidebar="menu-button"][data-active="true"]{background:rgba(224,205,190,.18)!important;box-shadow:none!important}
 .sii-app.sii-ui [data-sidebar="group-label"]{color:hsl(var(--sidebar-foreground) / .76)!important;letter-spacing:.04em}
-.sii-app.sii-ui .sii-topbar{border:0!important;border-radius:14px;box-shadow:none!important;margin:14px 16px 0;min-height:60px}
+.sii-app.sii-ui .sii-topbar{border:0;border-radius:14px;box-shadow:none;margin:14px 16px 0;min-height:60px}
 .sii-app.sii-ui .sii-topbar .sii-topbar-actions{min-width:0;gap:9px}
 .sii-app.sii-ui .sii-sidebar,.sii-app.sii-ui [data-sidebar="sidebar"]{box-shadow:none!important}
-.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-access-panel,.sii-institution-item){border:0!important;box-shadow:none!important}
+.sii-app.sii-ui :is(.sii-panel,.sii-metric,.sii-module-card,.sii-access-panel,.sii-institution-item){border:0;box-shadow:none}
 .sii-app.sii-ui .sii-workspace :is(button,a,input,select,textarea):focus-visible{outline:2px solid hsl(var(--ring))!important;outline-offset:2px}
 .sii-app.sii-ui :is(.sii-workspace,.sii-topbar,.sii-sidebar) *{overflow-wrap:break-word}
 .sii-app.sii-ui .sii-kit-page-heading h1{letter-spacing:-.035em}
@@ -352,19 +351,16 @@ html[data-sii-theme="light"] .sii-app.sii-ui [data-sidebar="sidebar"] [class*="t
 .sii-app.sii-ui .sii-topbar .sii-topbar-start{min-width:0;display:flex;align-items:center;gap:15px;flex:1}
 .sii-app.sii-ui .sii-topbar .sii-command-trigger{
  width:min(420px,42vw);height:44px;justify-content:flex-start;gap:12px;
- background:rgba(201,190,183,.13)!important;border:0!important;
- border-radius:14px;box-shadow:none!important;color:hsl(var(--foreground));
+ background:rgba(201,190,183,.13);border:0;
+ border-radius:14px;box-shadow:none;color:hsl(var(--foreground));
  font-size:12px;font-weight:400;
 }
 .sii-app.sii-ui .sii-topbar .sii-command-trigger-label{flex:1;text-align:left;opacity:.84}
 .sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{
- border:0!important;background:rgba(255,255,255,.1)!important;border-radius:7px;padding:5px 9px
+ border:0;background:rgba(255,255,255,.1);border-radius:7px;padding:5px 9px
 }
 .sii-app.sii-ui .siii-account-chip{background:rgba(196,182,172,.10);padding:5px 11px;border-radius:14px;max-width:230px;min-width:0}
 .sii-app.sii-ui .siii-account-chip small{color:hsl(var(--foreground) / .8)!important}
-html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger{background:rgba(255,248,241,.57)!important}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-account-chip{background:rgba(255,249,242,.5)}
-html[data-sii-theme="light"] .sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{background:rgba(69,48,32,.09)!important}
 @media(max-width:1070px){
  .sii-app.sii-ui .sii-topbar .sii-command-trigger{width:44px;flex:0 0 44px;padding:11px;justify-content:center}
  .sii-app.sii-ui .sii-topbar .sii-command-trigger-label,.sii-app.sii-ui .sii-topbar .sii-command-trigger kbd{display:none!important}
@@ -410,21 +406,16 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-shared-glass-metric[data-tone
 
 /* Shared matte-glass surface contract across Student, Teacher, Services, Administration and Directorate. */
 .sii-app.sii-ui .siii-glass-surface{
- background:var(--sii-glass-panel)!important;
- border:0!important;border-radius:17px!important;
- box-shadow:none!important;
- backdrop-filter:blur(12px) saturate(106%);
- -webkit-backdrop-filter:blur(12px) saturate(106%);
+ background:var(--sii-glass-panel);
+ border:0;border-radius:17px;
+ box-shadow:none;
 }
 .sii-app.sii-ui .siii-teacher-profile-hero{
- background:linear-gradient(115deg,rgba(166,144,127,.27),rgba(102,93,89,.25))!important;
+ background:linear-gradient(115deg,rgba(166,144,127,.27),rgba(102,93,89,.25));
  position:relative;overflow:hidden;min-height:136px;
 }
 .sii-app.sii-ui .siii-teacher-profile-hero h2{font-size:clamp(24px,2.7vw,36px);letter-spacing:-.035em;line-height:1.2}
 .sii-app.sii-ui .siii-teacher-profile-hero p{color:var(--sii-text);opacity:.86}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-surface{background:rgba(255,255,255,.70)!important;color:#302b29}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero{background:linear-gradient(115deg,rgba(255,249,241,.72),rgba(231,216,202,.48))!important}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:#51453f}
 @media(max-width:768px){
  .sii-app.sii-ui .siii-glass-surface,
  .sii-app.sii-ui :is(.siii-overview-panel,.siii-overview-hero,.siii-teacher-profile-hero){
@@ -474,11 +465,9 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
  box-shadow:none;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-panel,.sii-catalog-summary,.sii-catalog-create){
- background:var(--sii-glass-panel)!important;
- border:0!important;border-radius:17px!important;
- box-shadow:none!important;
- backdrop-filter:blur(12px) saturate(106%);
- -webkit-backdrop-filter:blur(12px) saturate(106%);
+ background:var(--sii-glass-panel);
+ border:0;border-radius:17px;
+ box-shadow:none;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-toolbar,.sii-workspace-toolbar){
  gap:12px;min-width:0;align-items:center;
@@ -490,20 +479,7 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-teacher-profile-hero p{color:
  min-width:0;border-radius:14px;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]){
- background:rgba(38,33,31,.35)!important;
- border:1px solid rgba(242,226,215,.16)!important;
- box-shadow:none!important;min-width:0;max-width:100%;
- color:#fff6ee;
-}
-.sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{color:#dccfc5;opacity:.78}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
- .sii-panel,.sii-catalog-summary,.sii-catalog-create
-){background:rgba(255,255,255,.70)!important;color:#302b29}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
- input:is(:not([type]),[type=text],[type=search],[type=email],[type=password],[type=number],[type=tel],[type=url],[type=date],[type=datetime-local],[type=time],[type=month],[type=week]),textarea,select,[role=combobox]
-){background:rgba(255,254,251,.72)!important;border-color:rgba(78,55,43,.2)!important;color:#342a25}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(input,textarea)::placeholder{
- color:#68564e;opacity:1;
+ min-width:0;max-width:100%;
 }
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-catalog-table,.sii-workspace table){
  min-width:0;border-collapse:separate;border-spacing:0;
@@ -549,21 +525,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(.sii-cata
 
 
 /* Institutional modules use one surface system, not module-specific palettes. */
-.sii-app.sii-ui .siii-glass-workspace :is(
- .sii-administration-summary,.sii-administration-links,.sii-administration-card,
- .sii-calendar-panel,.sii-operation-table,.sii-administration-discovery
-){
- background:var(--sii-glass-panel)!important;
- border:0!important;
- border-radius:17px!important;
- box-shadow:none!important;
- backdrop-filter:blur(11px) saturate(106%);
- -webkit-backdrop-filter:blur(11px) saturate(106%);
-}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
- .sii-administration-summary,.sii-administration-links,.sii-administration-card,
- .sii-calendar-panel,.sii-operation-table
-){background:rgba(255,255,255,.70)!important;color:#302b29}
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-administration-links,.sii-workspace-section-nav){
  gap:10px;border:0;max-width:100%;min-width:0;
 }
@@ -635,25 +596,11 @@ html[data-sii-theme="light"] .sii-app.sii-ui{
 
 
 /* Institution landing and directorate/coordinator overview share the same glass grammar. */
-.sii-app.sii-ui .siii-glass-workspace :is(
- .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
-){
- background:var(--sii-glass-panel)!important;
- border:0!important;border-radius:17px!important;box-shadow:none!important;
- backdrop-filter:blur(12px) saturate(106%);
- -webkit-backdrop-filter:blur(12px) saturate(106%);
-}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace :is(
- .sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel
-){background:rgba(255,255,255,.70)!important;color:#302b29}
 .sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside) h2{
  font-weight:650;letter-spacing:-.025em
 }
 .sii-app.sii-ui .siii-glass-workspace .sii-institution-item{border-radius:11px;padding-inline:10px}
-.sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(255,255,255,.05)}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institution-item:hover{background:rgba(76,55,45,.07)}
 .sii-app.sii-ui .siii-glass-workspace .sii-institution-monogram{box-shadow:none;border-radius:12px}
-@media(max-width:760px){.sii-app.sii-ui .siii-glass-workspace :is(.sii-security-card,.sii-security-aside,.sii-institutions-panel,.sii-access-panel){backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}}
 
 
 /* Shared responsive metric bands for admissions, finance and personal role portals. */
@@ -677,17 +624,6 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-institut
 }
 
 
-/* Unified institutional matte surfaces. This rule intentionally has greater
-   specificity than legacy .sii-panel shadows and edges; avoid glowing frames. */
-.sii-app.sii-ui .siii-glass-workspace .sii-panel{
- background:var(--sii-glass-panel)!important;
- border:0!important;
- border-radius:17px!important;
- box-shadow:none!important;
-}
-html[data-sii-theme="light"] .sii-app.sii-ui .siii-glass-workspace .sii-panel{
- background:rgba(255,255,255,.70)!important;color:#302b29;border:0!important;border-width:0!important;
-}
 @media(forced-colors:active),(prefers-contrast:more){
  .sii-app.sii-ui .siii-glass-workspace .sii-panel{
   border:1px solid CanvasText!important;background:Canvas!important;color:CanvasText!important;
@@ -711,11 +647,8 @@ html[data-sii-theme="light"] .sii-app.sii-ui .siii-topbar-notices{background:rgb
 .sii-app.sii-ui .sii-security-workspace{max-width:1240px;width:100%;margin-inline:auto}
 .sii-app.sii-ui .sii-security-workspace .sii-security-layout{gap:16px;align-items:start}
 .sii-app.sii-ui .sii-security-workspace .sii-security-secondary{display:grid;gap:16px;align-content:start;min-width:0}
-.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside){background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.015)),var(--sii-glass-panel)!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:18px!important;box-shadow:0 18px 42px rgba(0,0,0,.13),inset 0 1px rgba(255,255,255,.035)!important;backdrop-filter:blur(17px) saturate(108%);-webkit-backdrop-filter:blur(17px) saturate(108%);padding:clamp(18px,2vw,26px);min-width:0}
-.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside) h2{font-size:clamp(1.12rem,1.6vw,1.38rem);line-height:1.25}
-.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside) :is(input,select){max-width:100%;min-height:42px;border-radius:10px}
-.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside) :is(button,[type=submit]){min-height:40px;border-radius:10px}
-html[data-sii-theme="light"] .sii-app.sii-ui .sii-security-workspace{background:radial-gradient(ellipse at 85% 8%,rgba(255,255,255,.52),transparent 62%)}
-html[data-sii-theme="light"] .sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside){background:linear-gradient(150deg,rgba(255,255,255,.49),rgba(255,255,255,.19)),rgba(239,235,228,.43)!important;border-color:rgba(255,255,255,.58)!important;color:#252d35!important;box-shadow:0 17px 42px rgba(45,54,64,.085),inset 0 1px rgba(255,255,255,.67)!important}
+.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside){padding:18px;min-width:0}
+.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside) h2{font-size:clamp(1.08rem,1.4vw,1.25rem);line-height:1.25}
+.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside) :is(input,select){max-width:100%;min-height:40px;border-radius:9px}
+.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside) :is(button,[type=submit]){min-height:38px;border-radius:9px}
 @media(max-width:850px){.sii-app.sii-ui .sii-security-workspace .sii-security-layout{display:grid;grid-template-columns:minmax(0,1fr)}.sii-app.sii-ui .sii-security-workspace .sii-security-secondary{grid-template-columns:minmax(0,1fr)}}
-@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.sii-app.sii-ui .sii-security-workspace :is(.sii-security-card,.sii-security-aside){backdrop-filter:none;-webkit-backdrop-filter:none}}

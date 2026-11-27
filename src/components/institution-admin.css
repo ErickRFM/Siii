@@ -1,6 +1,5 @@
 .sii-institution-admin{display:grid;gap:16px;min-width:0}
-.sii-administration-summary,.sii-administration-card,.sii-administration-discovery{padding:20px;min-width:0}
-.sii-administration-discovery{margin-top:24px}
+.sii-administration-summary,.sii-administration-card,.sii-administration-discovery{padding:18px;min-width:0}
 .sii-administration-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sii-administration-summary>div{flex:1;min-width:180px}
 .sii-administration-summary>p{flex-basis:100%}

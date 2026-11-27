@@ -84,17 +84,16 @@ export function ManageableInstitutions() {
     return () => controller.abort();
   }, [cursor, revision]);
   return <section className="sii-panel sii-administration-discovery" aria-label="Instituciones administrables" aria-busy={loading}>
-    <div className="sii-panel-top"><div><span className="sii-section-kicker">ADMINISTRACIÓN AUTORIZADA</span><h2>Gestión institucional</h2><p>Configuración e historial de las instituciones que puedes administrar.</p></div></div>
+    <div className="sii-panel-top"><h2>Gestión institucional</h2><Button variant="outline" type="button" className="sii-outline-button" disabled={loading || !online} onClick={() => { setPages([null]); setRevision(value => value + 1); }}>Actualizar instituciones</Button></div>
     {!online && <p role="status">Sin conexión. Las operaciones están deshabilitadas.</p>}
     {loading ? <p role="status">Consultando instituciones administrables…</p> : error ? <div className="sii-catalog-error" role="alert"><p>{error}</p><Button variant="outline" type="button" className="sii-outline-button" disabled={!online} onClick={() => setRevision(value => value + 1)}>Reintentar consulta</Button></div> : !rows.length ? <p role="status">No hay instituciones administrables para esta consulta.</p> : <ul className="sii-administration-list">{rows.map(institution => <li key={institution.id}>
       <span className="sii-admin-institution-glyph" aria-hidden="true"><SiiNavIcon name="institution"/></span><div><strong>{institution.name}</strong><small>{institution.code} · {statusLabels[institution.status]}</small></div>
       <Link href={`/dashboard/institutions/${institution.id}/admin` as Route} className="sii-outline-button" aria-label={`Administrar ${institution.name}`}>Administrar <span aria-hidden="true">→</span></Link>
     </li>)}</ul>}
-    <nav className="sii-catalog-pagination" aria-label="Paginación de instituciones administrables">
+    {(pages.length > 1 || Boolean(nextCursor)) && <nav className="sii-catalog-pagination" aria-label="Paginación de instituciones administrables">
       <Button variant="outline" type="button" className="sii-outline-button" disabled={pages.length === 1 || loading || !online} onClick={() => setPages(value => value.slice(0, -1))}>Instituciones: página anterior</Button><span aria-live="polite">Página {pages.length}</span>
       <Button variant="outline" type="button" className="sii-outline-button" disabled={!nextCursor || loading || !online} onClick={() => setPages(value => [...value, nextCursor])}>Instituciones: siguiente página</Button>
-      <Button variant="outline" type="button" className="sii-outline-button" disabled={loading || !online} onClick={() => { setPages([null]); setRevision(value => value + 1); }}>Actualizar instituciones</Button>
-    </nav>
+    </nav>}
   </section>;
 }
 

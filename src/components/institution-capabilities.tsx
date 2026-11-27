@@ -133,6 +133,5 @@ export function InstitutionOverview({ institutionId }: { institutionId: string }
         {!data.restricted && academicModuleLinks(data.capabilities).map(module=><Link key={module.id} href={`/dashboard/institutions/${institutionId}/${module.id}` as Route} className="sii-outline-button">{module.label}</Link>)}
       </div>
     </>}
-    <div className="sii-info-banner">Cada módulo disponible valida tus permisos vigentes en el servidor.</div>
   </>;
 }
