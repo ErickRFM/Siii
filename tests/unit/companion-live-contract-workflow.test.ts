@@ -61,8 +61,20 @@ describe('full Companion live contract CI gate', () => {
     expect(job['timeout-minutes']).toBe(25);
   });
 
+  it('retries only plugin and dependency resolution, before the contract tests run once', () => {
+    const all = steps();
+    const resolve = all.findIndex(step => step.name === 'Resolve receiver Gradle plugins with retry');
+    const tests = all.findIndex(step => step.run?.includes(':services:api:test'));
+    expect(resolve).toBeGreaterThanOrEqual(0);
+    expect(tests).toBeGreaterThan(resolve);
+    expect(all[resolve].run).toContain('./gradlew help');
+    expect(all[resolve].run).not.toContain('test');
+    expect(all.filter(step => step.run?.includes(':services:api:test'))).toHaveLength(1);
+    expect(all.find(step => step.name === 'Receiver Java 17 runtime')?.with?.cache).toBe('gradle');
+  });
+
   it('runs and validates exactly the seven required suites and uploads only bounded evidence', () => {
-    const receiver = steps().find(step => step.run?.includes('./gradlew'))!.run!;
+    const receiver = steps().find(step => step.run?.includes(':services:api:test'))!.run!;
     const selected = [...receiver.matchAll(/--tests '([^']+)'/g)].map(match => match[1]).sort();
     expect(selected).toEqual(Object.keys(expectedSuites).sort());
     expect(receiver).toContain('export COMPANION_CHAIN_PROBE_NODE=');
