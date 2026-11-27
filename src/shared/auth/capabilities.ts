@@ -10,6 +10,8 @@ export const CAPABILITIES = Object.freeze({
   'users.read': 'users.read', 'users.create': 'users.create', 'users.update': 'users.update',
   'users.suspend': 'users.suspend', 'users.restore': 'users.restore', 'users.reset': 'users.reset',
   'memberships.manage': 'memberships.manage', 'roles.assign': 'roles.assign', 'invitations.manage': 'invitations.manage',
+  // Review enrollment claims and revoke student account links; narrower than memberships.manage.
+  'student.links.manage': 'student.links.manage',
   'programs.read': 'programs.read', 'programs.manage': 'programs.manage',
   'curricula.read': 'curricula.read', 'curricula.manage': 'curricula.manage',
   'courses.read': 'courses.read', 'courses.manage': 'courses.manage',
@@ -39,7 +41,7 @@ export const ROLE_CAPABILITIES: Readonly<Record<P1Role, readonly Capability[]>> 
   teacher: readonlyCapabilities('teacher.self.read', 'institutions.read', ...CATALOG_READ, 'grades.read', 'grades.manage', 'grades.publish'),
   tutor: readonlyCapabilities('institutions.read', ...CATALOG_READ),
   coordinator: readonlyCapabilities('institutions.read', 'users.read', ...CATALOG_READ, ...CATALOG_MANAGE, 'groups.manage', 'enrollments.manage', 'grades.read'),
-  control_escolar: readonlyCapabilities('admissions.manage', 'institutions.read', 'users.read', ...CATALOG_READ, 'enrollments.manage', 'grades.read'),
+  control_escolar: readonlyCapabilities('admissions.manage', 'institutions.read', 'users.read', 'student.links.manage', ...CATALOG_READ, 'enrollments.manage', 'grades.read'),
   workshop_facilitator: readonlyCapabilities('institutions.read', ...CATALOG_READ, 'groups.manage', 'grades.read', 'grades.manage'),
   // Administrators must contain every capability they may delegate, including grade publication.
   admin: ALL_CAPABILITIES,

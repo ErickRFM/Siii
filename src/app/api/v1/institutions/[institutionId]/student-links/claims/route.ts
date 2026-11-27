@@ -3,7 +3,7 @@ import {and,asc,eq} from 'drizzle-orm';
 import {z} from 'zod';
 import {db} from '@/infrastructure/database';
 import {studentClaimRequests,institutionalStudents,platformUsers,people,accountEmailVerifications} from '../../../../../../../../db/schema';
-import {authorizeInstitution} from '@/shared/auth/session';
+import {authorizeCapability} from '@/shared/auth/session';
 import {jsonError} from '@/shared/auth/guards';
 import {canonicalEmail} from '@/shared/invitations/validation';
 import {withDomainErrors} from '@/modules/consolidation/domain-boundary';
@@ -19,7 +19,8 @@ const LIMIT=200;
  */
 export const GET=withDomainErrors(async(_req:NextRequest,{params}:{params:Promise<{institutionId:string}>})=>{
  const {institutionId}=await params;if(!z.uuid().safeParse(institutionId).success)return jsonError('NOT_FOUND',404);
- if(!await authorizeInstitution(institutionId,'users.manage'))return jsonError('FORBIDDEN',403);
+ // Control Escolar and administrators; fresh step-up because the list discloses personal contact data.
+ if(!await authorizeCapability(institutionId,'student.links.manage',{institutionId,status:'active'},true))return jsonError('FORBIDDEN',403);
  const rows=await db.select({
   id:studentClaimRequests.id,enrollmentNumber:studentClaimRequests.enrollmentNumber,createdAt:studentClaimRequests.createdAt,
   applicantUserId:platformUsers.id,username:platformUsers.username,firstName:people.firstName,lastName:people.lastName,profileEmail:people.email,
