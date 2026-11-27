@@ -15,6 +15,9 @@ describe('consolidated permission navigation',()=>{
   expect(academicModuleLinks(manage).map(x=>x.id)).not.toContain('financials');
   expect(academicModuleLinks(['integrations.manage']).map(x=>x.id)).toEqual(['companion']);
  });
+ it('opens the registry to student link reviewers without granting other academic modules',()=>{
+  expect(academicModuleLinks(['student.links.manage','admissions.manage']).map(x=>x.id)).toEqual(['registry','admissions']);
+ });
  it('connects the existing admissions screen only with its own capability',()=>{
   expect(academicModuleLinks(['admissions.manage']).map(x=>x.id)).toEqual(['admissions']);
   expect(academicModuleLinks(manage).map(x=>x.id)).not.toContain('admissions');

@@ -58,7 +58,9 @@ describe('student claim review',()=>{
   expect(listed.status).toBe(200);
   const item=(await listed.json()).data.find((row:{id:string})=>row.id===claim);
   expect(item).toMatchObject({enrollmentNumber:record.number,applicant:{userId:owner.id},student:{id:record.id,status:'active'},evidence:{verifiedMatchesRecord:false,profileMatchesRecord:false}});
-  for(const role of ['control_escolar','coordinator','student'])expect((await request('GET',listPath(),undefined,(await actor({role,mfa:true})).cookie)).status,role).toBe(403);
+  for(const role of ['coordinator','student'])expect((await request('GET',listPath(),undefined,(await actor({role,mfa:true})).cookie)).status,role).toBe(403);
+  // Control Escolar reviews claims through student.links.manage (with MFA and step-up).
+  expect((await request('GET',listPath(),undefined,(await actor({role:'control_escolar',mfa:true})).cookie)).status).toBe(200);
   expect((await request('GET',listPath(foreign),undefined,reviewer.cookie)).status).toBe(403);
   expect((await request('GET',listPath(),undefined,(await actor({role:'admin',mfa:false})).cookie)).status).toBe(403);
  });
@@ -94,7 +96,7 @@ describe('student claim review',()=>{
   expect((await decide(own,{decision:'approve'},outsider)).status).toBe(403);
   const other=await admin();
   expect((await decide(own,{decision:'approve'},other,unit,'https://attacker.example')).status).toBe(403);
-  expect((await decide(own,{decision:'approve'},await actor({role:'control_escolar',mfa:true}))).status).toBe(403);
+  expect((await decide(own,{decision:'approve'},await actor({role:'coordinator',mfa:true}))).status).toBe(403);
   expect((await decide(own,{decision:'approve'},await actor({role:'admin',mfa:false}))).status).toBe(403);
   expect(await links(record.id)).toEqual([]);
   expect((await claimRow(own)).verification_status).toBe('pending');
@@ -135,6 +137,30 @@ describe('student claim review',()=>{
   const linked=await me();expect(linked.studentRecord).toMatchObject({studentId:record.id,enrollmentNumber:record.number});expect(linked.claim).toBeNull();
   expect((await me(await actor())).claim).toBeNull();
  });
+ it('lets Control Escolar approve a claim that is not its own',async()=>{
+  const owner=await actor(),record=await student(),claim=await pendingClaim(owner,record.number),reviewer=await actor({role:'control_escolar',mfa:true});
+  expect((await decide(claim,{decision:'approve'},reviewer)).status).toBe(200);
+  expect(await links(record.id)).toEqual([{membership_id:owner.member,linked_by:reviewer.id}]);
+ });
+
+ it('lists active links and revokes one with a reason, audited and only once (A3)',async()=>{
+  const owner=await actor(),record=await student(),claim=await pendingClaim(owner,record.number),reviewer=await admin();
+  expect((await decide(claim,{decision:'approve'},reviewer)).status).toBe(200);
+  const linksPath='/api/v1/institutions/'+unit+'/student-links';
+  const listed=await request('GET',linksPath,undefined,reviewer.cookie);expect(listed.status).toBe(200);
+  const active=(await listed.json()).data.find((row:{studentId:string})=>row.studentId===record.id);
+  expect(active).toMatchObject({enrollmentNumber:record.number,membershipId:owner.member});
+  for(const role of ['coordinator','student'])expect((await request('PATCH',linksPath,{id:active.id,reason:'No corresponde'},(await actor({role,mfa:true})).cookie)).status,role).toBe(403);
+  expect((await request('PATCH',linksPath,{id:active.id},reviewer.cookie)).status).toBe(422);
+  expect((await request('PATCH',linksPath,{id:active.id,reason:'Vínculo equivocado'},reviewer.cookie,'https://attacker.example')).status).toBe(403);
+  const revoked=await request('PATCH',linksPath,{id:active.id,reason:'Vínculo equivocado'},reviewer.cookie);expect(revoked.status).toBe(200);
+  expect(await links(record.id)).toEqual([]);
+  expect((await sql.query("SELECT actor_user_id FROM security_audit_log WHERE action='student.link.revoked' AND target=$1",['student_account_link:'+active.id])).rows).toEqual([{actor_user_id:reviewer.id}]);
+  expect((await request('PATCH',linksPath,{id:active.id,reason:'Otra vez'},reviewer.cookie)).status).toBe(404);
+  // The record is free again: a new claim from the right account can be reviewed.
+  const rightOwner=await actor();expect(typeof await pendingClaim(rightOwner,record.number)).toBe('string');
+ });
+
  it('serializes concurrent approvals of the same claim into a single link',async()=>{
   const owner=await actor(),record=await student(),claim=await pendingClaim(owner,record.number),reviewer=await admin();
   const results=await Promise.all([decide(claim,{decision:'approve'},reviewer),decide(claim,{decision:'approve'},reviewer)]);

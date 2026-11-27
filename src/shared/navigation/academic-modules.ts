@@ -7,4 +7,6 @@ export type AcademicModule=typeof MODULES[number]['id'];
 // Each module mirrors the capability its page authorizes with.
 const OWN_CAPABILITY:Partial<Record<typeof MODULES[number]['id'],string>>={admissions:'admissions.manage',grading:'grades.manage',careers:'groups.manage',financials:'institutions.manage',companion:'integrations.manage'};
 /** Presentation projection only. Each page and API independently checks current permissions. */
-export function academicModuleLinks(capabilities:readonly string[]){const manage=MANAGEMENT.every(capability=>capabilities.includes(capability));return MODULES.filter(module=>{const own=OWN_CAPABILITY[module.id];return own?capabilities.includes(own):manage;})}
+export function academicModuleLinks(capabilities:readonly string[]){const manage=MANAGEMENT.every(capability=>capabilities.includes(capability));return MODULES.filter(module=>{const own=OWN_CAPABILITY[module.id];if(own)return capabilities.includes(own);
+ // Control Escolar reaches the registry page only for student link review.
+ return manage||(module.id==='registry'&&capabilities.includes('student.links.manage'));})}

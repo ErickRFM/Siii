@@ -6,7 +6,7 @@ const USER = 'user-a';
 const TENANT = 'institution-a';
 const CAPABILITIES: Capability[] = [
   'institutions.read', 'institutions.manage', 'users.read', 'users.create', 'users.update',
-  'users.suspend', 'users.restore', 'users.reset', 'memberships.manage', 'roles.assign', 'invitations.manage',
+  'users.suspend', 'users.restore', 'users.reset', 'memberships.manage', 'roles.assign', 'invitations.manage', 'student.links.manage',
   'programs.read', 'programs.manage', 'curricula.read', 'curricula.manage', 'courses.read', 'courses.manage',
   'campuses.read', 'campuses.manage', 'terms.read', 'terms.manage', 'groups.manage', 'enrollments.manage',
   'grades.read', 'grades.manage', 'grades.publish', 'audit.read', 'settings.manage', 'integrations.manage',
@@ -20,10 +20,10 @@ const EXPECTED: Record<P1Role, readonly Capability[]> = {
   teacher: ['institutions.read', 'programs.read', 'curricula.read', 'courses.read', 'campuses.read', 'terms.read', 'grades.read', 'grades.manage', 'grades.publish'],
   tutor: ['institutions.read', 'programs.read', 'curricula.read', 'courses.read', 'campuses.read', 'terms.read'],
   coordinator: ['institutions.read', 'users.read', 'programs.read', 'programs.manage', 'curricula.read', 'curricula.manage', 'courses.read', 'courses.manage', 'campuses.read', 'campuses.manage', 'terms.read', 'terms.manage', 'groups.manage', 'enrollments.manage', 'grades.read'],
-  control_escolar: ['institutions.read', 'users.read', 'programs.read', 'curricula.read', 'courses.read', 'campuses.read', 'terms.read', 'enrollments.manage', 'grades.read'],
+  control_escolar: ['institutions.read', 'users.read', 'student.links.manage', 'programs.read', 'curricula.read', 'courses.read', 'campuses.read', 'terms.read', 'enrollments.manage', 'grades.read'],
   workshop_facilitator: ['institutions.read', 'programs.read', 'curricula.read', 'courses.read', 'campuses.read', 'terms.read', 'groups.manage', 'grades.read', 'grades.manage'],
-  admin: ['institutions.read', 'institutions.manage', 'users.read', 'users.create', 'users.update', 'users.suspend', 'users.restore', 'users.reset', 'memberships.manage', 'roles.assign', 'invitations.manage', 'programs.read', 'programs.manage', 'curricula.read', 'curricula.manage', 'courses.read', 'courses.manage', 'campuses.read', 'campuses.manage', 'terms.read', 'terms.manage', 'groups.manage', 'enrollments.manage', 'grades.read', 'grades.manage', 'grades.publish', 'audit.read', 'settings.manage', 'integrations.manage'],
-  super_admin: ['institutions.read', 'institutions.manage', 'users.read', 'users.create', 'users.update', 'users.suspend', 'users.restore', 'users.reset', 'memberships.manage', 'roles.assign', 'invitations.manage', 'programs.read', 'programs.manage', 'curricula.read', 'curricula.manage', 'courses.read', 'courses.manage', 'campuses.read', 'campuses.manage', 'terms.read', 'terms.manage', 'groups.manage', 'enrollments.manage', 'grades.read', 'grades.manage', 'grades.publish', 'audit.read', 'settings.manage', 'integrations.manage'],
+  admin: ['student.links.manage', 'institutions.read', 'institutions.manage', 'users.read', 'users.create', 'users.update', 'users.suspend', 'users.restore', 'users.reset', 'memberships.manage', 'roles.assign', 'invitations.manage', 'programs.read', 'programs.manage', 'curricula.read', 'curricula.manage', 'courses.read', 'courses.manage', 'campuses.read', 'campuses.manage', 'terms.read', 'terms.manage', 'groups.manage', 'enrollments.manage', 'grades.read', 'grades.manage', 'grades.publish', 'audit.read', 'settings.manage', 'integrations.manage'],
+  super_admin: ['student.links.manage', 'institutions.read', 'institutions.manage', 'users.read', 'users.create', 'users.update', 'users.suspend', 'users.restore', 'users.reset', 'memberships.manage', 'roles.assign', 'invitations.manage', 'programs.read', 'programs.manage', 'curricula.read', 'curricula.manage', 'courses.read', 'courses.manage', 'campuses.read', 'campuses.manage', 'terms.read', 'terms.manage', 'groups.manage', 'enrollments.manage', 'grades.read', 'grades.manage', 'grades.publish', 'audit.read', 'settings.manage', 'integrations.manage'],
 };
 
 function grant(role: P1Role = 'admin', patch: Partial<Grant> = {}): Grant {

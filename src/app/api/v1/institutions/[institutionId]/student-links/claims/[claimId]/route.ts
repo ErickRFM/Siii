@@ -2,7 +2,7 @@ import {NextResponse,type NextRequest} from 'next/server';
 import {and,eq,isNull,or} from 'drizzle-orm';
 import {z} from 'zod';
 import {studentClaimRequests,institutionalStudents,studentAccountLinks,institutionMemberships} from '../../../../../../../../../db/schema';
-import {authorizeInstitution} from '@/shared/auth/session';
+import {authorizeCapability} from '@/shared/auth/session';
 import {assertSameOrigin,jsonError} from '@/shared/auth/guards';
 import {audit,context} from '@/shared/http/request-context';
 import {domainTransaction,withDomainErrors,DomainConflict} from '@/modules/consolidation/domain-boundary';
@@ -28,11 +28,11 @@ export const PATCH=withDomainErrors(async(req:NextRequest,ctx:Ctx)=>{
  if(!assertSameOrigin(req))return jsonError('INVALID_ORIGIN',403);
  const {institutionId,claimId}=await ctx.params;
  if(!z.uuid().safeParse(institutionId).success||!z.uuid().safeParse(claimId).success)return jsonError('NOT_FOUND',404);
- const access=await authorizeInstitution(institutionId,'users.manage');if(!access)return jsonError('FORBIDDEN',403);
+ const access=await authorizeCapability(institutionId,'student.links.manage',{institutionId,status:'active'},true);if(!access)return jsonError('FORBIDDEN',403);
  const parsed=claimDecision.safeParse(await req.json().catch(()=>null));if(!parsed.success)return jsonError('VALIDATION_ERROR',422);
  const input=parsed.data,{requestId}=context(req);
  try{
-  const data=await domainTransaction(access,{permission:'users.manage'},async tx=>{
+  const data=await domainTransaction(access,{capability:'student.links.manage'},async tx=>{
    const [claim]=await tx.select().from(studentClaimRequests)
     .where(and(eq(studentClaimRequests.id,claimId),eq(studentClaimRequests.institutionId,institutionId))).for('update');
    if(!claim||claim.verificationStatus!=='pending')throw new ClaimUnavailable();

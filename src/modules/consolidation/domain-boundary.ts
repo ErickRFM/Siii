@@ -15,16 +15,17 @@ export class DomainConflict extends Error {}
 type Actor={identity:{id:string;sessionId:string};access:InstitutionAccess};
 type Options=
  |{permission?:Permission;capability?:never;grade?:never}
- |{permission?:never;capability:Extract<Capability,'admissions.manage'|'institutions.read'>;grade?:never}
+ |{permission?:never;capability:Extract<Capability,'admissions.manage'|'institutions.read'|'student.links.manage'>;grade?:never}
  |{permission?:never;capability?:never;grade:{sectionId:string;capability:'grades.manage'|'grades.publish'}};
 /** All domain writers serialize against institutional/user administration and revalidate before commit. */
 export async function domainTransaction<T>(actor:Actor,options:Options,work:(tx:Transaction)=>Promise<T>):Promise<T>{
  // Do not route section-scoped/step-up capabilities through the institutional shortcut.
  if([options.permission,options.capability,options.grade].filter(value=>value!==undefined).length>1
-  ||options.capability!==undefined&&!['admissions.manage','institutions.read'].includes(options.capability))throw new DomainAccessDenied();
+  ||options.capability!==undefined&&!['admissions.manage','institutions.read','student.links.manage'].includes(options.capability))throw new DomainAccessDenied();
  return db.transaction(async tx=>{
   async function check(){
-   const critical=options.permission==='users.manage'||options.grade?.capability==='grades.publish';
+   // Linking an account to a student record changes who reaches private records and Compañero: fresh step-up.
+   const critical=options.permission==='users.manage'||options.capability==='student.links.manage'||options.grade?.capability==='grades.publish';
    const current=await lockInstitutionContext(tx,actor.identity,actor.access,undefined,critical);
    if(!current)throw new DomainAccessDenied();
    const allowed=options.grade?await gradeScopeAllows(tx,current,options.grade.sectionId,options.grade.capability):options.capability?can(current.subject,options.capability,{institutionId:current.access.institutionId,status:'active'},current.now):legacyAllows(current.subject,options.permission??'academic.manage',actor.access.institutionId,new Date());
