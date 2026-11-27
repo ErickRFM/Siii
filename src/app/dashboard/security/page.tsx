@@ -34,10 +34,8 @@ export default async function SecurityPage({searchParams}:{searchParams:Promise<
         </section>
         <aside className="sii-panel sii-security-aside">
           <span className="sii-security-shield" aria-hidden="true"><SiiNavIcon name="shield"/></span>
-          <h2>Información protegida</h2>
-          <p>Las operaciones institucionales verifican permisos y membresías directamente en el servidor.</p>
-          <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Tu usuario</strong><small>{user.username}</small></div></div>
-          <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Sesión</strong><small>Autenticada y vigente</small></div></div>
+          <h2>Cuenta activa</h2>
+          <div className="sii-access-feature"><span aria-hidden="true">✓</span><div><strong>Usuario</strong><small>{user.username}</small></div></div>
           <p className="sii-security-coming">El restablecimiento de contraseña conserva tu verificación de identidad y requiere iniciar sesión de nuevo.</p>
         </aside>
         </div>

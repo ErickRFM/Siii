@@ -8,25 +8,25 @@ import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle} from '@/compon
 import {cn} from '@/lib/utils';
 
 /** Reusable presentation primitives. Server and client compatible; no permission decisions. */
-export function SiiPageIntro({eyebrow,title,description,actions,hero=false}:{
- eyebrow:string;title:string;description:string;actions?:ReactNode;hero?:boolean;
+export function SiiPageIntro({eyebrow,title,description,actions}:{
+ eyebrow?:string;title:string;description?:string;actions?:ReactNode;hero?:boolean;
 }){
  return <header data-slot="siii-page-intro" className="siii-v2-page-intro min-w-0">
-   <div className="sii-page-eyebrow">{eyebrow}</div>
-   <div className={(hero?'sii-page-heading sii-kit-page-heading sii-kit-page-heading--hero':'sii-page-heading sii-kit-page-heading')+' flex flex-wrap items-start justify-between gap-4'}>
+   {eyebrow&&<div className="sii-page-eyebrow">{eyebrow}</div>}
+   <div className="sii-page-heading sii-kit-page-heading flex flex-wrap items-center justify-between gap-3">
     <div className="min-w-0">
      <h1 aria-label={title.endsWith('.')?title:`${title}.`}>{title}</h1>
-     <p>{description}</p>
+     {description&&<p>{description}</p>}
     </div>
     {actions&&<div className="siii-v2-page-actions flex min-w-0 shrink-0 flex-wrap gap-2">{actions}</div>}
    </div>
  </header>;
 }
 export function SiiSectionHeader({eyebrow,title,description,right,outside=false,workspace=false}:{
- eyebrow:string;title:string;description?:string;right?:ReactNode;outside?:boolean;workspace?:boolean;
+ eyebrow?:string;title:string;description?:string;right?:ReactNode;outside?:boolean;workspace?:boolean;
 }){
- return <div className={'sii-panel-top sii-kit-section-header'+(outside?' sii-panel-top--outside':'')+(workspace?' sii-catalog-summary':'')+' flex flex-wrap items-start justify-between gap-4'}>
-   <div className="min-w-0"><span className="sii-section-kicker">{eyebrow}</span><h2>{title}</h2>{description&&<p>{description}</p>}</div>{right}
+ return <div className={'sii-panel-top sii-kit-section-header'+(outside?' sii-panel-top--outside':'')+(workspace?' sii-catalog-summary':'')+' flex flex-wrap items-center justify-between gap-3'}>
+   <div className="min-w-0">{eyebrow&&<span className="sii-section-kicker">{eyebrow}</span>}<h2>{title}</h2>{description&&<p>{description}</p>}</div>{right}
  </div>;
 }
 export function SiiMetricTile({label,value,caption,description,icon,tone='rose',href,actionLabel,accessory,className}:{
@@ -34,23 +34,23 @@ export function SiiMetricTile({label,value,caption,description,icon,tone='rose',
  tone?:'rose'|'amber'|'blue'|'green'|'terracotta';href?:string;actionLabel?:string;accessory?:ReactNode;className?:string;
 }){
  const toneClass={
-  amber:'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-  blue:'bg-sky-500/10 text-sky-700 dark:text-sky-300',
-  green:'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  amber:'bg-amber-500/12 text-amber-800 dark:text-amber-300',
+  blue:'bg-sky-500/12 text-sky-800 dark:text-sky-300',
+  green:'bg-emerald-500/12 text-emerald-800 dark:text-emerald-300',
   rose:'bg-primary-soft text-primary',
-  terracotta:'bg-orange-500/10 text-orange-700 dark:text-orange-300',
+  terracotta:'bg-orange-500/12 text-orange-800 dark:text-orange-300',
  }[tone];
  return <Card className={cn('sii-metric sii-kit-metric sii-glass-role-metric siii-glass-surface overflow-hidden',className)}>
-   <CardContent className="flex h-full flex-col gap-2 p-5">
-    <div className="flex items-start justify-between gap-3">
-     <span className="text-xs font-semibold uppercase tracking-[.12em] text-muted-foreground">{label}</span>
-     {icon&&<span className={'grid size-10 shrink-0 place-items-center rounded-xl '+toneClass} aria-hidden="true">{typeof icon==='string'?<SiiNavIcon name={icon as SiiNavIconName}/>:icon}</span>}
+   <CardContent className="flex h-full w-full flex-col gap-1.5 p-4">
+    <div className="flex items-center justify-between gap-2.5">
+     <span className="text-[11px] font-semibold uppercase tracking-[.08em] text-muted-foreground">{label}</span>
+     {icon&&<span className={'grid size-8 shrink-0 place-items-center rounded-lg '+toneClass} aria-hidden="true">{typeof icon==='string'?<SiiNavIcon name={icon as SiiNavIconName}/>:icon}</span>}
     </div>
-    <span className={'sii-metric-value text-3xl font-bold tracking-tight tabular-nums'+(typeof value==='string'?' sii-metric-value--text':'')}>{value}</span>
+    <span className={'sii-metric-value text-2xl font-bold tracking-tight tabular-nums'+(typeof value==='string'?' sii-metric-value--text':'')}>{value}</span>
     {description&&<div className="text-xs text-muted-foreground">{description}</div>}
     {caption&&<span className="sii-metric-caption text-xs text-muted-foreground">{caption}</span>}
-    {accessory&&<div className="mt-1">{accessory}</div>}
-    {href&&actionLabel&&<Link href={href as Route} className="sii-metric-link mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-semibold text-primary">{actionLabel}<span aria-hidden="true">↗</span></Link>}
+    {accessory&&<div className="mt-0.5">{accessory}</div>}
+    {href&&actionLabel&&<Link href={href as Route} className="sii-metric-link mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-primary hover:underline">{actionLabel}<span aria-hidden="true">↗</span></Link>}
    </CardContent>
  </Card>;
 }
@@ -78,23 +78,22 @@ export function SiiModuleTile({title,description,icon,href,disabledReason}:{
  title:string;description:string;icon:SiiNavIconName;href?:string;disabledReason?:string;
 }){
  const content=<>
-   <div className="flex items-start justify-between gap-3">
-    <span className="sii-module-glyph sii-kit-module-icon grid size-11 place-items-center rounded-xl bg-primary-soft text-primary" aria-hidden="true"><SiiNavIcon name={icon}/></span>
+   <div className="flex items-center gap-3">
+    <span className="sii-module-glyph sii-kit-module-icon grid size-9 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary" aria-hidden="true"><SiiNavIcon name={icon}/></span>
+    <h3 className="m-0 text-sm font-bold tracking-tight">{title}</h3>
    </div>
-   <h3 className="mt-4 text-base font-bold tracking-tight">{title}</h3>
-   <p className="mt-1.5 min-h-10 text-sm leading-relaxed text-muted-foreground">{description}</p>
-   <div className="mt-5 flex items-center justify-between border-t pt-3 text-xs font-semibold text-primary">
-    <span>{href?'Abrir módulo':disabledReason??'No disponible'}</span><span aria-hidden="true">{href?'↗':'·'}</span>
+   <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{description}</p>
+   <div className="mt-3 flex items-center justify-between border-t pt-2.5 text-xs font-semibold text-primary">
+    <span>{href?'Abrir':disabledReason??'No disponible'}</span><span aria-hidden="true">{href?'→':'·'}</span>
    </div>
  </>;
  return href
-  ? <Link href={href as Route} className="sii-module-card sii-kit-module-card sii-glass-role-module siii-glass-surface block rounded-xl border bg-card p-5 text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">{content}</Link>
-  : <article className="sii-module-card sii-kit-module-card sii-kit-module-card--disabled block rounded-xl border border-dashed bg-card p-5 text-card-foreground" aria-label={title+': '+(disabledReason??'No disponible')}>{content}</article>;
+  ? <Link href={href as Route} className="sii-module-card sii-kit-module-card sii-glass-role-module siii-glass-surface block rounded-xl border bg-card p-4 text-card-foreground transition hover:border-primary/50">{content}</Link>
+  : <article className="sii-module-card sii-kit-module-card sii-kit-module-card--disabled block rounded-xl border border-dashed bg-card p-4 text-card-foreground" aria-label={title+': '+(disabledReason??'No disponible')}>{content}</article>;
 }
 export function SiiSkeleton({label='Cargando contenido'}:{label?:string}){
- return <div className="sii-kit-skeleton space-y-3" role="status" aria-label={label}>
-   <span className="sii-kit-skeleton-block block h-24 animate-pulse rounded-xl bg-muted"/><span className="sii-kit-skeleton-block block h-24 animate-pulse rounded-xl bg-muted"/>
-   <span className="sii-kit-skeleton-block block h-24 animate-pulse rounded-xl bg-muted"/>
-   <span className="sii-kit-skeleton-label text-sm text-muted-foreground">{label}…</span>
+ return <div className="sii-kit-skeleton space-y-2.5" role="status" aria-label={label}>
+   <span className="sii-kit-skeleton-block block h-16 animate-pulse rounded-xl bg-muted"/><span className="sii-kit-skeleton-block block h-16 animate-pulse rounded-xl bg-muted"/>
+   <span className="sii-kit-skeleton-label text-xs text-muted-foreground">{label}…</span>
  </div>;
 }

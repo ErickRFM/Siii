@@ -4,7 +4,7 @@ import type {ReactNode} from 'react';
 export type SiiNavIconName='home'|'institution'|'users'|'roles'|'mail'|'shield'|'book'|'registry'|'layers'|'grades'|'calendar'|'services'|'search';
 const illustrations:Record<SiiNavIconName,ReactNode>={
   home:<><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-8h6v8"/></>,
-  institution:<><rect x="4" y="9" width="16" height="12" rx="1"/><path d="M2 9 12 3l10 6M9 21v-7h6v7M8 11h.01M16 11h.01"/></>,
+  institution:<><path d="M3 21h18M4 10h16M12 3l9 5H3l9-5ZM6 10v8M10 10v8M14 10v8M18 10v8"/></>,
   users:<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.2a4 4 0 0 1 0 7.6M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></>,
   roles:<><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h5M16 16l2 2 3-3"/></>,
   mail:<><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></>,

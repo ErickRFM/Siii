@@ -101,15 +101,9 @@ html[data-sii-theme="dark"] {
   box-shadow:var(--sii-v4-elevation);
 }
 .sii-app .sii-administration-discovery .sii-panel-top {margin-bottom:13px}
-.sii-app .sii-administration-discovery .sii-administration-list {margin:16px 0}
-.sii-app .sii-administration-discovery .sii-catalog-pagination {margin-top:14px;padding-top:18px;border-top:1px solid var(--sii-line)}
-.sii-app .sii-administration-list li {
-  padding:17px 16px;
-  border:1px solid var(--sii-v4-outline);
-  border-radius:13px;
-  background:var(--sii-surface-soft);
-  margin-bottom:9px;
-}
+.sii-app .sii-administration-discovery .sii-administration-list {margin:8px 0 0}
+.sii-app .sii-administration-discovery .sii-catalog-pagination {margin-top:12px;padding-top:12px;border-top:1px solid var(--sii-line)}
+.sii-app .sii-administration-list li:last-child {border-bottom:0}
 .sii-app .sii-administration-list li>div {flex:1}
 .sii-app .sii-administration-list small {color:var(--sii-muted)}
 .sii-app .sii-admin-institution-glyph {

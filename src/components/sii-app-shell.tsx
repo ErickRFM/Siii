@@ -16,7 +16,6 @@ import {GradebookDraftsProvider} from './teacher-gradebook-drafts';
 import {academicModuleLinks,allAcademicModuleLinks} from '@/shared/navigation/academic-modules';
 import {personalModuleLinks,hasOnlyPersonalRoles} from '@/shared/navigation/personal-modules';
 import {Avatar,AvatarFallback} from '@/components/ui/avatar';
-import {Badge} from '@/components/ui/badge';
 import {Breadcrumb,BreadcrumbItem,BreadcrumbLink,BreadcrumbList,BreadcrumbPage,BreadcrumbSeparator} from '@/components/ui/breadcrumb';
 import {Button} from '@/components/ui/button';
 import {Sidebar,SidebarContent,SidebarFooter,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarHeader,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarProvider,useSidebar} from '@/components/ui/sidebar';
@@ -253,12 +252,11 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
      </nav></SidebarGroupContent>
     </SidebarGroup>
    </SidebarContent>
-   <SidebarFooter className="p-3">
-    <div className="flex items-center gap-2 rounded-md bg-sidebar-accent/70 px-2 py-2 group-data-[collapsible=icon]:justify-center">
-     <Avatar className="size-8"><AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
-     <span className="min-w-0 group-data-[collapsible=icon]:hidden"><strong className="block truncate text-xs text-sidebar-foreground">{fullName}</strong><small className="block truncate text-[10px] text-sidebar-foreground/60">Sesión institucional</small></span>
+   <SidebarFooter className="p-2.5">
+    <div className="flex items-center gap-2 rounded-md bg-sidebar-accent/70 px-2 py-1.5 group-data-[collapsible=icon]:justify-center">
+     <Avatar className="size-7"><AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar>
+     <strong className="min-w-0 truncate text-xs text-sidebar-foreground group-data-[collapsible=icon]:hidden">{fullName}</strong>
     </div>
-    <p className="mt-2 hidden items-center gap-2 px-1 text-[10px] text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden"><span className="size-1.5 rounded-full bg-emerald-400"/>Plataforma institucional · Acceso protegido</p>
    </SidebarFooter>
    </>}
    </nav>
@@ -296,7 +294,6 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
      <SiiQuickSwitch links={quickLinks}/>
     </div>
     <div className="sii-topbar-actions">
-     <Badge variant="secondary" className="hidden gap-1.5 md:inline-flex"><span className="sii-online-dot"/>Sesión autenticada</Badge>
      <SiiThemeToggle defaultTheme={personalShell?'dark':'light'}/>
      {institutionId&&personal.some(module=>module.id==='student')&&<Link
       href={('/dashboard/institutions/'+institutionId+'/student#avisos') as Route}
@@ -304,7 +301,7 @@ function Shell({firstName,fullName,active,institutionId,institutionAdministratio
       className="siii-topbar-notices" onClick={()=>window.dispatchEvent(new CustomEvent('siii:student-navigation',{detail:'avisos'}))}>
       <Bell size={19} aria-hidden="true"/>
      </Link>}
-     {personalShell?<details className="siii-personal-account"><summary><Avatar className="size-9"><AvatarFallback>{fullName.split(' ').filter(Boolean).map(part=>part[0]).slice(0,2).join('')}</AvatarFallback></Avatar><span><strong>{fullName}</strong><small>{active==='student'?'Estudiante':active==='teacher'?'Docente':'Cuenta institucional'}</small></span><ChevronDown size={14}/></summary><div><Link href="/dashboard">Cambiar contexto</Link><Link href="/dashboard/security">Cuenta y seguridad</Link><form action="/api/v1/auth/logout" method="post"><button type="submit">Salir</button></form></div></details>:<div className="siii-account-chip hidden items-center gap-2 sm:flex"><Avatar className="size-9"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar><span className="hidden min-w-0 lg:block"><strong className="block max-w-36 truncate text-xs">{fullName}</strong><small className="block text-[11px] text-muted-foreground">Cuenta institucional</small></span></div>}
+     {personalShell?<details className="siii-personal-account"><summary><Avatar className="size-9"><AvatarFallback>{fullName.split(' ').filter(Boolean).map(part=>part[0]).slice(0,2).join('')}</AvatarFallback></Avatar><span><strong>{fullName}</strong><small>{active==='student'?'Estudiante':active==='teacher'?'Docente':'Cuenta institucional'}</small></span><ChevronDown size={14}/></summary><div><Link href="/dashboard">Cambiar contexto</Link><Link href="/dashboard/security">Cuenta y seguridad</Link><form action="/api/v1/auth/logout" method="post"><button type="submit">Salir</button></form></div></details>:<div className="siii-account-chip hidden items-center gap-2 sm:flex"><Avatar className="size-8"><AvatarFallback className="bg-primary-soft text-xs font-bold text-primary">{firstName.substring(0,1).toLocaleUpperCase('es-MX')}</AvatarFallback></Avatar><strong className="hidden max-w-40 truncate text-xs lg:block">{fullName}</strong></div>}
      <form action="/api/v1/auth/logout" method="post"><Button type="submit" variant="outline" size="sm" className="gap-1.5">Salir <span aria-hidden="true">↗</span></Button></form>
     </div>
    </header>
