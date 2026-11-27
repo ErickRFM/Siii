@@ -10,6 +10,7 @@ import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/compon
 import {SiiEmptyView,SiiStatusPill} from '@/components/ui/sii-kit';
 import {SiiiGlassMetric,SiiiGlassMetricsRow} from './ui/siii-glass-kit';
 import SiiScrollRegion from './sii-scroll-region';
+import {AdmissionDecision} from './admissions/admission-decision';
 
 export type AdmissionListItem={
  id:string;applicationNumber:string;status:string;submittedAt:string|null;
@@ -18,7 +19,7 @@ export type AdmissionListItem={
 const statuses:Record<string,string>={draft:'Borrador',submitted:'Enviada',under_review:'En revisión',admitted:'Admitida',rejected:'Rechazada',waitlisted:'En espera',cancelled:'Cancelada'};
 const date=(value:string|null)=>value?new Date(value).toLocaleDateString('es-MX'):'Sin enviar';
 
-/** Presentation of the existing server-authorized list. No admission decisions. */
+/** Server-authorized application list; decisions go through the audited decision endpoint. */
 export default function AdmissionsWorkspace({institutionId,applications}:{institutionId:string;applications:AdmissionListItem[]}){
  const router=useRouter(),[refreshing,startRefresh]=useTransition();
  const [query,setQuery]=useState(''),[status,setStatus]=useState(''),[program,setProgram]=useState(''),[selectedId,setSelectedId]=useState<string|null>(null);
@@ -69,7 +70,7 @@ export default function AdmissionsWorkspace({institutionId,applications}:{instit
      ['Aspirante',selected.applicantFirstName+' '+selected.applicantLastName],
      ['Correo de contacto',selected.applicantEmail],['Programa',selected.programCode+' · '+selected.programName],['Fecha de envío',date(selected.submittedAt)],
     ].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-    <p>Consulta de la solicitud registrada. El estado corresponde al expediente de admisión.</p>
+    <AdmissionDecision key={selected.id+selected.status} institutionId={institutionId} applicationId={selected.id} applicationNumber={selected.applicationNumber} status={selected.status}/>
    </section>}
   </div>
  </div>;

@@ -1,6 +1,7 @@
 
 import {SiiPageIntro} from '@/components/ui/sii-kit';
 import AdmissionsWorkspace from '@/components/admissions-workspace';
+import {AdmissionCycles} from '@/components/admissions/admission-cycles';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
@@ -40,8 +41,9 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ ins
 
   return <>
     <SiiPageIntro eyebrow="CONTROL ESCOLAR Y ADMISIONES" title="Gestión de Admisiones"
-      description={access.institutionName+' · Consulta y seguimiento de solicitudes de ingreso.'}
+      description={access.institutionName+' · Convocatorias, solicitudes y dictámenes de ingreso.'}
       actions={<div className="sii-page-actions"><Link className="sii-outline-button" href={`/dashboard/institutions/${institutionId}`}>← Institución</Link><Link className="sii-outline-button" href={{pathname:`/admissions/${institutionId}`}}>Portal de aspirantes</Link></div>}/>
     <AdmissionsWorkspace key={institutionId} institutionId={institutionId} applications={applications.map(row=>({...row,submittedAt:row.submittedAt?.toISOString()??null}))}/>
+    <AdmissionCycles institutionId={institutionId}/>
   </>;
 }
