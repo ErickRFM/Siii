@@ -1,9 +1,10 @@
 'use client';
+import {SiiDateTimeField} from '@/components/ui/sii-date-time-field';
+import {toLocalInputValue} from '@/shared/format/date-time';
 import {useOnlineStatus} from '@/shared/client/use-online-status';
 import {Button} from '@/components/ui/button';
 import {Table,TableHeader,TableRow,TableHead,TableBody,TableCell} from '@/components/ui/table';
 import {NativeSelect} from '@/components/ui/native-select';
-import {Input} from '@/components/ui/input';
 
 import SiiScrollRegion from './sii-scroll-region';
 import {useInstitutionConfirmation} from './sii-confirmation';
@@ -34,6 +35,7 @@ function errorText(code?: string) {
     default: return 'No se pudo completar la operación. Vuelve a intentar.';
   }
 }
+const GRANT_PRESETS = [{label: '1 mes', hours: 24 * 30}, {label: '6 meses', hours: 24 * 182}, {label: '1 año', hours: 24 * 365}] as const;
 export default function InstitutionRoles({ institutionId }: { institutionId: string }) {
  const {ask,confirmation}=useInstitutionConfirmation();
   const { data: access, loading: accessLoading, error: accessError, refresh } = useInstitutionCapabilities();
@@ -148,9 +150,10 @@ export default function InstitutionRoles({ institutionId }: { institutionId: str
           {scopeType !== 'institution' && <label>{scopeType === 'program' ? 'Programa' : 'Campus'}<NativeSelect aria-label={scopeType==='program'?'Programa':'Campus'} value={scopeId} onChange={event => { setScopeId(event.target.value); setRole(''); setExpiresAt(''); }} required disabled={loading || saving || !online}><option value="">Seleccionar ámbito</option>{(scopeType === 'program' ? programs : campuses).filter(row => row.status === 'active').map(row => <option key={row.id} value={row.id}>{row.code} · {row.name}</option>)}</NativeSelect></label>}
           {scopeLoading&&<p role="status">Comprobando autoridad para el ámbito…</p>}
           <label>Perfil<NativeSelect aria-label="Perfil" value={role} onChange={event => { setRole(event.target.value); setExpiresAt(''); }} required disabled={saving || scopeLoading || !online}><option value="">Seleccionar perfil permitido</option>{Object.entries(PROFILE_LABELS).map(([value, label]) => <option key={value} value={value} disabled={!grantableRoles.includes(value)}>{label}{!grantableRoles.includes(value) ? ' · No concedible en este ámbito' : ''}</option>)}</NativeSelect></label>
-          {expiryLimit && <p id="grant-expiry-limit">Vencimiento obligatorio: como máximo {date(expiryLimit)}.</p>}
-          <label>Vence el<Input type="datetime-local" value={expiresAt} onChange={event => setExpiresAt(event.target.value)} required={Boolean(expiryLimit)} aria-describedby={expiryLimit ? 'grant-expiry-limit' : undefined} disabled={saving || !online}/></label>
-          <p>La hora se interpreta en la zona de tu dispositivo. Sin fecha, la concesión es permanente si tu autorización lo permite.</p>
+          <SiiDateTimeField id="grant-expires-at" label="Vence el" value={expiresAt} onChange={setExpiresAt} min={toLocalInputValue(Date.now() + 60000)}
+           max={expiryLimit ? toLocalInputValue(new Date(expiryLimit)) : undefined} required={Boolean(expiryLimit)} disabled={saving || !online || !role} presets={GRANT_PRESETS}
+           empty={{label: 'Sin vencimiento', summary: 'La concesión es permanente; puedes revocarla cuando sea necesario.'}}
+           hint={expiryLimit ? `Vencimiento obligatorio: tu autorización permite hasta el ${date(expiryLimit)}.` : undefined}/>
           <Button variant="default" type="submit" className="sii-submit" disabled={loading || scopeLoading || saving || !online || !grantableRoles.includes(role)}>{saving ? 'Guardando…' : 'Conceder perfil'}</Button>
         </form>
       </aside>

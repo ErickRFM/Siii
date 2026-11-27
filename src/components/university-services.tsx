@@ -1,4 +1,6 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
+import {userFacingError} from '@/shared/client/user-facing-error';
 import {CapabilityState,hasInstitutionCapability,useInstitutionCapabilities} from './institution-capabilities';
 import {SiiDrawer} from './ui/sii-workspace';
 import {SiiEmptyView} from '@/components/ui/sii-kit';
@@ -11,21 +13,6 @@ import {NativeSelect} from '@/components/ui/native-select';
 import SiiScrollRegion from './sii-scroll-region';
 import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
-function userFacingError(code:string){
- const messages:Record<string,string>={
-  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
-  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
-  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
-  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
-  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
-  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
-  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
-  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
-  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
-  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
- };
- return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
-}
 
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
@@ -39,6 +26,7 @@ const tabs:{id:Module;label:string}[]=[
  {id:'workshops',label:'Talleres'},
 ];
 export default function UniversityServices({institutionId}:{institutionId:string}){
+ const online=useOnlineStatus();
  const {ask,confirmation,cancel:cancelConfirmation}=useInstitutionConfirmation();
  const {data:capabilities}=useInstitutionCapabilities();
  const allowed=['programs','courses','curricula','terms','campuses'].every(resource=>hasInstitutionCapability(capabilities,resource+'.manage'));
@@ -80,7 +68,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
    if(!response.ok){const info=await response.json().catch(()=>({error:{code:'UNKNOWN'}})) as {error?:{code?:string}};
     throw Error(info.error?.code??'OPERATION_DENIED')}
    setNotice('Operación guardada y auditada.');await fetchRows(tab);return true;
-  }catch(e){setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
+  }catch(e){setError(userFacingError(e));return false}
   finally{writing.current=false;setSaving(false)}
  }
  async function submit(e:FormEvent<HTMLFormElement>){
@@ -155,7 +143,7 @@ export default function UniversityServices({institutionId}:{institutionId:string
 
   </div>
   <SiiDrawer open={createOpen} busy={saving} onOpenChange={open=>{if(!open)void closeCreate()}} title={tab==='announcements'?'Nuevo aviso':tab==='requests'?'Nueva solicitud':'Nuevo taller'} description="Prepara el registro y revisa los datos antes de guardar.">
-   {confirmation}{error&&<p role="alert" className="sii-catalog-error">{error}</p>}
+   {confirmation}{!online&&<p className="sii-catalog-error" role="status">Sin conexión. Puedes consultar lo que ya está cargado; los cambios no se guardarán hasta que vuelvas a conectarte.</p>}{error&&<p role="alert" className="sii-catalog-error">{error}</p>}
        <form className="sii-catalog-form" onSubmit={e=>void submit(e)} onChange={()=>setDirty(true)}><fieldset className="sii-form-fields" disabled={saving}>
      {tab==='announcements'&&<><label>Título<Input name="title" minLength={3} required/></label><label>Mensaje<Textarea name="body" minLength={10} required rows={5}/></label></>}
      {tab==='requests'&&<><label>Alumno<NativeSelect disabled={peopleLoading} name="studentId" defaultValue="" required><option value="" disabled>Seleccionar matrícula</option>

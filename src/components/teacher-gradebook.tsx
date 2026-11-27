@@ -1,4 +1,6 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
+import {userFacingError} from '@/shared/client/user-facing-error';
 import Link from 'next/link';
 import {Button} from '@/components/ui/button';
 import {NativeSelect} from '@/components/ui/native-select';
@@ -9,27 +11,14 @@ import {Input} from '@/components/ui/input';
 
 import {SiiSectionHeader} from './ui/sii-kit';
 /** Convert service error codes to clear UI feedback; server decisions are authoritative. */
-function userFacingError(code:string){
- const messages:Record<string,string>={
-  UNAUTHENTICATED:'Tu sesión venció. Inicia sesión de nuevo.',
-  FORBIDDEN:'Tu autorización cambió o no tienes permiso para esta operación. Actualiza el módulo.',
-  MFA_REQUIRED:'Verifica tu autenticador desde Cuenta y seguridad y vuelve a intentar.',
-  STEP_UP_REQUIRED:'Confirma tu identidad desde Cuenta y seguridad antes de continuar.',
-  PASSWORD_CHANGE_REQUIRED:'Actualiza tu contraseña desde Cuenta y seguridad.',
-  VALIDATION_ERROR:'Revisa los datos del formulario e intenta nuevamente.',
-  INVALID_TRANSITION:'El registro cambió de estado. Actualiza el listado y vuelve a intentar.',
-  NOT_FOUND:'El registro ya no existe o cambió. Actualiza el listado.',
-  CONFLICT:'Los datos entran en conflicto con otros registros. Actualiza el listado.',
-  SCHEDULE_CONFLICT:'El aula, horario o docente ya tiene una actividad en ese intervalo.',
+const GRADE_MESSAGES:Readonly<Record<string,string>>={
   GRADE_PERIOD_CLOSED:'El periodo o grupo está cerrado. Puedes consultar las notas, pero la captura y publicación están bloqueadas.',
   GRADE_ALREADY_PUBLISHED:'Las notas ya fueron publicadas. Los cambios requieren una rectificación autorizada.',
   ACTA_ALREADY_PUBLISHED_CORRECTION_REQUIRED:'Ya existe una publicación. Consulta los resultados oficiales.',
   INCOMPLETE_GRADES:'Faltan notas guardadas. Completa la captura antes de publicar.',
   INVALID_WEIGHT_SUM:'Las ponderaciones deben sumar 100 %.',
   GRADE_SCORE_CONFLICT:'Otra captura cambió esta nota. Actualiza el libro y compara el último valor guardado con tu captura antes de volver a guardar.',
- };
- return messages[code]??'No se pudo completar la operación. Conservamos tus datos; actualiza y vuelve a intentar.';
-}
+};
 
 import {useInstitutionConfirmation} from './sii-confirmation';
 import {SecurityActionLink} from './institution-capabilities';
@@ -45,6 +34,7 @@ type Result=Student&{id:string;publicationId:string;scoreHundredths:number};
 type Snapshot={components:Component[];scores:Score[];publications:Publication[];roster:Student[];section?:{id:string;code:string;courseName:string;status:string;termName:string;termStatus:string};results?:Result[]};
 
 export default function TeacherGradebook({institutionId,initialSectionId,initialView='capture'}:{institutionId:string;initialSectionId?:string;initialView?:'roster'|'capture'|'results'}){
+ const online=useOnlineStatus();
  const {ask,confirmation}=useInstitutionConfirmation();
  const [view,setView]=useState(initialView),[publicationId,setPublicationId]=useState('');
  const base=`/api/v1/institutions/${institutionId}/grading`;
@@ -87,7 +77,7 @@ export default function TeacherGradebook({institutionId,initialSectionId,initial
    const r=await fetch(`${base}?sectionId=${encodeURIComponent(id)}`,{signal:controller.signal,cache:'no-store'});
    if(!current())return false;
    if(!r.ok){
-    if(r.status===401||r.status===403){retirePrivate(r.status);setError(userFacingError(r.status===401?'UNAUTHENTICATED':'FORBIDDEN'));return false;}
+    if(r.status===401||r.status===403){retirePrivate(r.status);setError(userFacingError(r.status===401?'UNAUTHENTICATED':'FORBIDDEN',GRADE_MESSAGES));return false;}
     throw Error('GRADEBOOK_FAILED');
    }
    const value=await r.json() as Snapshot;
@@ -127,14 +117,14 @@ export default function TeacherGradebook({institutionId,initialSectionId,initial
    if(r.status===401||r.status===403){
     const current=activeScope.current===target&&isCurrent(authorityEpoch);
     retirePrivate(r.status);
-    if(current){const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};setError(userFacingError(info.error?.code??(r.status===401?'UNAUTHENTICATED':'FORBIDDEN')));}
+    if(current){const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};setError(userFacingError(info.error?.code??(r.status===401?'UNAUTHENTICATED':'FORBIDDEN'),GRADE_MESSAGES));}
     return false;
    }
    if(activeScope.current!==target||!isCurrent(authorityEpoch))return false;
    const info=await r.json().catch(()=>({error:{code:'REQUEST_FAILED'}})) as {error?:{code?:string}};
    if(activeScope.current!==target||!isCurrent(authorityEpoch))return false;
    throw Error(info.error?.code??'REQUEST_FAILED');
-  }catch(e){if(activeScope.current===target)setError(userFacingError(e instanceof Error?e.message:'ERROR'));return false}
+  }catch(e){if(activeScope.current===target)setError(userFacingError(e,GRADE_MESSAGES));return false}
   finally{operation.current=null;setSaving(false);setPublishing(false)}
  }
  async function addComponent(event:FormEvent<HTMLFormElement>){
@@ -181,7 +171,7 @@ export default function TeacherGradebook({institutionId,initialSectionId,initial
  return <div className="sii-academic siii-glass-workspace min-w-0 space-y-5">
  {confirmation}
   <SiiSectionHeader workspace eyebrow="DOCENCIA · EVALUACIÓN" title="Libro de calificaciones" description="Captura privada, revisión y resultados oficiales. Escala institucional de 0 a 10."/>
-  {(error||identityError)&&<div className="sii-catalog-error" role="alert"><p>{error||identityError}</p><Button variant="outline" type="button" onClick={()=>{if(!identityReady)void revalidateIdentity();else if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</Button></div>}
+  {!online&&<p className="sii-catalog-error" role="status">Sin conexión. Puedes consultar lo que ya está cargado; los cambios no se guardarán hasta que vuelvas a conectarte.</p>}{(error||identityError)&&<div className="sii-catalog-error" role="alert"><p>{error||identityError}</p><Button variant="outline" type="button" onClick={()=>{if(!identityReady)void revalidateIdentity();else if(sections.length)void refresh(sectionId);else setSectionQuery(v=>v+1);}}>Reintentar consulta</Button></div>}
   {notice&&<p className="sii-catalog-notice" role="status">{notice}</p>}
   <label className="block space-y-2 font-medium">Materia y grupo asignado<NativeSelect value={identityReady?sectionId:''} onChange={event=>void changeSection(event.target.value)} disabled={saving||loading}>
    {!sectionId&&<option value="">{sections.length?'Selecciona un grupo autorizado':'Sin secciones asignadas'}</option>}{(identityReady?sections:[]).map(section=><option key={section.id} value={section.id}>{section.courseName} · {section.code}</option>)}

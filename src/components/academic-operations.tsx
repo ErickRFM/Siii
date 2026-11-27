@@ -1,4 +1,5 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
 
 import {useCallback,useEffect,useMemo,useRef,useState,type FormEvent} from 'react';
 import {Button} from './ui/button';
@@ -35,6 +36,7 @@ function feedback(code:string){return messages[code]??'No se pudo completar la o
 const choice=(rows:Row[],kind:'person'|'catalog'):SiiChoice[]=>rows.map(row=>({id:row.id,label:kind==='person'?`${row.enrollmentNumber??row.employeeNumber??''} · ${row.firstName??''} ${row.lastName??''}`:`${row.code??''}${row.name?' · '+row.name:''}`}));
 
 export default function AcademicOperations({institutionId}:{institutionId:string}){
+ const online=useOnlineStatus();
  const {ask,confirmation,cancel:cancelConfirmation}=useInstitutionConfirmation();
  const {data:capabilities,refresh:refreshCapabilities}=useInstitutionCapabilities();
  const allowed=['programs','courses','curricula','terms','campuses'].every(resource=>hasInstitutionCapability(capabilities,resource+'.manage'));
@@ -110,6 +112,7 @@ export default function AcademicOperations({institutionId}:{institutionId:string
  return <div className="sii-academic sii-workspace sii-workspace--operations siii-glass-workspace">
   {!drawer&&confirmation}
   <SiiSectionHeader workspace eyebrow="OPERACIÓN ACADÉMICA" title="Oferta, grupos e inscripciones" description="Consulta los registros de tu institución y prepara las operaciones en un panel contextual." right={<Button variant="outline" disabled={busy||loading} onClick={()=>void refresh()}>Actualizar</Button>}/>
+  {!online&&<p className="sii-catalog-error" role="status">Sin conexión. Puedes consultar lo que ya está cargado; los cambios no se guardarán hasta que vuelvas a conectarte.</p>}
   {error&&<div role="alert" className="sii-catalog-error"><p>{error}</p><Button variant="outline" disabled={busy||loading} onClick={()=>void refresh()}>Actualizar datos</Button></div>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   <Tabs value={part} onValueChange={value=>{setPart(value as Part);setQuery('');setStatus('')}}>

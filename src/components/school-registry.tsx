@@ -1,4 +1,6 @@
 'use client';
+import {useOnlineStatus} from '@/shared/client/use-online-status';
+import {userFacingError,isNetworkError,OFFLINE_MESSAGE} from '@/shared/client/user-facing-error';
 import {SiiPagination} from '@/components/ui/sii-pagination';
 import {SiiEmptyView} from '@/components/ui/sii-kit';
 import {Button} from '@/components/ui/button';
@@ -12,9 +14,17 @@ import {useInstitutionConfirmation} from './sii-confirmation';
 import {readCollection} from '@/shared/client/read-collection';
 import { useCallback,useEffect,useRef,useState,type FormEvent,type KeyboardEvent } from 'react';
 type Kind='students'|'teachers';
+// Registry write codes; shared codes (FORBIDDEN, VALIDATION_ERROR, NOT_FOUND…) come from userFacingError.
+const REGISTRY_MESSAGES:Readonly<Record<string,string>>={
+ DUPLICATE_RECORD:'Ya existe un expediente con esa matrícula o número de empleado.',
+ PROGRAM_NOT_FOUND:'El programa seleccionado ya no está disponible. Actualiza el listado.',
+ INSTITUTIONAL_CONSTRAINT:'Los datos no cumplen las reglas de la institución (correo o identificador repetido).',
+ INVALID_RESOURCE:'Este tipo de registro no está disponible.',
+};
 type RecordRow={id:string;firstName:string;lastName:string;enrollmentNumber?:string;employeeNumber?:string;institutionalEmail?:string|null;status:string;programId?:string};
 type Program={id:string;code:string;name:string;status:string};
 export default function SchoolRegistry({institutionId}:{institutionId:string}){
+ const online=useOnlineStatus();
  const {ask,confirmation}=useInstitutionConfirmation();
  const [kind,setKind]=useState<Kind>('students');
  const [rows,setRows]=useState<RecordRow[]>([]);
@@ -81,7 +91,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
    const r=await fetch(`${base}/registry/${kind}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    if(!r.ok){const j=await r.json().catch(()=>({error:{code:'UNKNOWN'}})) as {error?:{code?:string}};throw Error(j.error?.code??'UNKNOWN')}
    form.reset();setNotice('Registro guardado y auditado en la institución actual.');setHistory([null]);await refresh(kind);
-  }catch(e){setError('No se pudo guardar: '+(e instanceof Error?e.message:'ERROR'))}
+  }catch(e){setError(userFacingError(e,REGISTRY_MESSAGES))}
   finally{setSaving(false)}
  }
  function navigateTabs(event:KeyboardEvent<HTMLButtonElement>,current:Kind){
@@ -100,7 +110,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
    const r=await fetch(`${base}/registry/${kind}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:row.id,status:next})});
    if(!r.ok)throw Error('No se autorizó el cambio');
    await refresh(kind,currentCursor);
-  }catch{setError('No se pudo cambiar el estado del registro.')}finally{setSaving(false)}
+  }catch(e){setError(isNetworkError(e)?OFFLINE_MESSAGE:'No se pudo cambiar el estado del registro.')}finally{setSaving(false)}
  }
  function cancelEdit(){setEditing(null);setError('')}
  async function saveProfile(event:FormEvent<HTMLFormElement>){
@@ -124,6 +134,7 @@ export default function SchoolRegistry({institutionId}:{institutionId:string}){
   <SiiSectionHeader workspace eyebrow="CONTROL ESCOLAR" title={kind==='students'?'Expedientes de estudiantes':'Plantilla docente'}
    description="Registros institucionales oficiales. La creación de cuentas de acceso es independiente."
    right={<span className="sii-small-count">{loading?'Cargando…':`${rows.length} registros en esta página`}</span>}/>
+  {!online&&<p className="sii-catalog-error" role="status">Sin conexión. Puedes consultar lo que ya está cargado; los cambios no se guardarán hasta que vuelvas a conectarte.</p>}
   {error&&<p role="alert" className="sii-catalog-error">{error}</p>}
   {notice&&<p role="status" className="sii-catalog-notice">{notice}</p>}
   <div id="registry-panel" role="tabpanel" aria-labelledby={"registry-tab-"+kind} tabIndex={0} aria-busy={loading} className="sii-catalog-layout">
