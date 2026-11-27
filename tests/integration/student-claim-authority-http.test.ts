@@ -160,11 +160,11 @@ describe.sequential('student claim authority through real HTTP, mailbox proof an
    await denied(await read(),401,'UNAUTHORIZED');await denied(await read(await actor({membership:false})),404,'NO_MEMBERSHIP');
   });
   it('preserves a non-MFA student response with no active link',async()=>{
-   const owner=await actor(),response=await read(owner);expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{membershipId:owner.member,studentRecord:null}});
+   const owner=await actor(),response=await read(owner);expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{membershipId:owner.member,studentRecord:null,claim:null}});
   });
   it('preserves the exact own-record projection after genuine mailbox proof and claim',async()=>{
    const owner=await verifiedActor(),record=await student(owner.email),created=await claim(owner,record);expect(created.status).toBe(201);const {link}= (await created.json()).data;
-   const response=await read(owner);expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{membershipId:owner.member,studentRecord:{linkId:link.id,studentId:record.id,enrollmentNumber:record.number,firstName:'Synthetic',lastName:'Claim student',institutionalEmail:owner.email,status:'active'}}});
+   const response=await read(owner);expect(response.status).toBe(200);expect(await response.json()).toEqual({data:{membershipId:owner.member,studentRecord:{linkId:link.id,studentId:record.id,enrollmentNumber:record.number,firstName:'Synthetic',lastName:'Claim student',institutionalEmail:owner.email,status:'active'},claim:null}});
   });
   it.each(['suspended-membership','deleted-membership','inactive-institution','mandatory-password','revoked-grant','expired-grant','missing-grant','admin-without-mfa','control-escolar-without-mfa'])('denies %s without private fields',async(kind)=>{
    const {owner}=await linked({role:kind==='admin-without-mfa'?'admin':kind==='control-escolar-without-mfa'?'control_escolar':'student'});

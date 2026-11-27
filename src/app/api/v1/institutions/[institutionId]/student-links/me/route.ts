@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, desc } from 'drizzle-orm';
 import { db } from '@/infrastructure/database';
-import { studentAccountLinks, institutionalStudents, institutionMemberships } from '../../../../../../../../db/schema';
+import { studentAccountLinks, institutionalStudents, institutionMemberships, studentClaimRequests } from '../../../../../../../../db/schema';
 import { authorizeCapability, getIdentity } from '@/shared/auth/session';
 import { institutionVisibility } from '@/shared/auth/read-access';
 
@@ -59,7 +59,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ inst
       return NextResponse.json({ error: { code: 'FORBIDDEN' } }, { status: 403, headers: privateHeaders });
     }
     const { membershipId, ...record } = row;
-    return NextResponse.json({ data: { membershipId, studentRecord: record.studentId ? record : null } }, { status: 200, headers: privateHeaders });
+    // Latest own claim lets the portal show pending/rejected states instead of inviting duplicates.
+    const [claim] = record.studentId ? [] : await db.select({
+      id: studentClaimRequests.id,
+      enrollmentNumber: studentClaimRequests.enrollmentNumber,
+      status: studentClaimRequests.verificationStatus,
+      rejectionReason: studentClaimRequests.rejectionReason,
+      createdAt: studentClaimRequests.createdAt,
+    }).from(studentClaimRequests)
+      .where(and(eq(studentClaimRequests.institutionId, institutionId), eq(studentClaimRequests.applicantUserId, user.id)))
+      .orderBy(desc(studentClaimRequests.createdAt), desc(studentClaimRequests.id)).limit(1);
+    return NextResponse.json({ data: { membershipId, studentRecord: record.studentId ? record : null, claim: claim ?? null } }, { status: 200, headers: privateHeaders });
   } catch {
     return NextResponse.json({ error: { code: 'FETCH_FAILED', message: 'No se pudo consultar la vinculación de estudiante' } }, { status: 500, headers: privateHeaders });
   }

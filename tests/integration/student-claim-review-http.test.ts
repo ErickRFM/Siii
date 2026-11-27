@@ -120,6 +120,21 @@ describe('student claim review',()=>{
   expect(await links(record.id)).toEqual([]);
  });
 
+ it('reports the student own claim lifecycle through student-links/me',async()=>{
+  const owner=await actor(),record=await student(),reviewer=await admin();
+  const mePath=()=>'/api/v1/institutions/'+unit+'/student-links/me';
+  const me=async(who=owner)=>{const response=await request('GET',mePath(),undefined,who.cookie);expect(response.status).toBe(200);return (await response.json()).data;};
+  expect((await me()).claim).toBeNull();
+  const first=await pendingClaim(owner,record.number);
+  expect((await me()).claim).toMatchObject({id:first,enrollmentNumber:record.number,status:'pending',rejectionReason:null});
+  expect((await decide(first,{decision:'reject',reason:'Corrige la matrícula'},reviewer)).status).toBe(200);
+  expect((await me()).claim).toMatchObject({id:first,status:'rejected',rejectionReason:'Corrige la matrícula'});
+  const second=await pendingClaim(owner,record.number);
+  expect((await me()).claim).toMatchObject({id:second,status:'pending'});
+  expect((await decide(second,{decision:'approve'},reviewer)).status).toBe(200);
+  const linked=await me();expect(linked.studentRecord).toMatchObject({studentId:record.id,enrollmentNumber:record.number});expect(linked.claim).toBeNull();
+  expect((await me(await actor())).claim).toBeNull();
+ });
  it('serializes concurrent approvals of the same claim into a single link',async()=>{
   const owner=await actor(),record=await student(),claim=await pendingClaim(owner,record.number),reviewer=await admin();
   const results=await Promise.all([decide(claim,{decision:'approve'},reviewer),decide(claim,{decision:'approve'},reviewer)]);
