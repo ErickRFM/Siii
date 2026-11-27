@@ -37,6 +37,16 @@ async function waitBlocked(pattern:string){const until=Date.now()+7000;while(Dat
 
 describe.sequential('admissions writers: authority and audit through HTTP/PostgreSQL',()=>{
  beforeAll(async()=>{await sql.connect();});afterAll(async()=>{await sql.end();});
+ describe('cycle list',()=>{
+  const list=(o:Offer,cookie='')=>fetch(base+'/api/v1/institutions/'+o.institution+'/admissions/cycles',{headers:{cookie},redirect:'manual'});
+  it('is never anonymous and requires admissions.manage',async()=>{
+   const o=await offer();
+   expect((await list(o)).status).toBe(401);
+   for(const role of ['teacher','student'])expect((await list(o,(await actor(o,role)).cookie)).status,role).toBe(403);
+   for(const role of ['admin','control_escolar']){const response=await list(o,(await actor(o,role)).cookie);expect(response.status,role).toBe(200);expect(response.headers.get('cache-control')).toBe('no-store');expect((await response.json()).data.map((row:{code:string})=>row.code)).toContain('AWA');}
+   const other=await offer();expect((await list(other,(await actor(o,'admin')).cookie)).status).toBe(403);
+  });
+ });
  for(const kind of kinds){
   describe(kind,()=>{
    it('requires institutional authentication',async()=>{const o=await offer(),before=await snapshot(o);expect((await post(kind,o)).status).toBe(401);expect(await snapshot(o)).toEqual(before);});
