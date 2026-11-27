@@ -1,6 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {hasOnlyPersonalRoles,personalModuleLinks} from '@/shared/navigation/personal-modules';
 import {can,ROLE_CAPABILITIES,type Subject,type P1Role} from '@/shared/auth/capabilities';
+it('keeps treasury out of the personal space',()=>{expect(personalModuleLinks(['institutions.manage','teacher.self.read'],['admin','teacher']).map(item=>item.id)).toEqual(['teacher'])});
 it('describes institutional teaching without a personal agenda',()=>{expect(personalModuleLinks(['teacher.self.read'],['teacher'])[0].description).not.toContain('horarios')});
 
 describe('personal capabilities and multirole navigation',()=>{
@@ -13,7 +14,8 @@ describe('personal capabilities and multirole navigation',()=>{
   expect(personalModuleLinks([],['student'],[{scopeType:'campus',capabilities:['student.self.read']}])).toEqual([]);
   expect(personalModuleLinks([],['teacher'],[{scopeType:'program',capabilities:['teacher.self.read']}])).toEqual([]);
   expect(personalModuleLinks(['student.self.read','teacher.self.read'],['student','teacher']).map(item=>item.id)).toEqual(['student','teacher']);
-  expect(personalModuleLinks(['student.self.read','teacher.self.read','institutions.manage'],['admin']).map(item=>item.id)).toEqual(['financials']);
+  // Treasury is institutional administration (Gestión académica), never part of the personal space.
+  expect(personalModuleLinks(['student.self.read','teacher.self.read','institutions.manage'],['admin']).map(item=>item.id)).toEqual([]);
  });
  it('allows personal capabilities only with an owning relation, a live grant and a supported role',()=>{
   for(const role of Object.keys(ROLE_CAPABILITIES) as P1Role[]){

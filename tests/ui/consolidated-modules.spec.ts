@@ -68,13 +68,13 @@ test('teacher navigation exposes only the assigned gradebook module',async({page
 test('module directory keeps integrated areas visible for an authenticated guest without granting links',async({page})=>{
  await fixture('guest');await login(page);await page.goto('/dashboard');
  const directory=page.getByRole('region',{name:'Módulos de QA consolidación'});
- await expect(directory.locator('.sii-module-card')).toHaveCount(7);
- for(const label of ['Catálogo académico','Estudiantes y docentes','Grupos e inscripciones','Calificaciones','Horarios y aulas','Servicios universitarios','Admisiones']){
+ await expect(directory.locator('.sii-module-card')).toHaveCount(9);
+ for(const label of ['Catálogo académico','Estudiantes y docentes','Grupos e inscripciones','Calificaciones','Horarios y aulas','Servicios universitarios','Admisiones','Carreras','Caja y finanzas']){
   await expect(directory.getByRole('heading',{name:label,exact:true})).toBeVisible();
   await expect(directory.getByRole('link',{name:new RegExp(label)})).toHaveCount(0);
  }
- await expect(directory.locator('article')).toHaveCount(7);
- await expect(directory.getByText('Sin permiso para este módulo',{exact:true})).toHaveCount(7);
+ await expect(directory.locator('article')).toHaveCount(9);
+ await expect(directory.getByText('Sin permiso para este módulo',{exact:true})).toHaveCount(9);
  await page.goto('/dashboard/institutions/'+tenant);
  const navigation=page.getByRole('navigation',{name:'Gestión académica',exact:true});
  await expect(navigation).toBeVisible();
