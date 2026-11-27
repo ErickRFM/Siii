@@ -26,7 +26,10 @@ export const admissionCycleSchema = z.object({
   startDate: z.string().datetime({ message: 'Fecha de inicio no válida' }),
   endDate: z.string().datetime({ message: 'Fecha de fin no válida' }),
   status: z.enum(['draft', 'open', 'closed', 'archived']).default('draft'),
-}).strict();
+}).strict().refine(cycle => new Date(cycle.endDate).getTime() > new Date(cycle.startDate).getTime(), {
+  message: 'La fecha de fin debe ser posterior a la de inicio',
+  path: ['endDate'],
+});
 
 export const admissionApplicationSchema = z.object({
   cycleId: z.string().uuid('Identificador de convocatoria no válido'),

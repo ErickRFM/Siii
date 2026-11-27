@@ -61,6 +61,15 @@ describe('Admissions Module Validations', () => {
     expect(valid.success).toBe(true);
   });
 
+  it('rejects an admission cycle that ends before or when it starts', () => {
+    const base = {code: 'CONV-2026-2', name: 'Convocatoria invertida', status: 'draft' as const};
+    for (const [startDate, endDate] of [['2026-03-31T00:00:00.000Z', '2026-01-01T00:00:00.000Z'], ['2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z']]) {
+      const parsed = admissionCycleSchema.safeParse({...base, startDate, endDate});
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) expect(parsed.error.issues[0]?.path).toEqual(['endDate']);
+    }
+  });
+
   it('validates admission application input correctly', () => {
     const valid = admissionApplicationSchema.safeParse({
       cycleId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
